@@ -65,6 +65,15 @@ export const MENU_SIDEBAR: MenuConfig = [
   },
   { heading: 'User' },
   {
+    title: 'User Management',
+    icon: Users,
+    children: [
+      { title: 'Admin', path: '/admin/users' },
+      { title: 'Merchant', path: '/admin/merchant' },
+      { title: 'Affiliate', path: '/admin/affiliate' },
+    ],
+  },
+  {
     title: 'Public Profile',
     icon: UserCircle,
     children: [
