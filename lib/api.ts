@@ -338,6 +338,12 @@ export async function apiFetch(
     );
   }
 
+  // For DELETE requests with 204 No Content, return a special indicator
+  // This allows the caller to distinguish between 200 with data and 204 No Content
+  if (method === "DELETE" && response.status === 204) {
+    return { __status: 204, __noContent: true };
+  }
+
   // Return the response data
   // Handle both { success: true, data: {...} } and direct data responses
   return data;

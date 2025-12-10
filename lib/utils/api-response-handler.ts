@@ -51,6 +51,14 @@ export function handleApiResponse<T = any>(
       }
     },
 
+    204: () => {
+      // 204 No Content - successful deletion with no response body
+      if (!silent) {
+        console.log('✅ Success: Resource deleted (204 No Content)');
+      }
+      onSuccess?.(undefined as any);
+    },
+
     400: () => {
       const errorMsg = response.error || 'Bad Request';
       if (!silent) {
@@ -107,7 +115,7 @@ export function handleApiResponse<T = any>(
 
   if (handler) {
     handler();
-    return response.status === 200;
+    return response.status === 200 || response.status === 204;
   }
 
   // Handle unknown status codes
