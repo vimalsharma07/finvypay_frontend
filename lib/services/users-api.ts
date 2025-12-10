@@ -6,7 +6,7 @@
  */
 
 import { http, ApiError } from '../api';
-import { adminRoutes } from '../routes/admin-routes';
+import { adminRoutes } from '../routes/routes';
 
 // ApiResponse type to match the expected format
 export interface ApiResponse<T> {
