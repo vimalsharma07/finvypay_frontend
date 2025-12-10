@@ -1,12 +1,13 @@
 /**
  * Base URL Configuration
- * Centralized BASE_URL logic for all route modules
+ * 
+ * Note: For API routes, use relative paths (starting with /).
+ * The api.ts file will automatically prepend NEXT_PUBLIC_API_URL.
+ * This function is kept for backward compatibility but should return empty string for API routes.
  */
 
 export const getBaseUrl = (): string => {
-  // Support both server and client-side
-  if (typeof window === 'undefined') {
-    return process.env.NEXTAUTH_URL || '';
-  }
-  return process.env.NEXT_PUBLIC_NEXTAUTH_URL || process.env.NEXTAUTH_URL || '';
+  // Return empty string - api.ts will handle prepending the API base URL
+  // API routes should be relative paths like /user-management, /admin/user-management, etc.
+  return '';
 };

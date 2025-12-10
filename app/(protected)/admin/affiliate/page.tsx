@@ -26,7 +26,7 @@ import { ConfirmComp } from '../../components/confirm-comp';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-export default function AdminUsersPage() {
+export default function AffiliateUsersPage() {
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,7 +62,7 @@ export default function AdminUsersPage() {
         limit: pageLimit,
         sortBy: sortField,
         sortOrder: sortDir,
-        role: 'admin', // Default to admin role for admin users page
+        role: 'affiliate', // Default to affiliate role for affiliate users page
       };
 
       // Add filter parameters if provided
@@ -166,7 +166,7 @@ export default function AdminUsersPage() {
 
   // Handle create user
   const handleCreateUser = () => {
-    router.push('/admin/users/create');
+    router.push('/admin/affiliate/create');
   };
 
   // Define table headers
@@ -244,11 +244,11 @@ export default function AdminUsersPage() {
   const actions: TableAction<User>[] = [
     {
       label: 'Edit',
-      route: (row) => `/admin/users/${row.id}/edit`,
+      route: (row) => `/admin/affiliate/${row.id}/edit`,
     },
     {
       label: 'View',
-      route: (row) => `/admin/users/${row.id}`,
+      route: (row) => `/admin/affiliate/${row.id}`,
     },
     {
       label: 'Delete',
@@ -267,8 +267,8 @@ export default function AdminUsersPage() {
         <Container>
           <Toolbar>
             <ToolbarHeading
-              title="Admins"
-              description="Manage and view all admin users "
+              title="Affiliates"
+              description="Manage and view all affiliate users"
             />
           </Toolbar>
         </Container>
@@ -284,8 +284,8 @@ export default function AdminUsersPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Admins"
-            description="Manage and view all admin users "
+            title="Affiliates"
+            description="Manage and view all affiliate users"
           />
           <ToolbarActions>
             <AdvancedFilter

@@ -6,7 +6,7 @@
  */
 
 import { http, ApiError } from '../api';
-import { adminRoutes } from '../routes/routes';
+import { routes } from '../routes/routes';
 
 // ApiResponse type to match the expected format
 export interface ApiResponse<T> {
@@ -41,19 +41,20 @@ export interface User {
 }
 
 export interface CreateUserPayload {
-  name: string;
   email: string;
-  password?: string;
-  role?: string;
-  [key: string]: any;
+  name: string;
+  password: string;
+  role: string;
+  roleId?: string | null;
+  parentId?: string | null;
 }
 
 export interface UpdateUserPayload {
   name?: string;
   email?: string;
   role?: string;
-  status?: string;
-  [key: string]: any;
+  isBlocked?: boolean;
+  isDeleted?: boolean;
 }
 
 export interface UserListParams {
@@ -92,7 +93,7 @@ export async function getUsers(
   params?: UserListParams
 ): Promise<ApiResponse<UserListResponse>> {
   try {
-    const data = await http.get(adminRoutes.users.list, {
+    const data = await http.get(routes.admin.users.list, {
       query: params as Record<string, string | number | boolean | null | undefined>,
     }) as UserListResponse;
     return {
@@ -119,10 +120,35 @@ export async function getUsers(
  */
 export async function getUserById(id: string): Promise<ApiResponse<User>> {
   try {
-    const data = await http.get(adminRoutes.users.getById(id)) as User;
+    const response = await http.get(routes.admin.users.getById(id)) as
+      | {
+          success: boolean;
+          data: User;
+        }
+      | User;
+    
+    // Handle API response structure: { success: true, data: {...} }
+    if (response && typeof response === 'object' && 'success' in response && 'data' in response) {
+      const apiResponse = response as { success: boolean; data: User };
+      if (apiResponse.success && apiResponse.data) {
+        return {
+          status: 200,
+          data: apiResponse.data,
+        };
+      }
+    }
+    
+    // Fallback: if response is directly the user data
+    if (response && typeof response === 'object' && 'id' in response && !('success' in response)) {
+      return {
+        status: 200,
+        data: response as unknown as User,
+      };
+    }
+    
     return {
       status: 200,
-      data,
+      data: response as unknown as User,
     };
   } catch (error) {
     if (error instanceof ApiError) {
@@ -146,7 +172,7 @@ export async function createUser(
   payload: CreateUserPayload
 ): Promise<ApiResponse<User>> {
   try {
-    const data = await http.post(adminRoutes.users.create, payload) as User;
+    const data = await http.post(routes.admin.users.create, payload) as User;
     return {
       status: 200,
       data,
@@ -169,14 +195,14 @@ export async function createUser(
 }
 
 /**
- * 4. Update user
+ * 4. Update user (PATCH)
  */
 export async function updateUser(
   id: string,
   payload: UpdateUserPayload
 ): Promise<ApiResponse<User>> {
   try {
-    const data = await http.put(adminRoutes.users.update(id), payload) as User;
+    const data = await http.patch(routes.admin.users.update(id), payload) as User;
     return {
       status: 200,
       data,
@@ -199,13 +225,24 @@ export async function updateUser(
 }
 
 /**
- * 5. Delete user
+ * 5. Delete user (returns 204 No Content per REST API standard)
  */
 export async function deleteUser(id: string): Promise<ApiResponse<void>> {
   try {
-    await http.delete(adminRoutes.users.delete(id));
+    // DELETE requests return 204 No Content with no body
+    const response = await http.delete(routes.admin.users.delete(id));
+    
+    // Check if response indicates 204 No Content
+    if (response && typeof response === 'object' && (response as any).__noContent) {
+      return {
+        status: 204,
+      };
+    }
+    
+    // Fallback: if we get here and response is null/undefined, assume 204
+    // (REST API standard for DELETE)
     return {
-      status: 200,
+      status: 204,
     };
   } catch (error) {
     if (error instanceof ApiError) {
@@ -230,7 +267,7 @@ export async function searchUsers(
   params?: Omit<UserListParams, 'search'>
 ): Promise<ApiResponse<UserListResponse>> {
   try {
-    const data = await http.get(adminRoutes.users.list, {
+    const data = await http.get(routes.admin.users.list, {
       query: { ...params, search: query } as Record<string, string | number | boolean | null | undefined>,
     }) as UserListResponse;
     return {
@@ -259,7 +296,7 @@ export async function bulkDeleteUsers(
   ids: string[]
 ): Promise<ApiResponse<{ deleted: number }>> {
   try {
-    const data = await http.post(adminRoutes.users.bulkDelete, { ids }) as { deleted: number };
+    const data = await http.post(routes.admin.users.bulkDelete, { ids }) as { deleted: number };
     return {
       status: 200,
       data,

@@ -287,36 +287,6 @@ export const MENU_SIDEBAR: MenuConfig = [
   },
   { heading: 'Apps' },
   {
-    title: 'User Management',
-    icon: ShieldUser,
-    children: [
-      {
-        title: 'Users',
-        path: '/user-management/users',
-      },
-      {
-        title: 'Roles',
-        path: '/user-management/roles',
-      },
-      {
-        title: 'Permissions',
-        path: '/user-management/permissions',
-      },
-      {
-        title: 'Account',
-        path: '/user-management/account',
-      },
-      {
-        title: 'Logs',
-        path: '/user-management/logs',
-      },
-      {
-        title: 'Settings',
-        path: '/user-management/settings',
-      },
-    ],
-  },
-  {
     title: 'Store - Client',
     icon: Users,
     children: [

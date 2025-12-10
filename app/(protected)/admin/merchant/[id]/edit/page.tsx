@@ -1,0 +1,343 @@
+'use client';
+
+import { Fragment, useEffect, useState } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import {
+  Toolbar,
+  ToolbarHeading,
+} from '@/layouts/demo1/components/toolbar';
+import { Container } from '@/components/common/container';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { getUserById, updateUser, User } from '@/lib/services/users-api';
+import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import {
+  updateUserSchema,
+  UpdateUserSchemaType,
+} from '@/lib/validations/admin/merchantUsers/user-validation';
+import { toast } from 'sonner';
+
+export default function EditMerchantUserPage() {
+  const router = useRouter();
+  const params = useParams();
+  const userId = params.id as string;
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+
+  const form = useForm<UpdateUserSchemaType>({
+    resolver: zodResolver(updateUserSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      role: 'user',
+      isBlocked: false,
+      isDeleted: false,
+    },
+  });
+
+  // Fetch user data
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!userId) return;
+
+      setLoading(true);
+      try {
+        const response = await getUserById(userId);
+
+        handleApiResponse<User>(response, {
+          onSuccess: (userData) => {
+            console.log('User data received:', userData);
+            setUser(userData);
+            // Reset form with user data
+            form.reset({
+              name: userData.name || '',
+              email: userData.email || '',
+              role: userData.role || 'user',
+              isBlocked: userData.isBlocked ?? false,
+              isDeleted: userData.isDeleted ?? false,
+            });
+            console.log('Form reset with data:', {
+              name: userData.name,
+              email: userData.email,
+              role: userData.role,
+              isBlocked: userData.isBlocked,
+              isDeleted: userData.isDeleted,
+            });
+          },
+          onError: (errorMessage) => {
+            toast.error(errorMessage || 'Failed to load user');
+            router.push('/admin/merchant');
+          },
+          onUnauthorized: () => {
+            toast.error('Unauthorized. Please check your authentication.');
+            router.push('/admin/merchant');
+          },
+        });
+      } catch (error) {
+        toast.error('An unexpected error occurred');
+        console.error('Fetch user error:', error);
+        router.push('/admin/merchant');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [userId, router, form]);
+
+  const onSubmit = async (data: UpdateUserSchemaType) => {
+    if (!userId) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await updateUser(userId, {
+        name: data.name,
+        email: data.email,
+        role: data.role,
+        isBlocked: data.isBlocked,
+        isDeleted: data.isDeleted,
+      });
+
+      handleApiResponse<User>(response, {
+        onSuccess: (userData) => {
+          toast.success('User updated successfully!');
+          router.push('/admin/merchant');
+        },
+        onValidationError: (errors, messages) => {
+          // Set form errors from API validation
+          if (errors) {
+            Object.entries(errors).forEach(([field, errorMessages]) => {
+              if (Array.isArray(errorMessages) && errorMessages.length > 0) {
+                form.setError(field as keyof UpdateUserSchemaType, {
+                  type: 'server',
+                  message: errorMessages[0],
+                });
+              }
+            });
+          }
+          const errorMessage = Array.isArray(messages)
+            ? messages[0]
+            : typeof messages === 'string'
+              ? messages
+              : 'Validation failed';
+          toast.error(errorMessage);
+        },
+        onError: (errorMessage, status) => {
+          toast.error(errorMessage || 'Failed to update user');
+        },
+        onUnauthorized: () => {
+          toast.error('Unauthorized. Please check your authentication.');
+        },
+      });
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+      console.error('Update user error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Fragment>
+        <Container>
+          <Toolbar>
+            <ToolbarHeading
+              title="Edit Merchant User"
+              description="Update merchant user information"
+            />
+          </Toolbar>
+        </Container>
+        <Container>
+          <div className="text-center py-8">Loading...</div>
+        </Container>
+      </Fragment>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  return (
+    <Fragment>
+      <Container>
+        <Toolbar>
+          <ToolbarHeading
+            title="Edit Merchant User"
+            description="Update merchant user information"
+          />
+        </Toolbar>
+      </Container>
+      <Container>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-4">
+              <Link href="/admin/merchant">
+                <Button variant="ghost" size="icon">
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              </Link>
+              <CardTitle>User Information</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-6"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name *</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Enter user name"
+                            {...field}
+                            disabled={isSubmitting}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email *</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="Enter email address"
+                            {...field}
+                            disabled={isSubmitting}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="role"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Role *</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          disabled={true}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select role" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="user">User</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        <p className="text-xs text-muted-foreground">
+                          Merchant users can only have "user" role
+                        </p>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="isBlocked"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">Blocked Status</FormLabel>
+                          <div className="text-sm text-muted-foreground">
+                            Block or unblock this user
+                          </div>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            disabled={isSubmitting}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="isDeleted"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">Deleted Status</FormLabel>
+                          <div className="text-sm text-muted-foreground">
+                            Mark user as deleted
+                          </div>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            disabled={isSubmitting}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-4 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.back()}
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? 'Updating...' : 'Update User'}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </Container>
+    </Fragment>
+  );
+}
