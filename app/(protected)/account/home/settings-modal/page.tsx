@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { UserHero } from '@/partials/common/user-hero';
 import { DropdownMenu9 } from '@/partials/dropdown-menu/dropdown-menu-9';
 import { Navbar, NavbarActions } from '@/partials/navbar/navbar';
@@ -14,8 +15,13 @@ import {
 import { toAbsoluteUrl } from '@/lib/helpers';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/common/container';
-import { AccountSettingsModal } from '@/app/(protected)/account/home/settings-modal/content';
 import { PageMenu } from '@/app/(protected)/public-profile/page-menu';
+
+// Dynamically import to avoid SSR issues
+const AccountSettingsModal = dynamic(
+  () => import('@/app/(protected)/account/home/settings-modal/content').then(mod => ({ default: mod.AccountSettingsModal })),
+  { ssr: false }
+);
 
 export default function AccountSettingsModalPage() {
   const [settingsModalOpen, setSettingsModalOpen] = useState(true);

@@ -55,30 +55,21 @@ export default function Page() {
       setSuccess(null);
       setShowRecaptcha(false);
 
-      const response = await apiFetch('/api/auth/reset-password', {
-        method: 'POST',
+      const data = await apiFetch('/api/auth/reset-password', 'POST', {
         headers: {
-          'Content-Type': 'application/json',
           'x-recaptcha-token': token,
         },
-        body: JSON.stringify(values),
+        body: values,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message);
-        return;
-      }
-
-      setSuccess(data.message);
+      setSuccess(data?.message || 'Password reset link sent successfully!');
       form.reset();
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'An unexpected error occurred. Please try again.',
-      );
+    } catch (err: any) {
+      const errorMessage = 
+        err?.data?.message || 
+        err?.message || 
+        'An unexpected error occurred. Please try again.';
+      setError(errorMessage);
     } finally {
       setIsProcessing(false);
     }

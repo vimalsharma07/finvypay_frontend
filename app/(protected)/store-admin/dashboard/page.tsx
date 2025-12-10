@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -11,7 +12,12 @@ import {
 } from '@/partials/common/toolbar';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/common/container';
-import { DashboardContent } from '@/app/(protected)/store-admin/dashboard/content';
+
+// Dynamically import to avoid SSR issues
+const DashboardContent = dynamic(
+  () => import('@/app/(protected)/store-admin/dashboard/content').then(mod => ({ default: mod.DashboardContent })),
+  { ssr: false }
+);
 
 export default function DashboardPage() {
   return (

@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -12,8 +13,13 @@ import {
 import { useSettings } from '@/providers/settings-provider';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/common/container';
-import { AccountSettingsSidebarContent } from '@/app/(protected)/account/home/settings-sidebar/content';
 import { PageNavbar } from '@/app/(protected)/account/page-navbar';
+
+// Dynamically import to avoid SSR issues
+const AccountSettingsSidebarContent = dynamic(
+  () => import('@/app/(protected)/account/home/settings-sidebar/content').then(mod => ({ default: mod.AccountSettingsSidebarContent })),
+  { ssr: false }
+);
 
 export default function AccountSettingsSidebarPage() {
   const { settings } = useSettings();

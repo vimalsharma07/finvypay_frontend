@@ -57,7 +57,7 @@ export async function validateUser(
   }
 
   try {
-    const response = await http.post<UserValidationResponse>(
+    const response = await http.post(
       '/auth/validation',
       {
         email,
@@ -66,7 +66,7 @@ export async function validateUser(
       {
         auth: false, // Don't send auth token for validation
       }
-    );
+    ) as UserValidationResponse;
 
     // Handle successful validation
     if (response?.success) {

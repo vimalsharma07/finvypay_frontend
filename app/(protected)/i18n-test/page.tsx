@@ -1,5 +1,8 @@
 import { I18nExample } from '@/components/examples/i18n-example';
 
+// Force dynamic rendering to avoid SSR issues with i18n
+export const dynamic = 'force-dynamic';
+
 export default function I18nTestPage() {
   return (
     <div className="container mx-auto p-6">

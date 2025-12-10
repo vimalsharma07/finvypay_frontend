@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment } from 'react';
+import dynamic from 'next/dynamic';
 import { UserHero } from '@/partials/common/user-hero';
 import { DropdownMenu9 } from '@/partials/dropdown-menu/dropdown-menu-9';
 import { Navbar, NavbarActions } from '@/partials/navbar/navbar';
@@ -16,7 +17,12 @@ import { toAbsoluteUrl } from '@/lib/helpers';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/common/container';
 import { PageMenu } from '@/app/(protected)/public-profile/page-menu';
-import { ProfileCRMContent } from '@/app/(protected)/public-profile/profiles/crm/content';
+
+// Dynamically import to avoid SSR issues
+const ProfileCRMContent = dynamic(
+  () => import('@/app/(protected)/public-profile/profiles/crm/content').then(mod => ({ default: mod.ProfileCRMContent })),
+  { ssr: false }
+);
 
 export default function ProfileCRMPage() {
   const image = (

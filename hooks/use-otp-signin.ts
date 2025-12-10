@@ -191,8 +191,7 @@ export function useOtpSignin({
           refreshToken,
           sessionId,
           tokenExpiry,
-          user: user || response.data.user,
-          userData: response.data,
+          userData: response.data, // userData already contains all user information
         });
 
         // Call success callback

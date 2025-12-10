@@ -51,20 +51,14 @@ export default function Page() {
       try {
         setVerifyingToken(true);
 
-        const response = await apiFetch('/api/auth/reset-password-verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token }),
+        await apiFetch('/api/auth/reset-password-verify', 'POST', {
+          body: { token },
         });
 
-        if (response.ok) {
-          setIsValidToken(true);
-        } else {
-          const errorData = await response.json();
-          setError(errorData.message || 'Invalid or expired token.');
-        }
-      } catch {
-        setError('Unable to verify the reset token.');
+        setIsValidToken(true);
+      } catch (error: any) {
+        const errorMessage = error?.data?.message || error?.message || 'Invalid or expired token.';
+        setError(errorMessage);
       } finally {
         setVerifyingToken(false);
       }
@@ -83,21 +77,15 @@ export default function Page() {
     setSuccessMessage(null);
 
     try {
-      const response = await apiFetch('/api/auth/change-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, newPassword: values.newPassword }),
+      await apiFetch('/api/auth/change-password', 'POST', {
+        body: { token, newPassword: values.newPassword },
       });
 
-      if (response.ok) {
-        setSuccessMessage('Password reset successful! Redirecting to login...');
-        setTimeout(() => router.push('/signin'), 3000);
-      } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Password reset failed.');
-      }
-    } catch {
-      setError('An error occurred while resetting the password.');
+      setSuccessMessage('Password reset successful! Redirecting to login...');
+      setTimeout(() => router.push('/signin'), 3000);
+    } catch (error: any) {
+      const errorMessage = error?.data?.message || error?.message || 'Password reset failed.';
+      setError(errorMessage);
     } finally {
       setIsProcessing(false);
     }

@@ -147,7 +147,7 @@ export function ForgotPasswordDialog({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {/* Success Message */}
             {displaySuccess && (
-              <Alert variant="default" className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
+              <Alert variant="success" className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
                 <AlertIcon>
                   <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
                 </AlertIcon>

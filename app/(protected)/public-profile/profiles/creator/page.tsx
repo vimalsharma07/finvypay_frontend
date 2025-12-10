@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment } from 'react';
+import dynamic from 'next/dynamic';
 import { UserHero } from '@/partials/common/user-hero';
 import { DropdownMenu9 } from '@/partials/dropdown-menu/dropdown-menu-9';
 import { Navbar, NavbarActions } from '@/partials/navbar/navbar';
@@ -17,7 +18,12 @@ import { toAbsoluteUrl } from '@/lib/helpers';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/common/container';
 import { PageMenu } from '@/app/(protected)/public-profile/page-menu';
-import { ProfileCreatorContent } from '@/app/(protected)/public-profile/profiles/creator/content';
+
+// Dynamically import to avoid SSR issues
+const ProfileCreatorContent = dynamic(
+  () => import('@/app/(protected)/public-profile/profiles/creator/content').then(mod => ({ default: mod.ProfileCreatorContent })),
+  { ssr: false }
+);
 
 export default function ProfileCreatorPage() {
   const image = (

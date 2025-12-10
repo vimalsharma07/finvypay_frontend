@@ -209,7 +209,8 @@ export function useGoogleOAuth({
           googleButton.click();
         } else {
           // Fallback: try prompt method if button rendering fails
-          window.google.accounts.id.prompt((notification: any) => {
+          if (window.google?.accounts?.id) {
+            window.google.accounts.id.prompt((notification: any) => {
             if (notification.isNotDisplayed()) {
               const reasons = notification.getNotDisplayedReason();
               let errorMsg = 'Google sign-in is not available. ';
@@ -231,6 +232,13 @@ export function useGoogleOAuth({
               setIsProcessing(false);
             }
           });
+          } else {
+            // Google Identity Services not available
+            const errorMsg = 'Google sign-in is not available. Please try again or use email/password login.';
+            setError(errorMsg);
+            onError?.(errorMsg);
+            setIsProcessing(false);
+          }
         }
         
         // Clean up temp div after a delay

@@ -515,7 +515,7 @@ export default function Page() {
           )}
 
           {otpSuccess && (
-            <Alert variant="default" className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
+            <Alert variant="success" className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
               <AlertIcon>
                 <AlertCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
               </AlertIcon>
