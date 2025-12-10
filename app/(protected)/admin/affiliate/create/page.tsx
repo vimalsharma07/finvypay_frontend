@@ -1,10 +1,10 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { Fragment, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -29,108 +29,54 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { getUserById, updateUser, User } from '@/lib/services/users-api';
+import { createUser, User } from '@/lib/services/users-api';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
-  updateUserSchema,
-  UpdateUserSchemaType,
-} from '@/lib/validations/admin/adminUsers/user-validation';
+  createUserSchema,
+  CreateUserSchemaType,
+} from '@/lib/validations/admin/affiliateUsers/user-validation';
 import { toast } from 'sonner';
 
-export default function EditUserPage() {
+export default function CreateAffiliateUserPage() {
   const router = useRouter();
-  const params = useParams();
-  const userId = params.id as string;
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
-  const form = useForm<UpdateUserSchemaType>({
-    resolver: zodResolver(updateUserSchema),
+  const form = useForm<CreateUserSchemaType>({
+    resolver: zodResolver(createUserSchema),
     defaultValues: {
-      name: '',
       email: '',
-      role: 'admin',
-      isBlocked: false,
-      isDeleted: false,
+      name: '',
+      password: '',
+      role: 'affiliate',
+      roleId: null,
+      parentId: null,
     },
   });
 
-  // Fetch user data
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (!userId) return;
-
-      setLoading(true);
-      try {
-        const response = await getUserById(userId);
-
-        handleApiResponse<User>(response, {
-          onSuccess: (userData) => {
-            console.log('User data received:', userData);
-            setUser(userData);
-            // Reset form with user data
-            form.reset({
-              name: userData.name || '',
-              email: userData.email || '',
-              role: userData.role || 'admin',
-              isBlocked: userData.isBlocked ?? false,
-              isDeleted: userData.isDeleted ?? false,
-            });
-            console.log('Form reset with data:', {
-              name: userData.name,
-              email: userData.email,
-              role: userData.role,
-              isBlocked: userData.isBlocked,
-              isDeleted: userData.isDeleted,
-            });
-          },
-          onError: (errorMessage) => {
-            toast.error(errorMessage || 'Failed to load user');
-            router.push('/admin/users');
-          },
-          onUnauthorized: () => {
-            toast.error('Unauthorized. Please check your authentication.');
-            router.push('/admin/users');
-          },
-        });
-      } catch (error) {
-        toast.error('An unexpected error occurred');
-        console.error('Fetch user error:', error);
-        router.push('/admin/users');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, [userId, router, form]);
-
-  const onSubmit = async (data: UpdateUserSchemaType) => {
-    if (!userId) return;
-
+  const onSubmit = async (data: CreateUserSchemaType) => {
     setIsSubmitting(true);
     try {
-      const response = await updateUser(userId, {
-        name: data.name,
+      const response = await createUser({
         email: data.email,
+        name: data.name,
+        password: data.password,
         role: data.role,
-        isBlocked: data.isBlocked,
-        isDeleted: data.isDeleted,
+        roleId: data.roleId || null,
+        parentId: data.parentId || null,
       });
 
       handleApiResponse<User>(response, {
         onSuccess: (userData) => {
-          toast.success('User updated successfully!');
-          router.push('/admin/users');
+          toast.success('User created successfully!');
+          router.push('/admin/affiliate');
         },
         onValidationError: (errors, messages) => {
           // Set form errors from API validation
           if (errors) {
             Object.entries(errors).forEach(([field, errorMessages]) => {
               if (Array.isArray(errorMessages) && errorMessages.length > 0) {
-                form.setError(field as keyof UpdateUserSchemaType, {
+                form.setError(field as keyof CreateUserSchemaType, {
                   type: 'server',
                   message: errorMessages[0],
                 });
@@ -145,7 +91,7 @@ export default function EditUserPage() {
           toast.error(errorMessage);
         },
         onError: (errorMessage, status) => {
-          toast.error(errorMessage || 'Failed to update user');
+          toast.error(errorMessage || 'Failed to create user');
         },
         onUnauthorized: () => {
           toast.error('Unauthorized. Please check your authentication.');
@@ -153,41 +99,19 @@ export default function EditUserPage() {
       });
     } catch (error) {
       toast.error('An unexpected error occurred');
-      console.error('Update user error:', error);
+      console.error('Create user error:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  if (loading) {
-    return (
-      <Fragment>
-        <Container>
-          <Toolbar>
-            <ToolbarHeading
-              title="Edit User"
-              description="Update user information"
-            />
-          </Toolbar>
-        </Container>
-        <Container>
-          <div className="text-center py-8">Loading...</div>
-        </Container>
-      </Fragment>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
 
   return (
     <Fragment>
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Edit User"
-            description="Update user information"
+            title="Create Affiliate User"
+            description="Add a new affiliate user to the system"
           />
         </Toolbar>
       </Container>
@@ -195,7 +119,7 @@ export default function EditUserPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-4">
-              <Link href="/admin/users">
+              <Link href="/admin/affiliate">
                 <Button variant="ghost" size="icon">
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
@@ -249,6 +173,42 @@ export default function EditUserPage() {
 
                   <FormField
                     control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password *</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              type={passwordVisible ? 'text' : 'password'}
+                              placeholder="Enter password"
+                              {...field}
+                              disabled={isSubmitting}
+                              className="pr-10"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => setPasswordVisible(!passwordVisible)}
+                              disabled={isSubmitting}
+                            >
+                              {passwordVisible ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
                     name="role"
                     render={({ field }) => (
                       <FormItem>
@@ -264,12 +224,12 @@ export default function EditUserPage() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="admin">Admin</SelectItem>
+                            <SelectItem value="affiliate">Affiliate</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
                         <p className="text-xs text-muted-foreground">
-                          Admin users can only have "admin" role
+                          Affiliate users can only have "affiliate" role
                         </p>
                       </FormItem>
                     )}
@@ -277,44 +237,48 @@ export default function EditUserPage() {
 
                   <FormField
                     control={form.control}
-                    name="isBlocked"
+                    name="roleId"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">Blocked Status</FormLabel>
-                          <div className="text-sm text-muted-foreground">
-                            Block or unblock this user
-                          </div>
-                        </div>
+                      <FormItem>
+                        <FormLabel>Role ID</FormLabel>
                         <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
+                          <Input
+                            placeholder="Enter role ID (optional)"
+                            {...field}
+                            value={field.value || ''}
+                            onChange={(e) =>
+                              field.onChange(
+                                e.target.value ? e.target.value : null
+                              )
+                            }
                             disabled={isSubmitting}
                           />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
 
                   <FormField
                     control={form.control}
-                    name="isDeleted"
+                    name="parentId"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">Deleted Status</FormLabel>
-                          <div className="text-sm text-muted-foreground">
-                            Mark user as deleted
-                          </div>
-                        </div>
+                      <FormItem>
+                        <FormLabel>Parent ID</FormLabel>
                         <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
+                          <Input
+                            placeholder="Enter parent ID (optional)"
+                            {...field}
+                            value={field.value || ''}
+                            onChange={(e) =>
+                              field.onChange(
+                                e.target.value ? e.target.value : null
+                              )
+                            }
                             disabled={isSubmitting}
                           />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -330,7 +294,7 @@ export default function EditUserPage() {
                     Cancel
                   </Button>
                   <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'Updating...' : 'Update User'}
+                    {isSubmitting ? 'Creating...' : 'Create User'}
                   </Button>
                 </div>
               </form>

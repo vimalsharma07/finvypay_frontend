@@ -26,7 +26,7 @@ import { ConfirmComp } from '../../components/confirm-comp';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-export default function AdminUsersPage() {
+export default function MerchantUsersPage() {
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,7 +62,7 @@ export default function AdminUsersPage() {
         limit: pageLimit,
         sortBy: sortField,
         sortOrder: sortDir,
-        role: 'admin', // Default to admin role for admin users page
+        role: 'user', // Default to user role for merchant users page
       };
 
       // Add filter parameters if provided
@@ -166,7 +166,7 @@ export default function AdminUsersPage() {
 
   // Handle create user
   const handleCreateUser = () => {
-    router.push('/admin/users/create');
+    router.push('/admin/merchant/create');
   };
 
   // Define table headers
@@ -244,11 +244,11 @@ export default function AdminUsersPage() {
   const actions: TableAction<User>[] = [
     {
       label: 'Edit',
-      route: (row) => `/admin/users/${row.id}/edit`,
+      route: (row) => `/admin/merchant/${row.id}/edit`,
     },
     {
       label: 'View',
-      route: (row) => `/admin/users/${row.id}`,
+      route: (row) => `/admin/merchant/${row.id}`,
     },
     {
       label: 'Delete',
@@ -267,8 +267,8 @@ export default function AdminUsersPage() {
         <Container>
           <Toolbar>
             <ToolbarHeading
-              title="Admins"
-              description="Manage and view all admin users "
+              title="Merchants"
+              description="Manage and view all merchant users"
             />
           </Toolbar>
         </Container>
@@ -284,8 +284,8 @@ export default function AdminUsersPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Admins"
-            description="Manage and view all admin users "
+            title="Merchants"
+            description="Manage and view all merchant users"
           />
           <ToolbarActions>
             <AdvancedFilter

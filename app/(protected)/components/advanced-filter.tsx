@@ -80,7 +80,14 @@ export function AdvancedFilter({
 
   // Handle apply filters
   const handleApply = () => {
-    onApply(filterValues);
+    // Filter out empty values and 'all' values
+    const cleanedFilters: Record<string, string> = {};
+    Object.entries(filterValues).forEach(([key, value]) => {
+      if (value && value !== 'all' && value !== '') {
+        cleanedFilters[key] = value;
+      }
+    });
+    onApply(cleanedFilters);
     setOpen(false);
   };
 
@@ -143,14 +150,14 @@ export function AdvancedFilter({
                   />
                 ) : field.type === 'select' ? (
                   <Select
-                    value={filterValues[field.key] || ''}
-                    onValueChange={(value) => handleFieldChange(field.key, value)}
+                    value={filterValues[field.key] || undefined}
+                    onValueChange={(value) => handleFieldChange(field.key, value === 'all' ? '' : value)}
                   >
                     <SelectTrigger id={`filter-${field.key}`}>
                       <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All {field.label}</SelectItem>
+                      <SelectItem value="all">All {field.label}</SelectItem>
                       {field.options?.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}

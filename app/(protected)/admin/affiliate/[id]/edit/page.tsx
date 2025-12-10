@@ -35,10 +35,10 @@ import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
   updateUserSchema,
   UpdateUserSchemaType,
-} from '@/lib/validations/admin/adminUsers/user-validation';
+} from '@/lib/validations/admin/affiliateUsers/user-validation';
 import { toast } from 'sonner';
 
-export default function EditUserPage() {
+export default function EditAffiliateUserPage() {
   const router = useRouter();
   const params = useParams();
   const userId = params.id as string;
@@ -51,7 +51,7 @@ export default function EditUserPage() {
     defaultValues: {
       name: '',
       email: '',
-      role: 'admin',
+      role: 'affiliate',
       isBlocked: false,
       isDeleted: false,
     },
@@ -74,7 +74,7 @@ export default function EditUserPage() {
             form.reset({
               name: userData.name || '',
               email: userData.email || '',
-              role: userData.role || 'admin',
+              role: userData.role || 'affiliate',
               isBlocked: userData.isBlocked ?? false,
               isDeleted: userData.isDeleted ?? false,
             });
@@ -88,17 +88,17 @@ export default function EditUserPage() {
           },
           onError: (errorMessage) => {
             toast.error(errorMessage || 'Failed to load user');
-            router.push('/admin/users');
+            router.push('/admin/affiliate');
           },
           onUnauthorized: () => {
             toast.error('Unauthorized. Please check your authentication.');
-            router.push('/admin/users');
+            router.push('/admin/affiliate');
           },
         });
       } catch (error) {
         toast.error('An unexpected error occurred');
         console.error('Fetch user error:', error);
-        router.push('/admin/users');
+        router.push('/admin/affiliate');
       } finally {
         setLoading(false);
       }
@@ -123,7 +123,7 @@ export default function EditUserPage() {
       handleApiResponse<User>(response, {
         onSuccess: (userData) => {
           toast.success('User updated successfully!');
-          router.push('/admin/users');
+          router.push('/admin/affiliate');
         },
         onValidationError: (errors, messages) => {
           // Set form errors from API validation
@@ -165,8 +165,8 @@ export default function EditUserPage() {
         <Container>
           <Toolbar>
             <ToolbarHeading
-              title="Edit User"
-              description="Update user information"
+              title="Edit Affiliate User"
+              description="Update affiliate user information"
             />
           </Toolbar>
         </Container>
@@ -186,8 +186,8 @@ export default function EditUserPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Edit User"
-            description="Update user information"
+            title="Edit Affiliate User"
+            description="Update affiliate user information"
           />
         </Toolbar>
       </Container>
@@ -195,7 +195,7 @@ export default function EditUserPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-4">
-              <Link href="/admin/users">
+              <Link href="/admin/affiliate">
                 <Button variant="ghost" size="icon">
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
@@ -264,12 +264,12 @@ export default function EditUserPage() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="admin">Admin</SelectItem>
+                            <SelectItem value="affiliate">Affiliate</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
                         <p className="text-xs text-muted-foreground">
-                          Admin users can only have "admin" role
+                          Affiliate users can only have "affiliate" role
                         </p>
                       </FormItem>
                     )}

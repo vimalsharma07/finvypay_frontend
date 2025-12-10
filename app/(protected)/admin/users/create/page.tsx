@@ -48,7 +48,7 @@ export default function CreateUserPage() {
       email: '',
       name: '',
       password: '',
-      role: 'user',
+      role: 'admin',
       roleId: null,
       parentId: null,
     },
@@ -216,7 +216,7 @@ export default function CreateUserPage() {
                         <Select
                           onValueChange={field.onChange}
                           value={field.value}
-                          disabled={isSubmitting}
+                          disabled={true}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -224,12 +224,13 @@ export default function CreateUserPage() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="user">User</SelectItem>
                             <SelectItem value="admin">Admin</SelectItem>
-                            <SelectItem value="affiliate">Affiliate</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
+                        <p className="text-xs text-muted-foreground">
+                          Admin users can only have "admin" role
+                        </p>
                       </FormItem>
                     )}
                   />
