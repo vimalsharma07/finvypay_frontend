@@ -7,14 +7,20 @@
 import { http, ApiError } from '../../api';
 import type { ApiResponse } from '../types';
 
-// Permission types
+// Permission types matching the API response structure
 export interface Permission {
   id: number | string;
   name: string;
-  slug?: string;
-  description?: string | null;
-  category?: string;
-  subCategory?: string;
+  identifier?: string;
+  route?: string;
+  method?: string;
+  frontendRoute?: string;
+  module: string;
+  subModule: string;
+  type: string;
+  rolePermissions?: any[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface PermissionListResponse {

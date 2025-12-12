@@ -59,9 +59,9 @@ export default function AdminRolesPage() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Delete dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Fetch roles function
   const fetchRoles = async () => {
@@ -139,26 +139,28 @@ export default function AdminRolesPage() {
     );
   }, [searchQuery, roles]);
 
-  // Delete role handler
-  const handleDeleteRole = async (roleId: number) => {
+  const handleDeleteRole = async () => {
+    if (!roleToDelete) return;
+
+    setDeleting(true);
     try {
-      const response = await deleteRole(roleId);
+      const response = await deleteRole(roleToDelete.id);
       handleApiResponse(response, {
         onSuccess: () => {
           toast.success('Role deleted successfully!');
-          // Immediately refetch roles list to update the table
+          setDeleteDialogOpen(false);
+          setRoleToDelete(null);
           fetchRoles();
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to delete role');
         },
-        onUnauthorized: () => {
-          toast.error('Unauthorized. Please check your authentication.');
-        },
       });
     } catch (error) {
       toast.error('An unexpected error occurred');
       console.error('Delete role error:', error);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -322,7 +324,6 @@ export default function AdminRolesPage() {
         </DataGrid>
       </Container>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -332,25 +333,13 @@ export default function AdminRolesPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => {
-                setRoleToDelete(null);
-                setDeleteDialogOpen(false);
-              }}
-            >
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={async () => {
-                if (roleToDelete) {
-                  await handleDeleteRole(roleToDelete.id);
-                  setRoleToDelete(null);
-                  setDeleteDialogOpen(false);
-                }
-              }}
+              onClick={handleDeleteRole}
+              disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {deleting ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
