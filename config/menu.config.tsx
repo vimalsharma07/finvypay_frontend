@@ -71,6 +71,7 @@ export const MENU_SIDEBAR: MenuConfig = [
       { title: 'Admin', path: '/admin/users' },
       { title: 'Merchant', path: '/admin/merchant' },
       { title: 'Affiliate', path: '/admin/affiliate' },
+      { title: 'Roles & Permissions', path: '/admin/roles' },
     ],
   },
   {
