@@ -23,9 +23,8 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 import { LoaderCircleIcon } from 'lucide-react';
 import { Icons } from '@/components/common/icons';
 import { getSigninSchema, SigninSchemaType } from '../forms/signin-schema';
-import { http, ApiError } from '@/lib/api';
-import { storeAuthData } from '@/lib/auth-storage';
-import { validateUser } from '@/lib/auth-validation';
+import { login, validateUser } from '@/lib/services/auth-api';
+import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { useGoogleOAuth } from '@/hooks/use-google-oauth';
 import { ForgotPasswordDialog } from './components/forgot-password-dialog';
 import { useOtpSignin } from '@/hooks/use-otp-signin';
@@ -180,120 +179,42 @@ export default function Page() {
 
     try {
       // Step 1: Validate user credentials before login
-      try {
-        await validateUser({
-          email: values.email,
-          password: values.password,
-        });
-      } catch (validationError) {
-        // Validation failed - stop here and show error
-        const errorMessage = 
-          validationError instanceof Error 
-            ? validationError.message 
-            : 'User validation failed. Please check your credentials.';
+      const validationResponse = await validateUser({
+        email: values.email,
+        password: values.password,
+      });
+
+      if (!validationResponse.data?.success) {
+        const errorMessage = validationResponse.error || 'User validation failed. Please check your credentials.';
         setError(errorMessage);
         setIsProcessing(false);
         return;
       }
 
       // Step 2: Proceed with login after successful validation
-      const response = await http.post(
-        '/auth/login',
-        {
-          email: values.email,
-          password: values.password,
-        },
-        {
-          auth: false, // Don't send auth token for login
-        }
-      );
+      const response = await login({
+        email: values.email,
+        password: values.password,
+      });
 
-      // Handle response structure: { success: true, data: { accessToken, refreshToken, ...userData } }
-      if (response?.success && response?.data) {
-        const { accessToken, refreshToken, sessionId, tokenExpiry, ...userData } = response.data;
-
-        // Validate that we have required tokens
-        if (!accessToken) {
-          setError('Login successful but access token is missing. Please contact support.');
-          setIsProcessing(false);
-          return;
-        }
-
-        // Store authentication data using utility function
-        storeAuthData({
-          accessToken,
-          refreshToken,
-          sessionId,
-          tokenExpiry,
-          userData: response.data, // Store complete user data
-        });
-
-        // Redirect to home page on success
-        router.push('/');
-      } else if (response?.data?.accessToken) {
-        // Fallback: Handle if response structure is slightly different (data at root level)
-        const { accessToken, refreshToken, sessionId, tokenExpiry, ...userData } = response.data;
-        
-        storeAuthData({
-          accessToken,
-          refreshToken,
-          sessionId,
-          tokenExpiry,
-          userData: response.data,
-        });
-        
-        router.push('/');
-      } else {
-        // Handle legacy response formats for backward compatibility
-        const accessToken = 
-          response.accessToken || 
-          response.access_token || 
-          response.token || 
-          response.data?.accessToken || 
-          response.data?.access_token || 
-          response.data?.token;
-
-        if (accessToken) {
-          storeAuthData({
-            accessToken,
-            refreshToken: response.refreshToken || response.refresh_token || response.data?.refreshToken,
-            sessionId: response.sessionId || response.session_id || response.data?.sessionId,
-            tokenExpiry: response.tokenExpiry || response.token_expiry || response.data?.tokenExpiry,
-            userData: response.user || response.data?.user || response.data,
-          });
-
+      handleApiResponse(response, {
+        onSuccess: () => {
+          // Redirect to home page on success
           router.push('/');
-        } else {
-          setError('Login successful but no access token received. Please contact support.');
-          setIsProcessing(false);
-        }
-      }
+        },
+        onError: (errorMessage) => {
+          setError(errorMessage || 'Login failed. Please check your credentials and try again.');
+        },
+        onValidationError: (errors, messages) => {
+          setError(Array.isArray(messages) ? messages.join(', ') : messages || 'Validation error occurred');
+        },
+        onUnauthorized: () => {
+          setError('Invalid credentials. Please check your email and password.');
+        },
+      });
     } catch (err) {
-      setIsProcessing(false);
-      if (err instanceof ApiError) {
-        // Extract error message from API response
-        let errorMessage = 'Login failed. Please check your credentials.';
-        
-        // Try to get error message from API response
-        if (err.data?.message) {
-          errorMessage = err.data.message;
-        } else if (err.data?.error) {
-          errorMessage = err.data.error;
-        } else if (err.message) {
-          errorMessage = err.message;
-        }
-        
-        // If it's a network error (status 0), show connection error
-        if (err.status === 0) {
-          errorMessage = 'Unable to connect to the server. Please check if the backend server is running.';
-        }
-        
-        setError(errorMessage);
-      } else if (err instanceof Error) {
-        setError(err.message || 'An unexpected error occurred. Please try again.');
-      } else {
-        setError('An unexpected error occurred. Please try again.');
-      }
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
+      setError(errorMessage);
     }
   }
 

@@ -1,7 +1,8 @@
 // lib/auth-validation.ts
 // Advanced user validation utility for authentication flow
+// This file now wraps the auth-api service for backward compatibility
 
-import { http, ApiError } from './api';
+import { validateUser as validateUserApi } from './services/auth-api';
 
 export interface UserValidationCredentials {
   email: string;
@@ -57,42 +58,24 @@ export async function validateUser(
   }
 
   try {
-    const response = await http.post(
-      '/auth/validation',
-      {
-        email,
-        password,
-      },
-      {
-        auth: false, // Don't send auth token for validation
-      }
-    ) as UserValidationResponse;
+    const response = await validateUserApi({ email, password });
 
     // Handle successful validation
-    if (response?.success) {
+    if (response.data?.success) {
       const validationResponse: UserValidationResponse = {
         success: true,
-        message: response?.message || 'User validation successful',
+        message: response.data?.message || 'User validation successful',
       };
       
       options?.onSuccess?.(validationResponse);
       return validationResponse;
     } else {
-      throw new Error('Validation failed. Please check your credentials.');
+      const errorMessage = response.error || 'Validation failed. Please check your credentials.';
+      options?.onError?.(errorMessage);
+      throw new Error(errorMessage);
     }
   } catch (err) {
-    let errorMessage = 'User validation failed. Please check your credentials.';
-    
-    if (err instanceof ApiError) {
-      errorMessage = 
-        err.data?.message || 
-        err.data?.error || 
-        err.message || 
-        errorMessage;
-    } else if (err instanceof Error) {
-      errorMessage = err.message;
-    }
-    
+    const errorMessage = err instanceof Error ? err.message : 'User validation failed. Please check your credentials.';
     options?.onError?.(errorMessage);
     throw new Error(errorMessage);
   }

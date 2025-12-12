@@ -2,8 +2,8 @@
 // Reusable React hook for Google OAuth authentication
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { http, ApiError } from '@/lib/api';
-import { storeAuthData } from '@/lib/auth-storage';
+import { googleLogin } from '@/lib/services/auth-api';
+import { handleApiResponse } from '@/lib/utils/api-response-handler';
 
 export interface UseGoogleOAuthOptions {
   clientId?: string;
@@ -93,54 +93,19 @@ export function useGoogleOAuth({
     setError(null);
 
     try {
-      const response = await http.post(
-        '/auth/google-login',
-        {
-          idToken,
+      const response = await googleLogin({ idToken });
+
+      handleApiResponse(response, {
+        onSuccess: (data) => {
+          onSuccess?.(data);
         },
-        {
-          auth: false,
-        }
-      );
-
-      // Handle successful login response
-      if (response?.success && response?.data) {
-        const { accessToken, refreshToken, sessionId, tokenExpiry, ...userData } = response.data;
-
-        if (!accessToken) {
-          const errorMsg = 'Login successful but access token is missing. Please contact support.';
-          setError(errorMsg);
-          onError?.(errorMsg);
-          setIsProcessing(false);
-          return;
-        }
-
-        // Store authentication data
-        storeAuthData({
-          accessToken,
-          refreshToken,
-          sessionId,
-          tokenExpiry,
-          userData: response.data,
-        });
-
-        onSuccess?.(response);
-      } else {
-        throw new Error('Unexpected response format from Google login.');
-      }
+        onError: (errorMessage) => {
+          setError(errorMessage || 'Google login failed. Please try again.');
+          onError?.(errorMessage || 'Google login failed. Please try again.');
+        },
+      });
     } catch (err) {
-      let errorMessage = 'Google login failed. Please try again.';
-      
-      if (err instanceof ApiError) {
-        errorMessage = 
-          err.data?.message || 
-          err.data?.error || 
-          err.message || 
-          errorMessage;
-      } else if (err instanceof Error) {
-        errorMessage = err.message;
-      }
-      
+      const errorMessage = err instanceof Error ? err.message : 'Google login failed. Please try again.';
       setError(errorMessage);
       onError?.(errorMessage);
     } finally {

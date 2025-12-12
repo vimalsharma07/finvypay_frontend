@@ -1,0 +1,683 @@
+/**
+ * Auth API Service
+ * 
+ * Centralized API calls for authentication operations
+ * All auth-related API calls should be defined here
+ */
+
+import { http, ApiError } from '../api';
+import { storeAuthData, getRefreshToken } from '../auth-storage';
+import { authRoutes } from '../routes/auth-routes';
+
+// ApiResponse type to match the expected format
+export interface ApiResponse<T> {
+  status: number;
+  data?: T;
+  error?: string;
+  errors?: Record<string, string[]>;
+  message?: string;
+}
+
+// ============================================
+// TYPES & INTERFACES
+// ============================================
+
+// Login payload
+export interface LoginPayload {
+  email: string;
+  password: string;
+}
+
+// Register payload
+export interface RegisterPayload {
+  email: string;
+  name: string;
+  password: string;
+}
+
+// Validation payload
+export interface ValidateUserPayload {
+  email: string;
+  password: string;
+}
+
+// Google login payload
+export interface GoogleLoginPayload {
+  idToken: string;
+}
+
+// Forgot password payload
+export interface ForgotPasswordPayload {
+  email: string;
+}
+
+// Reset password payload
+export interface ResetPasswordPayload {
+  token: string;
+  newPassword: string;
+}
+
+// Change password payload
+export interface ChangePasswordPayload {
+  token: string;
+  newPassword: string;
+}
+
+// Verify email payload
+export interface VerifyEmailPayload {
+  token: string;
+}
+
+// Send OTP payload
+export interface SendOtpPayload {
+  email: string;
+}
+
+// Verify OTP payload
+export interface VerifyOtpPayload {
+  email: string;
+  otp: string;
+}
+
+// Verify registration OTP payload
+export interface VerifyRegistrationOtpPayload {
+  email: string;
+  otp: string;
+}
+
+// Refresh token payload
+export interface RefreshTokenPayload {
+  refreshToken: string;
+}
+
+// Auth response (common structure)
+export interface AuthResponse {
+  success: boolean;
+  data?: {
+    accessToken: string;
+    refreshToken?: string;
+    sessionId?: string;
+    tokenExpiry?: string;
+    [key: string]: any;
+  };
+  message?: string;
+}
+
+// Refresh token response
+export interface RefreshTokenResponse extends AuthResponse {}
+
+// ============================================
+// AUTH API FUNCTIONS
+// ============================================
+
+/**
+ * Login with email and password
+ * 
+ * @param payload - Login credentials
+ * @returns Promise with access token and user data
+ */
+export async function login(
+  payload: LoginPayload
+): Promise<ApiResponse<AuthResponse>> {
+  try {
+    const response = await http.post(
+      authRoutes.login,
+      payload,
+      {
+        auth: false, // Don't send auth token for login
+      }
+    ) as AuthResponse;
+
+    // If login is successful, store auth data
+    if (response?.success && response?.data?.accessToken) {
+      storeAuthData({
+        accessToken: response.data.accessToken,
+        refreshToken: response.data.refreshToken,
+        sessionId: response.data.sessionId,
+        tokenExpiry: response.data.tokenExpiry,
+        userData: response.data, // Store complete user data
+      });
+    }
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Register a new user
+ * 
+ * @param payload - Registration data
+ * @returns Promise with registration response
+ */
+export async function register(
+  payload: RegisterPayload
+): Promise<ApiResponse<AuthResponse>> {
+  try {
+    const response = await http.post(
+      authRoutes.register,
+      payload,
+      {
+        auth: false,
+      }
+    ) as AuthResponse;
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Validate user credentials before login
+ * 
+ * @param payload - User credentials
+ * @returns Promise with validation response
+ */
+export async function validateUser(
+  payload: ValidateUserPayload
+): Promise<ApiResponse<{ success: boolean; message: string }>> {
+  try {
+    const response = await http.post(
+      authRoutes.validation,
+      payload,
+      {
+        auth: false,
+      }
+    ) as { success: boolean; message: string };
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Login with Google OAuth
+ * 
+ * @param payload - Google ID token
+ * @returns Promise with access token and user data
+ */
+export async function googleLogin(
+  payload: GoogleLoginPayload
+): Promise<ApiResponse<AuthResponse>> {
+  try {
+    const response = await http.post(
+      authRoutes.googleLogin,
+      payload,
+      {
+        auth: false,
+      }
+    ) as AuthResponse;
+
+    // If login is successful, store auth data
+    if (response?.success && response?.data?.accessToken) {
+      storeAuthData({
+        accessToken: response.data.accessToken,
+        refreshToken: response.data.refreshToken,
+        sessionId: response.data.sessionId,
+        tokenExpiry: response.data.tokenExpiry,
+        userData: response.data,
+      });
+    }
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Send password reset link
+ * 
+ * @param payload - Email address
+ * @returns Promise with success message
+ */
+export async function forgotPassword(
+  payload: ForgotPasswordPayload
+): Promise<ApiResponse<{ success: boolean; message: string }>> {
+  try {
+    const response = await http.post(
+      authRoutes.forgotPassword,
+      payload,
+      {
+        auth: false,
+      }
+    ) as { success: boolean; message: string };
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Reset password with token
+ * 
+ * @param payload - Reset token and new password
+ * @returns Promise with success message
+ */
+export async function resetPassword(
+  payload: ResetPasswordPayload
+): Promise<ApiResponse<{ success: boolean; message: string }>> {
+  try {
+    const response = await http.post(
+      authRoutes.resetPassword,
+      {
+        token: payload.token,
+        newPassword: payload.newPassword,
+      },
+      {
+        auth: false,
+      }
+    ) as { success: boolean; message: string };
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Change password (alternative endpoint)
+ * 
+ * @param payload - Reset token and new password
+ * @returns Promise with success message
+ */
+export async function changePassword(
+  payload: ChangePasswordPayload
+): Promise<ApiResponse<{ success: boolean; message: string }>> {
+  try {
+    const response = await http.post(
+      authRoutes.changePassword,
+      {
+        token: payload.token,
+        newPassword: payload.newPassword,
+      },
+      {
+        auth: false,
+      }
+    ) as { success: boolean; message: string };
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Verify email with token
+ * 
+ * @param payload - Verification token
+ * @returns Promise with success message
+ */
+export async function verifyEmail(
+  payload: VerifyEmailPayload
+): Promise<ApiResponse<{ success: boolean; message: string }>> {
+  try {
+    const response = await http.post(
+      authRoutes.verifyEmail,
+      payload,
+      {
+        auth: false,
+      }
+    ) as { success: boolean; message: string };
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Resend verification email
+ * 
+ * @param payload - Email address
+ * @returns Promise with success message
+ */
+export async function resendVerification(
+  payload: { email: string }
+): Promise<ApiResponse<{ success: boolean; message: string }>> {
+  try {
+    const response = await http.post(
+      authRoutes.resendVerification,
+      payload,
+      {
+        auth: false,
+      }
+    ) as { success: boolean; message: string };
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Send OTP to email for signin
+ * 
+ * @param payload - Email address
+ * @returns Promise with success message
+ */
+export async function sendOtp(
+  payload: SendOtpPayload
+): Promise<ApiResponse<{ success: boolean; message: string }>> {
+  try {
+    const response = await http.post(
+      authRoutes.sendOtp,
+      payload,
+      {
+        auth: false,
+      }
+    ) as { success: boolean; message: string };
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Verify OTP for email signin
+ * 
+ * @param payload - Email and OTP
+ * @returns Promise with access token and user data
+ */
+export async function verifyOtp(
+  payload: VerifyOtpPayload
+): Promise<ApiResponse<AuthResponse>> {
+  try {
+    const response = await http.post(
+      authRoutes.verifyOtp,
+      payload,
+      {
+        auth: false,
+      }
+    ) as AuthResponse;
+
+    // If verification is successful, store auth data
+    if (response?.success && response?.data?.accessToken) {
+      storeAuthData({
+        accessToken: response.data.accessToken,
+        refreshToken: response.data.refreshToken,
+        sessionId: response.data.sessionId,
+        tokenExpiry: response.data.tokenExpiry,
+        userData: response.data,
+      });
+    }
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Verify registration OTP
+ * 
+ * @param payload - Email and OTP
+ * @returns Promise with success message
+ */
+export async function verifyRegistrationOtp(
+  payload: VerifyRegistrationOtpPayload
+): Promise<ApiResponse<{ success: boolean; message: string }>> {
+  try {
+    const response = await http.post(
+      authRoutes.verify,
+      payload,
+      {
+        auth: false,
+      }
+    ) as { success: boolean; message: string };
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Refresh access token using refresh token
+ * 
+ * @param refreshToken - Optional refresh token. If not provided, will use stored refresh token
+ * @returns Promise with new access token and optionally new refresh token
+ */
+export async function refreshToken(
+  refreshToken?: string
+): Promise<ApiResponse<RefreshTokenResponse>> {
+  try {
+    // Use provided refresh token or get from storage
+    const tokenToUse = refreshToken || getRefreshToken();
+    
+    if (!tokenToUse) {
+      return {
+        status: 400,
+        error: 'Refresh token is required',
+      };
+    }
+
+    const payload: RefreshTokenPayload = {
+      refreshToken: tokenToUse,
+    };
+
+    const response = await http.post(
+      authRoutes.refresh,
+      payload,
+      {
+        auth: false, // Don't send auth token for refresh
+      }
+    ) as RefreshTokenResponse;
+
+    // If refresh is successful, update stored tokens
+    if (response?.success && response?.data?.accessToken) {
+      storeAuthData({
+        accessToken: response.data.accessToken,
+        refreshToken: response.data.refreshToken || tokenToUse, // Use new refresh token if provided, otherwise keep old one
+        sessionId: response.data.sessionId,
+        tokenExpiry: response.data.tokenExpiry,
+        userData: response.data, // Store any additional user data
+      });
+    }
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+

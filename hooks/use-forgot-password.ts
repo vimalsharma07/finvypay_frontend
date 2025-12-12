@@ -2,7 +2,8 @@
 // Reusable hook for forgot password functionality with rate limiting and error handling
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { http, ApiError } from '@/lib/api';
+import { forgotPassword } from '@/lib/services/auth-api';
+import { handleApiResponse } from '@/lib/utils/api-response-handler';
 
 export interface UseForgotPasswordOptions {
   onSuccess?: (message: string) => void;
@@ -124,43 +125,27 @@ export function useForgotPassword({
     setSuccess(null);
 
     try {
-      const response = await http.post(
-        '/auth/forgot-password',
-        {
-          email: email.trim(),
-        },
-        {
-          auth: false,
-        }
-      );
+      const response = await forgotPassword({ email: email.trim() });
 
-      // Handle successful response
-      if (response?.success || response?.message) {
-        const successMessage = 
-          response?.message || 
-          'Password reset link has been sent to your email. Please check your inbox.';
-        
-        setSuccess(successMessage);
-        onSuccess?.(successMessage);
-        
-        // Start cooldown timer
-        setCooldownRemaining(cooldownSeconds);
-      } else {
-        throw new Error('Unexpected response format from server.');
-      }
+      handleApiResponse(response, {
+        onSuccess: (data) => {
+          const successMessage = 
+            data?.message || 
+            'Password reset link has been sent to your email. Please check your inbox.';
+          
+          setSuccess(successMessage);
+          onSuccess?.(successMessage);
+          
+          // Start cooldown timer
+          setCooldownRemaining(cooldownSeconds);
+        },
+        onError: (errorMessage) => {
+          setError(errorMessage || 'Failed to send password reset link. Please try again.');
+          onError?.(errorMessage || 'Failed to send password reset link. Please try again.');
+        },
+      });
     } catch (err) {
-      let errorMessage = 'Failed to send password reset link. Please try again.';
-      
-      if (err instanceof ApiError) {
-        errorMessage = 
-          err.data?.message || 
-          err.data?.error || 
-          err.message || 
-          errorMessage;
-      } else if (err instanceof Error) {
-        errorMessage = err.message;
-      }
-      
+      const errorMessage = err instanceof Error ? err.message : 'Failed to send password reset link. Please try again.';
       setError(errorMessage);
       onError?.(errorMessage);
     } finally {

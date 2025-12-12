@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle, Check, Eye, EyeOff, Mail } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { http, ApiError } from '@/lib/api';
+import { register, verifyRegistrationOtp } from '@/lib/services/auth-api';
+import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -130,37 +131,30 @@ export default function Page() {
     setSuccess(null);
 
     try {
-      const response = await http.post(
-        '/auth/register',
-        {
-          email: values.email,
-          name: values.name,
-          password: values.password,
-        },
-        {
-          auth: false,
-        }
-      );
+      const response = await register({
+        email: values.email,
+        name: values.name,
+        password: values.password,
+      });
 
-      // Handle response: { success: true, message: "User registered successfully. Please verify the OTP" }
-      if (response?.success || response?.message) {
-        setRegisteredEmail(values.email);
-        // Reset OTP form when moving to verify step
-        otpForm.reset({ otp: '' });
-        setStep('verify');
-        setSuccess(response?.message || 'Registration successful! Please verify the OTP sent to your email.');
-      } else {
-        setError('Registration failed. Please try again.');
-      }
+      handleApiResponse(response, {
+        onSuccess: (data) => {
+          setRegisteredEmail(values.email);
+          // Reset OTP form when moving to verify step
+          otpForm.reset({ otp: '' });
+          setStep('verify');
+          setSuccess(data?.message || 'Registration successful! Please verify the OTP sent to your email.');
+        },
+        onError: (errorMessage) => {
+          setError(errorMessage || 'Registration failed. Please try again.');
+        },
+        onValidationError: (errors, messages) => {
+          setError(Array.isArray(messages) ? messages.join(', ') : messages || 'Validation error occurred');
+        },
+      });
     } catch (err) {
-      if (err instanceof ApiError) {
-        const errorMessage = err.data?.message || err.data?.error || err.message || 'Registration failed. Please try again.';
-        setError(errorMessage);
-      } else if (err instanceof Error) {
-        setError(err.message || 'An unexpected error occurred. Please try again.');
-      } else {
-        setError('An unexpected error occurred. Please try again.');
-      }
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
+      setError(errorMessage);
     } finally {
       setIsProcessing(false);
     }
@@ -184,37 +178,30 @@ export default function Page() {
     setSuccess(null);
 
     try {
-      const response = await http.post(
-        '/auth/verify',
-        {
-          email: registeredEmail,
-          otp: otpToVerify,
-        },
-        {
-          auth: false,
-        }
-      );
+      const response = await verifyRegistrationOtp({
+        email: registeredEmail,
+        otp: otpToVerify,
+      });
 
-      // Handle successful verification
-      if (response?.success || response?.message) {
-        setSuccess('Email verified successfully! Your merchant account is now activated.');
-        
-        // Redirect to signin after 2 seconds
-        setTimeout(() => {
-          router.push('/signin');
-        }, 2000);
-      } else {
-        setError('OTP verification failed. Please check the code and try again.');
-      }
+      handleApiResponse(response, {
+        onSuccess: (data) => {
+          setSuccess(data?.message || 'Email verified successfully! Your merchant account is now activated.');
+          
+          // Redirect to signin after 2 seconds
+          setTimeout(() => {
+            router.push('/signin');
+          }, 2000);
+        },
+        onError: (errorMessage) => {
+          setError(errorMessage || 'OTP verification failed. Please check the code and try again.');
+        },
+        onValidationError: (errors, messages) => {
+          setError(Array.isArray(messages) ? messages.join(', ') : messages || 'Validation error occurred');
+        },
+      });
     } catch (err) {
-      if (err instanceof ApiError) {
-        const errorMessage = err.data?.message || err.data?.error || err.message || 'OTP verification failed. Please try again.';
-        setError(errorMessage);
-      } else if (err instanceof Error) {
-        setError(err.message || 'An unexpected error occurred. Please try again.');
-      } else {
-        setError('An unexpected error occurred. Please try again.');
-      }
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
+      setError(errorMessage);
     } finally {
       setIsProcessing(false);
     }
