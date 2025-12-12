@@ -40,6 +40,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import Link from 'next/link';
+import { User } from '@/lib/services/admin/users';
 
 // Header definition matching old project pattern
 export interface TableHeader<T> {

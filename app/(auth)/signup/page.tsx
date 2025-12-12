@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle, Check, Eye, EyeOff, Mail } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { register, verifyRegistrationOtp } from '@/lib/services/auth-api';
+import { register, verifyRegistrationOtp } from '@/lib/services/auth';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';

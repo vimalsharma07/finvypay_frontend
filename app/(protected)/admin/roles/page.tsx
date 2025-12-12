@@ -12,7 +12,7 @@ import {
   deleteRole,
   Role,
   RoleListResponse,
-} from '@/lib/services/roles-api';
+} from '@/lib/services/admin/roles';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { Badge } from '@/components/ui/badge';
 import {

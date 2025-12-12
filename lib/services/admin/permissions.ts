@@ -4,16 +4,8 @@
  * Centralized API calls for permissions management
  */
 
-import { http, ApiError } from '../api';
-
-// ApiResponse type
-export interface ApiResponse<T> {
-  status: number;
-  data?: T;
-  error?: string;
-  errors?: Record<string, string[]>;
-  message?: string;
-}
+import { http, ApiError } from '../../api';
+import type { ApiResponse } from '../types';
 
 // Permission types
 export interface Permission {

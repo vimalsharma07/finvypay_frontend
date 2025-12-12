@@ -2,7 +2,7 @@
 // Reusable hook for forgot password functionality with rate limiting and error handling
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { forgotPassword } from '@/lib/services/auth-api';
+import { forgotPassword } from '@/lib/services/auth';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 
 export interface UseForgotPasswordOptions {

@@ -23,7 +23,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 import { LoaderCircleIcon } from 'lucide-react';
 import { Icons } from '@/components/common/icons';
 import { getSigninSchema, SigninSchemaType } from '../forms/signin-schema';
-import { login, validateUser } from '@/lib/services/auth-api';
+import { login, validateUser } from '@/lib/services/auth';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { useGoogleOAuth } from '@/hooks/use-google-oauth';
 import { ForgotPasswordDialog } from './components/forgot-password-dialog';

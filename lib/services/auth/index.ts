@@ -5,18 +5,13 @@
  * All auth-related API calls should be defined here
  */
 
-import { http, ApiError } from '../api';
-import { storeAuthData } from '../auth-storage';
-import { authRoutes } from '../routes/auth-routes';
+import { http, ApiError } from '../../api';
+import { storeAuthData } from '../../auth-storage';
+import { authRoutes } from '../../routes/auth-routes';
+import type { ApiResponse } from '../types';
 
-// ApiResponse type to match the expected format
-export interface ApiResponse<T> {
-  status: number;
-  data?: T;
-  error?: string;
-  errors?: Record<string, string[]>;
-  message?: string;
-}
+// Re-export ApiResponse for convenience
+export type { ApiResponse } from '../types';
 
 // ============================================
 // TYPES & INTERFACES
@@ -136,7 +131,7 @@ export async function login(
       
       // Set access token in memory (refresh token is in httpOnly cookie)
       if (typeof window !== 'undefined') {
-        const { setAccessToken } = await import('../api');
+        const { setAccessToken } = await import('../../api');
         setAccessToken(accessTokenValue);
       }
       
@@ -274,7 +269,7 @@ export async function googleLogin(
       
       // Set access token in memory (refresh token is in httpOnly cookie)
       if (typeof window !== 'undefined') {
-        const { setAccessToken } = await import('../api');
+        const { setAccessToken } = await import('../../api');
         setAccessToken(accessTokenValue);
       }
       
@@ -568,9 +563,18 @@ export async function verifyOtp(
 
     // If verification is successful, store auth data
     if (response?.success && response?.data?.accessToken) {
+      const accessTokenValue = typeof response.data.accessToken === 'object' && response.data.accessToken !== null
+        ? (response.data.accessToken as any).accessToken || response.data.accessToken
+        : response.data.accessToken;
+      
+      // Set access token in memory
+      if (typeof window !== 'undefined') {
+        const { setAccessToken } = await import('../../api');
+        setAccessToken(accessTokenValue);
+      }
+      
       storeAuthData({
-        accessToken: response.data.accessToken,
-        refreshToken: response.data.refreshToken,
+        accessToken: accessTokenValue,
         sessionId: response.data.sessionId,
         tokenExpiry: response.data.tokenExpiry,
         userData: response.data,
@@ -663,7 +667,7 @@ export async function refreshToken(): Promise<ApiResponse<RefreshTokenResponse>>
       
       // Set access token in memory
       if (typeof window !== 'undefined') {
-        const { setAccessToken } = await import('../api');
+        const { setAccessToken } = await import('../../api');
         setAccessToken(accessTokenValue);
       }
       

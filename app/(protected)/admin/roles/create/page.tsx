@@ -31,8 +31,8 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { createRole, CreateRolePayload } from '@/lib/services/roles-api';
-import { getPermissions, Permission } from '@/lib/services/permissions-api';
+import { createRole, CreateRolePayload } from '@/lib/services/admin/roles';
+import { getPermissions, Permission } from '@/lib/services/admin/permissions';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';

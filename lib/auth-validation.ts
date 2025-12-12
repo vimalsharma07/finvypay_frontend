@@ -2,7 +2,7 @@
 // Advanced user validation utility for authentication flow
 // This file now wraps the auth-api service for backward compatibility
 
-import { validateUser as validateUserApi } from './services/auth-api';
+import { validateUser as validateUserApi } from './services/auth';
 
 export interface UserValidationCredentials {
   email: string;

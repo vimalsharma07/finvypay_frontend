@@ -5,17 +5,9 @@
  * All user-related API calls should be defined here
  */
 
-import { http, ApiError } from '../api';
-import { routes } from '../routes/routes';
-
-// ApiResponse type to match the expected format
-export interface ApiResponse<T> {
-  status: number;
-  data?: T;
-  error?: string;
-  errors?: Record<string, string[]>;
-  message?: string;
-}
+import { http, ApiError } from '../../api';
+import { adminRoutes } from '../../routes/routes';
+import type { ApiResponse } from '../types';
 
 // User types matching the actual API response structure
 export interface User {
@@ -315,3 +307,4 @@ export async function bulkDeleteUsers(
     };
   }
 }
+

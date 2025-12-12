@@ -2,7 +2,7 @@
 // Reusable hook for OTP-based signin with email verification
 
 import { useState, useCallback } from 'react';
-import { sendOtp, verifyOtp as verifyOtpApi } from '@/lib/services/auth-api';
+import { sendOtp, verifyOtp as verifyOtpApi } from '@/lib/services/auth';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 
 export interface UseOtpSigninOptions {

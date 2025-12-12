@@ -2,7 +2,7 @@
 // Reusable React hook for Google OAuth authentication
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { googleLogin } from '@/lib/services/auth-api';
+import { googleLogin } from '@/lib/services/auth';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 
 export interface UseGoogleOAuthOptions {
