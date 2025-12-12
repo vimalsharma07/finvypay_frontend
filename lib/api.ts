@@ -62,10 +62,35 @@ export type RequestOptions = Omit<RequestInit, "method" | "body" | "signal"> & {
 // TOKEN HANDLING (CLIENT ONLY)
 // --------------------------------------------------
 
+// In-memory access token (rehydrated from localStorage on first access)
+let inMemoryAccessToken: string | null = null;
+let tokenRehydrated = false;
+
 const getToken = (): string | null => {
   if (isServer) return null;
-  return localStorage.getItem("access_token");
+  
+  // Rehydrate from localStorage on first access (for app reload)
+  if (!tokenRehydrated && typeof window !== 'undefined') {
+    const stored = localStorage.getItem("access_token");
+    if (stored) {
+      inMemoryAccessToken = stored;
+    }
+    tokenRehydrated = true;
+  }
+  
+  return inMemoryAccessToken;
 };
+
+// Export setter for login/refresh
+export function setAccessToken(token: string | null): void {
+  if (isServer) return;
+  inMemoryAccessToken = token;
+  if (token && typeof window !== 'undefined') {
+    localStorage.setItem("access_token", token);
+  } else if (typeof window !== 'undefined') {
+    localStorage.removeItem("access_token");
+  }
+}
 
 // --------------------------------------------------
 // URL HELPERS
@@ -317,6 +342,91 @@ export async function apiFetch(
       data = json ? JSON.parse(text) : text;
     } catch {
       data = text;
+    }
+  }
+
+  // Handle 401 Unauthorized - attempt refresh token
+  if (response.status === 401 && auth && !(options as any)._retry) {
+    // Mark request as retried to prevent loops
+    const retryOptions = { ...options, _retry: true };
+    
+    // Lazy import to avoid circular dependencies
+    const refreshHandler = await import('./api-refresh-handler');
+    const newToken = await refreshHandler.handle401Refresh();
+    
+    if (newToken) {
+      // Update in-memory token
+      setAccessToken(newToken);
+      
+      // Clone original request config for retry
+      const retryHeaders: HeadersInit = {
+        ...finalHeaders,
+        Authorization: `Bearer ${newToken}`,
+      };
+      
+      const retryInit: RequestInit = {
+        ...init,
+        headers: retryHeaders,
+      };
+      
+      // Retry the request
+      const retryResponse = await fetchWithRetry(
+        url,
+        retryInit,
+        retries!,
+        timeoutMs!
+      );
+      
+      const retryText = await retryResponse.text();
+      let retryData: any = null;
+      
+      if (retryText) {
+        try {
+          retryData = json ? JSON.parse(retryText) : retryText;
+        } catch {
+          retryData = retryText;
+        }
+      }
+      
+      if (!retryResponse.ok) {
+        const errorMessage = 
+          retryData?.message || 
+          retryData?.error || 
+          retryData?.data?.message ||
+          retryData?.data?.error ||
+          retryResponse.statusText ||
+          'An error occurred';
+        
+        throw new ApiError(
+          errorMessage,
+          retryResponse.status,
+          retryData
+        );
+      }
+      
+      return retryData;
+    } else {
+      // Refresh failed - clearAuthState already called in handler
+      throw new ApiError(
+        'Session expired. Please login again.',
+        401,
+        { refreshFailed: true }
+      );
+    }
+  }
+
+  // Handle 403 Forbidden - might be refresh token reuse
+  if (response.status === 403) {
+    if (data?.message?.toLowerCase().includes('refresh') || 
+        data?.error?.toLowerCase().includes('reuse') ||
+        data?.reuseDetected) {
+      const refreshHandler = await import('./api-refresh-handler');
+      refreshHandler.clearAuthState();
+      throw new ApiError(
+        'Session invalid — login again',
+        403,
+        { reuseDetected: true }
+      );
     }
   }
 

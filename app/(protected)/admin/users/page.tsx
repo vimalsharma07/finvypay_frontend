@@ -7,12 +7,7 @@ import {
   ToolbarActions,
 } from '@/layouts/demo1/components/toolbar';
 import { Container } from '@/components/common/container';
-import {
-  getUsers,
-  deleteUser,
-  User,
-  UserListResponse,
-} from '@/lib/services/users-api';
+import { getUsers, UserListResponse, User, deleteUser } from '@/lib/services/admin/users';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
   TableComp,

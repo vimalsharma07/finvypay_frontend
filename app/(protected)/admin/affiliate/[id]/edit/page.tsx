@@ -30,7 +30,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { getUserById, updateUser, User } from '@/lib/services/users-api';
+import { getUserById, updateUser, User } from '@/lib/services/admin/users';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
   updateUserSchema,

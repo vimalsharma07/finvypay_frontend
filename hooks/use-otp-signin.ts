@@ -2,8 +2,8 @@
 // Reusable hook for OTP-based signin with email verification
 
 import { useState, useCallback } from 'react';
-import { http, ApiError } from '@/lib/api';
-import { storeAuthData } from '@/lib/auth-storage';
+import { sendOtp as sendOtpApi, verifyOtp as verifyOtpApi } from '@/lib/services/auth';
+import { handleApiResponse } from '@/lib/utils/api-response-handler';
 
 export interface UseOtpSigninOptions {
   onSuccess?: (response: any) => void;
@@ -83,45 +83,30 @@ export function useOtpSignin({
     setSuccess(null);
 
     try {
-      const response = await http.post(
-        '/auth/email',
-        {
-          email: email.trim(),
-        },
-        {
-          auth: false,
-        }
-      );
+      const response = await sendOtpApi({ email: email.trim() });
 
-      // Handle successful response
-      if (response?.success || response?.message) {
-        const successMessage = 
-          response?.message || 
-          'OTP has been sent to your email. Please check your inbox.';
-        
-        setSuccess(successMessage);
-        setOtpSent(true);
-        
-        // Clear success message after 5 seconds
-        setTimeout(() => {
-          setSuccess(null);
-        }, 5000);
-      } else {
-        throw new Error('Unexpected response format from server.');
-      }
+      handleApiResponse(response, {
+        onSuccess: (data) => {
+          const successMessage = 
+            data?.message || 
+            'OTP has been sent to your email. Please check your inbox.';
+          
+          setSuccess(successMessage);
+          setOtpSent(true);
+          
+          // Clear success message after 5 seconds
+          setTimeout(() => {
+            setSuccess(null);
+          }, 5000);
+        },
+        onError: (errorMessage) => {
+          setError(errorMessage || 'Failed to send OTP. Please try again.');
+          onError?.(errorMessage || 'Failed to send OTP. Please try again.');
+          setOtpSent(false);
+        },
+      });
     } catch (err) {
-      let errorMessage = 'Failed to send OTP. Please try again.';
-      
-      if (err instanceof ApiError) {
-        errorMessage = 
-          err.data?.message || 
-          err.data?.error || 
-          err.message || 
-          errorMessage;
-      } else if (err instanceof Error) {
-        errorMessage = err.message;
-      }
-      
+      const errorMessage = err instanceof Error ? err.message : 'Failed to send OTP. Please try again.';
       setError(errorMessage);
       onError?.(errorMessage);
       setOtpSent(false);
@@ -162,56 +147,23 @@ export function useOtpSignin({
     setSuccess(null);
 
     try {
-      const response = await http.post(
-        '/auth/email/verify',
-        {
-          email: email.trim(),
-          otp: otp.trim(),
+      const response = await verifyOtpApi({
+        email: email.trim(),
+        otp: otp.trim(),
+      });
+
+      handleApiResponse(response, {
+        onSuccess: (data) => {
+          // Call success callback
+          onSuccess?.(data);
         },
-        {
-          auth: false,
-        }
-      );
-
-      // Handle successful response (same format as normal login)
-      if (response?.success && response?.data) {
-        const { accessToken, refreshToken, sessionId, tokenExpiry, user, ...userData } = response.data;
-
-        if (!accessToken) {
-          const errorMsg = 'Login successful but access token is missing. Please contact support.';
-          setError(errorMsg);
-          onError?.(errorMsg);
-          setIsVerifyingOtp(false);
-          return;
-        }
-
-        // Store authentication data (reuse existing logic)
-        storeAuthData({
-          accessToken,
-          refreshToken,
-          sessionId,
-          tokenExpiry,
-          userData: response.data, // userData already contains all user information
-        });
-
-        // Call success callback
-        onSuccess?.(response);
-      } else {
-        throw new Error('Unexpected response format from server.');
-      }
+        onError: (errorMessage) => {
+          setError(errorMessage || 'OTP verification failed. Please try again.');
+          onError?.(errorMessage || 'OTP verification failed. Please try again.');
+        },
+      });
     } catch (err) {
-      let errorMessage = 'OTP verification failed. Please try again.';
-      
-      if (err instanceof ApiError) {
-        errorMessage = 
-          err.data?.message || 
-          err.data?.error || 
-          err.message || 
-          errorMessage;
-      } else if (err instanceof Error) {
-        errorMessage = err.message;
-      }
-      
+      const errorMessage = err instanceof Error ? err.message : 'OTP verification failed. Please try again.';
       setError(errorMessage);
       onError?.(errorMessage);
     } finally {

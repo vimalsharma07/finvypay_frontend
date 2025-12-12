@@ -29,7 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { createUser, User } from '@/lib/services/users-api';
+import { createUser, User } from '@/lib/services/admin/users';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
   createUserSchema,

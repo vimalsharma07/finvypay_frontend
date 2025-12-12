@@ -6,7 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle, ArrowLeft, Check } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { apiFetch } from '@/lib/api';
+import { forgotPassword } from '@/lib/services/auth';
+import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -55,20 +56,19 @@ export default function Page() {
       setSuccess(null);
       setShowRecaptcha(false);
 
-      const data = await apiFetch('/api/auth/reset-password', 'POST', {
-        headers: {
-          'x-recaptcha-token': token,
-        },
-        body: values,
-      });
+      const response = await forgotPassword({ email: values.email });
 
-      setSuccess(data?.message || 'Password reset link sent successfully!');
-      form.reset();
+      handleApiResponse(response, {
+        onSuccess: (data) => {
+          setSuccess(data?.message || 'Password reset link sent successfully!');
+          form.reset();
+        },
+        onError: (errorMessage) => {
+          setError(errorMessage || 'An unexpected error occurred. Please try again.');
+        },
+      });
     } catch (err: any) {
-      const errorMessage = 
-        err?.data?.message || 
-        err?.message || 
-        'An unexpected error occurred. Please try again.';
+      const errorMessage = err?.message || 'An unexpected error occurred. Please try again.';
       setError(errorMessage);
     } finally {
       setIsProcessing(false);

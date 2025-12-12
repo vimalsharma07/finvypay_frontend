@@ -4,7 +4,8 @@ import { Suspense, useCallback, useEffect, useState } from 'react';
 import Link from 'next/dist/client/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertCircle } from 'lucide-react';
-import { apiFetch } from '@/lib/api';
+import { verifyEmail } from '@/lib/services/auth';
+import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { LoaderCircleIcon } from 'lucide-react';
@@ -18,23 +19,26 @@ export default function Page() {
   const verify = useCallback(
     async (token: string) => {
       try {
-        const data = await apiFetch('/api/auth/verify-email', 'POST', {
-          body: { token },
-        });
+      const response = await verifyEmail({ token });
 
-        setError(null);
-        setMessage(data?.message || 'Your email has been successfully verified!');
-        setTimeout(() => {
-          router.push('/signin'); // Redirect to sign-in page or another page
-        }, 2000);
-      } catch (error: any) {
-        setMessage(null);
-        const errorMessage = 
-          error?.data?.message || 
-          error?.message || 
-          'An error occurred during verification.';
-        setError(errorMessage);
-      }
+      handleApiResponse(response, {
+        onSuccess: (data) => {
+          setError(null);
+          setMessage(data?.message || 'Your email has been successfully verified!');
+          setTimeout(() => {
+            router.push('/signin');
+          }, 2000);
+        },
+        onError: (errorMessage) => {
+          setMessage(null);
+          setError(errorMessage || 'An error occurred during verification.');
+        },
+      });
+    } catch (error: any) {
+      setMessage(null);
+      const errorMessage = error?.message || 'An error occurred during verification.';
+      setError(errorMessage);
+    }
     },
     [router],
   );

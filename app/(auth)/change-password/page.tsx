@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle, Check, Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { changePassword } from '@/lib/services/auth';
+import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { apiFetch } from '@/lib/api';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -53,6 +55,7 @@ export default function Page() {
 
         await apiFetch('/api/auth/reset-password-verify', 'POST', {
           body: { token },
+          auth: false,
         });
 
         setIsValidToken(true);
@@ -77,14 +80,22 @@ export default function Page() {
     setSuccessMessage(null);
 
     try {
-      await apiFetch('/api/auth/change-password', 'POST', {
-        body: { token, newPassword: values.newPassword },
+      const response = await changePassword({
+        token: token || '',
+        newPassword: values.newPassword,
       });
 
-      setSuccessMessage('Password reset successful! Redirecting to login...');
-      setTimeout(() => router.push('/signin'), 3000);
+      handleApiResponse(response, {
+        onSuccess: () => {
+          setSuccessMessage('Password reset successful! Redirecting to login...');
+          setTimeout(() => router.push('/signin'), 3000);
+        },
+        onError: (errorMessage) => {
+          setError(errorMessage || 'Password reset failed.');
+        },
+      });
     } catch (error: any) {
-      const errorMessage = error?.data?.message || error?.message || 'Password reset failed.';
+      const errorMessage = error?.message || 'Password reset failed.';
       setError(errorMessage);
     } finally {
       setIsProcessing(false);
