@@ -8,6 +8,7 @@ import { adminMasterRoutes } from './master-routes';
 import { adminReportRoutes } from './report-routes';
 import { adminTransactionRoutes } from './transaction-routes';
 import { adminRolesRoutes } from './roles-routes';
+import { adminPermissionsRoutes } from './permissions-routes';
 
 export const adminModuleRoutes = {
   users: adminUserRoutes,
@@ -15,4 +16,5 @@ export const adminModuleRoutes = {
   reports: adminReportRoutes,
   transactions: adminTransactionRoutes,
   roles: adminRolesRoutes,
+  permissions: adminPermissionsRoutes,
 } as const;
