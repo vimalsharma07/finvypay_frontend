@@ -320,6 +320,88 @@ export async function apiFetch(
     }
   }
 
+  // Handle 401 Unauthorized - attempt refresh token
+  if (response.status === 401 && auth && !(options as any).__skipRefresh) {
+    // Lazy import to avoid circular dependencies
+    const refreshHandler = await import('./api-refresh-handler');
+    const newToken = await refreshHandler.handle401Refresh();
+    
+    if (newToken) {
+      // Retry original request with new token
+      
+      // Update headers with new token
+      const retryHeaders: HeadersInit = {
+        ...finalHeaders,
+        Authorization: `Bearer ${newToken}`,
+      };
+      
+      const retryInit: RequestInit = {
+        ...init,
+        headers: retryHeaders,
+      };
+      
+      // Retry the request
+      const retryResponse = await fetchWithRetry(
+        url,
+        retryInit,
+        retries!,
+        timeoutMs!
+      );
+      
+      const retryText = await retryResponse.text();
+      let retryData: any = null;
+      
+      if (retryText) {
+        try {
+          retryData = json ? JSON.parse(retryText) : retryText;
+        } catch {
+          retryData = retryText;
+        }
+      }
+      
+      if (!retryResponse.ok) {
+        const errorMessage = 
+          retryData?.message || 
+          retryData?.error || 
+          retryData?.data?.message ||
+          retryData?.data?.error ||
+          retryResponse.statusText ||
+          'An error occurred';
+        
+        throw new ApiError(
+          errorMessage,
+          retryResponse.status,
+          retryData
+        );
+      }
+      
+      return retryData;
+    } else {
+      // Refresh failed - clear auth and throw error
+      refreshHandler.clearAuthState();
+      throw new ApiError(
+        'Session expired. Please login again.',
+        401,
+        { refreshFailed: true }
+      );
+    }
+  }
+
+  // Handle 403 Forbidden - might be refresh token reuse
+  if (response.status === 403) {
+    if (data?.message?.toLowerCase().includes('refresh') || 
+        data?.error?.toLowerCase().includes('reuse') ||
+        data?.reuseDetected) {
+      const refreshHandler = await import('./api-refresh-handler');
+      refreshHandler.clearAuthState();
+      throw new ApiError(
+        'Session invalid — login again',
+        403,
+        { reuseDetected: true }
+      );
+    }
+  }
+
   if (!response.ok) {
     // Handle backend error response structure
     // Backend might return: { success: false, message: "...", error: "..." }

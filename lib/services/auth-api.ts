@@ -650,10 +650,19 @@ export async function refreshToken(
     ) as RefreshTokenResponse;
 
     // If refresh is successful, update stored tokens
+    // Handle nested structure: data.accessToken.accessToken
     if (response?.success && response?.data?.accessToken) {
+      const accessTokenData = response.data.accessToken;
+      const accessTokenValue = typeof accessTokenData === 'object' && accessTokenData !== null
+        ? (accessTokenData as any).accessToken || accessTokenData
+        : accessTokenData;
+      const refreshTokenValue = typeof accessTokenData === 'object' && accessTokenData !== null
+        ? (accessTokenData as any).refreshToken || response.data.refreshToken || tokenToUse
+        : response.data.refreshToken || tokenToUse;
+      
       storeAuthData({
-        accessToken: response.data.accessToken,
-        refreshToken: response.data.refreshToken || tokenToUse, // Use new refresh token if provided, otherwise keep old one
+        accessToken: accessTokenValue,
+        refreshToken: refreshTokenValue,
         sessionId: response.data.sessionId,
         tokenExpiry: response.data.tokenExpiry,
         userData: response.data, // Store any additional user data
