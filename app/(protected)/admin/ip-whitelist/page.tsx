@@ -304,7 +304,7 @@ export default function AdminIpWhitelistPage() {
         ),
         cell: ({ row }) => {
           const status = row.original.status;
-          const variant = status === 'approved' ? 'default' : status === 'pending' ? 'secondary' : 'destructive';
+          const variant = status === 'approved' ? 'success' : status === 'pending' ? 'secondary' : 'destructive';
           return (
             <Badge variant={variant} className="capitalize">
               {status}

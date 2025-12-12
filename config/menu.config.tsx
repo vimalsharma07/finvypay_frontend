@@ -75,7 +75,7 @@ export const MENU_SIDEBAR: MenuConfig = [
   },
   {
     title: 'Roles & Permissions',
-    icon: Users,
+    icon: ShieldUser,
     children: [
       { title: 'Roles', path: '/admin/roles' },
       { title: 'Permissions', path: '/admin/permissions' },
@@ -83,7 +83,7 @@ export const MENU_SIDEBAR: MenuConfig = [
   },
   {
     title: 'Risk Management',
-    icon: Users,
+    icon: Shield,
     children: [
       { title: 'IP Whitelist', path: '/admin/ip-whitelist' },
     ],
