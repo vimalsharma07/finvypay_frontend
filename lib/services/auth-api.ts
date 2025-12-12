@@ -6,7 +6,7 @@
  */
 
 import { http, ApiError } from '../api';
-import { storeAuthData, getRefreshToken } from '../auth-storage';
+import { storeAuthData } from '../auth-storage';
 import { authRoutes } from '../routes/auth-routes';
 
 // ApiResponse type to match the expected format
@@ -130,12 +130,22 @@ export async function login(
 
     // If login is successful, store auth data
     if (response?.success && response?.data?.accessToken) {
+      const accessTokenValue = typeof response.data.accessToken === 'object' && response.data.accessToken !== null
+        ? (response.data.accessToken as any).accessToken || response.data.accessToken
+        : response.data.accessToken;
+      
+      // Set access token in memory (refresh token is in httpOnly cookie)
+      if (typeof window !== 'undefined') {
+        const { setAccessToken } = await import('../api');
+        setAccessToken(accessTokenValue);
+      }
+      
       storeAuthData({
-        accessToken: response.data.accessToken,
-        refreshToken: response.data.refreshToken,
+        accessToken: accessTokenValue,
         sessionId: response.data.sessionId,
         tokenExpiry: response.data.tokenExpiry,
-        userData: response.data, // Store complete user data
+        userData: response.data,
+        // Note: refreshToken no longer stored - it's in httpOnly cookie
       });
     }
 
@@ -258,12 +268,22 @@ export async function googleLogin(
 
     // If login is successful, store auth data
     if (response?.success && response?.data?.accessToken) {
+      const accessTokenValue = typeof response.data.accessToken === 'object' && response.data.accessToken !== null
+        ? (response.data.accessToken as any).accessToken || response.data.accessToken
+        : response.data.accessToken;
+      
+      // Set access token in memory (refresh token is in httpOnly cookie)
+      if (typeof window !== 'undefined') {
+        const { setAccessToken } = await import('../api');
+        setAccessToken(accessTokenValue);
+      }
+      
       storeAuthData({
-        accessToken: response.data.accessToken,
-        refreshToken: response.data.refreshToken,
+        accessToken: accessTokenValue,
         sessionId: response.data.sessionId,
         tokenExpiry: response.data.tokenExpiry,
         userData: response.data,
+        // Note: refreshToken no longer stored - it's in httpOnly cookie
       });
     }
 
@@ -619,53 +639,40 @@ export async function verifyRegistrationOtp(
 
 /**
  * Refresh access token using refresh token
+ * Refresh token is now in httpOnly cookie (sent via credentials: 'include')
  * 
- * @param refreshToken - Optional refresh token. If not provided, will use stored refresh token
- * @returns Promise with new access token and optionally new refresh token
+ * @returns Promise with new access token
  */
-export async function refreshToken(
-  refreshToken?: string
-): Promise<ApiResponse<RefreshTokenResponse>> {
+export async function refreshToken(): Promise<ApiResponse<RefreshTokenResponse>> {
   try {
-    // Use provided refresh token or get from storage
-    const tokenToUse = refreshToken || getRefreshToken();
-    
-    if (!tokenToUse) {
-      return {
-        status: 400,
-        error: 'Refresh token is required',
-      };
-    }
-
-    const payload: RefreshTokenPayload = {
-      refreshToken: tokenToUse,
-    };
-
+    // Refresh token is in httpOnly cookie - no need to send in body
     const response = await http.post(
       authRoutes.refresh,
-      payload,
+      {}, // Empty body - server reads refresh token from cookie
       {
         auth: false, // Don't send auth token for refresh
       }
     ) as RefreshTokenResponse;
 
     // If refresh is successful, update stored tokens
-    // Handle nested structure: data.accessToken.accessToken
     if (response?.success && response?.data?.accessToken) {
       const accessTokenData = response.data.accessToken;
       const accessTokenValue = typeof accessTokenData === 'object' && accessTokenData !== null
         ? (accessTokenData as any).accessToken || accessTokenData
         : accessTokenData;
-      const refreshTokenValue = typeof accessTokenData === 'object' && accessTokenData !== null
-        ? (accessTokenData as any).refreshToken || response.data.refreshToken || tokenToUse
-        : response.data.refreshToken || tokenToUse;
+      
+      // Set access token in memory
+      if (typeof window !== 'undefined') {
+        const { setAccessToken } = await import('../api');
+        setAccessToken(accessTokenValue);
+      }
       
       storeAuthData({
         accessToken: accessTokenValue,
-        refreshToken: refreshTokenValue,
         sessionId: response.data.sessionId,
         tokenExpiry: response.data.tokenExpiry,
-        userData: response.data, // Store any additional user data
+        userData: response.data,
+        // Note: refreshToken no longer stored - it's in httpOnly cookie
       });
     }
 

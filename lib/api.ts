@@ -62,10 +62,35 @@ export type RequestOptions = Omit<RequestInit, "method" | "body" | "signal"> & {
 // TOKEN HANDLING (CLIENT ONLY)
 // --------------------------------------------------
 
+// In-memory access token (rehydrated from localStorage on first access)
+let inMemoryAccessToken: string | null = null;
+let tokenRehydrated = false;
+
 const getToken = (): string | null => {
   if (isServer) return null;
-  return localStorage.getItem("access_token");
+  
+  // Rehydrate from localStorage on first access (for app reload)
+  if (!tokenRehydrated && typeof window !== 'undefined') {
+    const stored = localStorage.getItem("access_token");
+    if (stored) {
+      inMemoryAccessToken = stored;
+    }
+    tokenRehydrated = true;
+  }
+  
+  return inMemoryAccessToken;
 };
+
+// Export setter for login/refresh
+export function setAccessToken(token: string | null): void {
+  if (isServer) return;
+  inMemoryAccessToken = token;
+  if (token && typeof window !== 'undefined') {
+    localStorage.setItem("access_token", token);
+  } else if (typeof window !== 'undefined') {
+    localStorage.removeItem("access_token");
+  }
+}
 
 // --------------------------------------------------
 // URL HELPERS
@@ -321,15 +346,19 @@ export async function apiFetch(
   }
 
   // Handle 401 Unauthorized - attempt refresh token
-  if (response.status === 401 && auth && !(options as any).__skipRefresh) {
+  if (response.status === 401 && auth && !(options as any)._retry) {
+    // Mark request as retried to prevent loops
+    const retryOptions = { ...options, _retry: true };
+    
     // Lazy import to avoid circular dependencies
     const refreshHandler = await import('./api-refresh-handler');
     const newToken = await refreshHandler.handle401Refresh();
     
     if (newToken) {
-      // Retry original request with new token
+      // Update in-memory token
+      setAccessToken(newToken);
       
-      // Update headers with new token
+      // Clone original request config for retry
       const retryHeaders: HeadersInit = {
         ...finalHeaders,
         Authorization: `Bearer ${newToken}`,
@@ -377,8 +406,7 @@ export async function apiFetch(
       
       return retryData;
     } else {
-      // Refresh failed - clear auth and throw error
-      refreshHandler.clearAuthState();
+      // Refresh failed - clearAuthState already called in handler
       throw new ApiError(
         'Session expired. Please login again.',
         401,
