@@ -31,6 +31,12 @@ export interface CreateRolePayload {
   permissionIds?: (number | string)[];
 }
 
+export interface UpdateRolePayload {
+  name: string;
+  type: string;
+  permissionIds?: (number | string)[];
+}
+
 /**
  * Get all roles
  */
@@ -117,6 +123,36 @@ export async function createRole(
 ): Promise<ApiResponse<Role>> {
   try {
     const data = await http.post(adminRoutes.roles.create, payload) as Role;
+    return {
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Update existing role
+ */
+export async function updateRole(
+  id: string | number,
+  payload: UpdateRolePayload
+): Promise<ApiResponse<Role>> {
+  try {
+    const data = await http.put(adminRoutes.roles.update(id), payload) as Role;
     return {
       status: 200,
       data,

@@ -1,7 +1,7 @@
 'use client';
 
-import { Fragment, useEffect, useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { Fragment, useEffect, useState, useMemo, useRef } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -31,19 +31,24 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { createRole, CreateRolePayload } from '@/lib/services/admin/roles';
+import {
+  getRoleById,
+  updateRole,
+  UpdateRolePayload,
+  Role,
+} from '@/lib/services/admin/roles';
 import { getPermissions, Permission } from '@/lib/services/admin/permissions';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Form schema
-const createRoleSchema = z.object({
+const updateRoleSchema = z.object({
   name: z.string().min(1, 'Role name is required'),
   type: z.string().min(1, 'Role type is required'),
 });
 
-type CreateRoleFormData = z.infer<typeof createRoleSchema>;
+type UpdateRoleFormData = z.infer<typeof updateRoleSchema>;
 
 // Permission group structure
 interface PermissionGroup {
@@ -52,51 +57,121 @@ interface PermissionGroup {
   permissions: Permission[];
 }
 
-export default function CreateRolePage() {
+export default function EditRolePage() {
   const router = useRouter();
+  const params = useParams();
+  const roleId = params?.id as string;
+
+  const [role, setRole] = useState<Role | null>(null);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [selectedPermissionIds, setSelectedPermissionIds] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('');
+  
+  // Store original role type and permission selections for restoration
+  const [originalRoleType, setOriginalRoleType] = useState<string | null>(null);
+  const [originalPermissionIds, setOriginalPermissionIds] = useState<Set<number>>(new Set());
+  const [permissionSelectionsByType, setPermissionSelectionsByType] = useState<Record<string, Set<number>>>({});
+  
+  // Use ref to track previous role type to avoid unnecessary effect runs
+  const previousRoleTypeRef = useRef<string | null>(null);
 
-  const form = useForm<CreateRoleFormData>({
-    resolver: zodResolver(createRoleSchema),
+  const form = useForm<UpdateRoleFormData>({
+    resolver: zodResolver(updateRoleSchema),
     defaultValues: {
       name: '',
       type: 'ADMIN',
     },
   });
 
-  // Fetch permissions on mount
+  // Fetch role and permissions on mount
   useEffect(() => {
-    const fetchPermissions = async () => {
+    const fetchData = async () => {
+      if (!roleId) {
+        toast.error('Role ID is missing');
+        router.push('/admin/roles');
+        return;
+      }
+
       setLoading(true);
       try {
-        const response = await getPermissions();
-        handleApiResponse(response, {
+        // Fetch role and permissions in parallel
+        const [roleResponse, permissionsResponse] = await Promise.all([
+          getRoleById(roleId),
+          getPermissions(),
+        ]);
+
+        // Handle permissions response
+        handleApiResponse(permissionsResponse, {
           onSuccess: (data) => {
             if (data && data.success && Array.isArray(data.data)) {
               setPermissions(data.data);
             } else {
-              // Fallback to empty array if API fails
               setPermissions([]);
             }
           },
           onError: () => {
-            // Use empty array if API fails - permissions will be added later
             setPermissions([]);
           },
         });
+
+        // Handle role response
+        handleApiResponse(roleResponse, {
+          onSuccess: (roleData) => {
+            if (roleData) {
+              setRole(roleData);
+              
+              // Store original role type
+              setOriginalRoleType(roleData.type);
+              
+              // Populate form with role data
+              form.reset({
+                name: roleData.name,
+                type: roleData.type,
+              });
+
+              // Extract permission IDs from rolePermissions
+              const permissionIds = new Set<number>();
+              if (roleData.rolePermissions && Array.isArray(roleData.rolePermissions)) {
+                roleData.rolePermissions.forEach((rp: any) => {
+                  if (rp.permissionId) {
+                    permissionIds.add(Number(rp.permissionId));
+                  }
+                });
+              }
+              
+              // Store original permission selections
+              setOriginalPermissionIds(new Set(permissionIds));
+              
+              // Initialize permission selections by type with original role type
+              setPermissionSelectionsByType({
+                [roleData.type]: new Set(permissionIds),
+              });
+              
+              // Set current selections
+              setSelectedPermissionIds(permissionIds);
+              
+              // Initialize previous role type ref
+              previousRoleTypeRef.current = roleData.type;
+            }
+          },
+          onError: (errorMessage) => {
+            toast.error(errorMessage || 'Failed to load role');
+            router.push('/admin/roles');
+          },
+        });
       } catch (error) {
-        console.error('Error fetching permissions:', error);
-        setPermissions([]);
+        console.error('Error fetching data:', error);
+        toast.error('An error occurred while loading data');
+        router.push('/admin/roles');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPermissions();
-  }, []);
+    fetchData();
+  }, [roleId, router, form]);
 
   // Get role type from form
   const roleType = form.watch('type');
@@ -158,23 +233,67 @@ export default function CreateRolePage() {
     }
   }, [modules, activeTab]);
 
-  // Reset active tab and selected permissions when role type changes
+  // Handle role type changes - preserve selections per role type
   useEffect(() => {
-    if (roleType) {
-      // Reset active tab to first available module for new role type
-      const newModules = Object.keys(groupedPermissions);
-      if (newModules.length > 0) {
-        setActiveTab(newModules[0]);
-      }
-      // Clear selected permissions when role type changes
-      setSelectedPermissionIds(new Set());
+    // Don't run until we have role type, original role type, and permissions loaded
+    if (!roleType || !originalRoleType || permissions.length === 0) {
+      return;
     }
-  }, [roleType, groupedPermissions]);
+
+    // Only run when role type actually changes
+    if (previousRoleTypeRef.current === roleType) {
+      return;
+    }
+
+    // Update previous role type ref
+    previousRoleTypeRef.current = roleType;
+
+    // Update active tab if needed
+    const newModules = Object.keys(groupedPermissions);
+    if (newModules.length > 0 && !newModules.includes(activeTab)) {
+      setActiveTab(newModules[0]);
+    }
+
+    // Check if we have saved selections for this role type
+    const savedSelections = permissionSelectionsByType[roleType];
+    
+    if (savedSelections && savedSelections.size > 0) {
+      // Restore saved selections for this role type
+      // Filter to only include permissions that are valid for this role type
+      const validSelections = new Set<number>();
+      savedSelections.forEach((permissionId) => {
+        const permission = permissions.find((p) => Number(p.id) === permissionId);
+        if (permission && permission.type === roleType) {
+          validSelections.add(permissionId);
+        }
+      });
+      setSelectedPermissionIds(validSelections);
+    } else {
+      // First time switching to this role type - start with empty or filter current selections
+      setSelectedPermissionIds((prev) => {
+        const newSet = new Set<number>();
+        prev.forEach((permissionId) => {
+          const permission = permissions.find((p) => Number(p.id) === permissionId);
+          if (permission && permission.type === roleType) {
+            newSet.add(permissionId);
+          }
+        });
+        
+        // Save filtered selections for this role type (even if empty)
+        setPermissionSelectionsByType((prev) => ({
+          ...prev,
+          [roleType]: new Set(newSet),
+        }));
+        
+        return newSet;
+      });
+    }
+  }, [roleType, originalRoleType, permissions, groupedPermissions, activeTab, permissionSelectionsByType]);
 
   // Get permissions for active tab
   const activeTabPermissions = groupedPermissions[activeTab] || [];
 
-  // Toggle permission selection
+  // Toggle permission selection and save to current role type
   const togglePermission = (permissionId: number) => {
     setSelectedPermissionIds((prev) => {
       const newSet = new Set(prev);
@@ -183,6 +302,15 @@ export default function CreateRolePage() {
       } else {
         newSet.add(permissionId);
       }
+      
+      // Save current selections for the current role type
+      if (roleType) {
+        setPermissionSelectionsByType((prev) => ({
+          ...prev,
+          [roleType]: new Set(newSet),
+        }));
+      }
+      
       return newSet;
     });
   };
@@ -203,6 +331,15 @@ export default function CreateRolePage() {
           newSet.add(permissionId);
         }
       });
+      
+      // Save current selections for the current role type
+      if (roleType) {
+        setPermissionSelectionsByType((prev) => ({
+          ...prev,
+          [roleType]: new Set(newSet),
+        }));
+      }
+      
       return newSet;
     });
   };
@@ -226,30 +363,45 @@ export default function CreateRolePage() {
           newSet.add(permissionId);
         }
       });
+      
+      // Save current selections for the current role type
+      if (roleType) {
+        setPermissionSelectionsByType((prev) => ({
+          ...prev,
+          [roleType]: new Set(newSet),
+        }));
+      }
+      
       return newSet;
     });
   };
 
-  const onSubmit = async (data: CreateRoleFormData) => {
+  const onSubmit = async (data: UpdateRoleFormData) => {
+    if (!roleId) {
+      toast.error('Role ID is missing');
+      return;
+    }
+
+    setSubmitting(true);
     try {
       // Convert Set to array of numbers
       const permissionIds = Array.from(selectedPermissionIds).map((id) => Number(id));
-      
-      const payload: CreateRolePayload = {
+
+      const payload: UpdateRolePayload = {
         name: data.name,
         type: data.type,
         permissionIds: permissionIds,
       };
 
-      const response = await createRole(payload);
+      const response = await updateRole(roleId, payload);
 
       handleApiResponse(response, {
         onSuccess: () => {
-          toast.success('Role created successfully!');
+          toast.success('Role updated successfully!');
           router.push('/admin/roles');
         },
         onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to create role');
+          toast.error(errorMessage || 'Failed to update role');
         },
         onValidationError: (errors, messages) => {
           console.error('Validation errors:', errors);
@@ -260,18 +412,67 @@ export default function CreateRolePage() {
         },
       });
     } catch (error) {
-      console.error('❌ Error creating role:', error);
+      console.error('❌ Error updating role:', error);
       toast.error('An unexpected error occurred');
+    } finally {
+      setSubmitting(false);
     }
   };
+
+  if (loading) {
+    return (
+      <Fragment>
+        <Container>
+          <Toolbar>
+            <ToolbarHeading
+              title="Edit Role"
+              description="Update role details and permissions"
+            />
+          </Toolbar>
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <p className="text-muted-foreground">Loading role data...</p>
+            </div>
+          </div>
+        </Container>
+      </Fragment>
+    );
+  }
+
+  if (!role) {
+    return (
+      <Fragment>
+        <Container>
+          <Toolbar>
+            <ToolbarHeading
+              title="Edit Role"
+              description="Update role details and permissions"
+            />
+          </Toolbar>
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <p className="text-muted-foreground">Role not found</p>
+              <Button
+                variant="outline"
+                onClick={() => router.push('/admin/roles')}
+                className="mt-4"
+              >
+                Back to Roles
+              </Button>
+            </div>
+          </div>
+        </Container>
+      </Fragment>
+    );
+  }
 
   return (
     <Fragment>
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Add Role"
-            description="Create a new role with specific permissions"
+            title="Edit Role"
+            description="Update role details and permissions"
           />
           <div className="flex items-center">
             <Link
@@ -462,11 +663,12 @@ export default function CreateRolePage() {
                   type="button"
                   variant="outline"
                   onClick={() => router.push('/admin/roles')}
+                  disabled={submitting}
                 >
                   Cancel
                 </Button>
-                <Button type="submit" variant="primary">
-                  Add Role
+                <Button type="submit" variant="primary" disabled={submitting}>
+                  {submitting ? 'Updating...' : 'Update Role'}
                 </Button>
               </div>
             </form>
@@ -476,3 +678,4 @@ export default function CreateRolePage() {
     </Fragment>
   );
 }
+

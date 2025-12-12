@@ -11,4 +11,5 @@ export type { ApiResponse } from '../types';
 export * from './roles';
 export * from './permissions';
 export * from './users';
+export * from './ip-whitelist';
 

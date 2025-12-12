@@ -8,11 +8,11 @@ import {
 } from '@/layouts/demo1/components/toolbar';
 import { Container } from '@/components/common/container';
 import {
-  getRoles,
-  deleteRole,
-  Role,
-  RoleListResponse,
-} from '@/lib/services/admin/roles';
+  getPermissions,
+  deletePermission,
+  Permission,
+  PermissionListResponse,
+} from '@/lib/services/admin/permissions';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -54,72 +54,41 @@ import {
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-export default function AdminRolesPage() {
+export default function AdminPermissionsPage() {
   const router = useRouter();
-  const [roles, setRoles] = useState<Role[]>([]);
+  const [permissions, setPermissions] = useState<Permission[]>([]);
   const [loading, setLoading] = useState(true);
-  
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
+  const [permissionToDelete, setPermissionToDelete] = useState<Permission | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // Fetch roles function
-  const fetchRoles = async () => {
+  const fetchPermissions = async () => {
     setLoading(true);
     try {
-      const response = await getRoles();
-      console.log('🔍 Full API Response:', response);
-
-      // Handle response using centralized handler
-      handleApiResponse<RoleListResponse>(response, {
+      const response = await getPermissions();
+      handleApiResponse<PermissionListResponse>(response, {
         onSuccess: (data) => {
-          console.log('✅ onSuccess called with data:', data);
-          console.log('📊 Data structure check:', {
-            hasData: !!data,
-            hasSuccess: data?.success,
-            hasDataArray: !!data?.data,
-            dataType: Array.isArray(data?.data) ? 'array' : typeof data?.data,
-            dataLength: Array.isArray(data?.data) ? data.data.length : 'not array',
-          });
-          
           if (data && data.success && Array.isArray(data.data)) {
-            console.log('📋 Setting roles:', data.data);
-            setRoles(data.data);
-            console.log('✅ Roles state updated, count:', data.data.length);
-            toast.success(`Loaded ${data.data.length} role(s)`);
+            setPermissions(data.data);
           } else {
-            console.warn('⚠️ API returned success=false or invalid structure:', data);
-            toast.error('Failed to fetch roles - invalid response structure');
+            toast.error('Failed to fetch permissions - invalid response structure');
           }
         },
         onError: (errorMessage) => {
-          console.error('❌ onError called:', errorMessage);
-          toast.error(errorMessage || 'Failed to fetch roles');
-        },
-        onValidationError: (errors, messages) => {
-          console.error('❌ Validation errors:', errors);
-          toast.error('Validation error occurred');
-        },
-        onUnauthorized: () => {
-          console.error('❌ Unauthorized');
-          toast.error('Unauthorized. Please check your authentication.');
+          toast.error(errorMessage || 'Failed to fetch permissions');
         },
       });
     } catch (error) {
-      console.error('❌ Network/Request error:', error);
       toast.error('An unexpected error occurred');
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch roles on component mount
   useEffect(() => {
-    fetchRoles();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchPermissions();
   }, []);
 
-  // Table state
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -127,45 +96,45 @@ export default function AdminRolesPage() {
   });
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Filter data based on search query
   const filteredData = useMemo(() => {
-    if (!searchQuery) return roles;
+    if (!searchQuery) return permissions;
 
     const searchLower = searchQuery.toLowerCase();
-    return roles.filter(
-      (role) =>
-        role.name.toLowerCase().includes(searchLower) ||
-        role.type.toLowerCase().includes(searchLower),
+    return permissions.filter(
+      (permission) =>
+        permission.name.toLowerCase().includes(searchLower) ||
+        permission.module?.toLowerCase().includes(searchLower) ||
+        permission.subModule?.toLowerCase().includes(searchLower) ||
+        permission.type?.toLowerCase().includes(searchLower),
     );
-  }, [searchQuery, roles]);
+  }, [searchQuery, permissions]);
 
-  const handleDeleteRole = async () => {
-    if (!roleToDelete) return;
+  const handleDeletePermission = async () => {
+    if (!permissionToDelete) return;
 
     setDeleting(true);
     try {
-      const response = await deleteRole(roleToDelete.id);
+      const response = await deletePermission(permissionToDelete.id);
       handleApiResponse(response, {
         onSuccess: () => {
-          toast.success('Role deleted successfully!');
+          toast.success('Permission deleted successfully!');
           setDeleteDialogOpen(false);
-          setRoleToDelete(null);
-          fetchRoles();
+          setPermissionToDelete(null);
+          fetchPermissions();
         },
         onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to delete role');
+          toast.error(errorMessage || 'Failed to delete permission');
         },
       });
     } catch (error) {
       toast.error('An unexpected error occurred');
-      console.error('Delete role error:', error);
+      console.error('Delete permission error:', error);
     } finally {
       setDeleting(false);
     }
   };
 
-  // Define columns
-  const columns = useMemo<ColumnDef<Role>[]>(
+  const columns = useMemo<ColumnDef<Permission>[]>(
     () => [
       {
         accessorKey: 'name',
@@ -174,6 +143,24 @@ export default function AdminRolesPage() {
         ),
         cell: ({ row }) => {
           return <div className="font-medium">{row.original.name}</div>;
+        },
+      },
+      {
+        accessorKey: 'module',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Module" />
+        ),
+        cell: ({ row }) => {
+          return <div>{row.original.module || '-'}</div>;
+        },
+      },
+      {
+        accessorKey: 'subModule',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="SubModule" />
+        ),
+        cell: ({ row }) => {
+          return <div>{row.original.subModule || '-'}</div>;
         },
       },
       {
@@ -202,7 +189,7 @@ export default function AdminRolesPage() {
               variant="ghost"
               asChild
             >
-              <Link href={`/admin/roles/${row.original.id}/edit`}>
+              <Link href={`/admin/permissions/${row.original.id}/edit`}>
                 <Pencil className="size-4" />
               </Link>
             </Button>
@@ -211,7 +198,7 @@ export default function AdminRolesPage() {
               mode="icon"
               variant="ghost"
               onClick={() => {
-                setRoleToDelete(row.original);
+                setPermissionToDelete(row.original);
                 setDeleteDialogOpen(true);
               }}
             >
@@ -226,7 +213,6 @@ export default function AdminRolesPage() {
     [],
   );
 
-  // Initialize table
   const table = useReactTable({
     data: filteredData,
     columns,
@@ -249,8 +235,8 @@ export default function AdminRolesPage() {
         <Container>
           <Toolbar>
             <ToolbarHeading
-              title="Roles"
-              description="Manage and view all roles"
+              title="Permissions"
+              description="Manage and view all permissions"
             />
           </Toolbar>
         </Container>
@@ -266,12 +252,12 @@ export default function AdminRolesPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Roles"
-            description="Manage and view all roles"
+            title="Permissions"
+            description="Manage and view all permissions"
           />
           <ToolbarActions>
-            <Button variant="primary" onClick={() => router.push('/admin/roles/create')}>
-              Create Role
+            <Button variant="primary" onClick={() => router.push('/admin/permissions/create')}>
+              Create Permission
             </Button>
           </ToolbarActions>
         </Toolbar>
@@ -292,7 +278,7 @@ export default function AdminRolesPage() {
                   <div className="relative">
                     <Search className="size-4 text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2" />
                     <Input
-                      placeholder="Search roles..."
+                      placeholder="Search permissions..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="ps-9 w-40"
@@ -327,15 +313,15 @@ export default function AdminRolesPage() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Role</AlertDialogTitle>
+            <AlertDialogTitle>Delete Permission</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete role &quot;{roleToDelete?.name}&quot;? This action cannot be undone.
+              Are you sure you want to delete permission &quot;{permissionToDelete?.name}&quot;? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDeleteRole}
+              onClick={handleDeletePermission}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
