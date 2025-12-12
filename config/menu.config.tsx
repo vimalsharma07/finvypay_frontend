@@ -82,6 +82,13 @@ export const MENU_SIDEBAR: MenuConfig = [
     ],
   },
   {
+    title: 'Risk Management',
+    icon: Users,
+    children: [
+      { title: 'IP Whitelist', path: '/admin/ip-whitelist' },
+    ],
+  },
+  {
     title: 'Public Profile',
     icon: UserCircle,
     children: [

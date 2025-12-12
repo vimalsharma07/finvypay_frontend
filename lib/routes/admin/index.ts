@@ -9,6 +9,7 @@ import { adminReportRoutes } from './report-routes';
 import { adminTransactionRoutes } from './transaction-routes';
 import { adminRolesRoutes } from './roles-routes';
 import { adminPermissionsRoutes } from './permissions-routes';
+import { adminIpWhitelistRoutes } from './ip-whitelist-routes';
 
 export const adminModuleRoutes = {
   users: adminUserRoutes,
@@ -17,4 +18,5 @@ export const adminModuleRoutes = {
   transactions: adminTransactionRoutes,
   roles: adminRolesRoutes,
   permissions: adminPermissionsRoutes,
+  ipWhitelist: adminIpWhitelistRoutes,
 } as const;
