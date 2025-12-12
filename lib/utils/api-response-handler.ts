@@ -5,7 +5,7 @@
  * Follows industry best practices for error handling
  */
 
-import { ApiResponse } from '../services/admin/users';
+import { ApiResponse } from '../services/types';
 
 export interface ResponseHandlerOptions {
   onSuccess?: (data: any) => void;

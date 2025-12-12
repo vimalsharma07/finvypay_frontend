@@ -2,7 +2,7 @@
 // Reusable hook for OTP-based signin with email verification
 
 import { useState, useCallback } from 'react';
-import { sendOtp, verifyOtp as verifyOtpApi } from '@/lib/services/auth';
+import { sendOtp as sendOtpApi, verifyOtp as verifyOtpApi } from '@/lib/services/auth';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 
 export interface UseOtpSigninOptions {
@@ -83,7 +83,7 @@ export function useOtpSignin({
     setSuccess(null);
 
     try {
-      const response = await sendOtp({ email: email.trim() });
+      const response = await sendOtpApi({ email: email.trim() });
 
       handleApiResponse(response, {
         onSuccess: (data) => {

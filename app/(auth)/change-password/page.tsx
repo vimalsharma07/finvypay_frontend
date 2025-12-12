@@ -7,6 +7,7 @@ import { AlertCircle, Check, Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { changePassword } from '@/lib/services/auth';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import { apiFetch } from '@/lib/api';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -54,6 +55,7 @@ export default function Page() {
 
         await apiFetch('/api/auth/reset-password-verify', 'POST', {
           body: { token },
+          auth: false,
         });
 
         setIsValidToken(true);
