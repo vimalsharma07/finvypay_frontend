@@ -85,7 +85,7 @@ export async function getUsers(
   params?: UserListParams
 ): Promise<ApiResponse<UserListResponse>> {
   try {
-    const data = await http.get(routes.admin.users.list, {
+    const data = await http.get(adminRoutes.users.list, {
       query: params as Record<string, string | number | boolean | null | undefined>,
     }) as UserListResponse;
     return {
@@ -112,7 +112,7 @@ export async function getUsers(
  */
 export async function getUserById(id: string): Promise<ApiResponse<User>> {
   try {
-    const response = await http.get(routes.admin.users.getById(id)) as
+    const response = await http.get(adminRoutes.users.getById(id)) as
       | {
           success: boolean;
           data: User;
@@ -164,7 +164,7 @@ export async function createUser(
   payload: CreateUserPayload
 ): Promise<ApiResponse<User>> {
   try {
-    const data = await http.post(routes.admin.users.create, payload) as User;
+    const data = await http.post(adminRoutes.users.create, payload) as User;
     return {
       status: 200,
       data,
@@ -194,7 +194,7 @@ export async function updateUser(
   payload: UpdateUserPayload
 ): Promise<ApiResponse<User>> {
   try {
-    const data = await http.patch(routes.admin.users.update(id), payload) as User;
+    const data = await http.patch(adminRoutes.users.update(id), payload) as User;
     return {
       status: 200,
       data,
@@ -222,7 +222,7 @@ export async function updateUser(
 export async function deleteUser(id: string): Promise<ApiResponse<void>> {
   try {
     // DELETE requests return 204 No Content with no body
-    const response = await http.delete(routes.admin.users.delete(id));
+    const response = await http.delete(adminRoutes.users.delete(id));
     
     // Check if response indicates 204 No Content
     if (response && typeof response === 'object' && (response as any).__noContent) {
@@ -259,7 +259,7 @@ export async function searchUsers(
   params?: Omit<UserListParams, 'search'>
 ): Promise<ApiResponse<UserListResponse>> {
   try {
-    const data = await http.get(routes.admin.users.list, {
+    const data = await http.get(adminRoutes.users.list, {
       query: { ...params, search: query } as Record<string, string | number | boolean | null | undefined>,
     }) as UserListResponse;
     return {
@@ -288,7 +288,7 @@ export async function bulkDeleteUsers(
   ids: string[]
 ): Promise<ApiResponse<{ deleted: number }>> {
   try {
-    const data = await http.post(routes.admin.users.bulkDelete, { ids }) as { deleted: number };
+    const data = await http.post(adminRoutes.users.bulkDelete, { ids }) as { deleted: number };
     return {
       status: 200,
       data,

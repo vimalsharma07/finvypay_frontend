@@ -17,7 +17,8 @@ export function useAuthLogoutListener() {
 
       if (reason === 'refresh_failed' || reason === 'token_reuse' || reason === 'manual_logout') {
         toast.error(message === 'Session invalid — login again' ? message : 'Session expired. Please login again.');
-        router.push('/signin');
+        // Use replace instead of push to avoid keeping current URL in history
+        router.replace('/signin');
       }
     };
 

@@ -6,7 +6,7 @@
  */
 
 import { http, ApiError } from '../../api';
-import { routes } from '../../routes/routes';
+import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
 
 // Role types matching the actual API response structure
@@ -36,8 +36,8 @@ export interface CreateRolePayload {
  */
 export async function getRoles(): Promise<ApiResponse<RoleListResponse>> {
   try {
-    console.log('📡 Calling API:', routes.admin.roles.list);
-    const data = await http.get(routes.admin.roles.list) as RoleListResponse;
+    console.log('📡 Calling API:', adminRoutes.roles.list);
+    const data = await http.get(adminRoutes.roles.list) as RoleListResponse;
     console.log('📦 Raw API response:', data);
     return {
       status: 200,
@@ -64,7 +64,7 @@ export async function getRoles(): Promise<ApiResponse<RoleListResponse>> {
  */
 export async function getRoleById(id: string | number): Promise<ApiResponse<Role>> {
   try {
-    const response = await http.get(routes.admin.roles.getById(id)) as
+    const response = await http.get(adminRoutes.roles.getById(id)) as
       | {
           success: boolean;
           data: Role;
@@ -116,7 +116,7 @@ export async function createRole(
   payload: CreateRolePayload
 ): Promise<ApiResponse<Role>> {
   try {
-    const data = await http.post(routes.admin.roles.create, payload) as Role;
+    const data = await http.post(adminRoutes.roles.create, payload) as Role;
     return {
       status: 200,
       data,
@@ -144,7 +144,7 @@ export async function createRole(
 export async function deleteRole(id: string | number): Promise<ApiResponse<void>> {
   try {
     // DELETE requests return 204 No Content with no body
-    const response = await http.delete(routes.admin.roles.delete(id));
+    const response = await http.delete(adminRoutes.roles.delete(id));
     
     // Check if response indicates 204 No Content
     if (response && typeof response === 'object' && (response as any).__noContent) {

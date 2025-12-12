@@ -12,7 +12,7 @@ import {
   deleteUser,
   User,
   UserListResponse,
-} from '@/lib/services/users-api';
+} from '@/lib/services/admin/users';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
   TableComp,

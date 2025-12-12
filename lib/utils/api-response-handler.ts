@@ -81,6 +81,17 @@ export function handleApiResponse<T = any>(
         console.error('❌ Unauthorized (401):', errorMsg);
         console.log('Please check your authentication token');
       }
+      
+      // If error message indicates session expiry, trigger logout event
+      if (errorMsg.toLowerCase().includes('session expired') || 
+          errorMsg.toLowerCase().includes('login again')) {
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('auth:logout', { 
+            detail: { reason: 'refresh_failed', message: errorMsg } 
+          }));
+        }
+      }
+      
       onUnauthorized?.();
       onError?.(errorMsg, 401);
     },
