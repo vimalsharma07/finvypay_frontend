@@ -65,24 +65,26 @@ export const ADMIN_MENU: MenuConfig = [
     title: 'User Management',
     icon: Users,
     children: [
-      { title: 'Admin', path: '/admin/users' },
-      { title: 'Merchant', path: '/admin/merchant' },
-      { title: 'Affiliate', path: '/admin/affiliate' },
+      { title: 'Admin', path: '/admin/user-management/admin' },
+      { title: 'Merchant', path: '/admin/user-management/merchant' },
+      { title: 'Affiliate', path: '/admin/user-management/affiliate' },
     ],
   },
   {
     title: 'Roles & Permissions',
     icon: ShieldUser,
     children: [
-      { title: 'Roles', path: '/admin/roles' },
-      { title: 'Permissions', path: '/admin/permissions' },
+      { title: 'Roles', path: '/admin/roles-permissions/roles' },
+      { title: 'Permissions', path: '/admin/roles-permissions/permissions' },
     ],
   },
   {
-    title: 'Risk Management',
+    title: 'Risk & Compliance',
     icon: Shield,
     children: [
-      { title: 'IP Whitelist', path: '/admin/ip-whitelist' },
+      { title: 'Manage Risk', path: '/admin/risk-compliance/manage-risk' },
+      { title: 'IP Allowlist', path: '/admin/risk-compliance/ip-allowlist' },
+      { title: 'Trusted Cards', path: '/admin/risk-compliance/trusted-cards' },
     ],
   },
   {
