@@ -7,26 +7,21 @@ import {
   ToolbarActions,
 } from '@/layouts/demo1/components/toolbar';
 import { Container } from '@/components/common/container';
-import {
-  getUsers,
-  deleteUser,
-  User,
-  UserListResponse,
-} from '@/lib/services/admin/users';
+import { getUsers, UserListResponse, User, deleteUser } from '@/lib/services/admin/users';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
   TableComp,
   TableHeader,
   TableAction,
-} from '../../components/table-comp';
+} from '../../../components/table-comp';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AdvancedFilter, FilterField } from '../../components/advanced-filter';
-import { ConfirmComp } from '../../components/confirm-comp';
+import { AdvancedFilter, FilterField } from '../../../components/advanced-filter';
+import { ConfirmComp } from '../../../components/confirm-comp';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-export default function AffiliateUsersPage() {
+export default function AdminUsersPage() {
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,7 +57,7 @@ export default function AffiliateUsersPage() {
         limit: pageLimit,
         sortBy: sortField,
         sortOrder: sortDir,
-        role: 'affiliate', // Default to affiliate role for affiliate users page
+        role: 'admin', // Default to admin role for admin users page
       };
 
       // Add filter parameters if provided
@@ -166,7 +161,7 @@ export default function AffiliateUsersPage() {
 
   // Handle create user
   const handleCreateUser = () => {
-    router.push('/admin/affiliate/create');
+    router.push('/admin/users/create');
   };
 
   // Define table headers
@@ -244,15 +239,15 @@ export default function AffiliateUsersPage() {
   const actions: TableAction<User>[] = [
     {
       label: 'Edit',
-      route: (row) => `/admin/affiliate/${row.id}/edit`,
+      route: (row: User) => `/admin/users/${row.id}/edit`,
     },
     {
       label: 'View',
-      route: (row) => `/admin/affiliate/${row.id}`,
+      route: (row: User) => `/admin/users/${row.id}`,
     },
     {
       label: 'Delete',
-      onClick: (row) => {
+      onClick: (row: User) => {
         setUserToDelete(row);
         setDeleteDialogOpen(true);
       },
@@ -267,8 +262,8 @@ export default function AffiliateUsersPage() {
         <Container>
           <Toolbar>
             <ToolbarHeading
-              title="Affiliates"
-              description="Manage and view all affiliate users"
+              title="Admins"
+              description="Manage and view all admin users "
             />
           </Toolbar>
         </Container>
@@ -284,8 +279,8 @@ export default function AffiliateUsersPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Affiliates"
-            description="Manage and view all affiliate users"
+            title="Admins"
+            description="Manage and view all admin users "
           />
           <ToolbarActions>
             <AdvancedFilter
@@ -308,7 +303,7 @@ export default function AffiliateUsersPage() {
           enableCheckbox={false}
           searchPlaceholder="Search users..."
           searchKeys={['name', 'email', 'role']}
-          getRowId={(row) => row.id}
+          getRowId={(row: User) => row.id}
           pagination={{
             pageSize: limit,
             pageIndex: page - 1, // Convert to 0-based for table

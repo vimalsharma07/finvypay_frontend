@@ -47,11 +47,12 @@ export const USER_MENU: MenuConfig = [
     ],
   },
   {
-    title: 'Risk Management',
+    title: 'Risk & Compliance',
     icon: FileBarChart,
     children: [
-      { title: 'Fraud Alerts', path: '/user/risk-management/fraud' },
-      { title: 'Blocked IPs', path: '/user/risk-management/blocked-ips' },
+      { title: 'Manage Risk', path: '/user/risk-compliance/manage-risk' },
+      { title: 'IP Allowlist', path: '/user/risk-compliance/ip-allowlist' },
+      { title: 'Trusted Cards', path: '/user/risk-compliance/trusted-cards' },
     ],
   },
   {

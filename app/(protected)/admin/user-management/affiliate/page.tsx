@@ -18,15 +18,15 @@ import {
   TableComp,
   TableHeader,
   TableAction,
-} from '../../components/table-comp';
+} from '../../../components/table-comp';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AdvancedFilter, FilterField } from '../../components/advanced-filter';
-import { ConfirmComp } from '../../components/confirm-comp';
+import { AdvancedFilter, FilterField } from '../../../components/advanced-filter';
+import { ConfirmComp } from '../../../components/confirm-comp';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-export default function MerchantUsersPage() {
+export default function AffiliateUsersPage() {
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,7 +62,7 @@ export default function MerchantUsersPage() {
         limit: pageLimit,
         sortBy: sortField,
         sortOrder: sortDir,
-        role: 'user', // Default to user role for merchant users page
+        role: 'affiliate', // Default to affiliate role for affiliate users page
       };
 
       // Add filter parameters if provided
@@ -166,7 +166,7 @@ export default function MerchantUsersPage() {
 
   // Handle create user
   const handleCreateUser = () => {
-    router.push('/admin/merchant/create');
+    router.push('/admin/affiliate/create');
   };
 
   // Define table headers
@@ -244,15 +244,15 @@ export default function MerchantUsersPage() {
   const actions: TableAction<User>[] = [
     {
       label: 'Edit',
-      route: (row) => `/admin/merchant/${row.id}/edit`,
+      route: (row: User) => `/admin/affiliate/${row.id}/edit`,
     },
     {
       label: 'View',
-      route: (row) => `/admin/merchant/${row.id}`,
+      route: (row: User) => `/admin/affiliate/${row.id}`,
     },
     {
       label: 'Delete',
-      onClick: (row) => {
+      onClick: (row: User) => {
         setUserToDelete(row);
         setDeleteDialogOpen(true);
       },
@@ -267,8 +267,8 @@ export default function MerchantUsersPage() {
         <Container>
           <Toolbar>
             <ToolbarHeading
-              title="Merchants"
-              description="Manage and view all merchant users"
+              title="Affiliates"
+              description="Manage and view all affiliate users"
             />
           </Toolbar>
         </Container>
@@ -284,8 +284,8 @@ export default function MerchantUsersPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Merchants"
-            description="Manage and view all merchant users"
+            title="Affiliates"
+            description="Manage and view all affiliate users"
           />
           <ToolbarActions>
             <AdvancedFilter
@@ -308,7 +308,7 @@ export default function MerchantUsersPage() {
           enableCheckbox={false}
           searchPlaceholder="Search users..."
           searchKeys={['name', 'email', 'role']}
-          getRowId={(row) => row.id}
+          getRowId={(row: User) => row.id}
           pagination={{
             pageSize: limit,
             pageIndex: page - 1, // Convert to 0-based for table
