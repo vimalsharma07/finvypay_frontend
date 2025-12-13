@@ -41,6 +41,17 @@ export interface CreatePermissionPayload {
   type: string;
 }
 
+export interface UpdatePermissionPayload {
+  name: string;
+  identifier: string;
+  route: string;
+  method: string;
+  frontendRoute: string;
+  module: string;
+  subModule: string;
+  type: string;
+}
+
 /**
  * Get all permissions
  */
@@ -74,6 +85,86 @@ export async function createPermission(
 ): Promise<ApiResponse<Permission>> {
   try {
     const data = await http.post(adminRoutes.permissions.create, payload) as Permission;
+    return {
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Get permission by ID
+ */
+export async function getPermissionById(id: string | number): Promise<ApiResponse<Permission>> {
+  try {
+    const response = await http.get(adminRoutes.permissions.getById(id)) as
+      | {
+          success: boolean;
+          data: Permission;
+        }
+      | Permission;
+    
+    // Handle API response structure: { success: true, data: {...} }
+    if (response && typeof response === 'object' && 'success' in response && 'data' in response) {
+      const apiResponse = response as { success: boolean; data: Permission };
+      if (apiResponse.success && apiResponse.data) {
+        return {
+          status: 200,
+          data: apiResponse.data,
+        };
+      }
+    }
+    
+    // Fallback: if response is directly the permission data
+    if (response && typeof response === 'object' && 'id' in response && !('success' in response)) {
+      return {
+        status: 200,
+        data: response as unknown as Permission,
+      };
+    }
+    
+    return {
+      status: 200,
+      data: response as unknown as Permission,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Update existing permission
+ */
+export async function updatePermission(
+  id: string | number,
+  payload: UpdatePermissionPayload
+): Promise<ApiResponse<Permission>> {
+  try {
+    const data = await http.put(adminRoutes.permissions.update(id), payload) as Permission;
     return {
       status: 200,
       data,
