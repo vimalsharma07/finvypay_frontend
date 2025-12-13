@@ -85,6 +85,11 @@ export interface RefreshTokenPayload {
   refreshToken: string;
 }
 
+// Logout payload
+export interface LogoutPayload {
+  sessionId: string;
+}
+
 // Auth response (common structure)
 export interface AuthResponse {
   success: boolean;
@@ -625,6 +630,57 @@ export async function verifyRegistrationOtp(
       data: response,
     };
   } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Logout user
+ * 
+ * @param sessionId - Session ID to logout
+ * @returns Promise with logout response
+ */
+export async function logout(sessionId?: string): Promise<ApiResponse<{ success: boolean; message?: string }>> {
+  try {
+    // Get sessionId from storage if not provided
+    const sessionIdToUse = sessionId || (typeof window !== 'undefined' ? 
+      (await import('../../auth-storage')).getSessionId() : null);
+
+    if (!sessionIdToUse) {
+      // If no sessionId, still clear local state
+      return {
+        status: 200,
+        data: { success: true, message: 'Logged out locally' },
+      };
+    }
+
+    const response = await http.delete(
+      authRoutes.logout,
+      { sessionId: sessionIdToUse },
+      {
+        auth: true,
+        json: true,
+      }
+    ) as { success: boolean; message?: string };
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    // Even if API call fails, we should still clear local state
     if (error instanceof ApiError) {
       return {
         status: error.status,

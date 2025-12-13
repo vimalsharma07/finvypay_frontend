@@ -326,7 +326,7 @@ export async function apiFetch(
         errorString: err?.toString?.(),
         fullError: err,
         apiBaseUrl: API_BASE_URL,
-        origin: window.location.origin,
+        origin: typeof window !== 'undefined' ? window.location.origin : 'server',
         isInternal: isInternalApi(endpoint),
       });
     }
@@ -476,7 +476,7 @@ export const http = {
   patch: (endpoint: string, body?: any, options?: RequestOptions) =>
     apiFetch(endpoint, "PATCH", { ...options, body }),
 
-  delete: (endpoint: string, options?: RequestOptions) =>
-    apiFetch(endpoint, "DELETE", options),
+  delete: (endpoint: string, body?: any, options?: RequestOptions) =>
+    apiFetch(endpoint, "DELETE", { ...options, body }),
 };
 
