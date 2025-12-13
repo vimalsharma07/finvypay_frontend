@@ -4,6 +4,8 @@ const nextConfig = {
   // This file will be overwritten during deployment with the appropriate basePath
   images: {},
   output: 'standalone',
+  swcMinify: true,
+  compress: true
 };
 
 export default nextConfig;
