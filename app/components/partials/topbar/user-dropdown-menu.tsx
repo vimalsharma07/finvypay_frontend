@@ -14,7 +14,8 @@ import {
   UserCircle,
   Users,
 } from 'lucide-react';
-import { useMockSession, mockSignOut } from '@/hooks/use-mock-session';
+import { useMockSession } from '@/hooks/use-mock-session';
+import { performLogout } from '@/lib/utils/logout';
 import { useTheme } from 'next-themes';
 import { useLanguage } from '@/providers/i18n-provider';
 import { Badge } from '@/components/ui/badge';
@@ -243,7 +244,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
             variant="outline"
             size="sm"
             className="w-full"
-            onClick={() => mockSignOut()}
+            onClick={() => performLogout()}
           >
             Logout
           </Button>

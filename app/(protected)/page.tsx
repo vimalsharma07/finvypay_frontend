@@ -1,52 +1,64 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-import { useSettings } from '@/providers/settings-provider';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { getRedirectPathByRole, getUserRole } from '@/lib/utils/menu-utils';
+import { isAuthenticated } from '@/lib/auth-storage';
 
-// Dynamically import to avoid SSR issues
-const Demo1LightSidebarPage = dynamic(
-  () => import('./components/demo1').then(mod => ({ default: mod.Demo1LightSidebarPage })),
-  { ssr: false }
-);
-const Demo2Page = dynamic(
-  () => import('./components/demo2').then(mod => ({ default: mod.Demo2Page })),
-  { ssr: false }
-);
-const Demo3Page = dynamic(
-  () => import('./components/demo3').then(mod => ({ default: mod.Demo3Page })),
-  { ssr: false }
-);
-const Demo4Page = dynamic(
-  () => import('./components/demo4').then(mod => ({ default: mod.Demo4Page })),
-  { ssr: false }
-);
-const Demo5Page = dynamic(
-  () => import('./components/demo5').then(mod => ({ default: mod.Demo5Page })),
-  { ssr: false }
-);
+/**
+ * Protected Root Page
+ * 
+ * Redirects authenticated users to their role-based dashboard
+ * If not authenticated, redirects to signin
+ */
+export default function ProtectedPage() {
+  const router = useRouter();
+  const [isRedirecting, setIsRedirecting] = useState(true);
 
-export default function Page() {
-  const { settings } = useSettings();
+  useEffect(() => {
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      router.replace('/signin');
+      return;
+    }
 
-  if (settings?.layout === 'demo1') {
-    return <Demo1LightSidebarPage />;
-  } else if (settings?.layout === 'demo2') {
-    return <Demo2Page />;
-  } else if (settings?.layout === 'demo3') {
-    return <Demo3Page />;
-  } else if (settings?.layout === 'demo4') {
-    return <Demo4Page />;
-  } else if (settings?.layout === 'demo5') {
-    return <Demo5Page />;
-  } else if (settings?.layout === 'demo6') {
-    return <Demo4Page />;
-  } else if (settings?.layout === 'demo7') {
-    return <Demo2Page />;
-  } else if (settings?.layout === 'demo8') {
-    return <Demo4Page />;
-  } else if (settings?.layout === 'demo9') {
-    return <Demo2Page />;
-  } else if (settings?.layout === 'demo10') {
-    return <Demo3Page />;
+    // Function to attempt redirect with retry logic
+    const attemptRedirect = (retries = 3) => {
+      const role = getUserRole();
+      
+      if (role) {
+        // Role found, redirect immediately
+        const redirectPath = getRedirectPathByRole(role);
+        router.replace(redirectPath);
+        setIsRedirecting(false);
+      } else if (retries > 0) {
+        // Role not found yet, retry after a short delay
+        setTimeout(() => {
+          attemptRedirect(retries - 1);
+        }, 200);
+      } else {
+        // No role found after retries, redirect to home
+        console.warn('User role not found, redirecting to home');
+        router.replace('/');
+        setIsRedirecting(false);
+      }
+    };
+
+    // Start redirect attempt
+    attemptRedirect();
+  }, [router]);
+
+  // Show loading state while redirecting
+  if (isRedirecting) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
+          <p className="text-sm text-muted-foreground">Redirecting...</p>
+        </div>
+      </div>
+    );
   }
+
+  return null;
 }

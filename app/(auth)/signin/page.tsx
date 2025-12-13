@@ -28,6 +28,7 @@ import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { useGoogleOAuth } from '@/hooks/use-google-oauth';
 import { ForgotPasswordDialog } from './components/forgot-password-dialog';
 import { useOtpSignin } from '@/hooks/use-otp-signin';
+import { handleLoginRedirect } from '@/lib/utils/menu-utils';
 
 // OTP verification schema
 const otpSchema = z.object({
@@ -56,9 +57,8 @@ export default function Page() {
     isProcessing: isGoogleProcessing,
     error: googleError,
   } = useGoogleOAuth({
-    onSuccess: () => {
-      // Redirect to home page on successful Google login
-      router.push('/');
+    onSuccess: (data) => {
+      handleLoginRedirect(data, router);
     },
     onError: (errorMessage) => {
       setError(errorMessage);
@@ -77,9 +77,8 @@ export default function Page() {
     otpSent,
     resetState: resetOtpState,
   } = useOtpSignin({
-    onSuccess: () => {
-      // Redirect to home page on successful OTP login
-      router.push('/');
+    onSuccess: (data) => {
+      handleLoginRedirect(data, router);
     },
     onError: (errorMessage) => {
       setError(errorMessage);
@@ -198,9 +197,8 @@ export default function Page() {
       });
 
       handleApiResponse(response, {
-        onSuccess: () => {
-          // Redirect to home page on success
-          router.push('/');
+        onSuccess: (data) => {
+          handleLoginRedirect(data, router);
         },
         onError: (errorMessage) => {
           setError(errorMessage || 'Login failed. Please check your credentials and try again.');
@@ -244,10 +242,10 @@ export default function Page() {
           >
         <div className="space-y-1.5 pb-3">
           <h1 className="text-2xl font-semibold tracking-tight text-center">
-            Merchant Login
+            Account Login
           </h1>
           <p className="text-sm text-muted-foreground text-center">
-            Sign in to your merchant account
+            Sign in to your  account
           </p>
         </div>
 
@@ -373,7 +371,7 @@ export default function Page() {
         </div>
 
         <p className="text-sm text-muted-foreground text-center">
-          Don&apos;t have a merchant account?{' '}
+          Don&apos;t have a  account?{' '}
           <Link
             href="/signup"
             className="text-sm font-semibold text-foreground hover:text-primary"
@@ -394,10 +392,10 @@ export default function Page() {
         >
           <div className="space-y-1.5 pb-3">
             <h1 className="text-2xl font-semibold tracking-tight text-center">
-              Merchant Login
+              Account Login
             </h1>
             <p className="text-sm text-muted-foreground text-center">
-              Sign in to your merchant account
+              Sign in to your  account
             </p>
           </div>
 
@@ -474,7 +472,7 @@ export default function Page() {
           </div>
 
           <p className="text-sm text-muted-foreground text-center">
-            Don&apos;t have a merchant account?{' '}
+            Don&apos;t have a  account?{' '}
             <Link
               href="/signup"
               className="text-sm font-semibold text-foreground hover:text-primary"

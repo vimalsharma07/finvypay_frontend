@@ -3,7 +3,7 @@
 import { JSX, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { MENU_SIDEBAR } from '@/config/menu.config';
+import { useRoleBasedMenu } from '@/hooks/use-role-based-menu';
 import { MenuConfig, MenuItem } from '@/config/types';
 import { cn } from '@/lib/utils';
 import {
@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 
 export function SidebarMenu() {
   const pathname = usePathname();
+  const menu = useRoleBasedMenu();
 
   // Memoize matchPath to prevent unnecessary re-renders
   const matchPath = useCallback(
@@ -59,9 +60,9 @@ export function SidebarMenu() {
     if (item.children) {
       return (
         <AccordionMenuSub key={index} value={item.path || `root-${index}`}>
-          <AccordionMenuSubTrigger className="text-sm font-medium">
-            {item.icon && <item.icon data-slot="accordion-menu-icon" />}
-            <span data-slot="accordion-menu-title">{item.title}</span>
+          <AccordionMenuSubTrigger className="text-sm font-medium flex items-center gap-2">
+            {item.icon && <item.icon data-slot="accordion-menu-icon" className="shrink-0" />}
+            <span data-slot="accordion-menu-title" className="flex-1 text-left">{item.title}</span>
           </AccordionMenuSubTrigger>
           <AccordionMenuSubContent
             type="single"
@@ -84,10 +85,10 @@ export function SidebarMenu() {
         >
           <Link
             href={item.path || '#'}
-            className="flex items-center justify-between grow gap-2"
+            className="flex items-center gap-2"
           >
-            {item.icon && <item.icon data-slot="accordion-menu-icon" />}
-            <span data-slot="accordion-menu-title">{item.title}</span>
+            {item.icon && <item.icon data-slot="accordion-menu-icon" className="shrink-0" />}
+            <span data-slot="accordion-menu-title" className="flex-1 text-left">{item.title}</span>
           </Link>
         </AccordionMenuItem>
       );
@@ -219,7 +220,7 @@ export function SidebarMenu() {
         collapsible
         classNames={classNames}
       >
-        {buildMenu(MENU_SIDEBAR)}
+        {buildMenu(menu)}
       </AccordionMenu>
     </div>
   );
