@@ -358,10 +358,10 @@ export default function Page() {
         >
           <div className="space-y-1.5 pb-3">
             <h1 className="text-2xl font-semibold tracking-tight text-center">
-              Merchant Sign Up
+              Account Sign Up
             </h1>
             <p className="text-sm text-muted-foreground text-center">
-              Create your merchant account
+              Create your  account
             </p>
           </div>
 
@@ -532,7 +532,7 @@ export default function Page() {
           </div>
 
           <p className="text-sm text-muted-foreground text-center">
-            Already have a merchant account?{' '}
+            Already have a  account?{' '}
             <Link
               href="/signin"
               className="text-sm font-semibold text-foreground hover:text-primary"
