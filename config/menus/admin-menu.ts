@@ -88,6 +88,14 @@ export const ADMIN_MENU: MenuConfig = [
     ],
   },
   {
+    title: 'Gateways & Channels',
+    icon: Shield,
+    children: [
+      { title: 'Gateways', path: '/admin/gateways/gateways' },
+      { title: 'Payment Channels', path: '/admin/gateways/payment-channels' },
+    ],
+  },
+  {
     title: 'Master',
     icon: FileText,
     children: [
