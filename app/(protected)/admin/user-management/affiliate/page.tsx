@@ -244,11 +244,11 @@ export default function AffiliateUsersPage() {
   const actions: TableAction<User>[] = [
     {
       label: 'Edit',
-      route: (row: User) => `/admin/affiliate/${row.id}/edit`,
+      route: (row: User) => `/admin/user-management/affiliate/${row.id}/edit`,
     },
     {
       label: 'View',
-      route: (row: User) => `/admin/affiliate/${row.id}`,
+      route: (row: User) => `/admin/user-management/affiliate/${row.id}`,
     },
     {
       label: 'Delete',

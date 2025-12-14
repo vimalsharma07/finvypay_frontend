@@ -239,11 +239,11 @@ export default function AdminUsersPage() {
   const actions: TableAction<User>[] = [
     {
       label: 'Edit',
-      route: (row: User) => `/admin/users/${row.id}/edit`,
+      route: (row: User) => `/admin/user-management/admin/${row.id}/edit`,
     },
     {
       label: 'View',
-      route: (row: User) => `/admin/users/${row.id}`,
+      route: (row: User) => `/admin/user-management/admin/${row.id}`,
     },
     {
       label: 'Delete',

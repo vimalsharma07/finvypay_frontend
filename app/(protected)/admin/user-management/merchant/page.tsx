@@ -244,11 +244,11 @@ export default function MerchantUsersPage() {
   const actions: TableAction<User>[] = [
     {
       label: 'Edit',
-      route: (row: User) => `/admin/merchant/${row.id}/edit`,
+      route: (row: User) => `/admin/user-management/merchant/${row.id}/edit`,
     },
     {
       label: 'View',
-      route: (row: User) => `/admin/merchant/${row.id}`,
+      route: (row: User) => `/admin/user-management/merchant/${row.id}`,
     },
     {
       label: 'Delete',
