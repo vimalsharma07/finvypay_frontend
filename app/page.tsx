@@ -11,7 +11,7 @@ import { ArrowRight, CreditCard, Shield, Zap, Globe } from 'lucide-react';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="min-h-screen w-full bg-linear-to-br from-background via-background to-muted/20">
       {/* Header */}
       <header className="border-b w-full">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between max-w-7xl">
