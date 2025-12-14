@@ -69,7 +69,7 @@ export default function CreateAffiliateUserPage() {
       handleApiResponse<User>(response, {
         onSuccess: (userData) => {
           toast.success('User created successfully!');
-          router.push('/admin/affiliate');
+          router.push('/admin/user-management/affiliate');
         },
         onValidationError: (errors, messages) => {
           // Set form errors from API validation
@@ -119,7 +119,7 @@ export default function CreateAffiliateUserPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-4">
-              <Link href="/admin/affiliate">
+              <Link href="/admin/user-management/affiliate">
                 <Button variant="ghost" size="icon">
                   <ArrowLeft className="h-4 w-4" />
                 </Button>

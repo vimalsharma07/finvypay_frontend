@@ -69,7 +69,7 @@ export default function CreateUserPage() {
       handleApiResponse<User>(response, {
         onSuccess: (userData) => {
           toast.success('User created successfully!');
-          router.push('/admin/users');
+          router.push('/admin/user-management/admin');
         },
         onValidationError: (errors, messages) => {
           // Set form errors from API validation
@@ -119,7 +119,7 @@ export default function CreateUserPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-4">
-              <Link href="/admin/users">
+              <Link href="/admin/user-management/admin">
                 <Button variant="ghost" size="icon">
                   <ArrowLeft className="h-4 w-4" />
                 </Button>

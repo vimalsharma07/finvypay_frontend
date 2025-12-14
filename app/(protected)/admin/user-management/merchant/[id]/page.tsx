@@ -41,17 +41,17 @@ export default function ViewMerchantUserPage() {
           },
           onError: (errorMessage) => {
             toast.error(errorMessage || 'Failed to load user');
-            router.push('/admin/merchant');
+            router.push('/admin/user-management/merchant');
           },
           onUnauthorized: () => {
             toast.error('Unauthorized. Please check your authentication.');
-            router.push('/admin/merchant');
+            router.push('/admin/user-management/merchant');
           },
         });
       } catch (error) {
         toast.error('An unexpected error occurred');
         console.error('Fetch user error:', error);
-        router.push('/admin/merchant');
+        router.push('/admin/user-management/merchant');
       } finally {
         setLoading(false);
       }
@@ -118,13 +118,13 @@ export default function ViewMerchantUserPage() {
             description="View merchant user information"
           />
           <ToolbarActions>
-            <Link href="/admin/merchant">
+            <Link href="/admin/user-management/merchant">
               <Button variant="outline">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </Button>
             </Link>
-            <Link href={`/admin/merchant/${userId}/edit`}>
+            <Link href={`/admin/user-management/merchant/${userId}/edit`}>
               <Button>
                 <Edit className="h-4 w-4 mr-2" />
                 Edit User

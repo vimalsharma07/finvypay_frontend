@@ -88,6 +88,14 @@ export const ADMIN_MENU: MenuConfig = [
     ],
   },
   {
+    title: 'Master',
+    icon: FileText,
+    children: [
+      { title: 'Countries', path: '/admin/master/countries' },
+      { title: 'Currency', path: '/admin/master/currency' },
+    ],
+  },
+  {
     title: 'Public Profile',
     icon: UserCircle,
     children: [

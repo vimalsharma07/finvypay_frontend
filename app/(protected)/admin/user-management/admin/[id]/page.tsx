@@ -41,17 +41,17 @@ export default function ViewUserPage() {
           },
           onError: (errorMessage) => {
             toast.error(errorMessage || 'Failed to load user');
-            router.push('/admin/users');
+            router.push('/admin/user-management/admin');
           },
           onUnauthorized: () => {
             toast.error('Unauthorized. Please check your authentication.');
-            router.push('/admin/users');
+            router.push('/admin/user-management/admin');
           },
         });
       } catch (error) {
         toast.error('An unexpected error occurred');
         console.error('Fetch user error:', error);
-        router.push('/admin/users');
+        router.push('/admin/user-management/admin');
       } finally {
         setLoading(false);
       }
@@ -118,13 +118,13 @@ export default function ViewUserPage() {
             description="View user information"
           />
           <ToolbarActions>
-            <Link href="/admin/users">
+            <Link href="/admin/user-management/admin">
               <Button variant="outline">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </Button>
             </Link>
-            <Link href={`/admin/users/${userId}/edit`}>
+            <Link href={`/admin/user-management/admin/${userId}/edit`}>
               <Button>
                 <Edit className="h-4 w-4 mr-2" />
                 Edit User

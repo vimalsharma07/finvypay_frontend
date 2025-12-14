@@ -41,17 +41,17 @@ export default function ViewAffiliateUserPage() {
           },
           onError: (errorMessage) => {
             toast.error(errorMessage || 'Failed to load user');
-            router.push('/admin/affiliate');
+            router.push('/admin/user-management/affiliate');
           },
           onUnauthorized: () => {
             toast.error('Unauthorized. Please check your authentication.');
-            router.push('/admin/affiliate');
+            router.push('/admin/user-management/affiliate');
           },
         });
       } catch (error) {
         toast.error('An unexpected error occurred');
         console.error('Fetch user error:', error);
-        router.push('/admin/affiliate');
+        router.push('/admin/user-management/affiliate');
       } finally {
         setLoading(false);
       }
@@ -118,13 +118,13 @@ export default function ViewAffiliateUserPage() {
             description="View affiliate user information"
           />
           <ToolbarActions>
-            <Link href="/admin/affiliate">
+            <Link href="/admin/user-management/affiliate">
               <Button variant="outline">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </Button>
             </Link>
-            <Link href={`/admin/affiliate/${userId}/edit`}>
+            <Link href={`/admin/user-management/affiliate/${userId}/edit`}>
               <Button>
                 <Edit className="h-4 w-4 mr-2" />
                 Edit User
