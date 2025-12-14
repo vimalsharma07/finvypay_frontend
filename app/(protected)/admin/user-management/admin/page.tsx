@@ -161,7 +161,7 @@ export default function AdminUsersPage() {
 
   // Handle create user
   const handleCreateUser = () => {
-    router.push('/admin/users/create');
+    router.push('/admin/user-management/admin/create');
   };
 
   // Define table headers

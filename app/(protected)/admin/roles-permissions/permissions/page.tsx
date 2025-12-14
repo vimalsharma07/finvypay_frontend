@@ -256,7 +256,7 @@ export default function AdminPermissionsPage() {
             description="Manage and view all permissions"
           />
           <ToolbarActions>
-            <Button variant="primary" onClick={() => router.push('/admin/permissions/create')}>
+            <Button variant="primary" onClick={() => router.push('/admin/roles-permissions/permissions/create')}>
               Create Permission
             </Button>
           </ToolbarActions>

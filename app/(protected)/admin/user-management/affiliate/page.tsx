@@ -166,7 +166,7 @@ export default function AffiliateUsersPage() {
 
   // Handle create user
   const handleCreateUser = () => {
-    router.push('/admin/affiliate/create');
+    router.push('/admin/user-management/affiliate/create');
   };
 
   // Define table headers

@@ -166,7 +166,7 @@ export default function MerchantUsersPage() {
 
   // Handle create user
   const handleCreateUser = () => {
-    router.push('/admin/merchant/create');
+    router.push('/admin/user-management/merchant/create');
   };
 
   // Define table headers

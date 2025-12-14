@@ -270,7 +270,7 @@ export default function AdminRolesPage() {
             description="Manage and view all roles"
           />
           <ToolbarActions>
-            <Button variant="primary" onClick={() => router.push('/admin/roles/create')}>
+            <Button variant="primary" onClick={() => router.push('/admin/roles-permissions/roles/create')}>
               Create Role
             </Button>
           </ToolbarActions>
