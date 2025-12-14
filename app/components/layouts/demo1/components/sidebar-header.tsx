@@ -22,8 +22,8 @@ export function SidebarHeader() {
       <Link href="/">
         <div className="dark:hidden">
           <img
-            src={toAbsoluteUrl('/media/app/default-logo.svg')}
-            className="default-logo h-[22px] max-w-none"
+            src={toAbsoluteUrl('/media/app/pay4tech.png')}
+            className="default-logo h-[182px] max-w-none"
             alt="Default Logo"
           />
           <img
