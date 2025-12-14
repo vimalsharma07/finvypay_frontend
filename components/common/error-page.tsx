@@ -47,8 +47,8 @@ export function ErrorPage({
   const iconColor = errorColors[statusCode] || 'text-muted-foreground';
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 px-4">
-      <div className="max-w-md w-full text-center space-y-6">
+    <div className="fixed inset-0 min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 px-4 py-8">
+      <div className="max-w-md w-full mx-auto text-center space-y-6">
         {/* Status Code */}
         <div className="space-y-4">
           <div className={`inline-flex items-center justify-center w-24 h-24 rounded-full bg-muted ${iconColor}`}>

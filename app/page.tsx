@@ -11,10 +11,10 @@ import { ArrowRight, CreditCard, Shield, Zap, Globe } from 'lucide-react';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="min-h-screen w-full bg-gradient-to-br from-background via-background to-muted/20">
       {/* Header */}
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <header className="border-b w-full">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between max-w-7xl">
           <div className="flex items-center gap-2">
             <CreditCard className="h-6 w-6 text-primary" />
             <span className="text-xl font-bold">Pay4Tech</span>
@@ -31,7 +31,7 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <main className="container mx-auto px-4 py-20">
+      <main className="container mx-auto px-4 py-20 max-w-7xl">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
             Secure Payment Solutions
@@ -58,7 +58,7 @@ export default function LandingPage() {
         </div>
 
         {/* Features Section */}
-        <div className="mt-32 grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="mt-32 grid md:grid-cols-3 gap-8 max-w-5xl mx-auto w-full">
           <div className="p-6 rounded-lg border bg-card space-y-4">
             <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
               <Shield className="h-6 w-6 text-primary" />
@@ -95,8 +95,8 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t mt-20">
-        <div className="container mx-auto px-4 py-8 text-center text-sm text-muted-foreground">
+      <footer className="border-t mt-20 w-full">
+        <div className="container mx-auto px-4 py-8 text-center text-sm text-muted-foreground max-w-7xl">
           <p>&copy; {new Date().getFullYear()} Pay4Tech. All rights reserved.</p>
         </div>
       </footer>
