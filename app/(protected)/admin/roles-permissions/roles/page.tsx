@@ -202,7 +202,7 @@ export default function AdminRolesPage() {
               variant="ghost"
               asChild
             >
-              <Link href={`/admin/roles/${row.original.id}/edit`}>
+              <Link href={`/admin/roles-permissions/roles/${row.original.id}/edit`}>
                 <Pencil className="size-4" />
               </Link>
             </Button>
