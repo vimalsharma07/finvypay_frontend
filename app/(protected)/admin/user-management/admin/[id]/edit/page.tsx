@@ -88,17 +88,17 @@ export default function EditUserPage() {
           },
           onError: (errorMessage) => {
             toast.error(errorMessage || 'Failed to load user');
-            router.push('/admin/users');
+            router.push('/admin/user-management/admin');
           },
           onUnauthorized: () => {
             toast.error('Unauthorized. Please check your authentication.');
-            router.push('/admin/users');
+            router.push('/admin/user-management/admin');
           },
         });
       } catch (error) {
         toast.error('An unexpected error occurred');
         console.error('Fetch user error:', error);
-        router.push('/admin/users');
+        router.push('/admin/user-management/admin');
       } finally {
         setLoading(false);
       }
@@ -123,7 +123,7 @@ export default function EditUserPage() {
       handleApiResponse<User>(response, {
         onSuccess: (userData) => {
           toast.success('User updated successfully!');
-          router.push('/admin/users');
+          router.push('/admin/user-management/admin');
         },
         onValidationError: (errors, messages) => {
           // Set form errors from API validation
@@ -195,7 +195,7 @@ export default function EditUserPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-4">
-              <Link href="/admin/users">
+              <Link href={`/admin/user-management/admin/${userId}`}>
                 <Button variant="ghost" size="icon">
                   <ArrowLeft className="h-4 w-4" />
                 </Button>

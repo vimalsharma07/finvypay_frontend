@@ -69,7 +69,7 @@ export default function CreateMerchantUserPage() {
       handleApiResponse<User>(response, {
         onSuccess: (userData) => {
           toast.success('User created successfully!');
-          router.push('/admin/merchant');
+          router.push('/admin/user-management/merchant');
         },
         onValidationError: (errors, messages) => {
           // Set form errors from API validation
@@ -119,7 +119,7 @@ export default function CreateMerchantUserPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-4">
-              <Link href="/admin/merchant">
+              <Link href="/admin/user-management/merchant">
                 <Button variant="ghost" size="icon">
                   <ArrowLeft className="h-4 w-4" />
                 </Button>

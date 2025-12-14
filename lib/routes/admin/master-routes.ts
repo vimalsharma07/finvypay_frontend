@@ -8,11 +8,14 @@ import { getBaseUrl } from '../config/base-url';
 const BASE_URL = getBaseUrl();
 
 export const adminMasterRoutes = {
-  // Add your admin master module endpoints here
-  // Example structure:
-  // list: `${BASE_URL}/admin/master`,
-  // getById: (id: string) => `${BASE_URL}/admin/master/${id}`,
-  // create: `${BASE_URL}/admin/master`,
-  // update: (id: string) => `${BASE_URL}/admin/master/${id}`,
-  // delete: (id: string) => `${BASE_URL}/admin/master/${id}`,
+  currency: {
+    list: `${BASE_URL}/currency`,
+  },
+  countries: {
+    list: `${BASE_URL}/countries`,
+    getById: (id: string) => `${BASE_URL}/countries/${id}`,
+    create: `${BASE_URL}/countries`,
+    update: (id: string) => `${BASE_URL}/countries/${id}`,
+    delete: (id: string) => `${BASE_URL}/countries/${id}`,
+  },
 } as const;

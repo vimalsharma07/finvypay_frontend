@@ -88,17 +88,17 @@ export default function EditMerchantUserPage() {
           },
           onError: (errorMessage) => {
             toast.error(errorMessage || 'Failed to load user');
-            router.push('/admin/merchant');
+            router.push('/admin/user-management/merchant');
           },
           onUnauthorized: () => {
             toast.error('Unauthorized. Please check your authentication.');
-            router.push('/admin/merchant');
+            router.push('/admin/user-management/merchant');
           },
         });
       } catch (error) {
         toast.error('An unexpected error occurred');
         console.error('Fetch user error:', error);
-        router.push('/admin/merchant');
+        router.push('/admin/user-management/merchant');
       } finally {
         setLoading(false);
       }
@@ -123,7 +123,7 @@ export default function EditMerchantUserPage() {
       handleApiResponse<User>(response, {
         onSuccess: (userData) => {
           toast.success('User updated successfully!');
-          router.push('/admin/merchant');
+          router.push('/admin/user-management/merchant');
         },
         onValidationError: (errors, messages) => {
           // Set form errors from API validation
@@ -195,7 +195,7 @@ export default function EditMerchantUserPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-4">
-              <Link href="/admin/merchant">
+              <Link href={`/admin/user-management/merchant/${userId}`}>
                 <Button variant="ghost" size="icon">
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
