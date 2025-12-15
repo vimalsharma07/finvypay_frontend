@@ -11,6 +11,7 @@ import { adminRolesRoutes } from './roles-routes';
 import { adminPermissionsRoutes } from './permissions-routes';
 import { adminIpWhitelistRoutes } from './ip-whitelist-routes';
 import { adminGatewayRoutes } from './gateway-routes';
+import { adminPaymentChannelsRoutes } from './payment-channels-routes';
 
 export const adminModuleRoutes = {
   users: adminUserRoutes,
@@ -21,4 +22,5 @@ export const adminModuleRoutes = {
   permissions: adminPermissionsRoutes,
   ipWhitelist: adminIpWhitelistRoutes,
   gateway: adminGatewayRoutes,
+  paymentChannels: adminPaymentChannelsRoutes,
 } as const;

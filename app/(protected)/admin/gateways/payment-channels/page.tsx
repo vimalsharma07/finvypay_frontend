@@ -4,15 +4,14 @@ import { Fragment, useEffect, useMemo, useState } from 'react';
 import {
   Toolbar,
   ToolbarHeading,
-  ToolbarActions,
 } from '@/layouts/demo1/components/toolbar';
 import { Container } from '@/components/common/container';
 import {
-  getGateways,
-  deleteGateway,
-  Gateway,
-  GatewayListResponse,
-} from '@/lib/services/admin/gateways';
+  getPaymentChannels,
+  deletePaymentChannel,
+  PaymentChannel,
+  PaymentChannelListResponse,
+} from '@/lib/services/admin/payment-channels';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -54,37 +53,37 @@ import {
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-export default function AdminGatewaysPage() {
+export default function AdminPaymentChannelsPage() {
   const router = useRouter();
-  const [gateways, setGateways] = useState<Gateway[]>([]);
+  const [paymentChannels, setPaymentChannels] = useState<PaymentChannel[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [gatewayToDelete, setGatewayToDelete] = useState<Gateway | null>(null);
+  const [channelToDelete, setChannelToDelete] = useState<PaymentChannel | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [meta, setMeta] = useState<GatewayListResponse['data']['meta'] | null>(null);
+  const [meta, setMeta] = useState<PaymentChannelListResponse['data']['meta'] | null>(null);
 
   // Pagination state
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
-  const fetchGateways = async (pageNum: number, pageLimit: number) => {
+  const fetchPaymentChannels = async (pageNum: number, pageLimit: number) => {
     setLoading(true);
     try {
-      const response = await getGateways({
+      const response = await getPaymentChannels({
         page: pageNum,
         limit: pageLimit,
       });
-      handleApiResponse<GatewayListResponse>(response, {
+      handleApiResponse<PaymentChannelListResponse>(response, {
         onSuccess: (data) => {
           if (data && data.success && data.data) {
-            setGateways(data.data.data);
+            setPaymentChannels(data.data.data);
             setMeta(data.data.meta);
           } else {
-            toast.error('Failed to fetch gateways - invalid response structure');
+            toast.error('Failed to fetch payment channels - invalid response structure');
           }
         },
         onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to fetch gateways');
+          toast.error(errorMessage || 'Failed to fetch payment channels');
         },
       });
     } catch (error) {
@@ -95,7 +94,7 @@ export default function AdminGatewaysPage() {
   };
 
   useEffect(() => {
-    fetchGateways(page, limit);
+    fetchPaymentChannels(page, limit);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit]);
 
@@ -107,60 +106,102 @@ export default function AdminGatewaysPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredData = useMemo(() => {
-    if (!searchQuery) return gateways;
+    if (!searchQuery) return paymentChannels;
 
     const searchLower = searchQuery.toLowerCase();
-    return gateways.filter(
-      (gateway) =>
-        gateway.gatewayName.toLowerCase().includes(searchLower) ||
-        gateway.fileName.toLowerCase().includes(searchLower) ||
-        gateway.status.toLowerCase().includes(searchLower),
+    return paymentChannels.filter(
+      (channel) =>
+        channel.gateway?.gatewayName?.toLowerCase().includes(searchLower) ||
+        channel.name?.toLowerCase().includes(searchLower) ||
+        channel.currency?.toLowerCase().includes(searchLower) ||
+        channel.providerType?.toLowerCase().includes(searchLower) ||
+        channel.flowType?.toLowerCase().includes(searchLower) ||
+        channel.status?.toLowerCase().includes(searchLower),
     );
-  }, [searchQuery, gateways]);
+  }, [searchQuery, paymentChannels]);
 
-  const handleDeleteGateway = async () => {
-    if (!gatewayToDelete) return;
+  const handleDeleteChannel = async () => {
+    if (!channelToDelete) return;
 
     setDeleting(true);
     try {
-      const response = await deleteGateway(gatewayToDelete.id);
+      const response = await deletePaymentChannel(channelToDelete.id);
       handleApiResponse(response, {
         onSuccess: () => {
-          toast.success('Gateway deleted successfully!');
+          toast.success('Payment channel deleted successfully!');
           setDeleteDialogOpen(false);
-          setGatewayToDelete(null);
-          fetchGateways(page, limit);
+          setChannelToDelete(null);
+          fetchPaymentChannels(page, limit);
         },
         onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to delete gateway');
+          toast.error(errorMessage || 'Failed to delete payment channel');
         },
       });
     } catch (error) {
       toast.error('An unexpected error occurred');
-      console.error('Delete gateway error:', error);
+      console.error('Delete payment channel error:', error);
     } finally {
       setDeleting(false);
     }
   };
 
-  const columns = useMemo<ColumnDef<Gateway>[]>(
+  const columns = useMemo<ColumnDef<PaymentChannel>[]>(
     () => [
       {
-        accessorKey: 'gatewayName',
+        accessorKey: 'gateway.gatewayName',
         header: ({ column }) => (
           <DataGridColumnHeader column={column} title="Gateway Name" />
         ),
         cell: ({ row }) => {
-          return <div className="font-medium">{row.original.gatewayName}</div>;
+          return (
+            <div className="font-medium">
+              {row.original.gateway?.gatewayName || '-'}
+            </div>
+          );
         },
       },
       {
-        accessorKey: 'fileName',
+        accessorKey: 'name',
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="File Name" />
+          <DataGridColumnHeader column={column} title="Name" />
         ),
         cell: ({ row }) => {
-          return <div className="text-muted-foreground">{row.original.fileName}</div>;
+          return <div className="font-medium">{row.original.name}</div>;
+        },
+      },
+      {
+        accessorKey: 'currency',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Currency" />
+        ),
+        cell: ({ row }) => {
+          return <div className="text-muted-foreground">{row.original.currency}</div>;
+        },
+      },
+      {
+        accessorKey: 'providerType',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Provider Type" />
+        ),
+        cell: ({ row }) => {
+          return (
+            <Badge variant="secondary" className="capitalize">
+              {row.original.providerType}
+            </Badge>
+          );
+        },
+      },
+      {
+        accessorKey: 'flowType',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Flow Type" />
+        ),
+        cell: ({ row }) => {
+          return (
+            <Badge variant="outline" className="capitalize">
+              {row.original.flowType}
+            </Badge>
+          );
         },
       },
       {
@@ -198,10 +239,9 @@ export default function AdminGatewaysPage() {
               mode="icon"
               variant="ghost"
               asChild
-              title="Create Payment Channel"
             >
-              <Link href={`/admin/gateways/payment-channels/create/${row.original.id}`}>
-                <Plus className="size-4 text-primary" />
+              <Link href={`/admin/gateways/payment-channels/${row.original.id}/edit`}>
+                <Pencil className="size-4" />
               </Link>
             </Button>
             <Button
@@ -210,8 +250,8 @@ export default function AdminGatewaysPage() {
               variant="ghost"
               asChild
             >
-              <Link href={`/admin/gateways/gateways/${row.original.id}/edit`}>
-                <Pencil className="size-4" />
+              <Link href={`/admin/gateways/payment-channels/${row.original.id}/rates`}>
+                <Plus className="size-4 text-primary" />
               </Link>
             </Button>
             <Button
@@ -219,7 +259,7 @@ export default function AdminGatewaysPage() {
               mode="icon"
               variant="ghost"
               onClick={() => {
-                setGatewayToDelete(row.original);
+                setChannelToDelete(row.original);
                 setDeleteDialogOpen(true);
               }}
             >
@@ -228,7 +268,7 @@ export default function AdminGatewaysPage() {
           </div>
         ),
         enableSorting: false,
-        size: 100,
+        size: 120,
       },
     ],
     [],
@@ -266,14 +306,14 @@ export default function AdminGatewaysPage() {
     pageCount: meta ? meta.totalPages : 0,
   });
 
-  if (loading && gateways.length === 0) {
+  if (loading && paymentChannels.length === 0) {
     return (
       <Fragment>
         <Container>
           <Toolbar>
             <ToolbarHeading
-              title="Gateways"
-              description="Manage and view all payment gateways"
+              title="Payment Channels"
+              description="Manage and view all payment channels"
             />
           </Toolbar>
         </Container>
@@ -289,17 +329,9 @@ export default function AdminGatewaysPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Gateways"
-            description="Manage and view all payment gateways"
+            title="Payment Channels"
+            description="Manage and view all payment channels"
           />
-          <ToolbarActions>
-            <Button
-              variant="primary"
-              onClick={() => router.push('/admin/gateways/gateways/create')}
-            >
-              Create Gateway
-            </Button>
-          </ToolbarActions>
         </Toolbar>
       </Container>
       <Container>
@@ -318,7 +350,7 @@ export default function AdminGatewaysPage() {
                   <div className="relative">
                     <Search className="size-4 text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2" />
                     <Input
-                      placeholder="Search gateways..."
+                      placeholder="Search payment channels..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="ps-9 w-40"
@@ -353,15 +385,15 @@ export default function AdminGatewaysPage() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Gateway</AlertDialogTitle>
+            <AlertDialogTitle>Delete Payment Channel</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete gateway &quot;{gatewayToDelete?.gatewayName}&quot;? This action cannot be undone.
+              Are you sure you want to delete payment channel &quot;{channelToDelete?.name}&quot;? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDeleteGateway}
+              onClick={handleDeleteChannel}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
