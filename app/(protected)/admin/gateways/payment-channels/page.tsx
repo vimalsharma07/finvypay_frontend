@@ -1,18 +1,18 @@
 'use client';
 
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Toolbar,
   ToolbarHeading,
-  ToolbarActions,
 } from '@/layouts/demo1/components/toolbar';
 import { Container } from '@/components/common/container';
 import {
-  getGateways,
-  deleteGateway,
-  Gateway,
-  GatewayListResponse,
-} from '@/lib/services/admin/gateways';
+  getPaymentChannels,
+  deletePaymentChannel,
+  updatePaymentChannelStatus,
+  PaymentChannel,
+  PaymentChannelListResponse,
+} from '@/lib/services/admin/payment-channels';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -39,6 +39,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Search, X, Pencil, Trash2, Plus } from 'lucide-react';
+import { Switch, SwitchWrapper } from '@/components/ui/switch';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -51,53 +52,52 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-export default function AdminGatewaysPage() {
-  const router = useRouter();
-  const [gateways, setGateways] = useState<Gateway[]>([]);
+export default function AdminPaymentChannelsPage() {
+  const [paymentChannels, setPaymentChannels] = useState<PaymentChannel[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [gatewayToDelete, setGatewayToDelete] = useState<Gateway | null>(null);
+  const [channelToDelete, setChannelToDelete] = useState<PaymentChannel | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [meta, setMeta] = useState<GatewayListResponse['data']['meta'] | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState<Record<string | number, boolean>>({});
+  const [meta, setMeta] = useState<PaymentChannelListResponse['data']['meta'] | null>(null);
 
   // Pagination state
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
-  const fetchGateways = async (pageNum: number, pageLimit: number) => {
+  const fetchPaymentChannels = useCallback(async (pageNum: number, pageLimit: number) => {
     setLoading(true);
     try {
-      const response = await getGateways({
+      const response = await getPaymentChannels({
         page: pageNum,
         limit: pageLimit,
       });
-      handleApiResponse<GatewayListResponse>(response, {
+      handleApiResponse<PaymentChannelListResponse>(response, {
         onSuccess: (data) => {
           if (data && data.success && data.data) {
-            setGateways(data.data.data);
+            setPaymentChannels(data.data.data);
             setMeta(data.data.meta);
           } else {
-            toast.error('Failed to fetch gateways - invalid response structure');
+            toast.error('Failed to fetch payment channels - invalid response structure');
           }
         },
         onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to fetch gateways');
+          toast.error(errorMessage || 'Failed to fetch payment channels');
         },
       });
     } catch (error) {
       toast.error('An unexpected error occurred');
+      console.error('Fetch payment channels error:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchGateways(page, limit);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, limit]);
+    fetchPaymentChannels(page, limit);
+  }, [page, limit, fetchPaymentChannels]);
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -107,60 +107,167 @@ export default function AdminGatewaysPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredData = useMemo(() => {
-    if (!searchQuery) return gateways;
+    if (!searchQuery.trim()) return paymentChannels;
 
     const searchLower = searchQuery.toLowerCase();
-    return gateways.filter(
-      (gateway) =>
-        gateway.gatewayName.toLowerCase().includes(searchLower) ||
-        gateway.fileName.toLowerCase().includes(searchLower) ||
-        gateway.status.toLowerCase().includes(searchLower),
-    );
-  }, [searchQuery, gateways]);
+    return paymentChannels.filter((channel) => {
+      const gatewayName = channel.gateway?.gatewayName?.toLowerCase() || '';
+      const name = channel.name?.toLowerCase() || '';
+      const currency = channel.currency?.toLowerCase() || '';
+      const providerType = channel.providerType?.toLowerCase() || '';
+      const flowType = channel.flowType?.toLowerCase() || '';
+      const status = channel.status?.toLowerCase() || '';
 
-  const handleDeleteGateway = async () => {
-    if (!gatewayToDelete) return;
+      return (
+        gatewayName.includes(searchLower) ||
+        name.includes(searchLower) ||
+        currency.includes(searchLower) ||
+        providerType.includes(searchLower) ||
+        flowType.includes(searchLower) ||
+        status.includes(searchLower)
+      );
+    });
+  }, [searchQuery, paymentChannels]);
+
+  const handleStatusToggle = useCallback(
+    async (channel: PaymentChannel, newStatus: 'active' | 'inactive') => {
+      if (!channel?.id) {
+        toast.error('Invalid payment channel');
+        return;
+      }
+
+      setUpdatingStatus((prev) => ({ ...prev, [channel.id]: true }));
+
+      try {
+        const response = await updatePaymentChannelStatus(channel.id, { status: newStatus });
+
+        handleApiResponse(response, {
+          onSuccess: (updatedChannel) => {
+            if (updatedChannel?.status) {
+              // Optimistic update: update local state immediately
+              setPaymentChannels((prev) =>
+                prev.map((ch) =>
+                  ch.id === channel.id ? { ...ch, status: updatedChannel.status } : ch
+                )
+              );
+              toast.success(`Payment channel status updated to ${newStatus}`);
+            } else {
+              // Fallback: refetch data if response doesn't include updated status
+              toast.success('Payment channel status updated successfully');
+              fetchPaymentChannels(page, limit);
+            }
+          },
+          onError: (errorMessage) => {
+            toast.error(errorMessage || 'Failed to update payment channel status');
+            // Revert optimistic update on error by refetching
+            fetchPaymentChannels(page, limit);
+          },
+          onUnauthorized: () => {
+            toast.error('Unauthorized. Please check your authentication.');
+            fetchPaymentChannels(page, limit);
+          },
+        });
+      } catch (error) {
+        toast.error('An unexpected error occurred');
+        console.error('Update status error:', error);
+        // Revert optimistic update on error by refetching
+        fetchPaymentChannels(page, limit);
+      } finally {
+        setUpdatingStatus((prev) => {
+          const updated = { ...prev };
+          delete updated[channel.id];
+          return updated;
+        });
+      }
+    },
+    [fetchPaymentChannels, page, limit]
+  );
+
+  const handleDeleteChannel = useCallback(async () => {
+    if (!channelToDelete) return;
 
     setDeleting(true);
     try {
-      const response = await deleteGateway(gatewayToDelete.id);
+      const response = await deletePaymentChannel(channelToDelete.id);
       handleApiResponse(response, {
         onSuccess: () => {
-          toast.success('Gateway deleted successfully!');
+          toast.success('Payment channel deleted successfully!');
           setDeleteDialogOpen(false);
-          setGatewayToDelete(null);
-          fetchGateways(page, limit);
+          setChannelToDelete(null);
+          fetchPaymentChannels(page, limit);
         },
         onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to delete gateway');
+          toast.error(errorMessage || 'Failed to delete payment channel');
+        },
+        onUnauthorized: () => {
+          toast.error('Unauthorized. Please check your authentication.');
         },
       });
     } catch (error) {
       toast.error('An unexpected error occurred');
-      console.error('Delete gateway error:', error);
+      console.error('Delete payment channel error:', error);
     } finally {
       setDeleting(false);
     }
-  };
+  }, [channelToDelete, fetchPaymentChannels, page, limit]);
 
-  const columns = useMemo<ColumnDef<Gateway>[]>(
+  const columns = useMemo<ColumnDef<PaymentChannel>[]>(
     () => [
       {
-        accessorKey: 'gatewayName',
+        accessorKey: 'gateway.gatewayName',
         header: ({ column }) => (
           <DataGridColumnHeader column={column} title="Gateway Name" />
         ),
         cell: ({ row }) => {
-          return <div className="font-medium">{row.original.gatewayName}</div>;
+          return (
+            <div className="font-medium">
+              {row.original.gateway?.gatewayName || '-'}
+            </div>
+          );
         },
       },
       {
-        accessorKey: 'fileName',
+        accessorKey: 'name',
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="File Name" />
+          <DataGridColumnHeader column={column} title="Name" />
         ),
         cell: ({ row }) => {
-          return <div className="text-muted-foreground">{row.original.fileName}</div>;
+          return <div className="font-medium">{row.original.name}</div>;
+        },
+      },
+      {
+        accessorKey: 'currency',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Currency" />
+        ),
+        cell: ({ row }) => {
+          return <div className="text-muted-foreground">{row.original.currency}</div>;
+        },
+      },
+      {
+        accessorKey: 'providerType',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Provider Type" />
+        ),
+        cell: ({ row }) => {
+          return (
+            <Badge variant="secondary" className="capitalize">
+              {row.original.providerType}
+            </Badge>
+          );
+        },
+      },
+      {
+        accessorKey: 'flowType',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Flow Type" />
+        ),
+        cell: ({ row }) => {
+          return (
+            <Badge variant="outline" className="capitalize">
+              {row.original.flowType}
+            </Badge>
+          );
         },
       },
       {
@@ -169,20 +276,23 @@ export default function AdminGatewaysPage() {
           <DataGridColumnHeader column={column} title="Status" />
         ),
         cell: ({ row }) => {
-          const status = row.original.status.toLowerCase();
+          const channel = row.original;
+          const currentStatus = channel?.status?.toLowerCase() || 'inactive';
+          const isActive = currentStatus === 'active';
+          const isUpdating = updatingStatus[channel.id] || false;
+
           return (
-            <Badge
-              variant={
-                status === 'active'
-                  ? 'success'
-                  : status === 'inactive'
-                    ? 'secondary'
-                    : 'destructive'
-              }
-              className="capitalize"
-            >
-              {row.original.status}
-            </Badge>
+            <SwitchWrapper>
+              <Switch
+                checked={isActive}
+                onCheckedChange={(checked) => {
+                  const newStatus = checked ? 'active' : 'inactive';
+                  handleStatusToggle(channel, newStatus);
+                }}
+                disabled={isUpdating}
+                size="sm"
+              />
+            </SwitchWrapper>
           );
         },
       },
@@ -198,10 +308,9 @@ export default function AdminGatewaysPage() {
               mode="icon"
               variant="ghost"
               asChild
-              title="Create Payment Channel"
             >
-              <Link href={`/admin/gateways/payment-channels/create/${row.original.id}`}>
-                <Plus className="size-4 text-primary" />
+              <Link href={`/admin/gateways/payment-channels/${row.original.id}/edit`}>
+                <Pencil className="size-4" />
               </Link>
             </Button>
             <Button
@@ -210,8 +319,8 @@ export default function AdminGatewaysPage() {
               variant="ghost"
               asChild
             >
-              <Link href={`/admin/gateways/gateways/${row.original.id}/edit`}>
-                <Pencil className="size-4" />
+              <Link href={`/admin/gateways/payment-channels/${row.original.id}/rates`}>
+                <Plus className="size-4 text-primary" />
               </Link>
             </Button>
             <Button
@@ -219,7 +328,7 @@ export default function AdminGatewaysPage() {
               mode="icon"
               variant="ghost"
               onClick={() => {
-                setGatewayToDelete(row.original);
+                setChannelToDelete(row.original);
                 setDeleteDialogOpen(true);
               }}
             >
@@ -228,10 +337,10 @@ export default function AdminGatewaysPage() {
           </div>
         ),
         enableSorting: false,
-        size: 100,
+        size: 120,
       },
     ],
-    [],
+    [updatingStatus, handleStatusToggle],
   );
 
   const table = useReactTable({
@@ -266,14 +375,14 @@ export default function AdminGatewaysPage() {
     pageCount: meta ? meta.totalPages : 0,
   });
 
-  if (loading && gateways.length === 0) {
+  if (loading && paymentChannels.length === 0) {
     return (
       <Fragment>
         <Container>
           <Toolbar>
             <ToolbarHeading
-              title="Gateways"
-              description="Manage and view all payment gateways"
+              title="Payment Channels"
+              description="Manage and view all payment channels"
             />
           </Toolbar>
         </Container>
@@ -289,17 +398,9 @@ export default function AdminGatewaysPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Gateways"
-            description="Manage and view all payment gateways"
+            title="Payment Channels"
+            description="Manage and view all payment channels"
           />
-          <ToolbarActions>
-            <Button
-              variant="primary"
-              onClick={() => router.push('/admin/gateways/gateways/create')}
-            >
-              Create Gateway
-            </Button>
-          </ToolbarActions>
         </Toolbar>
       </Container>
       <Container>
@@ -318,7 +419,7 @@ export default function AdminGatewaysPage() {
                   <div className="relative">
                     <Search className="size-4 text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2" />
                     <Input
-                      placeholder="Search gateways..."
+                      placeholder="Search payment channels..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="ps-9 w-40"
@@ -353,15 +454,15 @@ export default function AdminGatewaysPage() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Gateway</AlertDialogTitle>
+            <AlertDialogTitle>Delete Payment Channel</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete gateway &quot;{gatewayToDelete?.gatewayName}&quot;? This action cannot be undone.
+              Are you sure you want to delete payment channel &quot;{channelToDelete?.name}&quot;? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDeleteGateway}
+              onClick={handleDeleteChannel}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >

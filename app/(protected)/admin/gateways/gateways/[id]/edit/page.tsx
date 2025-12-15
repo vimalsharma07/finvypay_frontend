@@ -43,15 +43,12 @@ const updateGatewaySchema = z.object({
   gatewayName: z.string().min(1, 'Gateway name is required'),
   fileName: z.string().min(1, 'File name is required'),
   status: z.string().min(1, 'Status is required'),
-  fields: z
-    .array(
-      z.object({
-        fieldName: z.string().optional(),
-        fieldValue: z.string().optional(),
-      })
-    )
-    .optional()
-    .default([]),
+  fields: z.array(
+    z.object({
+      fieldName: z.string().optional(),
+      fieldValue: z.string().optional(),
+    })
+  ),
 });
 
 type UpdateGatewayFormData = z.infer<typeof updateGatewaySchema>;

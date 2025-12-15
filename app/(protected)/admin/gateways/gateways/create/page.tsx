@@ -30,15 +30,12 @@ import { toast } from 'sonner';
 const createGatewaySchema = z.object({
   gatewayName: z.string().min(1, 'Gateway name is required'),
   fileName: z.string().min(1, 'File name is required'),
-  fields: z
-    .array(
-      z.object({
-        fieldName: z.string().optional(),
-        fieldValue: z.string().optional(),
-      })
-    )
-    .optional()
-    .default([]),
+  fields: z.array(
+    z.object({
+      fieldName: z.string().optional(),
+      fieldValue: z.string().optional(),
+    })
+  ),
 });
 
 type CreateGatewayFormData = z.infer<typeof createGatewaySchema>;
