@@ -1,6 +1,6 @@
 'use client';
 
-import { Control, useFieldArray } from 'react-hook-form';
+import { Control, FieldValues, useFieldArray } from 'react-hook-form';
 import { Plus, X } from 'lucide-react';
 import {
   FormControl,
@@ -21,7 +21,7 @@ import {
 import { MultiSelectField } from './multi-select-field';
 import { CURRENCIES, PROVIDER_TYPES, FLOW_TYPES, TIMEZONES, COUNTRIES, CARD_TYPES } from '../constants';
 
-interface FormSectionsProps<T = any> {
+interface FormSectionsProps<T extends FieldValues = FieldValues> {
   control: Control<T>;
   gateways: Array<{ id: number | string; gatewayName: string }>;
   currencies?: string[];
@@ -35,7 +35,7 @@ interface FormSectionsProps<T = any> {
   showStatus?: boolean;
 }
 
-export function BasicInformationSection<T = any>({
+export function BasicInformationSection<T extends FieldValues = FieldValues>({
   control,
   gateways,
   currencies,
@@ -50,7 +50,7 @@ export function BasicInformationSection<T = any>({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField
           control={control}
-          name="name"
+          name={"name" as any}
           render={({ field }) => (
             <FormItem>
               <FormLabel>
@@ -66,7 +66,7 @@ export function BasicInformationSection<T = any>({
 
         <FormField
           control={control}
-          name="gatewayId"
+          name={"gatewayId" as any}
           render={({ field }) => (
             <FormItem>
               <FormLabel>
@@ -97,7 +97,7 @@ export function BasicInformationSection<T = any>({
 
         <FormField
           control={control}
-          name="currency"
+          name={"currency" as any}
           render={({ field }) => (
             <FormItem>
               <FormLabel>
@@ -124,7 +124,7 @@ export function BasicInformationSection<T = any>({
 
         <FormField
           control={control}
-          name="providerType"
+          name={"providerType" as any}
           render={({ field }) => (
             <FormItem>
               <FormLabel>
@@ -151,7 +151,7 @@ export function BasicInformationSection<T = any>({
 
         <FormField
           control={control}
-          name="flowType"
+          name={"flowType" as any}
           render={({ field }) => (
             <FormItem>
               <FormLabel>
@@ -178,7 +178,7 @@ export function BasicInformationSection<T = any>({
 
         <FormField
           control={control}
-          name="timezone"
+          name={"timezone" as any}
           render={({ field }) => (
             <FormItem>
               <FormLabel>
@@ -206,7 +206,7 @@ export function BasicInformationSection<T = any>({
         {showStatus && (
           <FormField
             control={control}
-            name="status"
+            name={"status" as any}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
@@ -233,22 +233,30 @@ export function BasicInformationSection<T = any>({
   );
 }
 
-const LIMIT_FIELDS = [
-  { name: 'minTransactionAmount', label: 'Minimum Transaction Amount', type: 'number' as const, step: '0.01' },
-  { name: 'maxTransactionAmount', label: 'Maximum Transaction Amount', type: 'number' as const, step: '0.01' },
-  { name: 'perDaySuccessAmount', label: 'Per Day Success Amount', type: 'number' as const, step: '0.01' },
-  { name: 'perDayCardLimit', label: 'Per Day Card Limit', type: 'integer' as const },
-  { name: 'perDayEmailLimit', label: 'Per Day Email Limit', type: 'integer' as const },
-  { name: 'perWeekCardLimit', label: 'Per Week Card Limit', type: 'integer' as const },
-  { name: 'perWeekEmailLimit', label: 'Per Week Email Limit', type: 'integer' as const },
-  { name: 'perMonthCardLimit', label: 'Per Month Card Limit', type: 'integer' as const },
-  { name: 'perMonthEmailLimit', label: 'Per Month Email Limit', type: 'integer' as const },
-  { name: 'dailyCardDeclineLimit', label: 'Daily Card Decline Limit', type: 'integer' as const },
-  { name: 'dailyEmailDeclineLimit', label: 'Daily Email Decline Limit', type: 'integer' as const },
-  { name: 'descriptor', label: 'Descriptor', type: 'text' as const, required: false },
-] as const;
+interface LimitFieldConfig {
+  name: string;
+  label: string;
+  type: 'number' | 'integer' | 'text';
+  step?: string;
+  required?: boolean;
+}
 
-export function LimitsSection<T = any>({
+const LIMIT_FIELDS: LimitFieldConfig[] = [
+  { name: 'minTransactionAmount', label: 'Minimum Transaction Amount', type: 'number', step: '0.01' },
+  { name: 'maxTransactionAmount', label: 'Maximum Transaction Amount', type: 'number', step: '0.01' },
+  { name: 'perDaySuccessAmount', label: 'Per Day Success Amount', type: 'number', step: '0.01' },
+  { name: 'perDayCardLimit', label: 'Per Day Card Limit', type: 'integer' },
+  { name: 'perDayEmailLimit', label: 'Per Day Email Limit', type: 'integer' },
+  { name: 'perWeekCardLimit', label: 'Per Week Card Limit', type: 'integer' },
+  { name: 'perWeekEmailLimit', label: 'Per Week Email Limit', type: 'integer' },
+  { name: 'perMonthCardLimit', label: 'Per Month Card Limit', type: 'integer' },
+  { name: 'perMonthEmailLimit', label: 'Per Month Email Limit', type: 'integer' },
+  { name: 'dailyCardDeclineLimit', label: 'Daily Card Decline Limit', type: 'integer' },
+  { name: 'dailyEmailDeclineLimit', label: 'Daily Email Decline Limit', type: 'integer' },
+  { name: 'descriptor', label: 'Descriptor', type: 'text', required: false },
+];
+
+export function LimitsSection<T extends FieldValues = FieldValues>({
   control,
   submitting = false,
 }: Pick<FormSectionsProps<T>, 'control' | 'submitting'>) {
@@ -260,7 +268,7 @@ export function LimitsSection<T = any>({
           <FormField
             key={fieldConfig.name}
             control={control}
-            name={fieldConfig.name}
+            name={fieldConfig.name as any}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
@@ -291,7 +299,7 @@ export function LimitsSection<T = any>({
   );
 }
 
-export function CountriesCardTypesSection<T = any>({
+export function CountriesCardTypesSection<T extends FieldValues = FieldValues>({
   control,
   countries,
   submitting = false,
@@ -313,7 +321,7 @@ export function CountriesCardTypesSection<T = any>({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <MultiSelectField
           control={control}
-          name="allowedCountries"
+          name={"allowedCountries" as any}
           label="Accepted Countries"
           options={countryOptions}
           placeholder="Select countries"
@@ -322,7 +330,7 @@ export function CountriesCardTypesSection<T = any>({
         />
         <MultiSelectField
           control={control}
-          name="blockedCountries"
+          name={"blockedCountries" as any}
           label="Blocked Countries"
           options={countryOptions}
           placeholder="Select blocked countries"
@@ -331,7 +339,7 @@ export function CountriesCardTypesSection<T = any>({
         />
         <MultiSelectField
           control={control}
-          name="acceptedCardTypes"
+          name={"acceptedCardTypes" as any}
           label="Accepted Card Type"
           options={cardTypeOptions}
           placeholder="Select accepted card types..."
@@ -343,7 +351,7 @@ export function CountriesCardTypesSection<T = any>({
   );
 }
 
-export function ConfigSection<T = any>({
+export function ConfigSection<T extends FieldValues = FieldValues>({
   control,
   configFields,
   appendConfig,
@@ -360,7 +368,7 @@ export function ConfigSection<T = any>({
             <div key={field.id} className="flex items-start gap-3">
               <FormField
                 control={control}
-                name={`config.${index}.fieldName`}
+                name={`config.${index}.fieldName` as any}
                 render={({ field }) => (
                   <FormItem className="flex-1">
                     <FormLabel className="sr-only">Field Name</FormLabel>
@@ -378,7 +386,7 @@ export function ConfigSection<T = any>({
               />
               <FormField
                 control={control}
-                name={`config.${index}.fieldValue`}
+                name={`config.${index}.fieldValue` as any}
                 render={({ field }) => (
                   <FormItem className="flex-1">
                     <FormLabel className="sr-only">Field Value</FormLabel>
