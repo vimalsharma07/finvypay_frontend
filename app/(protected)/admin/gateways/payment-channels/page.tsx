@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -9,6 +9,7 @@ import { Container } from '@/components/common/container';
 import {
   getPaymentChannels,
   deletePaymentChannel,
+  updatePaymentChannelStatus,
   PaymentChannel,
   PaymentChannelListResponse,
 } from '@/lib/services/admin/payment-channels';
@@ -38,6 +39,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Search, X, Pencil, Trash2, Plus } from 'lucide-react';
+import { Switch, SwitchWrapper } from '@/components/ui/switch';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -50,23 +52,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 export default function AdminPaymentChannelsPage() {
-  const router = useRouter();
   const [paymentChannels, setPaymentChannels] = useState<PaymentChannel[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [channelToDelete, setChannelToDelete] = useState<PaymentChannel | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState<Record<string | number, boolean>>({});
   const [meta, setMeta] = useState<PaymentChannelListResponse['data']['meta'] | null>(null);
 
   // Pagination state
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
-  const fetchPaymentChannels = async (pageNum: number, pageLimit: number) => {
+  const fetchPaymentChannels = useCallback(async (pageNum: number, pageLimit: number) => {
     setLoading(true);
     try {
       const response = await getPaymentChannels({
@@ -88,15 +89,15 @@ export default function AdminPaymentChannelsPage() {
       });
     } catch (error) {
       toast.error('An unexpected error occurred');
+      console.error('Fetch payment channels error:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchPaymentChannels(page, limit);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, limit]);
+  }, [page, limit, fetchPaymentChannels]);
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -106,21 +107,83 @@ export default function AdminPaymentChannelsPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredData = useMemo(() => {
-    if (!searchQuery) return paymentChannels;
+    if (!searchQuery.trim()) return paymentChannels;
 
     const searchLower = searchQuery.toLowerCase();
-    return paymentChannels.filter(
-      (channel) =>
-        channel.gateway?.gatewayName?.toLowerCase().includes(searchLower) ||
-        channel.name?.toLowerCase().includes(searchLower) ||
-        channel.currency?.toLowerCase().includes(searchLower) ||
-        channel.providerType?.toLowerCase().includes(searchLower) ||
-        channel.flowType?.toLowerCase().includes(searchLower) ||
-        channel.status?.toLowerCase().includes(searchLower),
-    );
+    return paymentChannels.filter((channel) => {
+      const gatewayName = channel.gateway?.gatewayName?.toLowerCase() || '';
+      const name = channel.name?.toLowerCase() || '';
+      const currency = channel.currency?.toLowerCase() || '';
+      const providerType = channel.providerType?.toLowerCase() || '';
+      const flowType = channel.flowType?.toLowerCase() || '';
+      const status = channel.status?.toLowerCase() || '';
+
+      return (
+        gatewayName.includes(searchLower) ||
+        name.includes(searchLower) ||
+        currency.includes(searchLower) ||
+        providerType.includes(searchLower) ||
+        flowType.includes(searchLower) ||
+        status.includes(searchLower)
+      );
+    });
   }, [searchQuery, paymentChannels]);
 
-  const handleDeleteChannel = async () => {
+  const handleStatusToggle = useCallback(
+    async (channel: PaymentChannel, newStatus: 'active' | 'inactive') => {
+      if (!channel?.id) {
+        toast.error('Invalid payment channel');
+        return;
+      }
+
+      setUpdatingStatus((prev) => ({ ...prev, [channel.id]: true }));
+
+      try {
+        const response = await updatePaymentChannelStatus(channel.id, { status: newStatus });
+
+        handleApiResponse(response, {
+          onSuccess: (updatedChannel) => {
+            if (updatedChannel?.status) {
+              // Optimistic update: update local state immediately
+              setPaymentChannels((prev) =>
+                prev.map((ch) =>
+                  ch.id === channel.id ? { ...ch, status: updatedChannel.status } : ch
+                )
+              );
+              toast.success(`Payment channel status updated to ${newStatus}`);
+            } else {
+              // Fallback: refetch data if response doesn't include updated status
+              toast.success('Payment channel status updated successfully');
+              fetchPaymentChannels(page, limit);
+            }
+          },
+          onError: (errorMessage) => {
+            toast.error(errorMessage || 'Failed to update payment channel status');
+            // Revert optimistic update on error by refetching
+            fetchPaymentChannels(page, limit);
+          },
+          onUnauthorized: () => {
+            toast.error('Unauthorized. Please check your authentication.');
+            fetchPaymentChannels(page, limit);
+          },
+        });
+      } catch (error) {
+        toast.error('An unexpected error occurred');
+        console.error('Update status error:', error);
+        // Revert optimistic update on error by refetching
+        fetchPaymentChannels(page, limit);
+      } finally {
+        setUpdatingStatus((prev) => {
+          const updated = { ...prev };
+          delete updated[channel.id];
+          return updated;
+        });
+      }
+    },
+    [fetchPaymentChannels, page, limit]
+  );
+
+  const handleDeleteChannel = useCallback(async () => {
     if (!channelToDelete) return;
 
     setDeleting(true);
@@ -136,6 +199,9 @@ export default function AdminPaymentChannelsPage() {
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to delete payment channel');
         },
+        onUnauthorized: () => {
+          toast.error('Unauthorized. Please check your authentication.');
+        },
       });
     } catch (error) {
       toast.error('An unexpected error occurred');
@@ -143,7 +209,7 @@ export default function AdminPaymentChannelsPage() {
     } finally {
       setDeleting(false);
     }
-  };
+  }, [channelToDelete, fetchPaymentChannels, page, limit]);
 
   const columns = useMemo<ColumnDef<PaymentChannel>[]>(
     () => [
@@ -210,20 +276,23 @@ export default function AdminPaymentChannelsPage() {
           <DataGridColumnHeader column={column} title="Status" />
         ),
         cell: ({ row }) => {
-          const status = row.original.status.toLowerCase();
+          const channel = row.original;
+          const currentStatus = channel?.status?.toLowerCase() || 'inactive';
+          const isActive = currentStatus === 'active';
+          const isUpdating = updatingStatus[channel.id] || false;
+
           return (
-            <Badge
-              variant={
-                status === 'active'
-                  ? 'success'
-                  : status === 'inactive'
-                    ? 'secondary'
-                    : 'destructive'
-              }
-              className="capitalize"
-            >
-              {row.original.status}
-            </Badge>
+            <SwitchWrapper>
+              <Switch
+                checked={isActive}
+                onCheckedChange={(checked) => {
+                  const newStatus = checked ? 'active' : 'inactive';
+                  handleStatusToggle(channel, newStatus);
+                }}
+                disabled={isUpdating}
+                size="sm"
+              />
+            </SwitchWrapper>
           );
         },
       },
@@ -271,7 +340,7 @@ export default function AdminPaymentChannelsPage() {
         size: 120,
       },
     ],
-    [],
+    [updatingStatus, handleStatusToggle],
   );
 
   const table = useReactTable({

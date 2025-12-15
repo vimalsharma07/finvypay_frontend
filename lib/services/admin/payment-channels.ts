@@ -263,6 +263,40 @@ export async function updatePaymentChannel(
 }
 
 /**
+ * Update payment channel status
+ */
+export interface UpdatePaymentChannelStatusPayload {
+  status: 'active' | 'inactive';
+}
+
+export async function updatePaymentChannelStatus(
+  id: string | number,
+  payload: UpdatePaymentChannelStatusPayload
+): Promise<ApiResponse<PaymentChannel>> {
+  try {
+    const data = await http.patch(adminRoutes.paymentChannels.updateStatus(id), payload) as PaymentChannel;
+    return {
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
  * Delete payment channel
  */
 export async function deletePaymentChannel(

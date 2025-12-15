@@ -12,6 +12,7 @@ export const adminPaymentChannelsRoutes = {
   getById: (id: string | number) => `${BASE_URL}/admin/payment-channels/${id}`,
   create: `${BASE_URL}/admin/payment-channels`,
   update: (id: string | number) => `${BASE_URL}/admin/payment-channels/${id}`,
+  updateStatus: (id: string | number) => `${BASE_URL}/admin/payment-channels/${id}/status`,
   delete: (id: string | number) => `${BASE_URL}/admin/payment-channels/${id}`,
 } as const;
 
