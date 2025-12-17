@@ -39,11 +39,15 @@ export interface UpdateRolePayload {
 
 /**
  * Get all roles
+ * @param type - Optional role type filter (e.g., 'ADMIN', 'USER', 'AFFILIATE')
  */
-export async function getRoles(): Promise<ApiResponse<RoleListResponse>> {
+export async function getRoles(type?: string): Promise<ApiResponse<RoleListResponse>> {
   try {
-    console.log('📡 Calling API:', adminRoutes.roles.list);
-    const data = await http.get(adminRoutes.roles.list) as RoleListResponse;
+    const endpoint = type 
+      ? `${adminRoutes.roles.list}?type=${type}`
+      : adminRoutes.roles.list;
+    console.log('📡 Calling API:', endpoint);
+    const data = await http.get(endpoint) as RoleListResponse;
     console.log('📦 Raw API response:', data);
     return {
       status: 200,

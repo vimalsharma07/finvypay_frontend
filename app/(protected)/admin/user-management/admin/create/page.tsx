@@ -4,7 +4,7 @@ import { Fragment, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -15,32 +15,30 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
+  FormControl,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { createUser, User } from '@/lib/services/admin/users';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
   createUserSchema,
   CreateUserSchemaType,
 } from '@/lib/validations/admin/adminUsers/user-validation';
+import { RoleSelectField } from '@/components/common/role-select-field';
+import { PasswordField } from '@/components/common/password-field';
+import { useRoles } from '@/hooks/use-roles';
 import { toast } from 'sonner';
+
+export const dynamic = 'force-dynamic';
 
 export default function CreateUserPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [passwordVisible, setPasswordVisible] = useState(false);
+  const { roles, loadingRoles } = useRoles({ type: 'ADMIN' });
 
   const form = useForm<CreateUserSchemaType>({
     resolver: zodResolver(createUserSchema),
@@ -48,31 +46,30 @@ export default function CreateUserPage() {
       email: '',
       name: '',
       password: '',
-      role: 'admin',
-      roleId: null,
-      parentId: null,
+      role: '',
+      roleId: '',
     },
   });
 
   const onSubmit = async (data: CreateUserSchemaType) => {
     setIsSubmitting(true);
     try {
+      const selectedRole = roles.find((role) => role.id.toString() === data.roleId);
+
       const response = await createUser({
         email: data.email,
         name: data.name,
         password: data.password,
-        role: data.role,
+        role: selectedRole?.name || data.role,
         roleId: data.roleId || null,
-        parentId: data.parentId || null,
       });
 
       handleApiResponse<User>(response, {
-        onSuccess: (userData) => {
+        onSuccess: () => {
           toast.success('User created successfully!');
           router.push('/admin/user-management/admin');
         },
         onValidationError: (errors, messages) => {
-          // Set form errors from API validation
           if (errors) {
             Object.entries(errors).forEach(([field, errorMessages]) => {
               if (Array.isArray(errorMessages) && errorMessages.length > 0) {
@@ -90,7 +87,7 @@ export default function CreateUserPage() {
               : 'Validation failed';
           toast.error(errorMessage);
         },
-        onError: (errorMessage, status) => {
+        onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to create user');
         },
         onUnauthorized: () => {
@@ -171,116 +168,19 @@ export default function CreateUserPage() {
                     )}
                   />
 
-                  <FormField
+                  <PasswordField
                     control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password *</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Input
-                              type={passwordVisible ? 'text' : 'password'}
-                              placeholder="Enter password"
-                              {...field}
-                              disabled={isSubmitting}
-                              className="pr-10"
-                            />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                              onClick={() => setPasswordVisible(!passwordVisible)}
-                              disabled={isSubmitting}
-                            >
-                              {passwordVisible ? (
-                                <EyeOff className="h-4 w-4" />
-                              ) : (
-                                <Eye className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    disabled={isSubmitting}
                   />
 
-                  <FormField
+                  <RoleSelectField
                     control={form.control}
-                    name="role"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Role *</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                          disabled={true}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select role" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="admin">Admin</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                        <p className="text-xs text-muted-foreground">
-                          Admin users can only have "admin" role
-                        </p>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="roleId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Role ID</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Enter role ID (optional)"
-                            {...field}
-                            value={field.value || ''}
-                            onChange={(e) =>
-                              field.onChange(
-                                e.target.value ? e.target.value : null
-                              )
-                            }
-                            disabled={isSubmitting}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="parentId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Parent ID</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Enter parent ID (optional)"
-                            {...field}
-                            value={field.value || ''}
-                            onChange={(e) =>
-                              field.onChange(
-                                e.target.value ? e.target.value : null
-                              )
-                            }
-                            disabled={isSubmitting}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    disabled={isSubmitting}
+                    roles={roles}
+                    loadingRoles={loadingRoles}
+                    onRoleChange={(roleId, roleName) => {
+                      form.setValue('role', roleName);
+                    }}
                   />
                 </div>
 

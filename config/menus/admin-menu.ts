@@ -54,54 +54,67 @@ import {
   Zap,
 } from 'lucide-react';
 import { type MenuConfig } from '../types';
+import { filterMenuByPermissions } from '@/lib/utils/permission-menu-matcher';
 
-export const ADMIN_MENU: MenuConfig = [
+// Base admin menu configuration (before permission filtering)
+const BASE_ADMIN_MENU: MenuConfig = [
   {
     title: 'Dashboard',
     icon: LayoutGrid,
     path: '/admin/dashboard',
+    requirePermission: false, // Dashboard always visible
   },
-  { heading: 'User' },
+  // { heading: 'User' },
   {
     title: 'User Management',
     icon: Users,
+    permissionModule: 'User Management', // Explicit permission module mapping
+    requirePermission: true,
     children: [
-      { title: 'Admin', path: '/admin/user-management/admin' },
-      { title: 'Merchant', path: '/admin/user-management/merchant' },
-      { title: 'Affiliate', path: '/admin/user-management/affiliate' },
+      { title: 'Admin', path: '/admin/user-management/admin', submodule: 'Admin User' },
+      { title: 'Merchant', path: '/admin/user-management/merchant', submodule: 'User' },
+      { title: 'Affiliate', path: '/admin/user-management/affiliate', submodule: 'Affiliate' },
     ],
   },
   {
     title: 'Roles & Permissions',
     icon: ShieldUser,
+    permissionModule: 'Roles & Permissions', // Explicit permission module mapping
+    requirePermission: true,
     children: [
-      { title: 'Roles', path: '/admin/roles-permissions/roles' },
-      { title: 'Permissions', path: '/admin/roles-permissions/permissions' },
+      { title: 'Roles', path: '/admin/roles-permissions/roles', submodule: 'Role' },
+      { title: 'Permissions', path: '/admin/roles-permissions/permissions', submodule: 'Permission' },
     ],
   },
   {
     title: 'Risk & Compliance',
     icon: ShieldCheck,
+    permissionModule: 'Risk Management', // Explicit permission module mapping
+    requirePermission: true,
     children: [
-      { title: 'Manage Risk', path: '/admin/risk-compliance/manage-risk' },
-      { title: 'IP Allowlist', path: '/admin/risk-compliance/ip-allowlist' },
-      { title: 'Trusted Cards', path: '/admin/risk-compliance/trusted-cards' },
+      { title: 'Manage Risk', path: '/admin/risk-compliance/manage-risk' }, // No specific submodule - shows if has any Risk Management permission
+      { title: 'IP Allowlist', path: '/admin/risk-compliance/ip-allowlist', submodule: 'IP Whitelist' },
+      { title: 'Trusted Cards', path: '/admin/risk-compliance/trusted-cards' }, // No specific submodule - shows if has any Risk Management permission
     ],
   },
   {
     title: 'Gateways & Channels',
     icon: Plug,
+    permissionModule: 'Gateway Management', // Explicit permission module mapping
+    requirePermission: true,
     children: [
-      { title: 'Gateways', path: '/admin/gateways/gateways' },
-      { title: 'Payment Channels', path: '/admin/gateways/payment-channels' },
+      { title: 'Gateways', path: '/admin/gateways/gateways', submodule: 'Gateways' },
+      { title: 'Payment Channels', path: '/admin/gateways/payment-channels', submodule: 'Payment Channel' },
     ],
   },
   {
     title: 'Master',
     icon: FileText,
+    permissionModule: 'Master Module', // Explicit permission module mapping
+    requirePermission: true,
     children: [
-      { title: 'Countries', path: '/admin/master/countries' },
-      { title: 'Currency', path: '/admin/master/currency' },
+      { title: 'Countries', path: '/admin/master/countries', submodule: 'Countries' },
+      { title: 'Currency', path: '/admin/master/currency', submodule: 'Currency' },
     ],
   },
   {
@@ -396,6 +409,24 @@ export const ADMIN_MENU: MenuConfig = [
   { title: 'AI Promt', icon: Theater, disabled: true },
   { title: 'Invoice Generator', icon: ScrollText, disabled: true },
 ];
+
+/**
+ * Get filtered admin menu based on user permissions
+ * Only shows menu items for modules the user has access to
+ * 
+ * @returns Filtered menu configuration
+ */
+export function getAdminMenu(): MenuConfig {
+  // Filter menu items based on permissions
+  // Dashboard is always shown, other items are filtered by module access
+  return filterMenuByPermissions(BASE_ADMIN_MENU);
+}
+
+/**
+ * Admin menu (for backward compatibility)
+ * This will be filtered automatically when used via getMenuByRole
+ */
+export const ADMIN_MENU: MenuConfig = BASE_ADMIN_MENU;
 
 export default ADMIN_MENU;
 

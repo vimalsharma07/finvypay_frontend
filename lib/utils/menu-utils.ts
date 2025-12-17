@@ -182,7 +182,13 @@ export function getMenuByRole(role?: UserRole | null, pathname?: string): MenuCo
   switch (userRole.toUpperCase()) {
     case 'ADMIN':
     case 'SUPER_ADMIN':
-      return ADMIN_MENU;
+      // Use getAdminMenu() to get permission-filtered menu
+      try {
+        const { getAdminMenu } = require('@/config/menus/admin-menu');
+        return getAdminMenu();
+      } catch {
+        return ADMIN_MENU;
+      }
     case 'USER':
     case 'MERCHANT':
       return USER_MENU;
@@ -194,7 +200,12 @@ export function getMenuByRole(role?: UserRole | null, pathname?: string): MenuCo
       if (process.env.NODE_ENV === 'development') {
         console.warn('[getMenuByRole] Unknown role:', userRole, 'defaulting to ADMIN_MENU');
       }
-      return ADMIN_MENU;
+      try {
+        const { getAdminMenu } = require('@/config/menus/admin-menu');
+        return getAdminMenu();
+      } catch {
+        return ADMIN_MENU;
+      }
   }
 }
 
