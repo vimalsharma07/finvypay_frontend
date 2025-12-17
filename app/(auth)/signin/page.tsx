@@ -30,6 +30,7 @@ import { ForgotPasswordDialog } from './components/forgot-password-dialog';
 import { useOtpSignin } from '@/hooks/use-otp-signin';
 import { handleLoginRedirect, getRedirectPathByRole } from '@/lib/utils/menu-utils';
 import { isAuthenticated } from '@/lib/auth-storage';
+import { fetchAndStorePermissions } from '@/lib/utils/auth-helpers';
 
 // OTP verification schema
 const otpSchema = z.object({
@@ -58,8 +59,16 @@ export default function Page() {
     isProcessing: isGoogleProcessing,
     error: googleError,
   } = useGoogleOAuth({
-    onSuccess: (data) => {
-      handleLoginRedirect(data, router);
+    onSuccess: async (data) => {
+      try {
+        // Fetch and store permissions after successful Google login
+        await fetchAndStorePermissions();
+        handleLoginRedirect(data, router);
+      } catch (permError) {
+        // Even if permissions fetch fails, still redirect (backend handles authorization)
+        console.error('Failed to fetch permissions:', permError);
+        handleLoginRedirect(data, router);
+      }
     },
     onError: (errorMessage) => {
       setError(errorMessage);
@@ -78,8 +87,16 @@ export default function Page() {
     otpSent,
     resetState: resetOtpState,
   } = useOtpSignin({
-    onSuccess: (data) => {
-      handleLoginRedirect(data, router);
+    onSuccess: async (data) => {
+      try {
+        // Fetch and store permissions after successful OTP verification
+        await fetchAndStorePermissions();
+        handleLoginRedirect(data, router);
+      } catch (permError) {
+        // Even if permissions fetch fails, still redirect (backend handles authorization)
+        console.error('Failed to fetch permissions:', permError);
+        handleLoginRedirect(data, router);
+      }
     },
     onError: (errorMessage) => {
       setError(errorMessage);
@@ -206,17 +223,32 @@ export default function Page() {
       });
 
       handleApiResponse(response, {
-        onSuccess: (data) => {
-          handleLoginRedirect(data, router);
+        onSuccess: async (data) => {
+          try {
+            // Step 3: Fetch and store permissions after successful login
+            await fetchAndStorePermissions();
+            
+            // Step 4: Redirect to appropriate dashboard
+            handleLoginRedirect(data, router);
+          } catch (permError) {
+            // Even if permissions fetch fails, still redirect (backend handles authorization)
+            console.error('Failed to fetch permissions:', permError);
+            handleLoginRedirect(data, router);
+          } finally {
+            setIsProcessing(false);
+          }
         },
         onError: (errorMessage) => {
           setError(errorMessage || 'Login failed. Please check your credentials and try again.');
+          setIsProcessing(false);
         },
         onValidationError: (errors, messages) => {
           setError(Array.isArray(messages) ? messages.join(', ') : messages || 'Validation error occurred');
+          setIsProcessing(false);
         },
         onUnauthorized: () => {
           setError('Invalid credentials. Please check your email and password.');
+          setIsProcessing(false);
         },
       });
     } catch (err) {

@@ -23,6 +23,13 @@ export function clearAuthState(): void {
   refreshPromise = null;
   clearAuthData();
   
+  // Clear Zustand auth store
+  if (typeof window !== 'undefined') {
+    import('./stores/auth-store').then(({ useAuthStore }) => {
+      useAuthStore.getState().clearAuth();
+    });
+  }
+  
   // Clear in-memory token via api.ts
   if (typeof window !== 'undefined') {
     import('./api').then(({ setAccessToken }) => {
