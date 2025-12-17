@@ -227,10 +227,14 @@ export function getRedirectPathByRole(role?: UserRole | null): string {
   // Normalize role to uppercase for comparison
   const normalizedRole = typeof userRole === 'string' ? userRole.toUpperCase() : userRole;
 
+  // Handle super_admin explicitly
+  if (normalizedRole === 'SUPER_ADMIN' || (typeof userRole === 'string' && userRole.toLowerCase() === 'super_admin')) {
+    return '/admin/dashboard';
+  }
+
   // Map role to default redirect path
   switch (normalizedRole) {
     case 'ADMIN':
-    case 'SUPER_ADMIN':
       return '/admin/dashboard';
     case 'USER':
     case 'MERCHANT':

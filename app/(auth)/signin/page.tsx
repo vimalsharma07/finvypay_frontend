@@ -28,7 +28,8 @@ import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { useGoogleOAuth } from '@/hooks/use-google-oauth';
 import { ForgotPasswordDialog } from './components/forgot-password-dialog';
 import { useOtpSignin } from '@/hooks/use-otp-signin';
-import { handleLoginRedirect } from '@/lib/utils/menu-utils';
+import { handleLoginRedirect, getRedirectPathByRole } from '@/lib/utils/menu-utils';
+import { isAuthenticated } from '@/lib/auth-storage';
 
 // OTP verification schema
 const otpSchema = z.object({
@@ -88,6 +89,14 @@ export default function Page() {
   // Handle resend OTP for OTP signin (use sendOtp from hook)
   const [resendCooldown, setResendCooldown] = useState(0);
   const resendTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Redirect if user is already authenticated
+  useEffect(() => {
+    if (isAuthenticated()) {
+      const redirectPath = getRedirectPathByRole();
+      router.replace(redirectPath);
+    }
+  }, [router]);
 
   useEffect(() => {
     if (resendCooldown > 0) {

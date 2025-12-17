@@ -82,7 +82,7 @@ export function hasRouteAccess(userRole: UserRole | null, pathname: string): boo
 
   // Strict role → route matching
   if (pathname.startsWith("/admin")) {
-    return normalizedRole === "ADMIN";
+    return normalizedRole === "ADMIN" || normalizedRole === "SUPER_ADMIN";
   }
 
   if (pathname.startsWith("/user")) {

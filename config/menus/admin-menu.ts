@@ -40,6 +40,7 @@ import {
   Settings,
   Share2,
   Shield,
+  ShieldCheck,
   ShieldUser,
   ShoppingCart,
   SquareMousePointer,
@@ -80,7 +81,7 @@ export const ADMIN_MENU: MenuConfig = [
   },
   {
     title: 'Risk & Compliance',
-    icon: Shield,
+    icon: ShieldCheck,
     children: [
       { title: 'Manage Risk', path: '/admin/risk-compliance/manage-risk' },
       { title: 'IP Allowlist', path: '/admin/risk-compliance/ip-allowlist' },
@@ -89,7 +90,7 @@ export const ADMIN_MENU: MenuConfig = [
   },
   {
     title: 'Gateways & Channels',
-    icon: Shield,
+    icon: Plug,
     children: [
       { title: 'Gateways', path: '/admin/gateways/gateways' },
       { title: 'Payment Channels', path: '/admin/gateways/payment-channels' },
