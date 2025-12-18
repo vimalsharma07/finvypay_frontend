@@ -14,10 +14,12 @@ export const createUserSchema = z.object({
     .min(2, { message: 'Name must be at least 2 characters long.' })
     .min(1, { message: 'Name is required.' }),
   password: getPasswordSchema(),
-  role: z
+  roleId: z
     .string()
-    .min(1, { message: 'Role is required.' }),
-  roleId: z.string().min(1, { message: 'Role is required.' }),
+    .min(1, { message: 'Role is required.' })
+    .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+      message: 'Role ID must be a valid positive number',
+    }),
 });
 
 export type CreateUserSchemaType = z.infer<typeof createUserSchema>;

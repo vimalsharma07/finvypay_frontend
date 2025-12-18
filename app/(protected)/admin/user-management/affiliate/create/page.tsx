@@ -46,7 +46,6 @@ export default function CreateAffiliateUserPage() {
       email: '',
       name: '',
       password: '',
-      role: '',
       roleId: '',
     },
   });
@@ -54,14 +53,11 @@ export default function CreateAffiliateUserPage() {
   const onSubmit = async (data: CreateUserSchemaType) => {
     setIsSubmitting(true);
     try {
-      const selectedRole = roles.find((role) => role.id.toString() === data.roleId);
-
       const response = await createUser({
         email: data.email,
         name: data.name,
         password: data.password,
-        role: selectedRole?.name || data.role,
-        roleId: data.roleId || null,
+        roleId: Number(data.roleId),
       });
 
       handleApiResponse<User>(response, {
@@ -178,9 +174,6 @@ export default function CreateAffiliateUserPage() {
                     disabled={isSubmitting}
                     roles={roles}
                     loadingRoles={loadingRoles}
-                    onRoleChange={(roleId, roleName) => {
-                      form.setValue('role', roleName);
-                    }}
                   />
                 </div>
 

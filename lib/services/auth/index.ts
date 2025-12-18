@@ -130,22 +130,33 @@ export async function login(
 
     // If login is successful, store auth data
     if (response?.success && response?.data?.accessToken) {
-      const accessTokenValue = typeof response.data.accessToken === 'object' && response.data.accessToken !== null
-        ? (response.data.accessToken as any).accessToken || response.data.accessToken
-        : response.data.accessToken;
+      // Extract access token and refresh token (handle both string and object formats)
+      let accessTokenValue: string;
+      let refreshTokenValue: string | undefined;
       
-      // Set access token in memory (refresh token is in httpOnly cookie)
+      if (typeof response.data.accessToken === 'object' && response.data.accessToken !== null) {
+        // Nested structure: { accessToken: { accessToken: "...", refreshToken: "..." } }
+        accessTokenValue = (response.data.accessToken as any).accessToken || response.data.accessToken;
+        refreshTokenValue = (response.data.accessToken as any).refreshToken;
+      } else {
+        // Direct string or check for separate refreshToken field
+        accessTokenValue = response.data.accessToken as string;
+        refreshTokenValue = response.data.refreshToken;
+      }
+      
+      // Set access token in memory
       if (typeof window !== 'undefined') {
         const { setAccessToken } = await import('../../api');
         setAccessToken(accessTokenValue);
       }
       
+      // Store both tokens in sessionStorage
       storeAuthData({
         accessToken: accessTokenValue,
+        refreshToken: refreshTokenValue,
         sessionId: response.data.sessionId,
         tokenExpiry: response.data.tokenExpiry,
         userData: response.data,
-        // Note: refreshToken no longer stored - it's in httpOnly cookie
       });
     }
 
@@ -698,17 +709,27 @@ export async function logout(sessionId?: string): Promise<ApiResponse<{ success:
 }
 
 /**
- * Refresh access token using refresh token
- * Refresh token is now in httpOnly cookie (sent via credentials: 'include')
+ * Refresh access token using refresh token from sessionStorage
  * 
- * @returns Promise with new access token
+ * @returns Promise with new access token and refresh token
  */
 export async function refreshToken(): Promise<ApiResponse<RefreshTokenResponse>> {
   try {
-    // Refresh token is in httpOnly cookie - no need to send in body
+    // Get refresh token from sessionStorage
+    const { getRefreshToken } = await import('../../auth-storage');
+    const refreshTokenValue = getRefreshToken();
+    
+    if (!refreshTokenValue) {
+      return {
+        status: 401,
+        error: 'No refresh token available',
+      };
+    }
+
+    // Send refresh token in request body
     const response = await http.post(
       authRoutes.refresh,
-      {}, // Empty body - server reads refresh token from cookie
+      { refreshToken: refreshTokenValue },
       {
         auth: false, // Don't send auth token for refresh
       }
@@ -716,10 +737,21 @@ export async function refreshToken(): Promise<ApiResponse<RefreshTokenResponse>>
 
     // If refresh is successful, update stored tokens
     if (response?.success && response?.data?.accessToken) {
+      // Handle nested response structure: { data: { accessToken: { accessToken: "...", refreshToken: "..." } } }
+      let accessTokenValue: string;
+      let newRefreshTokenValue: string | undefined;
+      
       const accessTokenData = response.data.accessToken;
-      const accessTokenValue = typeof accessTokenData === 'object' && accessTokenData !== null
-        ? (accessTokenData as any).accessToken || accessTokenData
-        : accessTokenData;
+      
+      if (typeof accessTokenData === 'object' && accessTokenData !== null) {
+        // Nested structure: { accessToken: { accessToken: "...", refreshToken: "..." } }
+        accessTokenValue = (accessTokenData as any).accessToken || accessTokenData;
+        newRefreshTokenValue = (accessTokenData as any).refreshToken;
+      } else {
+        // Direct string format
+        accessTokenValue = accessTokenData as string;
+        newRefreshTokenValue = response.data.refreshToken;
+      }
       
       // Set access token in memory
       if (typeof window !== 'undefined') {
@@ -727,12 +759,13 @@ export async function refreshToken(): Promise<ApiResponse<RefreshTokenResponse>>
         setAccessToken(accessTokenValue);
       }
       
+      // Store both new tokens in sessionStorage
       storeAuthData({
         accessToken: accessTokenValue,
+        refreshToken: newRefreshTokenValue,
         sessionId: response.data.sessionId,
         tokenExpiry: response.data.tokenExpiry,
         userData: response.data,
-        // Note: refreshToken no longer stored - it's in httpOnly cookie
       });
     }
 

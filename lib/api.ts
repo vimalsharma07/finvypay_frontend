@@ -69,9 +69,9 @@ let tokenRehydrated = false;
 const getToken = (): string | null => {
   if (isServer) return null;
   
-  // Rehydrate from localStorage on first access (for app reload)
+  // Rehydrate from sessionStorage on first access (for app reload)
   if (!tokenRehydrated && typeof window !== 'undefined') {
-    const stored = localStorage.getItem("access_token");
+    const stored = sessionStorage.getItem("access_token");
     if (stored) {
       inMemoryAccessToken = stored;
     }
@@ -86,9 +86,9 @@ export function setAccessToken(token: string | null): void {
   if (isServer) return;
   inMemoryAccessToken = token;
   if (token && typeof window !== 'undefined') {
-    localStorage.setItem("access_token", token);
+    sessionStorage.setItem("access_token", token);
   } else if (typeof window !== 'undefined') {
-    localStorage.removeItem("access_token");
+    sessionStorage.removeItem("access_token");
   }
 }
 
