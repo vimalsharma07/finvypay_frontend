@@ -90,7 +90,7 @@ export default function EditRolePage() {
     const fetchData = async () => {
       if (!roleId) {
         toast.error('Role ID is missing');
-        router.push('/admin/roles');
+        router.push('/admin/roles-permissions/roles');
         return;
       }
 
@@ -158,13 +158,13 @@ export default function EditRolePage() {
           },
           onError: (errorMessage) => {
             toast.error(errorMessage || 'Failed to load role');
-            router.push('/admin/roles');
+            router.push('/admin/roles-permissions/roles');
           },
         });
       } catch (error) {
         console.error('Error fetching data:', error);
         toast.error('An error occurred while loading data');
-        router.push('/admin/roles');
+        router.push('/admin/roles-permissions/roles');
       } finally {
         setLoading(false);
       }
@@ -454,7 +454,7 @@ export default function EditRolePage() {
               <p className="text-muted-foreground">Role not found</p>
               <Button
                 variant="outline"
-                onClick={() => router.push('/admin/roles')}
+                onClick={() => router.push('/admin/roles-permissions/roles')}
                 className="mt-4"
               >
                 Back to Roles
@@ -662,7 +662,7 @@ export default function EditRolePage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.push('/admin/roles')}
+                  onClick={() => router.push('/admin/roles-permissions/roles')}
                   disabled={submitting}
                 >
                   Cancel
