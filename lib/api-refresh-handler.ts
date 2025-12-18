@@ -3,7 +3,7 @@
  * Handles automatic token refresh on 401 errors
  */
 
-import { clearAuthData, storeAuthData } from './auth-storage';
+import { clearAuthData, getRefreshToken, storeAuthData } from './auth-storage';
 import { authRoutes } from './routes/auth-routes';
 
 const isServer = typeof window === 'undefined';
@@ -72,16 +72,22 @@ async function refreshAccessToken(): Promise<string | null> {
 
   refreshPromise = (async (): Promise<string | null> => {
     try {
-      // Refresh token is now in httpOnly cookie (credentials: 'include' sends it)
-      // No need to read from localStorage
+      // Get refresh token from sessionStorage
+      const refreshTokenValue = getRefreshToken();
+      
+      if (!refreshTokenValue) {
+        clearAuthState();
+        return null;
+      }
+
+      // Send refresh token in request body
       const response = await fetch(`${API_BASE_URL}${authRoutes.refresh}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // Sends httpOnly refresh token cookie
-        // Remove body - server reads from cookie
-        // body: JSON.stringify({ refreshToken: refreshTokenValue }),
+        credentials: 'include',
+        body: JSON.stringify({ refreshToken: refreshTokenValue }),
       });
 
       const data = await response.json();
@@ -91,7 +97,7 @@ async function refreshAccessToken(): Promise<string | null> {
         return null;
       }
 
-      // Defensive parsing: handle multiple response shapes
+      // Handle nested response structure: { data: { accessToken: { accessToken: "...", refreshToken: "..." } } }
       let newAccessToken: string | null = null;
       let newRefreshToken: string | null = null;
 
@@ -125,10 +131,11 @@ async function refreshAccessToken(): Promise<string | null> {
         setAccessToken(newAccessToken);
       }
       
-      // Store user data if available (but not refresh token - it's in cookie)
+      // Store both tokens in sessionStorage
       if (data?.data) {
         storeAuthData({
           accessToken: newAccessToken,
+          refreshToken: newRefreshToken || undefined,
           sessionId: data.data.sessionId,
           tokenExpiry: data.data.tokenExpiry,
           userData: data.data,

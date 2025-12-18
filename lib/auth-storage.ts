@@ -12,6 +12,8 @@ const AUTH_KEYS = {
 
 /**
  * Store authentication tokens and user data
+ * Tokens are stored in sessionStorage for security (cleared on tab close)
+ * User data remains in localStorage for persistence across page reloads
  */
 export function storeAuthData(data: {
   accessToken: string;
@@ -23,22 +25,22 @@ export function storeAuthData(data: {
   if (typeof window === 'undefined') return;
 
   try {
-    // Store tokens
-    localStorage.setItem(AUTH_KEYS.ACCESS_TOKEN, data.accessToken);
+    // Store tokens in sessionStorage (cleared on tab close)
+    sessionStorage.setItem(AUTH_KEYS.ACCESS_TOKEN, data.accessToken);
     
     if (data.refreshToken) {
-      localStorage.setItem(AUTH_KEYS.REFRESH_TOKEN, data.refreshToken);
+      sessionStorage.setItem(AUTH_KEYS.REFRESH_TOKEN, data.refreshToken);
     }
     
     if (data.sessionId) {
-      localStorage.setItem(AUTH_KEYS.SESSION_ID, data.sessionId);
+      sessionStorage.setItem(AUTH_KEYS.SESSION_ID, data.sessionId);
     }
     
     if (data.tokenExpiry) {
-      localStorage.setItem(AUTH_KEYS.TOKEN_EXPIRY, data.tokenExpiry);
+      sessionStorage.setItem(AUTH_KEYS.TOKEN_EXPIRY, data.tokenExpiry);
     }
 
-    // Store user data
+    // Store user data in localStorage (persists across page reloads)
     if (data.userData) {
       localStorage.setItem(AUTH_KEYS.USER, JSON.stringify(data.userData));
       
@@ -64,35 +66,35 @@ export function storeAuthData(data: {
 }
 
 /**
- * Get access token
+ * Get access token from sessionStorage
  */
 export function getAccessToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem(AUTH_KEYS.ACCESS_TOKEN);
+  return sessionStorage.getItem(AUTH_KEYS.ACCESS_TOKEN);
 }
 
 /**
- * Get refresh token
+ * Get refresh token from sessionStorage
  */
 export function getRefreshToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem(AUTH_KEYS.REFRESH_TOKEN);
+  return sessionStorage.getItem(AUTH_KEYS.REFRESH_TOKEN);
 }
 
 /**
- * Get session ID
+ * Get session ID from sessionStorage
  */
 export function getSessionId(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem(AUTH_KEYS.SESSION_ID);
+  return sessionStorage.getItem(AUTH_KEYS.SESSION_ID);
 }
 
 /**
- * Get token expiry
+ * Get token expiry from sessionStorage
  */
 export function getTokenExpiry(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem(AUTH_KEYS.TOKEN_EXPIRY);
+  return sessionStorage.getItem(AUTH_KEYS.TOKEN_EXPIRY);
 }
 
 /**
@@ -145,14 +147,21 @@ export function isTokenExpired(): boolean {
 
 /**
  * Clear all authentication data
+ * Clears tokens from sessionStorage and user data from localStorage
  */
 export function clearAuthData(): void {
   if (typeof window === 'undefined') return;
   
   try {
-    Object.values(AUTH_KEYS).forEach(key => {
-      localStorage.removeItem(key);
-    });
+    // Clear tokens from sessionStorage
+    sessionStorage.removeItem(AUTH_KEYS.ACCESS_TOKEN);
+    sessionStorage.removeItem(AUTH_KEYS.REFRESH_TOKEN);
+    sessionStorage.removeItem(AUTH_KEYS.SESSION_ID);
+    sessionStorage.removeItem(AUTH_KEYS.TOKEN_EXPIRY);
+    
+    // Clear user data from localStorage
+    localStorage.removeItem(AUTH_KEYS.USER);
+    localStorage.removeItem(AUTH_KEYS.USER_PROFILE);
   } catch (error) {
     console.error('Failed to clear auth data:', error);
   }
