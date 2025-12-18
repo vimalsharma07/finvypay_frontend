@@ -22,13 +22,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { getUserById, updateUser, User } from '@/lib/services/admin/users';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
@@ -36,6 +29,8 @@ import {
   updateUserSchema,
   UpdateUserSchemaType,
 } from '@/lib/validations/admin/adminUsers/user-validation';
+import { RoleSelectField } from '@/components/common/role-select-field';
+import { useRoles } from '@/hooks/use-roles';
 import { toast } from 'sonner';
 
 export default function EditUserPage() {
@@ -45,13 +40,14 @@ export default function EditUserPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const { roles, loadingRoles } = useRoles({ type: 'ADMIN' });
 
   const form = useForm<UpdateUserSchemaType>({
     resolver: zodResolver(updateUserSchema),
     defaultValues: {
       name: '',
       email: '',
-      role: 'admin',
+      roleId: '',
       isBlocked: false,
       isDeleted: false,
     },
@@ -70,20 +66,14 @@ export default function EditUserPage() {
           onSuccess: (userData) => {
             console.log('User data received:', userData);
             setUser(userData);
-            // Reset form with user data
+            
+            // Reset form with user data (roleId will be set in separate effect when roles are loaded)
             form.reset({
               name: userData.name || '',
               email: userData.email || '',
-              role: userData.role || 'admin',
+              roleId: '',
               isBlocked: userData.isBlocked ?? false,
               isDeleted: userData.isDeleted ?? false,
-            });
-            console.log('Form reset with data:', {
-              name: userData.name,
-              email: userData.email,
-              role: userData.role,
-              isBlocked: userData.isBlocked,
-              isDeleted: userData.isDeleted,
             });
           },
           onError: (errorMessage) => {
@@ -107,6 +97,36 @@ export default function EditUserPage() {
     fetchUser();
   }, [userId, router, form]);
 
+  // Update roleId when roles are loaded and user data is available
+  useEffect(() => {
+    if (user && roles.length > 0) {
+      // Use roleId directly from API response if available, otherwise try to match by role name
+      let roleId = '';
+      
+      if (user.roleId) {
+        // Use roleId directly from API response
+        roleId = user.roleId.toString();
+      } else if (user.role) {
+        // Fallback: Find the role ID by matching the role name
+        const matchedRole = roles.find(
+          (role) => role.name.toLowerCase() === user.role?.toLowerCase()
+        );
+        roleId = matchedRole ? matchedRole.id.toString() : '';
+      }
+      
+      // Update only the roleId field
+      if (roleId) {
+        form.setValue('roleId', roleId);
+      }
+      
+      console.log('Role mapped:', {
+        userRole: user.role,
+        userRoleId: user.roleId,
+        roleId: roleId,
+      });
+    }
+  }, [user, roles, form]);
+
   const onSubmit = async (data: UpdateUserSchemaType) => {
     if (!userId) return;
 
@@ -115,9 +135,9 @@ export default function EditUserPage() {
       const response = await updateUser(userId, {
         name: data.name,
         email: data.email,
-        role: data.role,
-        isBlocked: data.isBlocked,
-        isDeleted: data.isDeleted,
+        roleId: Number(data.roleId),
+        // isBlocked: data.isBlocked,
+        // isDeleted: data.isDeleted,
       });
 
       handleApiResponse<User>(response, {
@@ -247,32 +267,11 @@ export default function EditUserPage() {
                     )}
                   />
 
-                  <FormField
+                  <RoleSelectField
                     control={form.control}
-                    name="role"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Role *</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                          disabled={true}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select role" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="admin">Admin</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                        <p className="text-xs text-muted-foreground">
-                          Admin users can only have "admin" role
-                        </p>
-                      </FormItem>
-                    )}
+                    disabled={isSubmitting}
+                    roles={roles}
+                    loadingRoles={loadingRoles}
                   />
 
                   <FormField

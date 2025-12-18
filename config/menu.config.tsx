@@ -77,8 +77,8 @@ export const MENU_SIDEBAR: MenuConfig = [
     title: 'Roles & Permissions',
     icon: ShieldUser,
     children: [
-      { title: 'Roles', path: '/admin/roles' },
-      { title: 'Permissions', path: '/admin/permissions' },
+      { title: 'Roles', path: '/admin/roles-permissions/roles' },
+      { title: 'Permissions', path: '/admin/roles-permissions/permissions' },
     ],
   },
   {

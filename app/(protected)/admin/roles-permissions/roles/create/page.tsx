@@ -246,7 +246,7 @@ export default function CreateRolePage() {
       handleApiResponse(response, {
         onSuccess: () => {
           toast.success('Role created successfully!');
-          router.push('/admin/roles');
+          router.push('/admin/roles-permissions/roles');
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to create role');
@@ -461,7 +461,7 @@ export default function CreateRolePage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.push('/admin/roles')}
+                  onClick={() => router.push('/admin/roles-permissions/roles')}
                 >
                   Cancel
                 </Button>
