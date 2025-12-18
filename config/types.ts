@@ -14,6 +14,10 @@ export interface MenuItem {
   expandTitle?: string;
   badge?: string;
   separator?: boolean;
+  // Permission control
+  permissionModule?: string; // Explicit permission module name (e.g., "User Management", "Gateway Management")
+  requirePermission?: boolean; // If true, requires permission check. If false/undefined, always visible (like Dashboard)
+  submodule?: string; // Submodule identifier for child items (e.g., "Admin User", "admin", "Merchant")
 }
 
 export type MenuConfig = MenuItem[];

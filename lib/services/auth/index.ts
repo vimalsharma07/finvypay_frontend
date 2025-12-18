@@ -757,3 +757,68 @@ export async function refreshToken(): Promise<ApiResponse<RefreshTokenResponse>>
   }
 }
 
+/**
+ * Get user permissions
+ * 
+ * @returns Promise with user permissions data
+ */
+export async function getPermissions(): Promise<ApiResponse<{
+  success: boolean;
+  data: {
+    id: string;
+    email: string;
+    role: string;
+    permissions: Array<{
+      id: number;
+      name: string;
+      identifier: string;
+      module: string;
+      subModule: string;
+      type: string;
+    }>;
+  };
+}>> {
+  try {
+    const response = await http.get(
+      authRoutes.permissions,
+      {
+        auth: true, // Requires authentication
+      }
+    ) as {
+      success: boolean;
+      data: {
+        id: string;
+        email: string;
+        role: string;
+        permissions: Array<{
+          id: number;
+          name: string;
+          identifier: string;
+          module: string;
+          subModule: string;
+          type: string;
+        }>;
+      };
+    };
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+

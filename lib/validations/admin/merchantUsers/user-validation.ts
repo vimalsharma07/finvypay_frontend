@@ -16,12 +16,8 @@ export const createUserSchema = z.object({
   password: getPasswordSchema(),
   role: z
     .string()
-    .min(1, { message: 'Role is required.' })
-    .refine((val) => ['admin', 'user', 'affiliate'].includes(val), {
-      message: 'Role must be one of: admin, user, or affiliate.',
-    }),
-  roleId: z.string().nullable().optional(),
-  parentId: z.string().nullable().optional(),
+    .min(1, { message: 'Role is required.' }),
+  roleId: z.string().min(1, { message: 'Role is required.' }),
 });
 
 export type CreateUserSchemaType = z.infer<typeof createUserSchema>;

@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useSettings } from '@/providers/settings-provider';
 import { SidebarHeader } from './sidebar-header';
-import { SidebarMenu } from './sidebar-menu';
+import { SidebarMenuClient } from './sidebar-menu-client';
 
 export function Sidebar() {
   const { settings } = useSettings();
@@ -22,7 +22,7 @@ export function Sidebar() {
       <SidebarHeader />
       <div className="overflow-hidden">
         <div className="w-(--sidebar-default-width)">
-          <SidebarMenu />
+          <SidebarMenuClient />
         </div>
       </div>
     </div>

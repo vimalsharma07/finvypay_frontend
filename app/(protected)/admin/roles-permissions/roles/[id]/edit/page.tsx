@@ -398,7 +398,7 @@ export default function EditRolePage() {
       handleApiResponse(response, {
         onSuccess: () => {
           toast.success('Role updated successfully!');
-          router.push('/admin/roles');
+          router.push('/admin/roles-permissions/roles');
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to update role');
