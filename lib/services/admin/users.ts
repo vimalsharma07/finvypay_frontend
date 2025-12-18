@@ -15,6 +15,7 @@ export interface User {
   email: string;
   name: string;
   role: string;
+  roleId?: number;
   parentId: string | null;
   emailVerifiedAt: string | null;
   isBlocked: boolean;
@@ -43,9 +44,9 @@ export interface CreateUserPayload {
 export interface UpdateUserPayload {
   name?: string;
   email?: string;
-  role?: string;
-  isBlocked?: boolean;
-  isDeleted?: boolean;
+  roleId?: number;
+  // isBlocked?: boolean;
+  // isDeleted?: boolean;
 }
 
 export interface UserListParams {
