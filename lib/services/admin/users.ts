@@ -36,8 +36,7 @@ export interface CreateUserPayload {
   email: string;
   name: string;
   password: string;
-  role: string;
-  roleId?: string | null;
+  roleId: number;
   parentId?: string | null;
 }
 
