@@ -118,6 +118,16 @@ const BASE_ADMIN_MENU: MenuConfig = [
     ],
   },
   {
+    title: 'Support',
+    icon: LifeBuoy,
+    permissionModule: 'Support', // Explicit permission module mapping
+    requirePermission: true,
+    children: [
+      { title: 'Tickets', path: '/admin/support/tickets', submodule: 'Tickets' },
+      { title: 'Help Center', path: '/admin/support/help-center', submodule: 'Help Center' },
+    ],
+  },
+  {
     title: 'Public Profile',
     icon: UserCircle,
     children: [
