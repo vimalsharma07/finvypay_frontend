@@ -96,7 +96,7 @@ export function getUserRole(pathname?: string): UserRole | null {
   
   try {
     const user = getUser();
-    
+    console.log('user', user);
     // Check for role in various possible locations
     // Priority: role.type > role.name > role.slug > roleName > roleType > role (if string)
     let role: string | null = null;

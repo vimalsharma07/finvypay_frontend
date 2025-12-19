@@ -102,10 +102,33 @@ export function getTokenExpiry(): string | null {
  */
 export function getUser(): any | null {
   if (typeof window === 'undefined') return null;
+  
   try {
+    // First, try to get from Zustand store (single source of truth)
+    // This ensures consistency with the Zustand store
+    try {
+      // Dynamic import to avoid circular dependencies
+      const { useAuthStore } = require('@/lib/stores/auth-store');
+      const state = useAuthStore.getState();
+      if (state?.user) {
+        return state.user;
+      }
+    } catch (error) {
+      // Zustand store not available or error accessing it
+      // Fall through to localStorage fallback
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('[getUser] Zustand store not available, using localStorage fallback');
+      }
+    }
+    
+    // Fallback to localStorage (for backward compatibility)
+    // Note: This should match where storeAuthData stores the user (line 45)
     const user = localStorage.getItem(AUTH_KEYS.USER);
     return user ? JSON.parse(user) : null;
-  } catch {
+  } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('[getUser] Error retrieving user data:', error);
+    }
     return null;
   }
 }

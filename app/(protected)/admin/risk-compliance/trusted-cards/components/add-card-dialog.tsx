@@ -21,7 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -34,54 +34,41 @@ import { getUsers, User } from '@/lib/services/admin/users';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 
-// IP address validation regex
-const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+// Card number validation (basic validation - accepts digits only, 13-19 digits)
+const cardNumberRegex = /^\d{13,19}$/;
 
 // Form schema
-const addIpSchema = z.object({
+const addCardSchema = z.object({
   userId: z.string().min(1, 'User is required'),
-  ips: z.string().min(1, 'At least one IP address is required').refine(
-    (value) => {
-      // Split by newlines, commas, or spaces and filter empty strings
-      const ipList = value
-        .split(/[\n,]+/)
-        .map((ip) => ip.trim())
-        .filter((ip) => ip.length > 0);
-      
-      if (ipList.length === 0) return false;
-      
-      // Validate each IP address
-      return ipList.every((ip) => ipRegex.test(ip));
-    },
-    {
-      message: 'Please enter valid IP addresses (one per line or comma-separated)',
-    }
-  ),
+  card: z
+    .string()
+    .min(1, 'Card number is required')
+    .regex(cardNumberRegex, 'Please enter a valid card number (13-19 digits)'),
 });
 
-type AddIpFormData = z.infer<typeof addIpSchema>;
+type AddCardFormData = z.infer<typeof addCardSchema>;
 
-interface AddIpDialogProps {
+interface AddCardDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (userId: string, ips: string[]) => Promise<void>;
+  onSubmit: (userId: string, card: string) => Promise<void>;
   isSubmitting?: boolean;
 }
 
-export function AddIpDialog({
+export function AddCardDialog({
   open,
   onOpenChange,
   onSubmit,
   isSubmitting = false,
-}: AddIpDialogProps) {
+}: AddCardDialogProps) {
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
 
-  const form = useForm<AddIpFormData>({
-    resolver: zodResolver(addIpSchema),
+  const form = useForm<AddCardFormData>({
+    resolver: zodResolver(addCardSchema),
     defaultValues: {
       userId: '',
-      ips: '',
+      card: '',
     },
     mode: 'onChange',
   });
@@ -92,7 +79,7 @@ export function AddIpDialog({
       fetchUsers();
       form.reset({
         userId: '',
-        ips: '',
+        card: '',
       });
     }
   }, [open, form]);
@@ -124,14 +111,8 @@ export function AddIpDialog({
     }
   };
 
-  const handleSubmit = async (data: AddIpFormData) => {
-    // Parse IP addresses from textarea (split by newlines, commas, or spaces)
-    const ipList = data.ips
-      .split(/[\n,]+/)
-      .map((ip) => ip.trim())
-      .filter((ip) => ip.length > 0);
-
-    await onSubmit(data.userId, ipList);
+  const handleSubmit = async (data: AddCardFormData) => {
+    await onSubmit(data.userId, data.card);
   };
 
   const handleClose = (newOpen: boolean) => {
@@ -145,9 +126,9 @@ export function AddIpDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add IP Addresses</DialogTitle>
+          <DialogTitle>Add Trusted Card</DialogTitle>
           <DialogDescription>
-            Select a user and enter IP addresses to whitelist (one per line or comma-separated).
+            Select a user and enter the card number to trusted card list.
           </DialogDescription>
         </DialogHeader>
         <DialogBody>
@@ -169,7 +150,7 @@ export function AddIpDialog({
                         disabled={isSubmitting || loadingUsers}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder={loadingUsers ? 'Loading users...' : 'Select a user'} />
+                          <SelectValue placeholder={loadingUsers ? 'Loading users...' : 'Select a User'} />
                         </SelectTrigger>
                         <SelectContent>
                           {users.map((user) => (
@@ -185,27 +166,31 @@ export function AddIpDialog({
                 )}
               />
 
-              {/* IP Addresses - Textarea */}
+              {/* Card Number Input */}
               <FormField
                 control={form.control}
-                name="ips"
+                name="card"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      IP Addresses <span className="text-destructive">*</span>
+                      Card <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="192.168.1.1&#10;192.168.1.2&#10;10.0.0.1"
-                        className="min-h-24 font-mono"
+                      <Input
+                        placeholder="Enter Card Number"
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={19}
                         disabled={isSubmitting}
                         {...field}
+                        onChange={(e) => {
+                          // Only allow digits
+                          const value = e.target.value.replace(/\D/g, '');
+                          field.onChange(value);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
-                    <p className="text-xs text-muted-foreground">
-                      Enter IP addresses, one per line or comma-separated
-                    </p>
                   </FormItem>
                 )}
               />
@@ -220,7 +205,7 @@ export function AddIpDialog({
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary" disabled={isSubmitting || loadingUsers}>
-                  {isSubmitting ? 'Adding...' : 'Add IP Addresses'}
+                  {isSubmitting ? 'Creating...' : 'Create'}
                 </Button>
               </DialogFooter>
             </form>

@@ -134,14 +134,8 @@ export function useRouteGuard() {
 
     // 2️⃣ User is authenticated → get role
     const role = getUserRole();
-
     // 3️⃣ Deny access based on RBAC rules
     if (shouldDenyAccess(role, pathname)) {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(
-          `[RouteGuard] Role "${role}" blocked from "${pathname}"`
-        );
-      }
       router.replace("/forbidden");
       return;
     }

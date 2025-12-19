@@ -12,6 +12,8 @@ export * from './roles';
 export * from './permissions';
 export * from './users';
 export * from './ip-whitelist';
+export * from './card-whitelist';
+export * from './risk-management';
 export * from './currency';
 export * from './countries';
 
