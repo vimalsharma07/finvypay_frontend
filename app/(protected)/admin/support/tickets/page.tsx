@@ -204,33 +204,33 @@ export default function SupportTicketsPage() {
     }
   };
 
-  const getPriorityBadgeVariant = (priority: string) => {
+  const getPriorityBadgeVariant = (priority: string): 'primary' | 'destructive' | 'secondary' | 'warning' | 'info' => {
     switch (priority) {
       case 'URGENT':
         return 'destructive';
       case 'HIGH':
         return 'destructive';
       case 'MEDIUM':
-        return 'default';
+        return 'primary';
       case 'LOW':
         return 'secondary';
       default:
-        return 'default';
+        return 'primary';
     }
   };
 
-  const getStatusBadgeVariant = (status: string) => {
+  const getStatusBadgeVariant = (status: string): 'primary' | 'destructive' | 'secondary' | 'success' | 'warning' | 'info' => {
     switch (status) {
       case 'OPEN':
-        return 'default';
+        return 'primary';
       case 'IN_PROGRESS':
-        return 'default';
+        return 'info';
       case 'RESOLVED':
-        return 'secondary';
+        return 'success';
       case 'CLOSED':
         return 'secondary';
       default:
-        return 'default';
+        return 'primary';
     }
   };
 
@@ -401,10 +401,10 @@ export default function SupportTicketsPage() {
             </CardHeader>
             <CardTable>
               <ScrollArea className="w-full">
-                <DataGridTable table={table} loading={loading} />
+                <DataGridTable />
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
-              <DataGridPagination table={table} />
+              <DataGridPagination />
             </CardTable>
           </Card>
         </DataGrid>
