@@ -14,6 +14,7 @@ import {
   Code,
   Codepen,
   Coffee,
+  CreditCard,
   File as DocumentIcon,
   Euro,
   Eye,
@@ -74,6 +75,16 @@ const BASE_ADMIN_MENU: MenuConfig = [
       { title: 'Admin', path: '/admin/user-management/admin', submodule: 'Admin User' },
       { title: 'Merchant', path: '/admin/user-management/merchant', submodule: 'User' },
       { title: 'Affiliate', path: '/admin/user-management/affiliate', submodule: 'Affiliate' },
+    ],
+  },
+  {
+    title: 'Transactions',
+    icon: CreditCard,
+    permissionModule: 'User Management', 
+    requirePermission: true,
+    children: [
+      { title: 'Transactions', path: '/admin/transactions/transactions', submodule: 'Admin User' },
+      { title: 'Sanbox Transactions', path: '/admin/transactions/sandbox-transactions', submodule: 'User' },
     ],
   },
   {

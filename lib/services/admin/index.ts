@@ -16,4 +16,6 @@ export * from './card-whitelist';
 export * from './risk-management';
 export * from './currency';
 export * from './countries';
+export * from './transaction';
+export * from './support-ticket';
 
