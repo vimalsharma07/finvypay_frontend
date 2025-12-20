@@ -80,11 +80,11 @@ const BASE_ADMIN_MENU: MenuConfig = [
   {
     title: 'Transactions',
     icon: CreditCard,
-    permissionModule: 'User Management', 
-    requirePermission: true,
+    permissionModule: 'Transactions', 
+    requirePermission: false,
     children: [
-      { title: 'Transactions', path: '/admin/transactions/transactions', submodule: 'Admin User' },
-      { title: 'Sanbox Transactions', path: '/admin/transactions/sandbox-transactions', submodule: 'User' },
+      { title: 'Transactions', path: '/admin/transactions/transactions', submodule: 'Transactions' },
+      { title: 'Sanbox Transactions', path: '/admin/transactions/sandbox-transactions', submodule: 'Sanbox Transactions' },
     ],
   },
   {
@@ -126,6 +126,17 @@ const BASE_ADMIN_MENU: MenuConfig = [
     children: [
       { title: 'Countries', path: '/admin/master/countries', submodule: 'Countries' },
       { title: 'Currency', path: '/admin/master/currency', submodule: 'Currency' },
+    ],
+  },
+  {
+    title: 'Dev Logs',
+    icon: ScrollText,
+    permissionModule: 'Logs', // Explicit permission module mapping
+    requirePermission: true,
+    children: [
+      { title: 'Transaction Logs', path: '/admin/dev-logs/transaction-logs', submodule: 'Transaction Logs' },
+      { title: 'Webhook Logs', path: '/admin/dev-logs/webhook-logs', submodule: 'Webhook Logs' },
+      { title: 'Api Logs', path: '/admin/dev-logs/api-logs', submodule: 'Api Logs' },
     ],
   },
   {
