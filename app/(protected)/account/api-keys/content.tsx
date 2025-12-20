@@ -11,7 +11,7 @@ import { Cloud, Expand, StickyNote, UsersRound } from 'lucide-react';
 import { toAbsoluteUrl } from '@/lib/helpers';
 import { ExternalServicesManageApi } from '@/app/(protected)/account/home/settings-sidebar/components/external-services-manage-api';
 import { DoNotDistrub } from '@/app/(protected)/account/notifications/components/do-not-distrub';
-import { ApiIntegrations, Webhooks } from './components';
+import { ApiIntegrations, Webhooks, ApiCredentials } from './components';
 
 export function AccountApiKeysContent() {
   const posts: HighlightedPostsItems = [
@@ -42,6 +42,7 @@ export function AccountApiKeysContent() {
     <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 lg:gap-7.5">
       <div className="col-span-2">
         <div className="flex flex-col gap-5 lg:gap-7.5">
+          <ApiCredentials />
           <ExternalServicesManageApi title="Public API Key" switch={true} />
           <ApiIntegrations />
           <Webhooks />
