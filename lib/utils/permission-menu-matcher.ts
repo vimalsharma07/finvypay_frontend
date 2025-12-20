@@ -104,6 +104,13 @@ export function isMenuItemVisible(menuItem: MenuItem, parentModule?: string): bo
     return false;
   }
 
+  // If requirePermission is explicitly false, always show (skip all permission checks)
+  // This allows items like Dashboard or Transactions to always be visible
+  // even if permissionModule is set (permissionModule can be used for child items)
+  if (menuItem.requirePermission === false) {
+    return true;
+  }
+
   // If requirePermission is false or undefined and no permissionModule, show it
   // This allows items like Dashboard to always be visible
   if (!menuItem.requirePermission && !menuItem.permissionModule && !menuItem.submodule) {
@@ -156,6 +163,15 @@ export function filterMenuByPermissions(menuItems: MenuConfig, parentModule?: st
 
       // If item has children, recursively filter them
       if (item.children && item.children.length > 0) {
+        // If parent has requirePermission: false, show all children without filtering
+        // This allows parent to be visible and show all its children
+        if (item.requirePermission === false) {
+          return {
+            ...item,
+            children: item.children, // Show all children without filtering
+          };
+        }
+
         // Pass current module as parent for children
         const filteredChildren = filterMenuByPermissions(item.children, currentModule);
         
