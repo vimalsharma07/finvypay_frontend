@@ -282,7 +282,7 @@ export default function RoutingPage() {
           enableCheckbox={false}
           searchPlaceholder="Search routing rules..."
           searchKeys={['name', 'view_route']}
-          getRowId={(row: RouteRule) => row.id}
+          getRowId={(row: RouteRule) => String(row.id)}
           pagination={{
             pageSize: limit,
             pageIndex: page - 1,

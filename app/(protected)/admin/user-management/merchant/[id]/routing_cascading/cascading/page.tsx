@@ -258,7 +258,7 @@ export default function CascadingPage() {
           enableCheckbox={false}
           searchPlaceholder="Search cascading rules..."
           searchKeys={['name']}
-          getRowId={(row: CascadingRule) => row.id}
+          getRowId={(row: CascadingRule) => String(row.id)}
           pagination={{
             pageSize: limit,
             pageIndex: page - 1,

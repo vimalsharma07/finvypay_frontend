@@ -10,7 +10,7 @@ import {
   ToolbarActions,
 } from '@/layouts/demo1/components/toolbar';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Route, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Route, BarChart3, WalletCards } from 'lucide-react';
 
 interface RoutingCascadingLayoutProps {
   children: ReactNode;
@@ -24,6 +24,7 @@ export default function RoutingCascadingLayout({
   const userId = params.id as string;
 
   const basePath = `/admin/user-management/merchant/${userId}/routing_cascading`;
+  const isGateways = pathname?.endsWith('/routing_cascading') || pathname?.includes('/payment-channels');
   const isRouting = pathname?.includes('/routing');
   const isCascading = pathname?.includes('/cascading');
 
@@ -47,6 +48,17 @@ export default function RoutingCascadingLayout({
       </Container>
       <Container>
         <div className="flex gap-4 border-b border-border">
+          <Link
+            href={`${basePath}/payment-channels`}
+            className={`flex items-center gap-2 px-4 py-2 border-b-2 transition-colors ${
+              isGateways
+                ? 'border-primary text-primary font-medium'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <WalletCards className="h-4 w-4" />
+            Gateways
+          </Link>
           <Link
             href={`${basePath}/routing`}
             className={`flex items-center gap-2 px-4 py-2 border-b-2 transition-colors ${
