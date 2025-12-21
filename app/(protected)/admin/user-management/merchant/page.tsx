@@ -251,6 +251,11 @@ export default function MerchantUsersPage() {
       route: (row: User) => `/admin/user-management/merchant/${row.id}`,
     },
     {
+      label: 'Routing & Cascading',
+      route: (row: User) => `/admin/user-management/merchant/${row.id}/routing_cascading`,
+      separator: true,
+    },
+    {
       label: 'Delete',
       onClick: (row: User) => {
         setUserToDelete(row);
