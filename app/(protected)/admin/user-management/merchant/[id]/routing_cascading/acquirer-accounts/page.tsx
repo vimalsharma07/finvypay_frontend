@@ -65,7 +65,7 @@ export default function ConnectorsPage() {
           }
         },
           onError: (errorMessage) => {
-            toast.error(errorMessage || 'Failed to load acquirer accounts');
+            toast.error(errorMessage || 'Failed to load payment channels');
           },
       });
     } catch (error) {
@@ -87,7 +87,7 @@ export default function ConnectorsPage() {
     { key: 'name', label: 'Name', sortable: true },
     { key: 'terminalId', label: 'Terminal ID', sortable: true },
     { key: 'gateway', label: 'Gateway', sortable: false },
-    { key: 'acquirerAccount', label: 'Acquirer Account', sortable: false },
+    { key: 'acquirerAccount', label: 'Payment Channel', sortable: false },
     { key: 'status', label: 'Status', sortable: true },
     { key: 'isPrimary', label: 'Primary', sortable: false },
     { key: 'isActive', label: 'Active', sortable: false },
@@ -180,7 +180,7 @@ export default function ConnectorsPage() {
     {
       label: 'Delete',
       onClick: async (row: MerchantAcquirerAccount) => {
-        if (confirm(`Are you sure you want to delete acquirer account "${row.name}"?`)) {
+        if (confirm(`Are you sure you want to delete payment channel "${row.name}"?`)) {
           // TODO: Implement delete
           toast.info('Delete functionality coming soon');
         }
@@ -213,20 +213,20 @@ export default function ConnectorsPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Gateways (Acquirer Accounts)"
-            description="Manage acquirer accounts and gateways for merchant user"
+            title="Gateways (Payment Channels)"
+            description="Manage payment channels and gateways for merchant user"
           />
           <ToolbarActions>
             <Button
               variant="primary"
               onClick={() => {
-                // Navigate to create acquirer account page
+                // Navigate to create payment channel page
                 const returnUrl = encodeURIComponent(`/admin/user-management/merchant/${userId}/routing_cascading/acquirer-accounts`);
                 window.location.href = `/admin/user-management/merchant/${userId}/routing_cascading/acquirer-accounts/create?returnUrl=${returnUrl}`;
               }}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add Acquirer Account
+              Add Payment Channel
             </Button>
           </ToolbarActions>
         </Toolbar>
@@ -238,7 +238,7 @@ export default function ConnectorsPage() {
           renderCell={renderCell}
           actions={actions}
           enableCheckbox={false}
-          searchPlaceholder="Search acquirer accounts..."
+          searchPlaceholder="Search payment channels..."
           searchKeys={['name', 'terminalId']}
           getRowId={(row: MerchantAcquirerAccount) => String(row.id)}
           pagination={{

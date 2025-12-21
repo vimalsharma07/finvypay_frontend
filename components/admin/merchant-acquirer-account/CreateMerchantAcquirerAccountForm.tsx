@@ -167,17 +167,17 @@ const DEFAULT_FORM_DATA = {
   mdr: [{ min: '', max: '', rate: '' }],
 };
 
-interface CreateMerchantGatewayFormProps {
+interface CreateMerchantAcquirerAccountFormProps {
   userId: number;
   userProfileId?: number;
   onSubmit: (data: any) => Promise<void>;
 }
 
-export function CreateMerchantGatewayForm({
+export function CreateMerchantAcquirerAccountForm({
   userId,
   userProfileId,
   onSubmit,
-}: CreateMerchantGatewayFormProps) {
+}: CreateMerchantAcquirerAccountFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('CARD');
   const [selectedCurrency, setSelectedCurrency] = useState<string>('');
@@ -225,7 +225,7 @@ export function CreateMerchantGatewayForm({
         ]);
 
         if (providers.length === 0) {
-          console.warn('No providers found. Check if gateways exist in the database.');
+          console.warn('No providers found. Check if acquirers exist in the database.');
         }
         if (currencies.length === 0) {
           console.warn('No currencies found. Check if currencies exist in the database.');
@@ -370,8 +370,8 @@ export function CreateMerchantGatewayForm({
       const payload = {
         userId,
         userProfileId,
-        gatewayId: Number(selectedProvider),
-        paymentChannelId: Number(selectedConnector),
+        acquirerId: Number(selectedProvider),
+        acquirerAccountId: Number(selectedConnector),
         currencyCode: selectedCurrency,
         description: description,
         rates: data,
@@ -381,7 +381,7 @@ export function CreateMerchantGatewayForm({
 
       await onSubmit(payload);
     } catch (error) {
-      console.error('Error creating merchant gateway:', error);
+      console.error('Error creating merchant acquirer:', error);
     } finally {
       setIsLoading(false);
     }

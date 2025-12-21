@@ -7,12 +7,12 @@ import {
 } from '@/layouts/demo1/components/toolbar';
 import { Container } from '@/components/common/container';
 import {
-  getPaymentChannels,
-  deletePaymentChannel,
-  updatePaymentChannelStatus,
-  PaymentChannel,
-  PaymentChannelListResponse,
-} from '@/lib/services/admin/payment-channels';
+  getAcquirerAccounts,
+  deleteAcquirerAccount,
+  updateAcquirerAccountStatus,
+  AcquirerAccount,
+  AcquirerAccountListResponse,
+} from '@/lib/services/admin/acquirer-accounts';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -54,50 +54,50 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 
-export default function AdminPaymentChannelsPage() {
-  const [paymentChannels, setPaymentChannels] = useState<PaymentChannel[]>([]);
+export default function AdminAcquirerAccountsPage() {
+  const [acquirerAccounts, setAcquirerAccounts] = useState<AcquirerAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [channelToDelete, setChannelToDelete] = useState<PaymentChannel | null>(null);
+  const [accountToDelete, setAccountToDelete] = useState<AcquirerAccount | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState<Record<string | number, boolean>>({});
-  const [meta, setMeta] = useState<PaymentChannelListResponse['data']['meta'] | null>(null);
+  const [meta, setMeta] = useState<AcquirerAccountListResponse['data']['meta'] | null>(null);
 
   // Pagination state
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
-  const fetchPaymentChannels = useCallback(async (pageNum: number, pageLimit: number) => {
+  const fetchAcquirerAccounts = useCallback(async (pageNum: number, pageLimit: number) => {
     setLoading(true);
     try {
-      const response = await getPaymentChannels({
+      const response = await getAcquirerAccounts({
         page: pageNum,
         limit: pageLimit,
       });
-      handleApiResponse<PaymentChannelListResponse>(response, {
+      handleApiResponse<AcquirerAccountListResponse>(response, {
         onSuccess: (data) => {
           if (data && data.success && data.data) {
-            setPaymentChannels(data.data.data);
+            setAcquirerAccounts(data.data.data);
             setMeta(data.data.meta);
           } else {
-            toast.error('Failed to fetch payment channels - invalid response structure');
+            toast.error('Failed to fetch acquirer accounts - invalid response structure');
           }
         },
         onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to fetch payment channels');
+          toast.error(errorMessage || 'Failed to fetch acquirer accounts');
         },
       });
     } catch (error) {
       toast.error('An unexpected error occurred');
-      console.error('Fetch payment channels error:', error);
+      console.error('Fetch acquirer accounts error:', error);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchPaymentChannels(page, limit);
-  }, [page, limit, fetchPaymentChannels]);
+    fetchAcquirerAccounts(page, limit);
+  }, [page, limit, fetchAcquirerAccounts]);
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -107,19 +107,19 @@ export default function AdminPaymentChannelsPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredData = useMemo(() => {
-    if (!searchQuery.trim()) return paymentChannels;
+    if (!searchQuery.trim()) return acquirerAccounts;
 
     const searchLower = searchQuery.toLowerCase();
-    return paymentChannels.filter((channel) => {
-      const gatewayName = channel.gateway?.gatewayName?.toLowerCase() || '';
-      const name = channel.name?.toLowerCase() || '';
-      const currency = channel.currency?.toLowerCase() || '';
-      const providerType = channel.providerType?.toLowerCase() || '';
-      const flowType = channel.flowType?.toLowerCase() || '';
-      const status = channel.status?.toLowerCase() || '';
+    return acquirerAccounts.filter((account) => {
+      const acquirerName = account.acquirer?.acquirerName?.toLowerCase() || '';
+      const name = account.name?.toLowerCase() || '';
+      const currency = account.currency?.toLowerCase() || '';
+      const providerType = account.providerType?.toLowerCase() || '';
+      const flowType = account.flowType?.toLowerCase() || '';
+      const status = account.status?.toLowerCase() || '';
 
       return (
-        gatewayName.includes(searchLower) ||
+        acquirerName.includes(searchLower) ||
         name.includes(searchLower) ||
         currency.includes(searchLower) ||
         providerType.includes(searchLower) ||
@@ -127,77 +127,77 @@ export default function AdminPaymentChannelsPage() {
         status.includes(searchLower)
       );
     });
-  }, [searchQuery, paymentChannels]);
+  }, [searchQuery, acquirerAccounts]);
 
   const handleStatusToggle = useCallback(
-    async (channel: PaymentChannel, newStatus: 'active' | 'inactive') => {
-      if (!channel?.id) {
-        toast.error('Invalid payment channel');
+    async (account: AcquirerAccount, newStatus: 'active' | 'inactive') => {
+      if (!account?.id) {
+        toast.error('Invalid acquirer account');
         return;
       }
 
-      setUpdatingStatus((prev) => ({ ...prev, [channel.id]: true }));
+      setUpdatingStatus((prev) => ({ ...prev, [account.id]: true }));
 
       try {
-        const response = await updatePaymentChannelStatus(channel.id, { status: newStatus });
+        const response = await updateAcquirerAccountStatus(account.id, { status: newStatus });
 
         handleApiResponse(response, {
-          onSuccess: (updatedChannel) => {
-            if (updatedChannel?.status) {
+          onSuccess: (updatedAccount) => {
+            if (updatedAccount?.status) {
               // Optimistic update: update local state immediately
-              setPaymentChannels((prev) =>
-                prev.map((ch) =>
-                  ch.id === channel.id ? { ...ch, status: updatedChannel.status } : ch
+              setAcquirerAccounts((prev) =>
+                prev.map((acc) =>
+                  acc.id === account.id ? { ...acc, status: updatedAccount.status } : acc
                 )
               );
-              toast.success(`Payment channel status updated to ${newStatus}`);
+              toast.success(`Acquirer account status updated to ${newStatus}`);
             } else {
               // Fallback: refetch data if response doesn't include updated status
-              toast.success('Payment channel status updated successfully');
-              fetchPaymentChannels(page, limit);
+              toast.success('Acquirer account status updated successfully');
+              fetchAcquirerAccounts(page, limit);
             }
           },
           onError: (errorMessage) => {
-            toast.error(errorMessage || 'Failed to update payment channel status');
+            toast.error(errorMessage || 'Failed to update acquirer account status');
             // Revert optimistic update on error by refetching
-            fetchPaymentChannels(page, limit);
+            fetchAcquirerAccounts(page, limit);
           },
           onUnauthorized: () => {
             toast.error('Unauthorized. Please check your authentication.');
-            fetchPaymentChannels(page, limit);
+            fetchAcquirerAccounts(page, limit);
           },
         });
       } catch (error) {
         toast.error('An unexpected error occurred');
         console.error('Update status error:', error);
         // Revert optimistic update on error by refetching
-        fetchPaymentChannels(page, limit);
+        fetchAcquirerAccounts(page, limit);
       } finally {
         setUpdatingStatus((prev) => {
           const updated = { ...prev };
-          delete updated[channel.id];
+          delete updated[account.id];
           return updated;
         });
       }
     },
-    [fetchPaymentChannels, page, limit]
+    [fetchAcquirerAccounts, page, limit]
   );
 
-  const handleDeleteChannel = useCallback(async () => {
-    if (!channelToDelete) return;
+  const handleDeleteAcquirerAccount = useCallback(async () => {
+    if (!accountToDelete) return;
 
     setDeleting(true);
     try {
-      const response = await deletePaymentChannel(channelToDelete.id);
+      const response = await deleteAcquirerAccount(accountToDelete.id);
       handleApiResponse(response, {
         onSuccess: () => {
-          toast.success('Payment channel deleted successfully!');
+          toast.success('Acquirer account deleted successfully!');
           setDeleteDialogOpen(false);
-          setChannelToDelete(null);
-          fetchPaymentChannels(page, limit);
+          setAccountToDelete(null);
+          fetchAcquirerAccounts(page, limit);
         },
-        onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to delete payment channel');
+          onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to delete acquirer account');
         },
         onUnauthorized: () => {
           toast.error('Unauthorized. Please check your authentication.');
@@ -205,23 +205,23 @@ export default function AdminPaymentChannelsPage() {
       });
     } catch (error) {
       toast.error('An unexpected error occurred');
-      console.error('Delete payment channel error:', error);
+      console.error('Delete acquirer account error:', error);
     } finally {
       setDeleting(false);
     }
-  }, [channelToDelete, fetchPaymentChannels, page, limit]);
+  }, [accountToDelete, fetchAcquirerAccounts, page, limit]);
 
-  const columns = useMemo<ColumnDef<PaymentChannel>[]>(
+  const columns = useMemo<ColumnDef<AcquirerAccount>[]>(
     () => [
       {
-        accessorKey: 'gateway.gatewayName',
+        accessorKey: 'acquirer.acquirerName',
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Gateway Name" />
+          <DataGridColumnHeader column={column} title="Acquirer Name" />
         ),
         cell: ({ row }) => {
           return (
             <div className="font-medium">
-              {row.original.gateway?.gatewayName || '-'}
+              {row.original.acquirer?.acquirerName || '-'}
             </div>
           );
         },
@@ -276,10 +276,10 @@ export default function AdminPaymentChannelsPage() {
           <DataGridColumnHeader column={column} title="Status" />
         ),
         cell: ({ row }) => {
-          const channel = row.original;
-          const currentStatus = channel?.status?.toLowerCase() || 'inactive';
+          const account = row.original;
+          const currentStatus = account?.status?.toLowerCase() || 'inactive';
           const isActive = currentStatus === 'active';
-          const isUpdating = updatingStatus[channel.id] || false;
+          const isUpdating = updatingStatus[account.id] || false;
 
           return (
             <SwitchWrapper>
@@ -287,7 +287,7 @@ export default function AdminPaymentChannelsPage() {
                 checked={isActive}
                 onCheckedChange={(checked) => {
                   const newStatus = checked ? 'active' : 'inactive';
-                  handleStatusToggle(channel, newStatus);
+                  handleStatusToggle(account, newStatus);
                 }}
                 disabled={isUpdating}
                 size="sm"
@@ -309,7 +309,7 @@ export default function AdminPaymentChannelsPage() {
               variant="ghost"
               asChild
             >
-              <Link href={`/admin/gateways/payment-channels/${row.original.id}/edit`}>
+              <Link href={`/admin/acquirers/acquirer-accounts/${row.original.id}/edit`}>
                 <Pencil className="size-4" />
               </Link>
             </Button>
@@ -319,7 +319,7 @@ export default function AdminPaymentChannelsPage() {
               variant="ghost"
               asChild
             >
-              <Link href={`/admin/gateways/payment-channels/${row.original.id}/rates`}>
+              <Link href={`/admin/acquirers/acquirer-accounts/${row.original.id}/rates`}>
                 <Plus className="size-4 text-primary" />
               </Link>
             </Button>
@@ -328,7 +328,7 @@ export default function AdminPaymentChannelsPage() {
               mode="icon"
               variant="ghost"
               onClick={() => {
-                setChannelToDelete(row.original);
+                setAccountToDelete(row.original);
                 setDeleteDialogOpen(true);
               }}
             >
@@ -375,14 +375,14 @@ export default function AdminPaymentChannelsPage() {
     pageCount: meta ? meta.totalPages : 0,
   });
 
-  if (loading && paymentChannels.length === 0) {
+  if (loading && acquirerAccounts.length === 0) {
     return (
       <Fragment>
         <Container>
           <Toolbar>
             <ToolbarHeading
-              title="Payment Channels"
-              description="Manage and view all payment channels"
+              title="Acquirer Accounts"
+              description="Manage and view all acquirer accounts"
             />
           </Toolbar>
         </Container>
@@ -398,8 +398,8 @@ export default function AdminPaymentChannelsPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Payment Channels"
-            description="Manage and view all payment channels"
+            title="Acquirer Accounts"
+            description="Manage and view all acquirer accounts"
           />
         </Toolbar>
       </Container>
@@ -419,7 +419,7 @@ export default function AdminPaymentChannelsPage() {
                   <div className="relative">
                     <Search className="size-4 text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2" />
                     <Input
-                      placeholder="Search payment channels..."
+                      placeholder="Search acquirer accounts..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="ps-9 w-40"
@@ -454,15 +454,15 @@ export default function AdminPaymentChannelsPage() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Payment Channel</AlertDialogTitle>
+            <AlertDialogTitle>Delete Acquirer Account</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete payment channel &quot;{channelToDelete?.name}&quot;? This action cannot be undone.
+              Are you sure you want to delete acquirer account &quot;{accountToDelete?.name}&quot;? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDeleteChannel}
+              onClick={handleDeleteAcquirerAccount}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >

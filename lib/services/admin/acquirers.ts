@@ -1,17 +1,17 @@
 /**
- * Gateways API Service
+ * Acquirers API Service
  * 
- * Centralized API calls for gateway management
+ * Centralized API calls for acquirer management
  */
 
 import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
 
-// Gateway types matching the API response structure
-export interface Gateway {
+// Acquirer types matching the API response structure
+export interface Acquirer {
   id: number | string;
-  gatewayName: string;
+  acquirerName: string;
   fileName: string;
   fields: Record<string, string>;
   status: string;
@@ -20,12 +20,12 @@ export interface Gateway {
   updatedAt: string;
 }
 
-export interface GatewayListParams {
+export interface AcquirerListParams {
   page?: number;
   limit?: number;
 }
 
-export interface GatewayListMeta {
+export interface AcquirerListMeta {
   currentPage: number;
   itemsPerPage: number;
   totalItems: number;
@@ -34,40 +34,40 @@ export interface GatewayListMeta {
   hasNextPage: boolean;
 }
 
-export interface GatewayListData {
-  data: Gateway[];
-  meta: GatewayListMeta;
+export interface AcquirerListData {
+  data: Acquirer[];
+  meta: AcquirerListMeta;
 }
 
-export interface GatewayListResponse {
+export interface AcquirerListResponse {
   success: boolean;
-  data: GatewayListData;
+  data: AcquirerListData;
   message?: string;
 }
 
-export interface CreateGatewayPayload {
-  gatewayName: string;
+export interface CreateAcquirerPayload {
+  acquirerName: string;
   fileName: string;
   fields: Record<string, string>;
 }
 
-export interface UpdateGatewayPayload {
-  gatewayName: string;
+export interface UpdateAcquirerPayload {
+  acquirerName: string;
   fileName: string;
   fields: Record<string, string>;
   status: string;
 }
 
 /**
- * Get all gateways (with pagination)
+ * Get all acquirers (with pagination)
  */
-export async function getGateways(
-  params?: GatewayListParams
-): Promise<ApiResponse<GatewayListResponse>> {
+export async function getAcquirers(
+  params?: AcquirerListParams
+): Promise<ApiResponse<AcquirerListResponse>> {
   try {
-    const data = await http.get(adminRoutes.gateway.list, {
+    const data = await http.get(adminRoutes.acquirer.list, {
       query: params as Record<string, string | number | undefined>,
-    }) as GatewayListResponse;
+    }) as AcquirerListResponse;
     return {
       status: 200,
       data,
@@ -88,13 +88,13 @@ export async function getGateways(
 }
 
 /**
- * Create new gateway
+ * Create new acquirer
  */
-export async function createGateway(
-  payload: CreateGatewayPayload
-): Promise<ApiResponse<Gateway>> {
+export async function createAcquirer(
+  payload: CreateAcquirerPayload
+): Promise<ApiResponse<Acquirer>> {
   try {
-    const data = await http.post(adminRoutes.gateway.create, payload) as Gateway;
+    const data = await http.post(adminRoutes.acquirer.create, payload) as Acquirer;
     return {
       status: 200,
       data,
@@ -117,20 +117,20 @@ export async function createGateway(
 }
 
 /**
- * Get gateway by ID
+ * Get acquirer by ID
  */
-export async function getGatewayById(id: string | number): Promise<ApiResponse<Gateway>> {
+export async function getAcquirerById(id: string | number): Promise<ApiResponse<Acquirer>> {
   try {
-    const response = await http.get(adminRoutes.gateway.getById(id)) as
+    const response = await http.get(adminRoutes.acquirer.getById(id)) as
       | {
           success: boolean;
-          data: Gateway;
+          data: Acquirer;
         }
-      | Gateway;
+      | Acquirer;
     
     // Handle API response structure: { success: true, data: {...} }
     if (response && typeof response === 'object' && 'success' in response && 'data' in response) {
-      const apiResponse = response as { success: boolean; data: Gateway };
+      const apiResponse = response as { success: boolean; data: Acquirer };
       if (apiResponse.success && apiResponse.data) {
         return {
           status: 200,
@@ -139,18 +139,18 @@ export async function getGatewayById(id: string | number): Promise<ApiResponse<G
       }
     }
     
-    // Fallback: if response is directly the gateway data
+    // Fallback: if response is directly the acquirer data
     if (response && typeof response === 'object' && 'id' in response && !('success' in response)) {
       return {
         status: 200,
-        data: response as unknown as Gateway,
+        data: response as unknown as Acquirer,
       };
     }
     
-    // Handle direct Gateway object response
+    // Handle direct Acquirer object response
     return {
       status: 200,
-      data: response as Gateway,
+      data: response as Acquirer,
     };
   } catch (error) {
     if (error instanceof ApiError) {
@@ -168,14 +168,14 @@ export async function getGatewayById(id: string | number): Promise<ApiResponse<G
 }
 
 /**
- * Update gateway
+ * Update acquirer
  */
-export async function updateGateway(
+export async function updateAcquirer(
   id: string | number,
-  payload: UpdateGatewayPayload
-): Promise<ApiResponse<Gateway>> {
+  payload: UpdateAcquirerPayload
+): Promise<ApiResponse<Acquirer>> {
   try {
-    const data = await http.put(adminRoutes.gateway.update(id), payload) as Gateway;
+    const data = await http.put(adminRoutes.acquirer.update(id), payload) as Acquirer;
     return {
       status: 200,
       data,
@@ -198,11 +198,11 @@ export async function updateGateway(
 }
 
 /**
- * Delete gateway
+ * Delete acquirer
  */
-export async function deleteGateway(id: string | number): Promise<ApiResponse<{ success: boolean; message?: string }>> {
+export async function deleteAcquirer(id: string | number): Promise<ApiResponse<{ success: boolean; message?: string }>> {
   try {
-    const data = await http.delete(adminRoutes.gateway.delete(id)) as { success: boolean; message?: string };
+    const data = await http.delete(adminRoutes.acquirer.delete(id)) as { success: boolean; message?: string };
     return {
       status: 200,
       data,

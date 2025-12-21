@@ -15,17 +15,12 @@ import { Container } from '@/components/common/container';
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import {
-  createPaymentChannel,
-  CreatePaymentChannelPayload,
-} from '@/lib/services/admin/payment-channels';
-import {
-  getGateways,
-  getGatewayById,
-  Gateway,
-  GatewayListResponse,
-} from '@/lib/services/admin/gateways';
-import { getCountries, Country, CountryListResponse } from '@/lib/services/admin/countries';
-import { getCurrencies, Currency, CurrencyListResponse } from '@/lib/services/admin/currency';
+  getAcquirerAccountById,
+  updateAcquirerAccount,
+  UpdateAcquirerAccountPayload,
+  AcquirerAccount,
+} from '@/lib/services/admin/acquirer-accounts';
+import { getAcquirers, Acquirer } from '@/lib/services/admin/acquirers';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import {
@@ -33,11 +28,11 @@ import {
   LimitsSection,
   CountriesCardTypesSection,
   ConfigSection,
-} from '../../[id]/edit/components/form-sections';
+} from './components/form-sections';
 
 // Form schema
-const createPaymentChannelSchema = z.object({
-  gatewayId: z.string().min(1, 'Gateway is required'),
+const updateAcquirerAccountSchema = z.object({
+  acquirerId: z.string().min(1, 'Acquirer is required'),
   name: z.string().min(1, 'Name is required'),
   currency: z.string().min(1, 'Currency is required'),
   providerType: z.string().min(1, 'Provider type is required'),
@@ -63,32 +58,26 @@ const createPaymentChannelSchema = z.object({
       fieldValue: z.string().optional(),
     })
   ),
+  status: z.string().min(1, 'Status is required'),
+  descriptor: z.string().optional(),
 });
 
-type CreatePaymentChannelFormData = z.infer<typeof createPaymentChannelSchema>;
+type UpdateAcquirerAccountFormData = z.infer<typeof updateAcquirerAccountSchema>;
 
-// Helper to parse amounts safely
-const parseAmount = (value: string | number | undefined): number => {
-  if (typeof value === 'number') return value;
-  const parsed = parseFloat(value || '0');
-  return isNaN(parsed) ? 0 : parsed;
-};
-
-export default function CreatePaymentChannelPage() {
+export default function EditAcquirerAccountPage() {
   const router = useRouter();
   const params = useParams();
-  const gatewayId = params?.gatewayId as string;
+  const channelId = params?.id as string;
 
-  const [gateways, setGateways] = useState<Gateway[]>([]);
-  const [countries, setCountries] = useState<Array<{ code: string; name: string }>>([]);
-  const [currencies, setCurrencies] = useState<string[]>([]);
+  const [acquirerAccount, setAcquirerAccount] = useState<AcquirerAccount | null>(null);
+  const [acquirers, setAcquirers] = useState<Acquirer[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  const form = useForm<CreatePaymentChannelFormData>({
-    resolver: zodResolver(createPaymentChannelSchema),
+  const form = useForm<UpdateAcquirerAccountFormData>({
+    resolver: zodResolver(updateAcquirerAccountSchema),
     defaultValues: {
-      gatewayId: '',
+      acquirerId: '',
       name: '',
       currency: 'USD',
       providerType: 'CARD',
@@ -108,7 +97,9 @@ export default function CreatePaymentChannelPage() {
       allowedCountries: [],
       blockedCountries: [],
       acceptedCardTypes: [],
-      config: [{ fieldName: '', fieldValue: '' }],
+      config: [],
+      status: 'active',
+      descriptor: '',
     },
   });
 
@@ -117,117 +108,108 @@ export default function CreatePaymentChannelPage() {
     name: 'config',
   });
 
-  // Fetch all dropdown data (gateway, gateways list, countries, currencies)
+  // Fetch acquirers for dropdown
   useEffect(() => {
-    const fetchAllData = async () => {
-      if (!gatewayId) {
-        toast.error('Gateway ID is missing');
-        router.push('/admin/gateways/gateways');
+    const fetchAcquirers = async () => {
+      try {
+        const response = await getAcquirers({ page: 1, limit: 100 });
+        handleApiResponse(response, {
+          onSuccess: (data) => {
+            if (data && data.success && data.data) {
+              setAcquirers(data.data.data);
+            }
+          },
+        });
+      } catch (error) {
+        console.error('Error fetching acquirers:', error);
+      }
+    };
+    fetchAcquirers();
+  }, []);
+
+  // Fetch acquirer account on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!channelId) {
+        toast.error('Acquirer account ID is missing');
+        router.push('/admin/acquirers/acquirer-accounts');
         return;
       }
 
       setLoading(true);
       try {
-        const [gatewayResponse, gatewaysResponse, countriesResponse, currenciesResponse] = await Promise.all([
-          getGatewayById(gatewayId),
-          getGateways({ page: 1, limit: 100 }),
-          getCountries({ page: 1, limit: 500 }),
-          getCurrencies({ page: 1, limit: 500 }),
-        ]);
+        const response = await getAcquirerAccountById(channelId);
 
-        // Handle Selected Gateway Data
-        handleApiResponse<Gateway>(gatewayResponse, {
-          onSuccess: (gatewayData) => {
-            if (gatewayData) {
-              form.setValue('gatewayId', gatewayId);
+        handleApiResponse<AcquirerAccount>(response, {
+          onSuccess: (channelData) => {
+            if (channelData) {
+              setAcquirerAccount(channelData);
 
-              // Pre-fill config fields from gateway's fields
-              if (gatewayData.fields && Object.keys(gatewayData.fields).length > 0) {
-                const configArray = Object.entries(gatewayData.fields).map(
-                  ([fieldName, fieldValue]) => ({
-                    fieldName,
-                    fieldValue: String(fieldValue || ''),
-                  })
-                );
-                replaceConfig(configArray);
-              } else {
-                replaceConfig([{ fieldName: '', fieldValue: '' }]);
-              }
+              // Convert config object to array format
+              const configArray = Object.entries(channelData.config || {}).map(
+                ([fieldName, fieldValue]) => ({
+                  fieldName,
+                  fieldValue: String(fieldValue || ''),
+                })
+              );
+
+              // If no config, show one empty field
+              const formConfig = configArray.length > 0 
+                ? configArray 
+                : [{ fieldName: '', fieldValue: '' }];
+
+              // Populate form with acquirer account data
+              const formData = {
+                acquirerId: String(channelData.acquirerId || ''),
+                name: channelData.name || '',
+                currency: channelData.currency || 'USD',
+                providerType: channelData.providerType || 'CARD',
+                flowType: channelData.flowType || 'PAYIN',
+                timezone: channelData.timezone || 'UTC',
+                minTransactionAmount: channelData.minTransactionAmount || '',
+                maxTransactionAmount: channelData.maxTransactionAmount || '',
+                perDaySuccessAmount: channelData.perDaySuccessAmount || '',
+                perDayCardLimit: channelData.perDayCardLimit || 0,
+                perDayEmailLimit: channelData.perDayEmailLimit || 0,
+                perWeekCardLimit: channelData.perWeekCardLimit || 0,
+                perWeekEmailLimit: channelData.perWeekEmailLimit || 0,
+                perMonthCardLimit: channelData.perMonthCardLimit || 0,
+                perMonthEmailLimit: channelData.perMonthEmailLimit || 0,
+                dailyCardDeclineLimit: channelData.dailyCardDeclineLimit || 0,
+                dailyEmailDeclineLimit: channelData.dailyEmailDeclineLimit || 0,
+                allowedCountries: channelData.allowedCountries || [],
+                blockedCountries: channelData.blockedCountries || [],
+                acceptedCardTypes: channelData.acceptedCardTypes || [],
+                config: formConfig,
+                status: channelData.status || 'active',
+                descriptor: '',
+              };
+
+              form.reset(formData);
+              replaceConfig(formConfig);
             }
           },
           onError: (errorMessage) => {
-            console.error('Error fetching gateway:', errorMessage);
-            toast.error('Failed to load gateway data');
-            router.push('/admin/gateways/gateways');
-          },
-        });
-
-        // Handle Gateways List Data
-        handleApiResponse<GatewayListResponse>(gatewaysResponse, {
-          onSuccess: (data) => {
-            if (data && data.success && data.data) {
-              setGateways(data.data.data);
-            }
-          },
-          onError: (errorMessage) => {
-            console.error('Error fetching gateways:', errorMessage);
-            toast.error('Failed to load gateways for dropdown');
-          },
-        });
-
-        // Handle Countries Data
-        handleApiResponse<CountryListResponse>(countriesResponse, {
-          onSuccess: (data) => {
-            if (data && data.success && data.data && Array.isArray(data.data.data)) {
-              const countryList: Country[] = data.data.data;
-              const transformedCountries = countryList
-                .filter((country) => country.status === 'active' && !country.isDeleted)
-                .map((country) => ({
-                  code: country.isoTwo,
-                  name: country.countryName,
-                }))
-                .sort((a, b) => a.name.localeCompare(b.name));
-              setCountries(transformedCountries);
-            }
-          },
-          onError: (errorMessage) => {
-            console.error('Error fetching countries:', errorMessage);
-            toast.error('Failed to load countries for dropdown');
-          },
-        });
-
-        // Handle Currencies Data
-        handleApiResponse<CurrencyListResponse>(currenciesResponse, {
-          onSuccess: (data) => {
-            if (data && data.success && data.data && Array.isArray(data.data.data)) {
-              const currencyList: Currency[] = data.data.data;
-              const currencyCodes = currencyList
-                .filter((currency) => !currency.isDeleted)
-                .map((currency) => currency.code)
-                .sort();
-              setCurrencies(currencyCodes);
-            }
-          },
-          onError: (errorMessage) => {
-            console.error('Error fetching currencies:', errorMessage);
-            toast.error('Failed to load currencies for dropdown');
+            toast.error(errorMessage || 'Failed to load acquirer account');
+            router.push('/admin/acquirers/acquirer-accounts');
           },
         });
       } catch (error) {
-        console.error('Error fetching all data:', error);
-        toast.error('An error occurred while loading data');
+        console.error('Error fetching acquirer account:', error);
+        toast.error('An error occurred while loading acquirer account');
+        router.push('/admin/acquirers/acquirer-accounts');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAllData();
+    fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gatewayId, router]);
+  }, [channelId, router]);
 
-  const onSubmit = async (data: CreatePaymentChannelFormData) => {
-    if (!gatewayId) {
-      toast.error('Gateway ID is missing');
+  const onSubmit = async (data: UpdateAcquirerAccountFormData) => {
+    if (!channelId) {
+      toast.error('Acquirer account ID is missing');
       return;
     }
 
@@ -241,8 +223,14 @@ export default function CreatePaymentChannelPage() {
         }
       });
 
-      const payload: CreatePaymentChannelPayload = {
-        gatewayId: Number(data.gatewayId),
+      // Convert string amounts to numbers with proper validation
+      const parseAmount = (value: string): number => {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? 0 : parsed;
+      };
+
+      const payload: UpdateAcquirerAccountPayload = {
+        acquirerId: Number(data.acquirerId),
         name: data.name.trim(),
         currency: data.currency,
         providerType: data.providerType,
@@ -263,17 +251,18 @@ export default function CreatePaymentChannelPage() {
         blockedCountries: data.blockedCountries,
         acceptedCardTypes: data.acceptedCardTypes,
         config: configObject,
+        status: data.status,
       };
 
-      const response = await createPaymentChannel(payload);
+      const response = await updateAcquirerAccount(channelId, payload);
 
       handleApiResponse(response, {
         onSuccess: () => {
-          toast.success('Payment channel created successfully!');
-          router.push('/admin/gateways/payment-channels');
+          toast.success('Acquirer account updated successfully!');
+          router.push('/admin/acquirers/acquirer-accounts');
         },
         onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to create payment channel');
+          toast.error(errorMessage || 'Failed to update acquirer account');
         },
         onValidationError: (errors, messages) => {
           console.error('Validation errors:', errors);
@@ -284,7 +273,7 @@ export default function CreatePaymentChannelPage() {
         },
       });
     } catch (error) {
-      console.error('Error creating payment channel:', error);
+      console.error('❌ Error updating acquirer account:', error);
       toast.error('An unexpected error occurred');
     } finally {
       setSubmitting(false);
@@ -297,13 +286,40 @@ export default function CreatePaymentChannelPage() {
         <Container>
           <Toolbar>
             <ToolbarHeading
-              title="Create Payment Channel"
-              description="Create a new payment channel for the gateway"
+              title="Update Connector"
+              description="Update acquirer account details"
             />
           </Toolbar>
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <p className="text-muted-foreground">Loading form data...</p>
+              <p className="text-muted-foreground">Loading acquirer account data...</p>
+            </div>
+          </div>
+        </Container>
+      </Fragment>
+    );
+  }
+
+  if (!acquirerAccount) {
+    return (
+      <Fragment>
+        <Container>
+          <Toolbar>
+            <ToolbarHeading
+              title="Update Connector"
+              description="Update acquirer account details"
+            />
+          </Toolbar>
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <p className="text-muted-foreground">Acquirer account not found</p>
+              <Button
+                variant="outline"
+                onClick={() => router.push('/admin/acquirers/acquirer-accounts')}
+                className="mt-4"
+              >
+                Back to Acquirer Accounts
+              </Button>
             </div>
           </div>
         </Container>
@@ -316,12 +332,12 @@ export default function CreatePaymentChannelPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Create Payment Channel"
-            description="Create a new payment channel for the gateway"
+            title="Update Connector"
+            description="Update acquirer account details"
           />
           <div className="flex items-center">
             <Link
-              href="/admin/gateways/gateways"
+              href="/admin/acquirers/acquirer-accounts"
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="size-4" />
@@ -337,20 +353,13 @@ export default function CreatePaymentChannelPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <BasicInformationSection
                 control={form.control}
-                gateways={gateways}
-                currencies={currencies}
+                acquirers={acquirers}
                 submitting={submitting}
-                disableGateway={true}
-                showStatus={false}
               />
 
               <LimitsSection control={form.control} submitting={submitting} />
 
-              <CountriesCardTypesSection
-                control={form.control}
-                countries={countries}
-                submitting={submitting}
-              />
+              <CountriesCardTypesSection control={form.control} submitting={submitting} />
 
               <ConfigSection
                 control={form.control}
@@ -358,20 +367,19 @@ export default function CreatePaymentChannelPage() {
                 appendConfig={() => appendConfig({ fieldName: '', fieldValue: '' })}
                 removeConfig={removeConfig}
                 submitting={submitting}
-                disableFieldName={true}
               />
 
               <div className="flex justify-end gap-3 pt-4 border-t">
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.push('/admin/gateways/gateways')}
+                  onClick={() => router.push('/admin/acquirers/acquirer-accounts')}
                   disabled={submitting}
                 >
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary" disabled={submitting}>
-                  {submitting ? 'Creating...' : 'Create Payment Channel'}
+                  {submitting ? 'Updating...' : 'Update Connector'}
                 </Button>
               </div>
             </form>

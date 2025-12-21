@@ -1,18 +1,18 @@
 /**
- * Connectors (Merchant Gateways) API Service
+ * Connectors (Merchant Acquirer Accounts) API Service
  * 
- * Centralized API calls for connector/merchant gateway management
+ * Centralized API calls for connector/merchant acquirer account management
  */
 
 import { http, ApiError } from '../../api';
 import type { ApiResponse } from '../types';
 
-// Merchant Gateway types
-export interface MerchantGateway {
+// Merchant Acquirer Account types
+export interface MerchantAcquirerAccount {
   id: string;
   userId: number;
-  gatewayId: number | null;
-  paymentChannelId: number | null;
+  acquirerId: number | null;
+  acquirerAccountId: number | null;
   name: string;
   terminalId: string | null;
   description: string | null;
@@ -26,11 +26,11 @@ export interface MerchantGateway {
   isActive: boolean;
   isPrimary: boolean;
   isDeleted: boolean;
-  gateway?: {
+  acquirer?: {
     id: number;
     name: string;
   };
-  paymentChannel?: {
+  acquirerAccount?: {
     id: number;
     name: string;
     currency: string;
@@ -41,7 +41,7 @@ export interface MerchantGateway {
   updatedAt: string;
 }
 
-export interface MerchantGatewayListMeta {
+export interface MerchantAcquirerAccountListMeta {
   currentPage: number;
   itemsPerPage: number;
   totalItems: number;
@@ -50,30 +50,30 @@ export interface MerchantGatewayListMeta {
   hasNextPage: boolean;
 }
 
-export interface MerchantGatewayListData {
-  data: MerchantGateway[];
-  meta: MerchantGatewayListMeta;
+export interface MerchantAcquirerAccountListData {
+  data: MerchantAcquirerAccount[];
+  meta: MerchantAcquirerAccountListMeta;
 }
 
-export interface MerchantGatewayListResponse {
+export interface MerchantAcquirerAccountListResponse {
   success: boolean;
-  data: MerchantGatewayListData;
+  data: MerchantAcquirerAccountListData;
   message?: string;
 }
 
 const getBaseUrl = (userId?: string) => {
   if (userId) {
-    return `/api/admin/user-management/${userId}/payment-channels`;
+    return `/api/admin/user-management/${userId}/acquirer-accounts`;
   }
-  return `/api/admin/merchant-gateway`;
+  return `/api/admin/merchant-acquirer-account`;
 };
 
 /**
- * Get all connectors (merchant gateways) for a user
+ * Get all connectors (merchant acquirer accounts) for a user
  */
 export async function getUserConnectors(
   params?: Record<string, any>
-): Promise<ApiResponse<MerchantGatewayListResponse>> {
+): Promise<ApiResponse<MerchantAcquirerAccountListResponse>> {
   try {
     const userId = params?.userId as string;
     const baseUrl = getBaseUrl(userId);
@@ -82,7 +82,7 @@ export async function getUserConnectors(
     
     const data = await http.get(baseUrl, {
       query: queryParams as Record<string, string | number | boolean | null | undefined>,
-    }) as MerchantGatewayListResponse;
+    }) as MerchantAcquirerAccountListResponse;
     return {
       status: 200,
       data,
@@ -104,11 +104,11 @@ export async function getUserConnectors(
  */
 export async function getConnectorById(
   connectorId: string
-): Promise<ApiResponse<{ success: boolean; data: MerchantGateway }>> {
+): Promise<ApiResponse<{ success: boolean; data: MerchantAcquirerAccount }>> {
   try {
     const data = await http.get(`${getBaseUrl()}/${connectorId}`) as {
       success: boolean;
-      data: MerchantGateway;
+      data: MerchantAcquirerAccount;
     };
     return {
       status: 200,

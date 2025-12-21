@@ -8,11 +8,11 @@ import {
 } from '@/layouts/demo1/components/toolbar';
 import { Container } from '@/components/common/container';
 import {
-  getGateways,
-  deleteGateway,
-  Gateway,
-  GatewayListResponse,
-} from '@/lib/services/admin/gateways';
+  getAcquirers,
+  deleteAcquirer,
+  Acquirer,
+  AcquirerListResponse,
+} from '@/lib/services/admin/acquirers';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -54,37 +54,37 @@ import {
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-export default function AdminGatewaysPage() {
+export default function AdminAcquirersPage() {
   const router = useRouter();
-  const [gateways, setGateways] = useState<Gateway[]>([]);
+  const [acquirers, setAcquirers] = useState<Acquirer[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [gatewayToDelete, setGatewayToDelete] = useState<Gateway | null>(null);
+  const [acquirerToDelete, setAcquirerToDelete] = useState<Acquirer | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [meta, setMeta] = useState<GatewayListResponse['data']['meta'] | null>(null);
+  const [meta, setMeta] = useState<AcquirerListResponse['data']['meta'] | null>(null);
 
   // Pagination state
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
-  const fetchGateways = async (pageNum: number, pageLimit: number) => {
+  const fetchAcquirers = async (pageNum: number, pageLimit: number) => {
     setLoading(true);
     try {
-      const response = await getGateways({
+      const response = await getAcquirers({
         page: pageNum,
         limit: pageLimit,
       });
-      handleApiResponse<GatewayListResponse>(response, {
+      handleApiResponse<AcquirerListResponse>(response, {
         onSuccess: (data) => {
           if (data && data.success && data.data) {
-            setGateways(data.data.data);
+            setAcquirers(data.data.data);
             setMeta(data.data.meta);
           } else {
-            toast.error('Failed to fetch gateways - invalid response structure');
+            toast.error('Failed to fetch acquirers - invalid response structure');
           }
         },
         onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to fetch gateways');
+          toast.error(errorMessage || 'Failed to fetch acquirers');
         },
       });
     } catch (error) {
@@ -95,7 +95,7 @@ export default function AdminGatewaysPage() {
   };
 
   useEffect(() => {
-    fetchGateways(page, limit);
+    fetchAcquirers(page, limit);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit]);
 
@@ -107,51 +107,51 @@ export default function AdminGatewaysPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredData = useMemo(() => {
-    if (!searchQuery) return gateways;
+    if (!searchQuery) return acquirers;
 
     const searchLower = searchQuery.toLowerCase();
-    return gateways.filter(
-      (gateway) =>
-        gateway.gatewayName.toLowerCase().includes(searchLower) ||
-        gateway.fileName.toLowerCase().includes(searchLower) ||
-        gateway.status.toLowerCase().includes(searchLower),
+    return acquirers.filter(
+      (acquirer) =>
+        acquirer.acquirerName.toLowerCase().includes(searchLower) ||
+        acquirer.fileName.toLowerCase().includes(searchLower) ||
+        acquirer.status.toLowerCase().includes(searchLower),
     );
-  }, [searchQuery, gateways]);
+  }, [searchQuery, acquirers]);
 
-  const handleDeleteGateway = async () => {
-    if (!gatewayToDelete) return;
+  const handleDeleteAcquirer = async () => {
+    if (!acquirerToDelete) return;
 
     setDeleting(true);
     try {
-      const response = await deleteGateway(gatewayToDelete.id);
+      const response = await deleteAcquirer(acquirerToDelete.id);
       handleApiResponse(response, {
         onSuccess: () => {
-          toast.success('Gateway deleted successfully!');
+          toast.success('Acquirer deleted successfully!');
           setDeleteDialogOpen(false);
-          setGatewayToDelete(null);
-          fetchGateways(page, limit);
+          setAcquirerToDelete(null);
+          fetchAcquirers(page, limit);
         },
         onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to delete gateway');
+          toast.error(errorMessage || 'Failed to delete acquirer');
         },
       });
     } catch (error) {
       toast.error('An unexpected error occurred');
-      console.error('Delete gateway error:', error);
+      console.error('Delete acquirer error:', error);
     } finally {
       setDeleting(false);
     }
   };
 
-  const columns = useMemo<ColumnDef<Gateway>[]>(
+  const columns = useMemo<ColumnDef<Acquirer>[]>(
     () => [
       {
-        accessorKey: 'gatewayName',
+        accessorKey: 'acquirerName',
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Gateway Name" />
+          <DataGridColumnHeader column={column} title="Acquirer Name" />
         ),
         cell: ({ row }) => {
-          return <div className="font-medium">{row.original.gatewayName}</div>;
+          return <div className="font-medium">{row.original.acquirerName}</div>;
         },
       },
       {
@@ -198,9 +198,9 @@ export default function AdminGatewaysPage() {
               mode="icon"
               variant="ghost"
               asChild
-              title="Create Payment Channel"
+              title="Create Acquirer Account"
             >
-              <Link href={`/admin/gateways/payment-channels/create/${row.original.id}`}>
+              <Link href={`/admin/acquirers/acquirer-accounts/create/${row.original.id}`}>
                 <Plus className="size-4 text-primary" />
               </Link>
             </Button>
@@ -210,7 +210,7 @@ export default function AdminGatewaysPage() {
               variant="ghost"
               asChild
             >
-              <Link href={`/admin/gateways/gateways/${row.original.id}/edit`}>
+              <Link href={`/admin/acquirers/acquirers/${row.original.id}/edit`}>
                 <Pencil className="size-4" />
               </Link>
             </Button>
@@ -219,7 +219,7 @@ export default function AdminGatewaysPage() {
               mode="icon"
               variant="ghost"
               onClick={() => {
-                setGatewayToDelete(row.original);
+                setAcquirerToDelete(row.original);
                 setDeleteDialogOpen(true);
               }}
             >
@@ -266,14 +266,14 @@ export default function AdminGatewaysPage() {
     pageCount: meta ? meta.totalPages : 0,
   });
 
-  if (loading && gateways.length === 0) {
+  if (loading && acquirers.length === 0) {
     return (
       <Fragment>
         <Container>
           <Toolbar>
             <ToolbarHeading
-              title="Gateways"
-              description="Manage and view all payment gateways"
+              title="Acquirers"
+              description="Manage and view all payment acquirers"
             />
           </Toolbar>
         </Container>
@@ -289,15 +289,15 @@ export default function AdminGatewaysPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Gateways"
-            description="Manage and view all payment gateways"
+            title="Acquirers"
+            description="Manage and view all payment acquirers"
           />
           <ToolbarActions>
             <Button
               variant="primary"
-              onClick={() => router.push('/admin/gateways/gateways/create')}
+              onClick={() => router.push('/admin/acquirers/acquirers/create')}
             >
-              Create Gateway
+              Create Acquirer
             </Button>
           </ToolbarActions>
         </Toolbar>
@@ -318,7 +318,7 @@ export default function AdminGatewaysPage() {
                   <div className="relative">
                     <Search className="size-4 text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2" />
                     <Input
-                      placeholder="Search gateways..."
+                      placeholder="Search acquirers..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="ps-9 w-40"
@@ -353,15 +353,15 @@ export default function AdminGatewaysPage() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Gateway</AlertDialogTitle>
+            <AlertDialogTitle>Delete Acquirer</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete gateway &quot;{gatewayToDelete?.gatewayName}&quot;? This action cannot be undone.
+              Are you sure you want to delete acquirer &quot;{acquirerToDelete?.acquirerName}&quot;? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDeleteGateway}
+              onClick={handleDeleteAcquirer}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >

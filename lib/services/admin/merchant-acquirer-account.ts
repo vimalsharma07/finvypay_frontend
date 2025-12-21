@@ -1,22 +1,22 @@
 /**
- * Merchant Gateway API Service
+ * Merchant Acquirer Account API Service
  * 
- * Centralized API calls for merchant gateway management
+ * Centralized API calls for merchant acquirer account management
  */
 
 import { http, ApiError } from '../../api';
 import type { ApiResponse } from '../types';
 
-// Merchant Gateway types
-export interface MerchantGateway {
+// Merchant Acquirer Account types
+export interface MerchantAcquirerAccount {
   id: string;
   userId: number;
-  gatewayId: number | null;
-  paymentChannelId: number | null;
+  acquirerId: number | null;
+  acquirerAccountId: number | null;
   name: string;
   terminalId: string | null;
   description: string | null;
-  status: number;
+  status: number; // 0 = rejected, 1 = approved, 2 = pending, 3 = rates assigned
   adminRejectReason: string | null;
   merchantRejectReason: string | null;
   rates: Record<string, any> | null;
@@ -26,11 +26,11 @@ export interface MerchantGateway {
   isActive: boolean;
   isPrimary: boolean;
   isDeleted: boolean;
-  gateway?: {
+  acquirer?: {
     id: number;
     name: string;
   };
-  paymentChannel?: {
+  acquirerAccount?: {
     id: number;
     name: string;
   };
@@ -38,33 +38,37 @@ export interface MerchantGateway {
   updatedAt: string;
 }
 
-export interface CreateMerchantGatewayPayload {
+export interface CreateMerchantAcquirerAccountPayload {
   userId: number;
-  gatewayId?: number;
-  paymentChannelId?: number;
+  acquirerId?: number;
+  acquirerAccountId?: number;
   name?: string;
   description?: string;
   currencyCode?: string;
   rates?: Record<string, any>;
   ratesType?: string;
   userProfileId?: number;
+  paymentMethod?: string;
+  providerId?: number;
+  connectorId?: number;
+  cryptoFlow?: number;
 }
 
 const getBaseUrl = () => {
-  return `/api/admin/merchant-gateway`;
+  return `/api/admin/merchant-acquirer-account`;
 };
 
 /**
- * Create a new merchant gateway
+ * Create a new merchant acquirer account
  */
-export async function createMerchantGateway(
-  payload: CreateMerchantGatewayPayload
-): Promise<ApiResponse<{ success: boolean; message: string; data: MerchantGateway }>> {
+export async function createMerchantAcquirerAccount(
+  payload: CreateMerchantAcquirerAccountPayload
+): Promise<ApiResponse<{ success: boolean; message: string; data: MerchantAcquirerAccount }>> {
   try {
     const data = await http.post(getBaseUrl(), { body: payload }) as {
       success: boolean;
       message: string;
-      data: MerchantGateway;
+      data: MerchantAcquirerAccount;
     };
     return {
       status: 201,
@@ -83,15 +87,15 @@ export async function createMerchantGateway(
 }
 
 /**
- * Get merchant gateway by ID
+ * Get merchant acquirer account by ID
  */
-export async function getMerchantGatewayById(
+export async function getMerchantAcquirerAccountById(
   id: string
-): Promise<ApiResponse<{ success: boolean; data: MerchantGateway }>> {
+): Promise<ApiResponse<{ success: boolean; data: MerchantAcquirerAccount }>> {
   try {
     const data = await http.get(`${getBaseUrl()}/${id}`) as {
       success: boolean;
-      data: MerchantGateway;
+      data: MerchantAcquirerAccount;
     };
     return {
       status: 200,
@@ -108,4 +112,3 @@ export async function getMerchantGatewayById(
     throw error;
   }
 }
-

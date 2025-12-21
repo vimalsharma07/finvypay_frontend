@@ -23,7 +23,7 @@ import { CURRENCIES, PROVIDER_TYPES, FLOW_TYPES, TIMEZONES, COUNTRIES, CARD_TYPE
 
 interface FormSectionsProps<T extends FieldValues = FieldValues> {
   control: Control<T>;
-  gateways: Array<{ id: number | string; gatewayName: string }>;
+  acquirers: Array<{ id: number | string; acquirerName: string }>;
   currencies?: string[];
   countries?: Array<{ code: string; name: string }>;
   configFields: Array<{ id: string }>;
@@ -31,18 +31,18 @@ interface FormSectionsProps<T extends FieldValues = FieldValues> {
   removeConfig: (index: number) => void;
   submitting?: boolean;
   disableFieldName?: boolean;
-  disableGateway?: boolean;
+  disableAcquirer?: boolean;
   showStatus?: boolean;
 }
 
 export function BasicInformationSection<T extends FieldValues = FieldValues>({
   control,
-  gateways,
+  acquirers,
   currencies,
   submitting = false,
-  disableGateway = false,
+  disableAcquirer = false,
   showStatus = true,
-}: Pick<FormSectionsProps<T>, 'control' | 'gateways' | 'currencies' | 'submitting' | 'disableGateway' | 'showStatus'>) {
+}: Pick<FormSectionsProps<T>, 'control' | 'acquirers' | 'currencies' | 'submitting' | 'disableAcquirer' | 'showStatus'>) {
   const currencyOptions = currencies && currencies.length > 0 ? currencies : CURRENCIES;
   return (
     <div className="space-y-6">
@@ -66,25 +66,25 @@ export function BasicInformationSection<T extends FieldValues = FieldValues>({
 
         <FormField
           control={control}
-          name={"gatewayId" as any}
+          name={"acquirerId" as any}
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Gateway <span className="text-destructive">*</span>
+                Acquirer <span className="text-destructive">*</span>
               </FormLabel>
               <FormControl>
                 <Select
                   value={field.value}
                   onValueChange={field.onChange}
-                  disabled={submitting || disableGateway}
+                  disabled={submitting || disableAcquirer}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select gateway" />
+                    <SelectValue placeholder="Select acquirer" />
                   </SelectTrigger>
                   <SelectContent>
-                    {gateways.map((gateway) => (
-                      <SelectItem key={gateway.id} value={String(gateway.id)}>
-                        {gateway.gatewayName}
+                    {acquirers.map((acquirer) => (
+                      <SelectItem key={acquirer.id} value={String(acquirer.id)}>
+                        {acquirer.acquirerName}
                       </SelectItem>
                     ))}
                   </SelectContent>

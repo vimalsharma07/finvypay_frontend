@@ -1,5 +1,5 @@
 /**
- * Constants for Payment Channel Edit Page
+ * Constants for Acquirer Account Edit Page
  */
 
 export const CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'AED', 'SGD'];

@@ -22,13 +22,13 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { createGateway, CreateGatewayPayload } from '@/lib/services/admin/gateways';
+import { createAcquirer, CreateAcquirerPayload } from '@/lib/services/admin/acquirers';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 
 // Form schema
-const createGatewaySchema = z.object({
-  gatewayName: z.string().min(1, 'Gateway name is required'),
+const createAcquirerSchema = z.object({
+  acquirerName: z.string().min(1, 'Acquirer name is required'),
   fileName: z.string().min(1, 'File name is required'),
   fields: z.array(
     z.object({
@@ -38,16 +38,16 @@ const createGatewaySchema = z.object({
   ),
 });
 
-type CreateGatewayFormData = z.infer<typeof createGatewaySchema>;
+type CreateAcquirerFormData = z.infer<typeof createAcquirerSchema>;
 
-export default function CreateGatewayPage() {
+export default function CreateAcquirerPage() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
-  const form = useForm<CreateGatewayFormData>({
-    resolver: zodResolver(createGatewaySchema),
+  const form = useForm<CreateAcquirerFormData>({
+    resolver: zodResolver(createAcquirerSchema),
     defaultValues: {
-      gatewayName: '',
+      acquirerName: '',
       fileName: '',
       fields: [{ fieldName: '', fieldValue: '' }],
     },
@@ -58,7 +58,7 @@ export default function CreateGatewayPage() {
     name: 'fields',
   });
 
-  const onSubmit = async (data: CreateGatewayFormData) => {
+  const onSubmit = async (data: CreateAcquirerFormData) => {
     setSubmitting(true);
     try {
       // Convert fields array to object format (only include non-empty fields)
@@ -69,21 +69,21 @@ export default function CreateGatewayPage() {
         }
       });
 
-      const payload: CreateGatewayPayload = {
-        gatewayName: data.gatewayName.trim(),
+      const payload: CreateAcquirerPayload = {
+        acquirerName: data.acquirerName.trim(),
         fileName: data.fileName.trim(),
         fields: fieldsObject,
       };
 
-      const response = await createGateway(payload);
+      const response = await createAcquirer(payload);
 
       handleApiResponse(response, {
         onSuccess: () => {
-          toast.success('Gateway created successfully!');
-          router.push('/admin/gateways/gateways');
+          toast.success('Acquirer created successfully!');
+          router.push('/admin/acquirers/acquirers');
         },
         onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to create gateway');
+          toast.error(errorMessage || 'Failed to create acquirer');
         },
         onValidationError: (errors, messages) => {
           console.error('Validation errors:', errors);
@@ -94,7 +94,7 @@ export default function CreateGatewayPage() {
         },
       });
     } catch (error) {
-      console.error('❌ Error creating gateway:', error);
+      console.error('❌ Error creating acquirer:', error);
       toast.error('An unexpected error occurred');
     } finally {
       setSubmitting(false);
@@ -106,12 +106,12 @@ export default function CreateGatewayPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Create Gateway"
-            description="Create a new payment gateway"
+            title="Create Acquirer"
+            description="Create a new payment acquirer"
           />
           <div className="flex items-center">
             <Link
-              href="/admin/gateways/gateways"
+              href="/admin/acquirers/acquirers"
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="size-4" />
@@ -128,15 +128,15 @@ export default function CreateGatewayPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
-                  name="gatewayName"
+                  name="acquirerName"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Gateway Name <span className="text-destructive">*</span>
+                        Acquirer Name <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Enter Gateway Name"
+                          placeholder="Enter Acquirer Name"
                           {...field}
                           disabled={submitting}
                         />
@@ -237,13 +237,13 @@ export default function CreateGatewayPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.push('/admin/gateways/gateways')}
+                  onClick={() => router.push('/admin/acquirers/acquirers')}
                   disabled={submitting}
                 >
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary" disabled={submitting}>
-                  {submitting ? 'Creating...' : 'Create Gateway'}
+                  {submitting ? 'Creating...' : 'Create Acquirer'}
                 </Button>
               </div>
             </form>

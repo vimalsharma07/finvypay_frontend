@@ -30,17 +30,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  getGatewayById,
-  updateGateway,
-  UpdateGatewayPayload,
-  Gateway,
-} from '@/lib/services/admin/gateways';
+  getAcquirerById,
+  updateAcquirer,
+  UpdateAcquirerPayload,
+  Acquirer,
+} from '@/lib/services/admin/acquirers';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 
 // Form schema
-const updateGatewaySchema = z.object({
-  gatewayName: z.string().min(1, 'Gateway name is required'),
+const updateAcquirerSchema = z.object({
+  acquirerName: z.string().min(1, 'Acquirer name is required'),
   fileName: z.string().min(1, 'File name is required'),
   status: z.string().min(1, 'Status is required'),
   fields: z.array(
@@ -51,21 +51,21 @@ const updateGatewaySchema = z.object({
   ),
 });
 
-type UpdateGatewayFormData = z.infer<typeof updateGatewaySchema>;
+type UpdateAcquirerFormData = z.infer<typeof updateAcquirerSchema>;
 
-export default function EditGatewayPage() {
+export default function EditAcquirerPage() {
   const router = useRouter();
   const params = useParams();
-  const gatewayId = params?.id as string;
+  const acquirerId = params?.id as string;
 
-  const [gateway, setGateway] = useState<Gateway | null>(null);
+  const [acquirer, setAcquirer] = useState<Acquirer | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  const form = useForm<UpdateGatewayFormData>({
-    resolver: zodResolver(updateGatewaySchema),
+  const form = useForm<UpdateAcquirerFormData>({
+    resolver: zodResolver(updateAcquirerSchema),
     defaultValues: {
-      gatewayName: '',
+      acquirerName: '',
       fileName: '',
       status: 'active',
       fields: [{ fieldName: '', fieldValue: '' }],
@@ -77,26 +77,26 @@ export default function EditGatewayPage() {
     name: 'fields',
   });
 
-  // Fetch gateway on mount
+  // Fetch acquirer on mount
   useEffect(() => {
     const fetchData = async () => {
-      if (!gatewayId) {
-        toast.error('Gateway ID is missing');
-        router.push('/admin/gateways/gateways');
+      if (!acquirerId) {
+        toast.error('Acquirer ID is missing');
+        router.push('/admin/acquirers/acquirers');
         return;
       }
 
       setLoading(true);
       try {
-        const response = await getGatewayById(gatewayId);
+        const response = await getAcquirerById(acquirerId);
 
-        handleApiResponse<Gateway>(response, {
-          onSuccess: (gatewayData) => {
-            if (gatewayData) {
-              setGateway(gatewayData);
+        handleApiResponse<Acquirer>(response, {
+          onSuccess: (acquirerData) => {
+            if (acquirerData) {
+              setAcquirer(acquirerData);
 
               // Convert fields object to array format
-              const fieldsArray = Object.entries(gatewayData.fields || {}).map(
+              const fieldsArray = Object.entries(acquirerData.fields || {}).map(
                 ([fieldName, fieldValue]) => ({
                   fieldName,
                   fieldValue: String(fieldValue || ''),
@@ -108,11 +108,11 @@ export default function EditGatewayPage() {
                 ? fieldsArray 
                 : [{ fieldName: '', fieldValue: '' }];
 
-              // Populate form with gateway data
+              // Populate form with acquirer data
               const formData = {
-                gatewayName: gatewayData.gatewayName || '',
-                fileName: gatewayData.fileName || '',
-                status: gatewayData.status || 'active',
+                acquirerName: acquirerData.acquirerName || '',
+                fileName: acquirerData.fileName || '',
+                status: acquirerData.status || 'active',
                 fields: formFields,
               };
 
@@ -124,14 +124,14 @@ export default function EditGatewayPage() {
             }
           },
           onError: (errorMessage) => {
-            toast.error(errorMessage || 'Failed to load gateway');
-            router.push('/admin/gateways/gateways');
+            toast.error(errorMessage || 'Failed to load acquirer');
+            router.push('/admin/acquirers/acquirers');
           },
         });
       } catch (error) {
-        console.error('Error fetching gateway:', error);
-        toast.error('An error occurred while loading gateway');
-        router.push('/admin/gateways/gateways');
+        console.error('Error fetching acquirer:', error);
+        toast.error('An error occurred while loading acquirer');
+        router.push('/admin/acquirers/acquirers');
       } finally {
         setLoading(false);
       }
@@ -139,11 +139,11 @@ export default function EditGatewayPage() {
 
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gatewayId, router]);
+  }, [acquirerId, router]);
 
-  const onSubmit = async (data: UpdateGatewayFormData) => {
-    if (!gatewayId) {
-      toast.error('Gateway ID is missing');
+  const onSubmit = async (data: UpdateAcquirerFormData) => {
+    if (!acquirerId) {
+      toast.error('Acquirer ID is missing');
       return;
     }
 
@@ -157,22 +157,22 @@ export default function EditGatewayPage() {
         }
       });
 
-      const payload: UpdateGatewayPayload = {
-        gatewayName: data.gatewayName.trim(),
+      const payload: UpdateAcquirerPayload = {
+        acquirerName: data.acquirerName.trim(),
         fileName: data.fileName.trim(),
         status: data.status,
         fields: fieldsObject,
       };
 
-      const response = await updateGateway(gatewayId, payload);
+      const response = await updateAcquirer(acquirerId, payload);
 
       handleApiResponse(response, {
         onSuccess: () => {
-          toast.success('Gateway updated successfully!');
-          router.push('/admin/gateways/gateways');
+          toast.success('Acquirer updated successfully!');
+          router.push('/admin/acquirers/acquirers');
         },
         onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to update gateway');
+          toast.error(errorMessage || 'Failed to update acquirer');
         },
         onValidationError: (errors, messages) => {
           console.error('Validation errors:', errors);
@@ -183,7 +183,7 @@ export default function EditGatewayPage() {
         },
       });
     } catch (error) {
-      console.error('❌ Error updating gateway:', error);
+      console.error('❌ Error updating acquirer:', error);
       toast.error('An unexpected error occurred');
     } finally {
       setSubmitting(false);
@@ -196,13 +196,13 @@ export default function EditGatewayPage() {
         <Container>
           <Toolbar>
             <ToolbarHeading
-              title="Edit Gateway"
-              description="Update gateway details"
+              title="Edit Acquirer"
+              description="Update acquirer details"
             />
           </Toolbar>
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <p className="text-muted-foreground">Loading gateway data...</p>
+              <p className="text-muted-foreground">Loading acquirer data...</p>
             </div>
           </div>
         </Container>
@@ -210,25 +210,25 @@ export default function EditGatewayPage() {
     );
   }
 
-  if (!gateway) {
+  if (!acquirer) {
     return (
       <Fragment>
         <Container>
           <Toolbar>
             <ToolbarHeading
-              title="Edit Gateway"
-              description="Update gateway details"
+              title="Edit Acquirer"
+              description="Update acquirer details"
             />
           </Toolbar>
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <p className="text-muted-foreground">Gateway not found</p>
+              <p className="text-muted-foreground">Acquirer not found</p>
               <Button
                 variant="outline"
-                onClick={() => router.push('/admin/gateways/gateways')}
+                onClick={() => router.push('/admin/acquirers/acquirers')}
                 className="mt-4"
               >
-                Back to Gateways
+                Back to Acquirers
               </Button>
             </div>
           </div>
@@ -242,12 +242,12 @@ export default function EditGatewayPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Edit Gateway"
-            description="Update gateway details"
+            title="Edit Acquirer"
+            description="Update acquirer details"
           />
           <div className="flex items-center">
             <Link
-              href="/admin/gateways/gateways"
+              href="/admin/acquirers/acquirers"
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="size-4" />
@@ -264,15 +264,15 @@ export default function EditGatewayPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
-                  name="gatewayName"
+                  name="acquirerName"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Gateway Name <span className="text-destructive">*</span>
+                        Acquirer Name <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Enter Gateway Name"
+                          placeholder="Enter Acquirer Name"
                           {...field}
                           disabled={submitting}
                         />
@@ -401,13 +401,13 @@ export default function EditGatewayPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.push('/admin/gateways/gateways')}
+                  onClick={() => router.push('/admin/acquirers/acquirers')}
                   disabled={submitting}
                 >
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary" disabled={submitting}>
-                  {submitting ? 'Updating...' : 'Update Gateway'}
+                  {submitting ? 'Updating...' : 'Update Acquirer'}
                 </Button>
               </div>
             </form>

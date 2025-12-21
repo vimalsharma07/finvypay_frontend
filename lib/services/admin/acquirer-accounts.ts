@@ -1,25 +1,25 @@
 /**
- * Payment Channels API Service
+ * Acquirer Accounts API Service
  * 
- * Centralized API calls for payment channels management
+ * Centralized API calls for acquirer accounts management
  */
 
 import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
 
-// Payment Channel types matching the API response structure
-export interface PaymentChannelGateway {
+// Acquirer Account types matching the API response structure
+export interface AcquirerAccountAcquirer {
   id: number | string;
-  gatewayName: string;
+  acquirerName: string;
   fileName: string;
   status: string;
 }
 
-export interface PaymentChannel {
+export interface AcquirerAccount {
   id: number | string;
-  gatewayId: number | string;
-  gateway: PaymentChannelGateway;
+  acquirerId: number | string;
+  acquirer: AcquirerAccountAcquirer;
   name: string;
   currency: string;
   providerType: string;
@@ -46,12 +46,13 @@ export interface PaymentChannel {
   updatedAt: string;
 }
 
-export interface PaymentChannelListParams {
+export interface AcquirerAccountListParams {
   page?: number;
   limit?: number;
+  acquirerId?: number;
 }
 
-export interface PaymentChannelListMeta {
+export interface AcquirerAccountListMeta {
   currentPage: number;
   itemsPerPage: number;
   totalItems: number;
@@ -60,19 +61,19 @@ export interface PaymentChannelListMeta {
   hasNextPage: boolean;
 }
 
-export interface PaymentChannelListData {
-  data: PaymentChannel[];
-  meta: PaymentChannelListMeta;
+export interface AcquirerAccountListData {
+  data: AcquirerAccount[];
+  meta: AcquirerAccountListMeta;
 }
 
-export interface PaymentChannelListResponse {
+export interface AcquirerAccountListResponse {
   success: boolean;
-  data: PaymentChannelListData;
+  data: AcquirerAccountListData;
   message?: string;
 }
 
-export interface CreatePaymentChannelPayload {
-  gatewayId: number | string;
+export interface CreateAcquirerAccountPayload {
+  acquirerId: number | string;
   name: string;
   currency: string;
   providerType: string;
@@ -95,42 +96,42 @@ export interface CreatePaymentChannelPayload {
   config: Record<string, string>;
 }
 
-export interface UpdatePaymentChannelPayload {
-  gatewayId: number | string;
-  name: string;
-  currency: string;
-  providerType: string;
-  flowType: string;
-  timezone: string;
-  minTransactionAmount: number;
-  maxTransactionAmount: number;
-  perDaySuccessAmount: number;
-  perDayCardLimit: number;
-  perDayEmailLimit: number;
-  perWeekCardLimit: number;
-  perWeekEmailLimit: number;
-  perMonthCardLimit: number;
-  perMonthEmailLimit: number;
-  dailyCardDeclineLimit: number;
-  dailyEmailDeclineLimit: number;
-  allowedCountries: string[];
-  blockedCountries: string[];
-  acceptedCardTypes: string[];
-  config: Record<string, string>;
-  status: string;
+export interface UpdateAcquirerAccountPayload {
+  acquirerId?: number | string;
+  name?: string;
+  currency?: string;
+  providerType?: string;
+  flowType?: string;
+  timezone?: string;
+  minTransactionAmount?: number;
+  maxTransactionAmount?: number;
+  perDaySuccessAmount?: number;
+  perDayCardLimit?: number;
+  perDayEmailLimit?: number;
+  perWeekCardLimit?: number;
+  perWeekEmailLimit?: number;
+  perMonthCardLimit?: number;
+  perMonthEmailLimit?: number;
+  dailyCardDeclineLimit?: number;
+  dailyEmailDeclineLimit?: number;
+  allowedCountries?: string[];
+  blockedCountries?: string[];
+  acceptedCardTypes?: string[];
+  config?: Record<string, string>;
+  status?: string;
   descriptor?: string;
 }
 
 /**
- * Get all payment channels (with pagination)
+ * Get all acquirer accounts (with pagination)
  */
-export async function getPaymentChannels(
-  params?: PaymentChannelListParams
-): Promise<ApiResponse<PaymentChannelListResponse>> {
+export async function getAcquirerAccounts(
+  params?: AcquirerAccountListParams
+): Promise<ApiResponse<AcquirerAccountListResponse>> {
   try {
-    const data = await http.get(adminRoutes.paymentChannels.list, {
+    const data = await http.get(adminRoutes.acquirerAccounts.list, {
       query: params as Record<string, string | number | undefined>,
-    }) as PaymentChannelListResponse;
+    }) as AcquirerAccountListResponse;
     return {
       status: 200,
       data,
@@ -151,22 +152,22 @@ export async function getPaymentChannels(
 }
 
 /**
- * Get payment channel by ID
+ * Get acquirer account by ID
  */
-export async function getPaymentChannelById(
+export async function getAcquirerAccountById(
   id: string | number
-): Promise<ApiResponse<PaymentChannel>> {
+): Promise<ApiResponse<AcquirerAccount>> {
   try {
-    const response = await http.get(adminRoutes.paymentChannels.getById(id)) as
+    const response = await http.get(adminRoutes.acquirerAccounts.getById(id)) as
       | {
           success: boolean;
-          data: PaymentChannel;
+          data: AcquirerAccount;
         }
-      | PaymentChannel;
+      | AcquirerAccount;
     
     // Handle API response structure: { success: true, data: {...} }
     if (response && typeof response === 'object' && 'success' in response && 'data' in response) {
-      const apiResponse = response as { success: boolean; data: PaymentChannel };
+      const apiResponse = response as { success: boolean; data: AcquirerAccount };
       if (apiResponse.success && apiResponse.data) {
         return {
           status: 200,
@@ -175,18 +176,18 @@ export async function getPaymentChannelById(
       }
     }
     
-    // Fallback: if response is directly the payment channel data
+    // Fallback: if response is directly the acquirer account data
     if (response && typeof response === 'object' && 'id' in response && !('success' in response)) {
       return {
         status: 200,
-        data: response as unknown as PaymentChannel,
+        data: response as unknown as AcquirerAccount,
       };
     }
     
-    // Handle direct PaymentChannel object response
+    // Handle direct AcquirerAccount object response
     return {
       status: 200,
-      data: response as PaymentChannel,
+      data: response as AcquirerAccount,
     };
   } catch (error) {
     if (error instanceof ApiError) {
@@ -204,13 +205,13 @@ export async function getPaymentChannelById(
 }
 
 /**
- * Create payment channel
+ * Create acquirer account
  */
-export async function createPaymentChannel(
-  payload: CreatePaymentChannelPayload
-): Promise<ApiResponse<PaymentChannel>> {
+export async function createAcquirerAccount(
+  payload: CreateAcquirerAccountPayload
+): Promise<ApiResponse<AcquirerAccount>> {
   try {
-    const data = await http.post(adminRoutes.paymentChannels.create, payload) as PaymentChannel;
+    const data = await http.post(adminRoutes.acquirerAccounts.create, payload) as AcquirerAccount;
     return {
       status: 200,
       data,
@@ -233,14 +234,14 @@ export async function createPaymentChannel(
 }
 
 /**
- * Update payment channel
+ * Update acquirer account
  */
-export async function updatePaymentChannel(
+export async function updateAcquirerAccount(
   id: string | number,
-  payload: UpdatePaymentChannelPayload
-): Promise<ApiResponse<PaymentChannel>> {
+  payload: UpdateAcquirerAccountPayload
+): Promise<ApiResponse<AcquirerAccount>> {
   try {
-    const data = await http.put(adminRoutes.paymentChannels.update(id), payload) as PaymentChannel;
+    const data = await http.put(adminRoutes.acquirerAccounts.update(id), payload) as AcquirerAccount;
     return {
       status: 200,
       data,
@@ -263,18 +264,18 @@ export async function updatePaymentChannel(
 }
 
 /**
- * Update payment channel status
+ * Update acquirer account status
  */
-export interface UpdatePaymentChannelStatusPayload {
+export interface UpdateAcquirerAccountStatusPayload {
   status: 'active' | 'inactive';
 }
 
-export async function updatePaymentChannelStatus(
+export async function updateAcquirerAccountStatus(
   id: string | number,
-  payload: UpdatePaymentChannelStatusPayload
-): Promise<ApiResponse<PaymentChannel>> {
+  payload: UpdateAcquirerAccountStatusPayload
+): Promise<ApiResponse<AcquirerAccount>> {
   try {
-    const data = await http.patch(adminRoutes.paymentChannels.updateStatus(id), payload) as PaymentChannel;
+    const data = await http.patch(adminRoutes.acquirerAccounts.updateStatus(id), payload) as AcquirerAccount;
     return {
       status: 200,
       data,
@@ -297,13 +298,13 @@ export async function updatePaymentChannelStatus(
 }
 
 /**
- * Delete payment channel
+ * Delete acquirer account
  */
-export async function deletePaymentChannel(
+export async function deleteAcquirerAccount(
   id: string | number
 ): Promise<ApiResponse<{ success: boolean; message?: string }>> {
   try {
-    const data = await http.delete(adminRoutes.paymentChannels.delete(id)) as {
+    const data = await http.delete(adminRoutes.acquirerAccounts.delete(id)) as {
       success: boolean;
       message?: string;
     };
@@ -327,4 +328,3 @@ export async function deletePaymentChannel(
     };
   }
 }
-
