@@ -162,9 +162,19 @@ export function getMenuByRole(role?: UserRole | null, pathname?: string): MenuCo
   // If still no role, try to infer from pathname
   if (!userRole && pathname) {
     if (pathname.startsWith('/user/')) {
-      return USER_MENU;
+      try {
+        const { getUserMenu } = require('@/config/menus/user-menu');
+        return getUserMenu();
+      } catch {
+        return USER_MENU;
+      }
     } else if (pathname.startsWith('/admin/')) {
-      return ADMIN_MENU;
+      try {
+        const { getAdminMenu } = require('@/config/menus/admin-menu');
+        return getAdminMenu();
+      } catch {
+        return ADMIN_MENU;
+      }
     } else if (pathname.startsWith('/affiliate/')) {
       return AFFILIATE_MENU;
     }
@@ -191,7 +201,13 @@ export function getMenuByRole(role?: UserRole | null, pathname?: string): MenuCo
       }
     case 'USER':
     case 'MERCHANT':
-      return USER_MENU;
+      // Use getUserMenu() to get permission-filtered menu
+      try {
+        const { getUserMenu } = require('@/config/menus/user-menu');
+        return getUserMenu();
+      } catch {
+        return USER_MENU;
+      }
     case 'AFFILIATE':
     case 'AFFILIATE_PARTNER':
       return AFFILIATE_MENU;
