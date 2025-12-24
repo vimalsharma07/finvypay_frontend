@@ -353,7 +353,7 @@ export function CreateMerchantAcquirerAccountForm({
       return;
     }
     if (!selectedProvider) {
-      setAdditionalError('Provider is required');
+      setAdditionalError('Acquirer is required');
       return;
     }
     if (!selectedConnector) {
@@ -477,7 +477,7 @@ export function CreateMerchantAcquirerAccountForm({
 
           <div className="flex flex-col gap-1">
             <Label className="text-foreground text-sm font-semibold">
-              Provider<span className="text-red-500">*</span>
+              Assign Acquirer<span className="text-red-500">*</span>
             </Label>
             <SearchSelect
               options={providerOptions || []}

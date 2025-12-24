@@ -1,9 +1,11 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   Toolbar,
   ToolbarHeading,
+  ToolbarActions,
 } from '@/layouts/demo1/components/toolbar';
 import { Container } from '@/components/common/container';
 import {
@@ -13,6 +15,7 @@ import {
   AcquirerAccount,
   AcquirerAccountListResponse,
 } from '@/lib/services/admin/acquirer-accounts';
+import { getAcquirerById, Acquirer } from '@/lib/services/admin/acquirers';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -39,9 +42,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Search, X, Pencil, Trash2, Plus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Switch, SwitchWrapper } from '@/components/ui/switch';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { TableActionMenu, TableActionMenuItem } from '@/app/(protected)/components/table-action-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,9 +58,32 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 
+// Helper function to get icon URL from publicId
+const getIconUrl = (iconUrl?: string): string | null => {
+  if (!iconUrl) return null;
+  
+  // If it's already a full URL, return it
+  if (iconUrl.startsWith('http://') || iconUrl.startsWith('https://')) {
+    return iconUrl;
+  }
+  
+  // If it's a publicId (starts with "uploads/"), construct the URL
+  if (iconUrl.startsWith('uploads/')) {
+    return `https://stagebucket4all.s3.amazonaws.com/${iconUrl}`;
+  }
+  
+  return iconUrl;
+};
+
 export default function AdminAcquirerAccountsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const acquirerIdFromUrl = searchParams.get('acquirerId');
+  
   const [acquirerAccounts, setAcquirerAccounts] = useState<AcquirerAccount[]>([]);
   const [loading, setLoading] = useState(true);
+  const [acquirer, setAcquirer] = useState<Acquirer | null>(null);
+  const [loadingAcquirer, setLoadingAcquirer] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState<AcquirerAccount | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -70,15 +97,36 @@ export default function AdminAcquirerAccountsPage() {
   const fetchAcquirerAccounts = useCallback(async (pageNum: number, pageLimit: number) => {
     setLoading(true);
     try {
-      const response = await getAcquirerAccounts({
+      const params: { page: number; limit: number; acquirerId?: number } = {
         page: pageNum,
         limit: pageLimit,
-      });
+      };
+      
+      if (acquirerIdFromUrl) {
+        params.acquirerId = parseInt(acquirerIdFromUrl, 10);
+      }
+      
+      const response = await getAcquirerAccounts(params);
       handleApiResponse<AcquirerAccountListResponse>(response, {
         onSuccess: (data) => {
           if (data && data.success && data.data) {
             setAcquirerAccounts(data.data.data);
             setMeta(data.data.meta);
+            
+            // If we have accounts and acquirerId, try to get acquirer name from first account
+            if (data.data.data.length > 0 && data.data.data[0].acquirer?.acquirerName) {
+              setAcquirer({
+                id: acquirerIdFromUrl || '',
+                acquirerName: data.data.data[0].acquirer.acquirerName,
+                fileName: data.data.data[0].acquirer.fileName || '',
+                iconUrl: data.data.data[0].acquirer.iconUrl,
+                fields: {},
+                status: '',
+                isDeleted: false,
+                createdAt: '',
+                updatedAt: '',
+              });
+            }
           } else {
             toast.error('Failed to fetch acquirer accounts - invalid response structure');
           }
@@ -95,9 +143,31 @@ export default function AdminAcquirerAccountsPage() {
     }
   }, []);
 
+  // Fetch acquirer details when acquirerId is present
+  useEffect(() => {
+    if (acquirerIdFromUrl) {
+      setLoadingAcquirer(true);
+      getAcquirerById(acquirerIdFromUrl).then((response) => {
+        handleApiResponse<Acquirer>(response, {
+          onSuccess: (data) => {
+            setAcquirer(data);
+          },
+          onError: () => {
+            // Silently fail - we'll try to get name from accounts
+          },
+        });
+        setLoadingAcquirer(false);
+      }).catch(() => {
+        setLoadingAcquirer(false);
+      });
+    } else {
+      setAcquirer(null);
+    }
+  }, [acquirerIdFromUrl]);
+
   useEffect(() => {
     fetchAcquirerAccounts(page, limit);
-  }, [page, limit, fetchAcquirerAccounts]);
+  }, [page, limit, acquirerIdFromUrl, fetchAcquirerAccounts]);
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -301,43 +371,34 @@ export default function AdminAcquirerAccountsPage() {
         header: ({ column }) => (
           <DataGridColumnHeader column={column} title="Action" />
         ),
-        cell: ({ row }) => (
-          <div className="flex items-center gap-2">
-            <Button
-              className="size-7"
-              mode="icon"
-              variant="ghost"
-              asChild
-            >
-              <Link href={`/admin/acquirers/acquirer-accounts/${row.original.id}/edit`}>
-                <Pencil className="size-4" />
-              </Link>
-            </Button>
-            <Button
-              className="size-7"
-              mode="icon"
-              variant="ghost"
-              asChild
-            >
-              <Link href={`/admin/acquirers/acquirer-accounts/${row.original.id}/rates`}>
-                <Plus className="size-4 text-primary" />
-              </Link>
-            </Button>
-            <Button
-              className="size-7"
-              mode="icon"
-              variant="ghost"
-              onClick={() => {
-                setAccountToDelete(row.original);
+        cell: ({ row }) => {
+          const actions: TableActionMenuItem<AcquirerAccount>[] = [
+            {
+              label: 'Edit',
+              icon: Pencil,
+              route: (account) => `/admin/acquirers/acquirer-accounts/${account.id}/edit`,
+            },
+            {
+              label: 'Add Rates',
+              icon: Plus,
+              route: (account) => `/admin/acquirers/acquirer-accounts/${account.id}/rates`,
+            },
+            {
+              label: 'Delete',
+              icon: Trash2,
+              onClick: (account) => {
+                setAccountToDelete(account);
                 setDeleteDialogOpen(true);
-              }}
-            >
-              <Trash2 className="size-4 text-destructive" />
-            </Button>
-          </div>
-        ),
+              },
+              variant: 'destructive',
+              separator: true,
+            },
+          ];
+
+          return <TableActionMenu row={row.original} actions={actions} />;
+        },
         enableSorting: false,
-        size: 120,
+        size: 80,
       },
     ],
     [updatingStatus, handleStatusToggle],
@@ -399,8 +460,51 @@ export default function AdminAcquirerAccountsPage() {
         <Toolbar>
           <ToolbarHeading
             title="Acquirer Accounts"
-            description="Manage and view all acquirer accounts"
+            description={
+              acquirerIdFromUrl && acquirer
+                ? (
+                    <span className="flex items-center gap-2 flex-wrap">
+                      <span className="text-muted-foreground">Manage and view acquirer accounts for</span>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary font-semibold border border-primary/20">
+                        {acquirer.iconUrl && (() => {
+                          const iconUrl = getIconUrl(acquirer.iconUrl);
+                          return iconUrl ? (
+                            <img
+                              src={iconUrl}
+                              alt={acquirer.acquirerName}
+                              className="h-5 w-5 object-cover rounded"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                              }}
+                            />
+                          ) : null;
+                        })()}
+                        <span>{acquirer.acquirerName}</span>
+                      </span>
+                    </span>
+                  )
+                : acquirerIdFromUrl
+                ? `Manage and view acquirer accounts for acquirer ID: ${acquirerIdFromUrl}`
+                : 'Manage and view all acquirer accounts'
+            }
           />
+          <ToolbarActions>
+            <Button
+              variant="primary"
+              onClick={() => {
+                if (acquirerIdFromUrl) {
+                  router.push(`/admin/acquirers/acquirer-accounts/create/${acquirerIdFromUrl}`);
+                } else {
+                  // If no acquirerId, navigate to acquirers page to select one first
+                  router.push('/admin/acquirers');
+                }
+              }}
+            >
+              <Plus className="size-4 mr-2" />
+              Add Account
+            </Button>
+          </ToolbarActions>
         </Toolbar>
       </Container>
       <Container>

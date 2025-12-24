@@ -39,8 +39,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Search, X, Pencil, Trash2 } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { TableActionMenu, TableActionMenuItem } from '@/app/(protected)/components/table-action-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -181,33 +180,29 @@ export default function AdminPermissionsPage() {
         header: ({ column }) => (
           <DataGridColumnHeader column={column} title="Action" />
         ),
-        cell: ({ row }) => (
-          <div className="flex items-center gap-2">
-            <Button
-              className="size-7"
-              mode="icon"
-              variant="ghost"
-              asChild
-            >
-              <Link href={`/admin/roles-permissions/permissions/${row.original.id}/edit`}>
-                <Pencil className="size-4" />
-              </Link>
-            </Button>
-            <Button
-              className="size-7"
-              mode="icon"
-              variant="ghost"
-              onClick={() => {
-                setPermissionToDelete(row.original);
+        cell: ({ row }) => {
+          const actions: TableActionMenuItem<Permission>[] = [
+            {
+              label: 'Edit',
+              icon: Pencil,
+              route: (permission) => `/admin/roles-permissions/permissions/${permission.id}/edit`,
+            },
+            {
+              label: 'Delete',
+              icon: Trash2,
+              onClick: (permission) => {
+                setPermissionToDelete(permission);
                 setDeleteDialogOpen(true);
-              }}
-            >
-              <Trash2 className="size-4 text-destructive" />
-            </Button>
-          </div>
-        ),
+              },
+              variant: 'destructive',
+              separator: true,
+            },
+          ];
+
+          return <TableActionMenu row={row.original} actions={actions} />;
+        },
         enableSorting: false,
-        size: 100,
+        size: 80,
       },
     ],
     [],

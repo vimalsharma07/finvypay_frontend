@@ -82,7 +82,7 @@ export default function EditAcquirerPage() {
     const fetchData = async () => {
       if (!acquirerId) {
         toast.error('Acquirer ID is missing');
-        router.push('/admin/acquirers/acquirers');
+        router.push('/admin/acquirers');
         return;
       }
 
@@ -125,13 +125,13 @@ export default function EditAcquirerPage() {
           },
           onError: (errorMessage) => {
             toast.error(errorMessage || 'Failed to load acquirer');
-            router.push('/admin/acquirers/acquirers');
+            router.push('/admin/acquirers');
           },
         });
       } catch (error) {
         console.error('Error fetching acquirer:', error);
         toast.error('An error occurred while loading acquirer');
-        router.push('/admin/acquirers/acquirers');
+        router.push('/admin/acquirers');
       } finally {
         setLoading(false);
       }
@@ -169,7 +169,7 @@ export default function EditAcquirerPage() {
       handleApiResponse(response, {
         onSuccess: () => {
           toast.success('Acquirer updated successfully!');
-          router.push('/admin/acquirers/acquirers');
+          router.push('/admin/acquirers');
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to update acquirer');
@@ -225,7 +225,7 @@ export default function EditAcquirerPage() {
               <p className="text-muted-foreground">Acquirer not found</p>
               <Button
                 variant="outline"
-                onClick={() => router.push('/admin/acquirers/acquirers')}
+                onClick={() => router.push('/admin/acquirers')}
                 className="mt-4"
               >
                 Back to Acquirers
@@ -247,7 +247,7 @@ export default function EditAcquirerPage() {
           />
           <div className="flex items-center">
             <Link
-              href="/admin/acquirers/acquirers"
+              href="/admin/acquirers"
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="size-4" />
@@ -401,7 +401,7 @@ export default function EditAcquirerPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.push('/admin/acquirers/acquirers')}
+                  onClick={() => router.push('/admin/acquirers')}
                   disabled={submitting}
                 >
                   Cancel

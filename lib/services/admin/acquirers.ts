@@ -13,6 +13,7 @@ export interface Acquirer {
   id: number | string;
   acquirerName: string;
   fileName: string;
+  iconUrl?: string;
   fields: Record<string, string>;
   status: string;
   isDeleted: boolean;
@@ -48,14 +49,16 @@ export interface AcquirerListResponse {
 export interface CreateAcquirerPayload {
   acquirerName: string;
   fileName: string;
+  iconUrl?: string;
   fields: Record<string, string>;
 }
 
 export interface UpdateAcquirerPayload {
   acquirerName: string;
   fileName: string;
+  iconUrl?: string;
   fields: Record<string, string>;
-  status: string;
+  status?: string;
 }
 
 /**

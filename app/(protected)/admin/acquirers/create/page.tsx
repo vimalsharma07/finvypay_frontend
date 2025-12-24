@@ -33,7 +33,7 @@ import { createAcquirer, CreateAcquirerPayload } from '@/lib/services/admin/acqu
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import { ImageInput, type ImageInputFiles } from '@/components/image-input';
-import { uploadToS3 } from '@/lib/s3-upload';
+import { uploadFile, deleteFile } from '@/lib/services/file-upload';
 
 // Available provider types
 const PROVIDER_TYPES = [
@@ -62,6 +62,9 @@ export default function CreateAcquirerPage() {
   const [submitting, setSubmitting] = useState(false);
   const [iconFiles, setIconFiles] = useState<ImageInputFiles>([]);
   const [uploadingIcon, setUploadingIcon] = useState(false);
+  const [iconUrl, setIconUrl] = useState<string>(''); // Store URL for display
+  const [iconPublicId, setIconPublicId] = useState<string>(''); // Store publicId separately to ensure it's included
+  const [iconFileId, setIconFileId] = useState<string>(''); // Store file ID for deletion
 
   const form = useForm<CreateAcquirerFormData>({
     resolver: zodResolver(createAcquirerSchema),
@@ -106,6 +109,9 @@ export default function CreateAcquirerPage() {
         toast.error('Only PNG files are allowed');
         setIconFiles([]);
         form.setValue('iconUrl', '');
+        setIconUrl('');
+        setIconPublicId('');
+        setIconFileId('');
         return;
       }
       
@@ -115,24 +121,59 @@ export default function CreateAcquirerPage() {
         toast.error('File size must be less than 2MB');
         setIconFiles([]);
         form.setValue('iconUrl', '');
+        setIconUrl('');
+        setIconPublicId('');
+        setIconFileId('');
         return;
       }
       
       setUploadingIcon(true);
       try {
-        const iconUrl = await uploadToS3(file, 'acquirer-icons');
-        form.setValue('iconUrl', iconUrl);
+        // Delete old file if exists (non-blocking - continue even if deletion fails)
+        if (iconFileId) {
+          try {
+            await deleteFile(iconFileId);
+            console.log('Old icon file deleted:', iconFileId);
+          } catch (deleteError: any) {
+            console.warn('Failed to delete old icon file:', deleteError);
+            // Try deleting by publicId as fallback
+            if (iconPublicId) {
+              try {
+                await deleteFileByPublicId(iconPublicId);
+              } catch (err) {
+                console.warn('Failed to delete old icon file by publicId:', err);
+              }
+            }
+            // Continue with upload even if delete fails - don't block the upload
+          }
+        }
+
+        const uploadResponse = await uploadFile(file, 'Acquirer icon', 'common');
+        // Store publicId in the form (for database)
+        form.setValue('iconUrl', uploadResponse.publicId, { shouldValidate: false, shouldDirty: true });
+        // Store publicId separately to ensure it's included in payload
+        setIconPublicId(uploadResponse.publicId);
+        // Store file ID for future deletion
+        setIconFileId(uploadResponse.id);
+        // Store URL for display
+        setIconUrl(uploadResponse.url);
+        console.log('Icon uploaded, publicId:', uploadResponse.publicId, 'fileId:', uploadResponse.id);
+        console.log('Form iconUrl value:', form.getValues('iconUrl'));
         toast.success('Icon uploaded successfully');
       } catch (error) {
         console.error('Error uploading icon:', error);
-        toast.error('Failed to upload icon. Please check your S3 configuration.');
+        toast.error('Failed to upload icon. Please try again.');
         setIconFiles([]);
         form.setValue('iconUrl', '');
+        setIconUrl('');
+        setIconPublicId('');
+        setIconFileId('');
       } finally {
         setUploadingIcon(false);
       }
     } else {
       form.setValue('iconUrl', '');
+      setIconUrl('');
     }
   };
 
@@ -147,12 +188,22 @@ export default function CreateAcquirerPage() {
         }
       });
 
+      // Get iconUrl from state (publicId from upload) - use state as primary source
+      const finalIconPublicId = iconPublicId?.trim() || data.iconUrl?.trim() || form.getValues('iconUrl')?.trim();
+      
+      console.log('Submitting form - iconPublicId from state:', iconPublicId);
+      console.log('Submitting form - iconUrl from data:', data.iconUrl);
+      console.log('Submitting form - iconUrl from form.getValues:', form.getValues('iconUrl'));
+      console.log('Submitting form - final iconPublicId:', finalIconPublicId);
+      
       const payload: CreateAcquirerPayload = {
         acquirerName: data.acquirerName.trim(),
         fileName: data.fileName.trim(),
-        iconUrl: data.iconUrl || undefined,
+        ...(finalIconPublicId && finalIconPublicId.length > 0 && { iconUrl: finalIconPublicId }), // Only include if not empty
         fields: fieldsObject,
       };
+      
+      console.log('Final payload:', JSON.stringify(payload, null, 2));
 
       const response = await createAcquirer(payload);
 
@@ -282,6 +333,20 @@ export default function CreateAcquirerPage() {
                 )}
               />
 
+              {/* Hidden field for iconUrl to ensure it's included in form submission */}
+              <FormField
+                control={form.control}
+                name="iconUrl"
+                render={({ field }) => (
+                  <FormItem className="hidden">
+                    <FormControl>
+                      <Input {...field} type="hidden" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               {/* Icon Upload Section */}
               <FormField
                 control={form.control}
@@ -300,18 +365,32 @@ export default function CreateAcquirerPage() {
                       >
                         {({ onImageUpload, fileList, onImageRemove, isDragging, dragProps }) => (
                           <div className="space-y-3">
-                            {fileList.length > 0 ? (
+                            {fileList.length > 0 || iconUrl ? (
                               <div className="flex items-center gap-4">
                                 <div className="relative">
                                   <div className="h-20 w-20 rounded-lg border-2 border-border overflow-hidden bg-muted flex items-center justify-center">
-                                    {fileList[0].dataURL ? (
+                                    {iconUrl ? (
+                                      <img
+                                        src={iconUrl}
+                                        alt="Acquirer icon"
+                                        className="h-full w-full object-cover"
+                                        onError={(e) => {
+                                          const target = e.target as HTMLImageElement;
+                                          target.src = '/media/app/pay4tech.png';
+                                        }}
+                                      />
+                                    ) : fileList[0]?.dataURL ? (
                                       <img
                                         src={fileList[0].dataURL}
                                         alt="Acquirer icon"
                                         className="h-full w-full object-cover"
                                       />
                                     ) : (
-                                      <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                                      <img
+                                        src="/media/app/pay4tech.png"
+                                        alt="Default acquirer icon"
+                                        className="h-full w-full object-cover opacity-50"
+                                      />
                                     )}
                                   </div>
                                   <Button
@@ -319,10 +398,42 @@ export default function CreateAcquirerPage() {
                                     variant="ghost"
                                     size="icon"
                                     className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                    onClick={() => {
+                                    onClick={async () => {
+                                      // Delete file from database and S3 if exists (non-blocking)
+                                      let deletionSuccess = false;
+                                      
+                                      if (iconFileId) {
+                                        try {
+                                          await deleteFile(iconFileId);
+                                          console.log('Icon file deleted:', iconFileId);
+                                          deletionSuccess = true;
+                                        } catch (error: any) {
+                                          console.warn('Error deleting icon file:', error);
+                                          // Try deleting by publicId as fallback
+                                          if (iconPublicId) {
+                                            try {
+                                              await deleteFileByPublicId(iconPublicId);
+                                              deletionSuccess = true;
+                                            } catch (err) {
+                                              console.warn('Error deleting icon file by publicId:', err);
+                                            }
+                                          }
+                                        }
+                                      }
+                                      
+                                      // Always remove from UI, even if file deletion failed
                                       onImageRemove(0);
                                       setIconFiles([]);
                                       form.setValue('iconUrl', '');
+                                      setIconUrl('');
+                                      setIconPublicId('');
+                                      setIconFileId('');
+                                      
+                                      if (deletionSuccess) {
+                                        toast.success('Icon removed successfully');
+                                      } else if (iconFileId || iconPublicId) {
+                                        toast.warning('Icon removed from form, but file deletion may have failed. Please check manually.');
+                                      }
                                     }}
                                     disabled={uploadingIcon || submitting}
                                   >
@@ -330,7 +441,7 @@ export default function CreateAcquirerPage() {
                                   </Button>
                                 </div>
                                 <div className="flex-1">
-                                  <p className="text-sm font-medium">{fileList[0].file?.name || 'Icon uploaded'}</p>
+                                  <p className="text-sm font-medium">{fileList[0]?.file?.name || 'Icon uploaded'}</p>
                                   {uploadingIcon && (
                                     <p className="text-xs text-muted-foreground">Uploading...</p>
                                   )}

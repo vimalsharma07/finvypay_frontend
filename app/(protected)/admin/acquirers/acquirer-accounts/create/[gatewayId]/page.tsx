@@ -123,7 +123,7 @@ export default function CreateAcquirerAccountPage() {
     const fetchAllData = async () => {
       if (!acquirerId) {
         toast.error('Acquirer ID is missing');
-        router.push('/admin/acquirers/acquirers');
+        router.push('/admin/acquirers');
         return;
       }
 
@@ -159,7 +159,7 @@ export default function CreateAcquirerAccountPage() {
           onError: (errorMessage) => {
             console.error('Error fetching acquirer:', errorMessage);
             toast.error('Failed to load acquirer data');
-            router.push('/admin/acquirers/acquirers');
+            router.push('/admin/acquirers');
           },
         });
 
@@ -322,7 +322,7 @@ export default function CreateAcquirerAccountPage() {
           />
           <div className="flex items-center">
             <Link
-              href="/admin/acquirers/acquirers"
+              href="/admin/acquirers"
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="size-4" />
@@ -366,7 +366,7 @@ export default function CreateAcquirerAccountPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.push('/admin/acquirers/acquirers')}
+                  onClick={() => router.push('/admin/acquirers')}
                   disabled={submitting}
                 >
                   Cancel

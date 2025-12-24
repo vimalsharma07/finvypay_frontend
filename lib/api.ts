@@ -232,7 +232,7 @@ export async function apiFetch(
   url += buildQuery(query);
 
   const finalHeaders: HeadersInit = {
-    ...(json
+    ...(json && !(body instanceof FormData)
       ? {
           "Content-Type": "application/json",
           Accept: "application/json",
@@ -241,8 +241,8 @@ export async function apiFetch(
     ...(headers || {}),
   };
 
-  // Ensure Content-Type is set for POST/PUT/PATCH requests with body
-  if (body !== undefined && method !== "GET" && !(body instanceof FormData)) {
+  // Ensure Content-Type is set for POST/PUT/PATCH requests with body (but not for FormData)
+  if (body !== undefined && method !== "GET" && !(body instanceof FormData) && !finalHeaders["Content-Type"]) {
     (finalHeaders as any)["Content-Type"] = "application/json";
   }
 

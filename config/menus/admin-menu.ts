@@ -109,14 +109,11 @@ const BASE_ADMIN_MENU: MenuConfig = [
     ],
   },
   {
-    title: 'Acquirers & Accounts',
+    title: 'Acquirers',
     icon: Plug,
+    path: '/admin/acquirers',
     permissionModule: 'Acquirer Management', // Explicit permission module mapping
     requirePermission: true,
-    children: [
-      { title: 'Acquirers', path: '/admin/acquirers/acquirers', submodule: 'Acquirers' },
-      { title: 'Acquirer Accounts', path: '/admin/acquirers/acquirer-accounts', submodule: 'Acquirer Account' },
-    ],
   },
   {
     title: 'Master',
