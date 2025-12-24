@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -9,12 +9,12 @@ import {
   ToolbarActions,
 } from '@/layouts/demo1/components/toolbar';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, ArrowLeft } from 'lucide-react';
 import {
   TableComp,
   TableHeader,
   TableAction,
-} from '../../../../../../components/table-comp';
+} from '../../../../../components/table-comp';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
@@ -24,9 +24,11 @@ import {
   MerchantAcquirerAccountListResponse,
 } from '@/lib/services/admin/connectors';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import Link from 'next/link';
 
-export default function ConnectorsPage() {
+export default function AcquirerAccountsPage() {
   const params = useParams();
+  const router = useRouter();
   const userId = params.id as string;
   const [loading, setLoading] = useState(true);
   const [connectors, setConnectors] = useState<MerchantAcquirerAccount[]>([]);
@@ -64,9 +66,9 @@ export default function ConnectorsPage() {
             setMeta(data.data.meta);
           }
         },
-          onError: (errorMessage) => {
-            toast.error(errorMessage || 'Failed to load acquirer accounts');
-          },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to load acquirer accounts');
+        },
       });
     } catch (error) {
       console.error('Fetch connectors error:', error);
@@ -86,7 +88,7 @@ export default function ConnectorsPage() {
   const headers: TableHeader<MerchantAcquirerAccount>[] = [
     { key: 'name', label: 'Name', sortable: true },
     { key: 'terminalId', label: 'Terminal ID', sortable: true },
-    { key: 'gateway', label: 'Gateway', sortable: false },
+    { key: 'gateway', label: 'Acquirer', sortable: false },
     { key: 'acquirerAccount', label: 'Acquirer Account', sortable: false },
     { key: 'status', label: 'Status', sortable: true },
     { key: 'isPrimary', label: 'Primary', sortable: false },
@@ -111,7 +113,7 @@ export default function ConnectorsPage() {
       case 'gateway':
         return (
           <div className="text-sm">
-            {item.gateway?.name || 'N/A'}
+            {item.gateway?.name || item.acquirer?.acquirerName || 'N/A'}
           </div>
         );
       case 'acquirerAccount':
@@ -213,16 +215,20 @@ export default function ConnectorsPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Gateways (Acquirer Accounts)"
-            description="Manage acquirer accounts and gateways for merchant user"
+            title="Assign Acquirer"
+            description="Manage acquirer accounts for merchant user"
           />
           <ToolbarActions>
+            <Link href={`/admin/user-management/merchant/${userId}`}>
+              <Button variant="outline">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Merchant
+              </Button>
+            </Link>
             <Button
               variant="primary"
               onClick={() => {
-                // Navigate to create acquirer account page
-                const returnUrl = encodeURIComponent(`/admin/user-management/merchant/${userId}/routing_cascading/acquirer-accounts`);
-                window.location.href = `/admin/user-management/merchant/${userId}/routing_cascading/acquirer-accounts/create?returnUrl=${returnUrl}`;
+                router.push(`/admin/user-management/merchant/${userId}/acquirer-accounts/create`);
               }}
             >
               <Plus className="h-4 w-4 mr-2" />

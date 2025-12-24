@@ -25,6 +25,7 @@ import { AdvancedFilter, FilterField } from '../../../components/advanced-filter
 import { ConfirmComp } from '../../../components/confirm-comp';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { Pencil, Eye, Plug, Route, Trash2 } from 'lucide-react';
 
 export default function MerchantUsersPage() {
   const router = useRouter();
@@ -244,19 +245,29 @@ export default function MerchantUsersPage() {
   const actions: TableAction<User>[] = [
     {
       label: 'Edit',
+      icon: Pencil,
       route: (row: User) => `/admin/user-management/merchant/${row.id}/edit`,
     },
     {
       label: 'View',
+      icon: Eye,
       route: (row: User) => `/admin/user-management/merchant/${row.id}`,
     },
     {
+      label: 'Assign Acquirer',
+      icon: Plug,
+      route: (row: User) => `/admin/user-management/merchant/${row.id}/acquirer-accounts`,
+      separator: true,
+    },
+    {
       label: 'Routing & Cascading',
+      icon: Route,
       route: (row: User) => `/admin/user-management/merchant/${row.id}/routing_cascading`,
       separator: true,
     },
     {
       label: 'Delete',
+      icon: Trash2,
       onClick: (row: User) => {
         setUserToDelete(row);
         setDeleteDialogOpen(true);

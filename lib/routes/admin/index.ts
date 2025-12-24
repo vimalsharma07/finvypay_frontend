@@ -12,8 +12,8 @@ import { adminPermissionsRoutes } from './permissions-routes';
 import { adminIpWhitelistRoutes } from './ip-whitelist-routes';
 import { adminCardWhitelistRoutes } from './card-whitelist-routes';
 import { adminRiskManagementRoutes } from './risk-management-routes';
-import { adminGatewayRoutes } from './gateway-routes';
-import { adminPaymentChannelsRoutes } from './payment-channels-routes';
+import { adminAcquirerRoutes } from './acquirer-routes';
+import { adminAcquirerAccountsRoutes } from './acquirer-accounts-routes';
 import { adminSupportTicketRoutes } from './support-ticket-routes';
 
 export const adminModuleRoutes = {
@@ -26,7 +26,7 @@ export const adminModuleRoutes = {
   ipWhitelist: adminIpWhitelistRoutes,
   cardWhitelist: adminCardWhitelistRoutes,
   riskManagement: adminRiskManagementRoutes,
-  gateway: adminGatewayRoutes,
-  paymentChannels: adminPaymentChannelsRoutes,
+  acquirer: adminAcquirerRoutes,
+  acquirerAccounts: adminAcquirerAccountsRoutes,
   supportTicket: adminSupportTicketRoutes,
 } as const;

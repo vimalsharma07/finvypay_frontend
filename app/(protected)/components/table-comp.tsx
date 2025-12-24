@@ -13,7 +13,7 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table';
-import { EllipsisVertical, Search, X } from 'lucide-react';
+import { EllipsisVertical, Search, X, LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -58,6 +58,7 @@ export interface TableAction<T> {
   onClick?: (row: T) => void;
   variant?: 'destructive';
   separator?: boolean;
+  icon?: LucideIcon;
 }
 
 // Props interface
@@ -108,6 +109,8 @@ function DefaultActionsCell<T>({
         {actions.map((action, index) => {
           const shouldShowSeparator = action.separator && index > 0;
 
+          const IconComponent = action.icon;
+          
           if (action.route) {
             return (
               <Fragment key={index}>
@@ -116,7 +119,8 @@ function DefaultActionsCell<T>({
                   asChild
                   {...(action.variant && { variant: action.variant })}
                 >
-                  <Link href={action.route(row.original)}>
+                  <Link href={action.route(row.original)} className="flex items-center gap-2">
+                    {IconComponent && <IconComponent className="h-4 w-4" />}
                     {action.label}
                   </Link>
                 </DropdownMenuItem>
@@ -130,7 +134,9 @@ function DefaultActionsCell<T>({
               <DropdownMenuItem
                 {...(action.variant && { variant: action.variant })}
                 onClick={() => action.onClick?.(row.original)}
+                className="flex items-center gap-2"
               >
+                {IconComponent && <IconComponent className="h-4 w-4" />}
                 {action.label}
               </DropdownMenuItem>
             </Fragment>

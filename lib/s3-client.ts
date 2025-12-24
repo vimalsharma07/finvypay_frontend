@@ -18,12 +18,17 @@ function getS3Client() {
     hasSecretKey: !!config.secretAccessKey,
   });
 
+  // Validate credentials before creating client
+  if (!config.accessKeyId || !config.secretAccessKey) {
+    throw new Error('S3 credentials are not configured. Please set STORAGE_ACCESS_KEY_ID and STORAGE_SECRET_ACCESS_KEY environment variables.');
+  }
+
   return new S3Client({
     region: config.region,
     endpoint: config.endpoint,
     credentials: {
-      accessKeyId: config.accessKeyId!,
-      secretAccessKey: config.secretAccessKey!,
+      accessKeyId: config.accessKeyId,
+      secretAccessKey: config.secretAccessKey,
     },
     forcePathStyle: true,
   });

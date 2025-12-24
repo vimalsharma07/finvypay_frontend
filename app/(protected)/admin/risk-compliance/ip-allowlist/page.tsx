@@ -321,48 +321,43 @@ export default function AdminIpWhitelistPage() {
           const isPending = row.original.status === 'pending';
           const isApproving = approvingId === row.original.id;
           
-          return (
-            <div className="flex items-center gap-2">
-              {isPending && (
-                <Button
-                  className="size-7"
-                  mode="icon"
-                  variant="ghost"
-                  onClick={() => handleApproveIp(row.original.id)}
-                  disabled={isApproving}
-                  title="Approve"
-                >
-                  <CheckCircle2 className={`size-4 text-green-600 ${isApproving ? 'opacity-50' : ''}`} />
-                </Button>
-              )}
-              <Button
-                className="size-7"
-                mode="icon"
-                variant="ghost"
-                onClick={() => {
-                  setIpToEdit(row.original);
-                  setEditDialogOpen(true);
-                }}
-                title="Edit IP"
-              >
-                <Pencil className="size-4" />
-              </Button>
-              <Button
-                className="size-7"
-                mode="icon"
-                variant="ghost"
-                onClick={() => {
-                  setIpToDelete(row.original);
-                  setDeleteDialogOpen(true);
-                }}
-              >
-                <Trash2 className="size-4 text-destructive" />
-              </Button>
-            </div>
+          const actions: TableActionMenuItem<IpWhitelist>[] = [];
+          
+          if (isPending) {
+            actions.push({
+              label: 'Approve',
+              icon: CheckCircle2,
+              onClick: () => handleApproveIp(row.original.id),
+              disabled: isApproving,
+            });
+          }
+          
+          actions.push(
+            {
+              label: 'Edit',
+              icon: Pencil,
+              onClick: () => {
+                setIpToEdit(row.original);
+                setEditDialogOpen(true);
+              },
+              separator: isPending,
+            },
+            {
+              label: 'Delete',
+              icon: Trash2,
+              onClick: () => {
+                setIpToDelete(row.original);
+                setDeleteDialogOpen(true);
+              },
+              variant: 'destructive',
+              separator: true,
+            }
           );
+
+          return <TableActionMenu row={row.original} actions={actions} />;
         },
         enableSorting: false,
-        size: 100,
+        size: 80,
       },
     ],
     [],

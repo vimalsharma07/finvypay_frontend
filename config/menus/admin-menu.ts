@@ -109,14 +109,11 @@ const BASE_ADMIN_MENU: MenuConfig = [
     ],
   },
   {
-    title: 'Gateways & Channels',
+    title: 'Acquirers',
     icon: Plug,
-    permissionModule: 'Gateway Management', // Explicit permission module mapping
+    path: '/admin/acquirers',
+    permissionModule: 'Acquirer Management', // Explicit permission module mapping
     requirePermission: true,
-    children: [
-      { title: 'Gateways', path: '/admin/gateways/gateways', submodule: 'Gateways' },
-      { title: 'Payment Channels', path: '/admin/gateways/payment-channels', submodule: 'Payment Channel' },
-    ],
   },
   {
     title: 'Master',

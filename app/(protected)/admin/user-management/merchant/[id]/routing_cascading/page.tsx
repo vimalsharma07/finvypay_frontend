@@ -9,14 +9,14 @@ export default function RoutingCascadingPage() {
   const userId = params.id as string;
 
   useEffect(() => {
-    // Redirect to payment-channels page by default
-    router.replace(`/admin/user-management/merchant/${userId}/routing_cascading/payment-channels`);
+    // Redirect to routing page by default
+    router.replace(`/admin/user-management/merchant/${userId}/routing_cascading/routing`);
   }, [userId, router]);
 
   return (
     <div className="flex items-center justify-center min-h-[400px]">
       <div className="text-center">
-        <p className="text-muted-foreground">Redirecting to payment channels...</p>
+        <p className="text-muted-foreground">Redirecting to routing...</p>
       </div>
     </div>
   );

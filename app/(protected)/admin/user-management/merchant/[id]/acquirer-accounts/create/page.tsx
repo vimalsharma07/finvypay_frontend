@@ -14,13 +14,14 @@ import { toast } from 'sonner';
 import { createMerchantAcquirerAccount } from '@/lib/services/admin/merchant-acquirer-account';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { CreateMerchantAcquirerAccountForm } from '@/components/admin/merchant-acquirer-account/CreateMerchantAcquirerAccountForm';
+import Link from 'next/link';
 
 export default function CreateAcquirerAccountPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
   const userId = params.id as string;
-  const returnUrl = searchParams?.get('returnUrl') || `/admin/user-management/merchant/${userId}/routing_cascading/acquirer-accounts`;
+  const returnUrl = `/admin/user-management/merchant/${userId}/acquirer-accounts`;
   const userProfileId = searchParams?.get('userProfileId') || '';
 
   const handleSubmit = async (data: any) => {
@@ -58,7 +59,7 @@ export default function CreateAcquirerAccountPage() {
         <Toolbar>
           <ToolbarHeading
             title="Add Acquirer Account"
-            description="Create a new acquirer account (connector) for this merchant user"
+            description="Create a new acquirer account for this merchant user"
           />
           <ToolbarActions>
             <Button
