@@ -113,7 +113,7 @@ export default function AcquirerAccountsPage() {
       case 'gateway':
         return (
           <div className="text-sm">
-            {item.gateway?.name || item.acquirer?.acquirerName || 'N/A'}
+            {item.acquirer?.name || 'N/A'}
           </div>
         );
       case 'acquirerAccount':

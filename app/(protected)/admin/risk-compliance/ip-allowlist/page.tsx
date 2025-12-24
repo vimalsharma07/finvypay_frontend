@@ -54,6 +54,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { TableActionMenu, TableActionMenuItem } from '@/app/(protected)/components/table-action-menu';
 
 export default function AdminIpWhitelistPage() {
   const [ipWhitelist, setIpWhitelist] = useState<IpWhitelist[]>([]);

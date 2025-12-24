@@ -242,8 +242,11 @@ export async function apiFetch(
   };
 
   // Ensure Content-Type is set for POST/PUT/PATCH requests with body (but not for FormData)
-  if (body !== undefined && method !== "GET" && !(body instanceof FormData) && !finalHeaders["Content-Type"]) {
-    (finalHeaders as any)["Content-Type"] = "application/json";
+  if (body !== undefined && method !== "GET" && !(body instanceof FormData)) {
+    const headersObj = finalHeaders as Record<string, string>;
+    if (!headersObj["Content-Type"]) {
+      headersObj["Content-Type"] = "application/json";
+    }
   }
 
   if (auth) {

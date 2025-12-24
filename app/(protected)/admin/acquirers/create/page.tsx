@@ -33,7 +33,7 @@ import { createAcquirer, CreateAcquirerPayload } from '@/lib/services/admin/acqu
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import { ImageInput, type ImageInputFiles } from '@/components/image-input';
-import { uploadFile, deleteFile } from '@/lib/services/file-upload';
+import { uploadFile, deleteFile, deleteFileByPublicId } from '@/lib/services/file-upload';
 
 // Available provider types
 const PROVIDER_TYPES = [

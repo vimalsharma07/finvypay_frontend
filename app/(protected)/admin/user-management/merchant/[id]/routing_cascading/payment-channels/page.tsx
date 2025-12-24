@@ -111,7 +111,7 @@ export default function ConnectorsPage() {
       case 'gateway':
         return (
           <div className="text-sm">
-            {item.gateway?.name || 'N/A'}
+            {item.acquirer?.name || 'N/A'}
           </div>
         );
       case 'acquirerAccount':

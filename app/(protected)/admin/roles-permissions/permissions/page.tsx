@@ -39,6 +39,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Search, X, Pencil, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { TableActionMenu, TableActionMenuItem } from '@/app/(protected)/components/table-action-menu';
 import {
   AlertDialog,
