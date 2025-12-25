@@ -51,10 +51,9 @@ const BASE_USER_MENU: MenuConfig = [
     permissionModule: 'Transactions',
     requirePermission: false,
     children: [
-      { title: 'All Transactions', path: '/user/transactions', submodule: 'Transactions' },
-      { title: 'Pending Transactions', path: '/user/transactions/pending', submodule: 'Transactions' },
-      { title: 'Completed Transactions', path: '/user/transactions/completed', submodule: 'Transactions' },
-      { title: 'Failed Transactions', path: '/user/transactions/failed', submodule: 'Transactions' },
+      { title: ' Transactions', path: '/user/transactions', submodule: 'Transactions' },
+      { title: 'Sandbox Transactions', path: '/user/transactions/sandbox-transactions', submodule: ' Sandbox Transactions' },
+     
     ],
   },
   {
