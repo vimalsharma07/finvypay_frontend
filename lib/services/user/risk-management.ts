@@ -59,7 +59,6 @@ export interface UpdateRiskManagementPayload {
 }
 
 export interface CreateRiskManagementPayload {
-  userId: number | string;
   riskType: string;
   riskValue: string;
 }

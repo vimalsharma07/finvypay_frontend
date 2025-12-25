@@ -123,11 +123,10 @@ export default function ManageRiskPage() {
     );
   }, [searchQuery, riskManagement]);
 
-  const handleAddRisk = async (userId: string, riskType: string, riskValue: string) => {
+  const handleAddRisk = async (riskType: string, riskValue: string) => {
     setAdding(true);
     try {
       const response = await createRiskManagement({
-        userId: Number(userId),
         riskType,
         riskValue,
       });
