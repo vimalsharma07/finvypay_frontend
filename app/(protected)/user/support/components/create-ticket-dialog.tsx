@@ -237,7 +237,7 @@ export function CreateTicketDialog({
               <FormField
                 control={form.control}
                 name="file"
-                render={({ field: { value, onChange, ...field } }) => (
+                render={({ field: { value, onChange, ref, ...field } }) => (
                   <FormItem>
                     <FormLabel>Attachment (Optional)</FormLabel>
                     <FormControl>
