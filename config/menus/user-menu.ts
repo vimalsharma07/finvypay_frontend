@@ -43,7 +43,7 @@ const BASE_USER_MENU: MenuConfig = [
     icon: Users,
     path: '/user/user-management',
     permissionModule: 'User Management',
-    requirePermission: true,
+    requirePermission: false,
   },
   {
     title: 'Transactions',
@@ -93,7 +93,7 @@ const BASE_USER_MENU: MenuConfig = [
     icon: Heart,
     path: '/user/support',
     permissionModule: 'Support',
-    requirePermission: true,
+    requirePermission: false,
   },
   {
     title: 'Report',
