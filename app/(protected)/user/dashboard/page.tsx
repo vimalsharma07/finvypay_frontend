@@ -1,22 +1,32 @@
 'use client';
 
-import dynamicImport from 'next/dynamic';
-
-// Dynamically import to avoid SSR issues with client-only code
-const Demo1LightSidebarPage = dynamicImport(
-  () => import('@/app/(protected)/components/demo1').then(mod => ({ default: mod.Demo1LightSidebarPage })),
-  { ssr: false }
-);
-
-// Force dynamic rendering to prevent SSR issues
-export const dynamic = 'force-dynamic';
+import { Fragment } from 'react';
+import {
+  Toolbar,
+  ToolbarHeading,
+} from '@/layouts/demo1/components/toolbar';
+import { Container } from '@/components/common/container';
+import { UserDashboardContent } from './components';
 
 /**
  * User Dashboard Page
  * 
- * Uses the original dashboard content - only the sidebar menu changes based on role
+ * Dedicated dashboard for user role with user-specific statistics and quick actions
  */
 export default function UserDashboardPage() {
-  return <Demo1LightSidebarPage />;
+  return (
+    <Fragment>
+      <Container>
+        <Toolbar>
+          <ToolbarHeading
+            title="Dashboard"
+            description="Overview of your transactions, cards, and account activity"
+          />
+        </Toolbar>
+      </Container>
+      <Container>
+        <UserDashboardContent />
+      </Container>
+    </Fragment>
+  );
 }
-
