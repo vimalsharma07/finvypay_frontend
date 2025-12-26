@@ -173,8 +173,12 @@ export function TransactionDetailsDialog({
                 />
                 <InfoField label="Message" value={transaction.message} />
                 <InfoField label="Risk Blocked" value={transaction.riskBlocked ? 'Yes' : 'No'} />
+                <InfoField 
+                  label="Merchant Profile ID" 
+                  value={transaction.merchantProfileId || transaction.profileId} 
+                />
                 <InfoField label="Terminal ID" value={transaction.terminalId} />
-                <InfoField label="Profile ID" value={transaction.profileId} />
+                <InfoField label="Profile ID (Legacy)" value={transaction.profileId} />
                 <InfoField label="Connector ID" value={transaction.connectorId} />
                 <InfoField label="Request API" value={transaction.requestApi} />
               </div>

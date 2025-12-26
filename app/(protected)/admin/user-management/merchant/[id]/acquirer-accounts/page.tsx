@@ -87,6 +87,7 @@ export default function AcquirerAccountsPage() {
   // Define table headers
   const headers: TableHeader<MerchantAcquirerAccount>[] = [
     { key: 'name', label: 'Name', sortable: true },
+    { key: 'merchantProfileId', label: 'Merchant Profile ID', sortable: true },
     { key: 'terminalId', label: 'Terminal ID', sortable: true },
     { key: 'gateway', label: 'Acquirer', sortable: false },
     { key: 'acquirerAccount', label: 'Acquirer Account', sortable: false },
@@ -104,6 +105,12 @@ export default function AcquirerAccountsPage() {
     switch (key) {
       case 'name':
         return <div className="font-medium">{item.name || '-'}</div>;
+      case 'merchantProfileId':
+        return (
+          <div className="text-sm font-semibold text-primary">
+            {item.merchantProfileId || '-'}
+          </div>
+        );
       case 'terminalId':
         return (
           <div className="text-sm font-mono text-muted-foreground">
@@ -245,7 +252,7 @@ export default function AcquirerAccountsPage() {
           actions={actions}
           enableCheckbox={false}
           searchPlaceholder="Search acquirer accounts..."
-          searchKeys={['name', 'terminalId']}
+          searchKeys={['name', 'merchantProfileId', 'terminalId']}
           getRowId={(row: MerchantAcquirerAccount) => String(row.id)}
           pagination={{
             pageSize: limit,

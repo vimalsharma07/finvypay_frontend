@@ -36,6 +36,7 @@ import { SearchInput } from './shared/search-input';
 import { getTransactionColumns } from './shared/columns';
 import { filterTransactions } from './shared/utils';
 import { TransactionDetailsDialog } from './shared/transaction-details-dialog';
+import { ProfileSelector } from './shared/profile-selector';
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -43,6 +44,9 @@ export default function TransactionsPage() {
   const [meta, setMeta] = useState<TransactionListResponse['data']['meta'] | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+
+  // Merchant Profile state
+  const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -61,13 +65,22 @@ export default function TransactionsPage() {
   });
 
   const fetchTransactions = useCallback(
-    async (pageNum: number, pageLimit: number) => {
+    async (pageNum: number, pageLimit: number, profileId?: number | null) => {
       setLoading(true);
       try {
-        const params = {
+        const params: {
+          page: number;
+          limit: number;
+          profileId?: number;
+        } = {
           page: pageNum,
           limit: pageLimit,
         };
+
+        // Include profileId if selected
+        if (profileId) {
+          params.profileId = profileId;
+        }
 
         const response = await getProductionTransactions(params);
         handleApiResponse<TransactionListResponse>(response, {
@@ -95,8 +108,14 @@ export default function TransactionsPage() {
   );
 
   useEffect(() => {
-    fetchTransactions(page, limit);
-  }, [fetchTransactions, page, limit]);
+    fetchTransactions(page, limit, selectedProfileId);
+  }, [fetchTransactions, page, limit, selectedProfileId]);
+
+  // Handle profile change
+  const handleProfileChange = (profileId: number | null) => {
+    setSelectedProfileId(profileId);
+    setPage(1); // Reset to first page when profile changes
+  };
 
   // Client-side filtering
   const filteredData = useMemo(
@@ -183,10 +202,19 @@ export default function TransactionsPage() {
     <Fragment>
       <Container>
         <Toolbar>
-          <ToolbarHeading
-            title="Transactions"
-            description="View all your transactions"
-          />
+          <div className="flex items-center justify-between w-full">
+            <ToolbarHeading
+              title="Transactions"
+              description="View all your transactions"
+            />
+            <div className="flex items-center gap-4">
+              <ProfileSelector
+                value={selectedProfileId}
+                onChange={handleProfileChange}
+                className="w-[250px]"
+              />
+            </div>
+          </div>
         </Toolbar>
       </Container>
 

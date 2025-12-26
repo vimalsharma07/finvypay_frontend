@@ -19,6 +19,7 @@ export interface Transaction {
   id: string;
   transactionId: string;
   userId: string;
+  merchantProfileId: string | null;
   profileId: string | null;
   connectorId: string | null;
   gatewayId: string;

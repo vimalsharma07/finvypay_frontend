@@ -68,6 +68,7 @@ export interface Transaction {
 export interface TransactionListParams {
   page?: number;
   limit?: number;
+  profileId?: number; // Merchant Profile ID for filtering
 }
 
 export interface TransactionListMeta {

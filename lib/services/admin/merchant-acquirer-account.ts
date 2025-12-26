@@ -11,6 +11,7 @@ import type { ApiResponse } from '../types';
 export interface MerchantAcquirerAccount {
   id: string;
   userId: number;
+  merchantProfileId: number | null;
   acquirerId: number | null;
   acquirerAccountId: number | null;
   name: string;
@@ -33,6 +34,10 @@ export interface MerchantAcquirerAccount {
   acquirerAccount?: {
     id: number;
     name: string;
+  };
+  merchantProfile?: {
+    id: number;
+    name?: string;
   };
   createdAt: string;
   updatedAt: string;

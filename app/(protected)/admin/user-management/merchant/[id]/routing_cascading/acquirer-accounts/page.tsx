@@ -85,6 +85,7 @@ export default function ConnectorsPage() {
   // Define table headers
   const headers: TableHeader<MerchantAcquirerAccount>[] = [
     { key: 'name', label: 'Name', sortable: true },
+    { key: 'merchantProfileId', label: 'Merchant Profile ID', sortable: true },
     { key: 'terminalId', label: 'Terminal ID', sortable: true },
     { key: 'gateway', label: 'Gateway', sortable: false },
     { key: 'acquirerAccount', label: 'Payment Channel', sortable: false },
@@ -102,6 +103,12 @@ export default function ConnectorsPage() {
     switch (key) {
       case 'name':
         return <div className="font-medium">{item.name || '-'}</div>;
+      case 'merchantProfileId':
+        return (
+          <div className="text-sm font-semibold text-primary">
+            {item.merchantProfileId || '-'}
+          </div>
+        );
       case 'terminalId':
         return (
           <div className="text-sm font-mono text-muted-foreground">
@@ -239,7 +246,7 @@ export default function ConnectorsPage() {
           actions={actions}
           enableCheckbox={false}
           searchPlaceholder="Search payment channels..."
-          searchKeys={['name', 'terminalId']}
+          searchKeys={['name', 'merchantProfileId', 'terminalId']}
           getRowId={(row: MerchantAcquirerAccount) => String(row.id)}
           pagination={{
             pageSize: limit,
