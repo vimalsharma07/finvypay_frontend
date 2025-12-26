@@ -124,6 +124,7 @@ const BASE_ADMIN_MENU: MenuConfig = [
       { title: 'Countries', path: '/admin/master/countries', submodule: 'Countries' },
       { title: 'Currency', path: '/admin/master/currency', submodule: 'Currency' },
       { title: 'Industries', path: '/admin/master/industries', submodule: 'Industries' },
+      { title: 'Agreements', path: '/admin/master/agreements', submodule: 'Agreements' },
 
     ],
   },

@@ -25,4 +25,11 @@ export const adminMasterRoutes = {
     update: (id: string) => `${BASE_URL}/industries/${id}`,
     delete: (id: string) => `${BASE_URL}/industries/${id}`,
   },
+  agreements: {
+    list: `${BASE_URL}/agreements`,
+    getById: (id: string) => `${BASE_URL}/agreements/${id}`,
+    create: `${BASE_URL}/agreements`,
+    update: (id: string) => `${BASE_URL}/agreements/${id}`,
+    delete: (id: string) => `${BASE_URL}/agreements/${id}`,
+  },
 } as const;
