@@ -333,7 +333,7 @@ export default function CreateRolePage() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="ADMIN">ADMIN</SelectItem>
-                          <SelectItem value="USER">USER</SelectItem>
+                          <SelectItem value="MERCHANT">MERCHANT</SelectItem>
                           <SelectItem value="AFFILIATE">AFFILIATE</SelectItem>
                         </SelectContent>
                       </Select>

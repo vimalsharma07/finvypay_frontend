@@ -29,8 +29,6 @@ import {
   updateUserSchema,
   UpdateUserSchemaType,
 } from '@/lib/validations/admin/merchantUsers/user-validation';
-import { RoleSelectField } from '@/components/common/role-select-field';
-import { useRoles } from '@/hooks/use-roles';
 import { toast } from 'sonner';
 
 export default function EditMerchantUserPage() {
@@ -40,14 +38,13 @@ export default function EditMerchantUserPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
-  const { roles, loadingRoles } = useRoles({ type: 'USER' });
 
   const form = useForm<UpdateUserSchemaType>({
     resolver: zodResolver(updateUserSchema),
     defaultValues: {
       name: '',
       email: '',
-      roleId: '',
+      roleId: '', // Will be set from user data, but not editable
       isBlocked: false,
       isDeleted: false,
     },
@@ -67,17 +64,18 @@ export default function EditMerchantUserPage() {
             console.log('User data received:', userData);
             setUser(userData);
             
-            // Reset form with user data (roleId will be set in separate effect when roles are loaded)
+            // Reset form with user data
+            // CRITICAL: For USER category, roleId is set but not editable
             form.reset({
               name: userData.name || '',
               email: userData.email || '',
-              roleId: '',
+              roleId: userData.roleId?.toString() || '',
               isBlocked: userData.isBlocked ?? false,
               isDeleted: userData.isDeleted ?? false,
             });
           },
           onError: (errorMessage) => {
-            toast.error(errorMessage || 'Failed to load user');
+            toast.error(errorMessage || 'Failed to load merchant');
             router.push('/admin/user-management/merchant');
           },
           onUnauthorized: () => {
@@ -97,52 +95,33 @@ export default function EditMerchantUserPage() {
     fetchUser();
   }, [userId, router, form]);
 
-  // Update roleId when roles are loaded and user data is available
-  useEffect(() => {
-    if (user && roles.length > 0) {
-      // Use roleId directly from API response if available, otherwise try to match by role name
-      let roleId = '';
-      
-      if (user.roleId) {
-        // Use roleId directly from API response
-        roleId = user.roleId.toString();
-      } else if (user.role) {
-        // Fallback: Find the role ID by matching the role name
-        const matchedRole = roles.find(
-          (role) => role.name.toLowerCase() === user.role?.toLowerCase()
-        );
-        roleId = matchedRole ? matchedRole.id.toString() : '';
-      }
-      
-      // Update only the roleId field
-      if (roleId) {
-        form.setValue('roleId', roleId);
-      }
-      
-      console.log('Role mapped:', {
-        userRole: user.role,
-        userRoleId: user.roleId,
-        roleId: roleId,
-      });
-    }
-  }, [user, roles, form]);
+  // Role is non-editable for USER category - no need to fetch roles
 
   const onSubmit = async (data: UpdateUserSchemaType) => {
     if (!userId) return;
 
     setIsSubmitting(true);
     try {
-      const response = await updateUser(userId, {
+      // CRITICAL: For USER category, roleId cannot be changed
+      // Backend will enforce this, but we don't send roleId for USER category
+      const updatePayload: any = {
         name: data.name,
         email: data.email,
-        roleId: Number(data.roleId),
         // isBlocked: data.isBlocked,
         // isDeleted: data.isDeleted,
-      });
+      };
+      
+      // Only include roleId if user is not USER category (backend will handle USER category)
+      // For USER category, backend will ignore roleId changes
+      if (user && user.role !== 'user') {
+        updatePayload.roleId = Number(data.roleId);
+      }
+      
+      const response = await updateUser(userId, updatePayload);
 
       handleApiResponse<User>(response, {
         onSuccess: (userData) => {
-          toast.success('User updated successfully!');
+          toast.success('Merchant updated successfully!');
           router.push('/admin/user-management/merchant');
         },
         onValidationError: (errors, messages) => {
@@ -165,7 +144,7 @@ export default function EditMerchantUserPage() {
           toast.error(errorMessage);
         },
         onError: (errorMessage, status) => {
-          toast.error(errorMessage || 'Failed to update user');
+          toast.error(errorMessage || 'Failed to update merchant');
         },
         onUnauthorized: () => {
           toast.error('Unauthorized. Please check your authentication.');
@@ -185,8 +164,8 @@ export default function EditMerchantUserPage() {
         <Container>
           <Toolbar>
             <ToolbarHeading
-              title="Edit Merchant User"
-              description="Update merchant user information"
+              title="Edit Merchant"
+              description="Update merchant information"
             />
           </Toolbar>
         </Container>
@@ -267,12 +246,32 @@ export default function EditMerchantUserPage() {
                     )}
                   />
 
-                  <RoleSelectField
-                    control={form.control}
-                    disabled={isSubmitting}
-                    roles={roles}
-                    loadingRoles={loadingRoles}
-                  />
+                  {/* Role field - non-editable for USER category */}
+                  {user && user.role === 'user' ? (
+                    <FormItem>
+                      <FormLabel>Role</FormLabel>
+                      <div className="text-sm text-muted-foreground">
+                        Standard Merchant (cannot be changed)
+                      </div>
+                      <input
+                        type="hidden"
+                        {...form.register('roleId')}
+                        value={user.roleId?.toString() || ''}
+                      />
+                    </FormItem>
+                  ) : (
+                    <FormItem>
+                      <FormLabel>Role</FormLabel>
+                      <div className="text-sm text-muted-foreground">
+                        {user?.role || 'N/A'} (role changes not supported for USER category)
+                      </div>
+                      <input
+                        type="hidden"
+                        {...form.register('roleId')}
+                        value={user?.roleId?.toString() || ''}
+                      />
+                    </FormItem>
+                  )}
 
                   <FormField
                     control={form.control}

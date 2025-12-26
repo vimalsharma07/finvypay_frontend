@@ -85,7 +85,7 @@ export const mockRoles: MockRole[] = [
     id: '3',
     slug: 'user',
     name: 'User',
-    description: 'Standard user with basic access',
+    description: 'Standard merchant with basic access',
     isTrashed: false,
     isProtected: false,
     isDefault: true,

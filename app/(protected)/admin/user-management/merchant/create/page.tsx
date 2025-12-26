@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -28,17 +28,17 @@ import {
   createUserSchema,
   CreateUserSchemaType,
 } from '@/lib/validations/admin/merchantUsers/user-validation';
-import { RoleSelectField } from '@/components/common/role-select-field';
 import { PasswordField } from '@/components/common/password-field';
-import { useRoles } from '@/hooks/use-roles';
 import { toast } from 'sonner';
+import { getRoles } from '@/lib/services/admin/roles';
 
 export const dynamic = 'force-dynamic';
 
 export default function CreateMerchantUserPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { roles, loadingRoles } = useRoles({ type: 'USER' });
+  const [standardUserRoleId, setStandardUserRoleId] = useState<number | null>(null);
+  const [loadingRoleId, setLoadingRoleId] = useState(true);
 
   const form = useForm<CreateUserSchemaType>({
     resolver: zodResolver(createUserSchema),
@@ -46,23 +46,63 @@ export default function CreateMerchantUserPage() {
       email: '',
       name: '',
       password: '',
-      roleId: '',
+      roleId: '', // Will be auto-assigned to Standard Merchant
     },
   });
+
+  // Fetch Standard Merchant role ID on mount
+  useEffect(() => {
+    const fetchStandardUserRoleId = async () => {
+      setLoadingRoleId(true);
+      try {
+        const response = await getRoles('MERCHANT');
+        handleApiResponse(response, {
+          onSuccess: (data) => {
+            if (data && data.success && Array.isArray(data.data)) {
+              // Find "Standard Merchant" role
+              const standardUser = data.data.find(
+                (role: any) => role.name === 'Standard Merchant'
+              );
+              if (standardUser) {
+                setStandardUserRoleId(Number(standardUser.id));
+                // Auto-set roleId in form
+                form.setValue('roleId', standardUser.id.toString());
+              } else {
+                toast.error('Standard Merchant role not found');
+              }
+            }
+          },
+          onError: (errorMessage) => {
+            toast.error(errorMessage || 'Failed to fetch Standard Merchant role');
+          },
+        });
+      } catch (error) {
+        console.error('Error fetching Standard Merchant role:', error);
+        toast.error('Failed to fetch Standard Merchant role');
+      } finally {
+        setLoadingRoleId(false);
+      }
+    };
+
+    fetchStandardUserRoleId();
+  }, [form]);
 
   const onSubmit = async (data: CreateUserSchemaType) => {
     setIsSubmitting(true);
     try {
+      // CRITICAL: Force Standard Merchant roleId (backend will also enforce this)
+      const roleIdToUse = standardUserRoleId || Number(data.roleId);
+      
       const response = await createUser({
         email: data.email,
         name: data.name,
         password: data.password,
-        roleId: Number(data.roleId),
+        roleId: roleIdToUse, // Always use Standard Merchant roleId
       });
 
       handleApiResponse<User>(response, {
         onSuccess: () => {
-          toast.success('User created successfully!');
+          toast.success('Merchant created successfully!');
           router.push('/admin/user-management/merchant');
         },
         onValidationError: (errors, messages) => {
@@ -84,7 +124,7 @@ export default function CreateMerchantUserPage() {
           toast.error(errorMessage);
         },
         onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to create user');
+          toast.error(errorMessage || 'Failed to create merchant');
         },
         onUnauthorized: () => {
           toast.error('Unauthorized. Please check your authentication.');
@@ -103,8 +143,8 @@ export default function CreateMerchantUserPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Create User"
-            description="Add a new user to the system"
+            title="Create Merchant"
+            description="Add a new merchant to the system"
           />
         </Toolbar>
       </Container>
@@ -117,7 +157,7 @@ export default function CreateMerchantUserPage() {
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
               </Link>
-              <CardTitle>User Information</CardTitle>
+              <CardTitle>Merchant Information</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
@@ -135,7 +175,7 @@ export default function CreateMerchantUserPage() {
                         <FormLabel>Name *</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Enter user name"
+                            placeholder="Enter merchant name"
                             {...field}
                             disabled={isSubmitting}
                           />
@@ -169,12 +209,24 @@ export default function CreateMerchantUserPage() {
                     disabled={isSubmitting}
                   />
 
-                  <RoleSelectField
-                    control={form.control}
-                    disabled={isSubmitting}
-                    roles={roles}
-                    loadingRoles={loadingRoles}
-                  />
+                          {/* Role field removed - Standard Merchant is auto-assigned */}
+                  {/* Role is hidden from UI as per requirements */}
+                  {loadingRoleId && (
+                    <FormItem>
+                      <FormLabel>Role</FormLabel>
+                      <div className="text-sm text-muted-foreground">
+                        Loading...
+                      </div>
+                    </FormItem>
+                  )}
+                  {!loadingRoleId && standardUserRoleId && (
+                    <FormItem>
+                      <FormLabel>Role</FormLabel>
+                      <div className="text-sm text-muted-foreground">
+                        Standard Merchant (auto-assigned)
+                      </div>
+                    </FormItem>
+                  )}
                 </div>
 
                 <div className="flex justify-end gap-4 pt-4">

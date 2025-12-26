@@ -1,10 +1,12 @@
 /**
- * User - Transaction Routes
- * All endpoints related to user transaction operations
+ * Merchant - Transaction Routes
+ * All endpoints related to merchant transaction operations
  */
 
 export const userTransactionRoutes = {
-  production: `/user/transaction/production`,
-  sandbox: `/user/transaction/sandbox`,
+  production: `/merchant/transaction/production`,
+  sandbox: `/merchant/transaction/sandbox`,
+  getProductionById: (id: string | number) => `/merchant/transaction/production/${id}`,
+  getSandboxById: (id: string | number) => `/merchant/transaction/sandbox/${id}`,
 } as const;
 

@@ -80,10 +80,27 @@ export function hasSubModuleAccess(moduleName: string, submodule: string): boole
   const { permissions } = useAuthStore.getState();
   const modulePermissions = permissions.byModule[moduleName] || [];
 
+  // Debug logging in development
+  if (process.env.NODE_ENV === 'development' && moduleName === 'User Management' && submodule === 'Merchant') {
+    console.debug('[hasSubModuleAccess] Checking Merchant access:', {
+      moduleName,
+      submodule,
+      modulePermissionsCount: modulePermissions.length,
+      modulePermissions: modulePermissions.map(p => ({ name: p.name, subModule: p.subModule, identifier: p.identifier })),
+    });
+  }
+
   // Check if any permission in the module matches the submodule
-  return modulePermissions.some(perm => 
+  const hasAccess = modulePermissions.some(perm => 
     matchesSubModule(submodule, perm.subModule)
   );
+
+  // Debug logging in development
+  if (process.env.NODE_ENV === 'development' && moduleName === 'User Management' && submodule === 'Merchant') {
+    console.debug('[hasSubModuleAccess] Merchant access result:', hasAccess);
+  }
+
+  return hasAccess;
 }
 
 /**

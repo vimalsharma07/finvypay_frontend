@@ -1,9 +1,9 @@
 /**
  * Admin - User Management Routes
- * All endpoints related to admin user operations
+ * All endpoints related to admin user/merchant operations
  * 
  * Note: These are relative paths. The api.ts will prepend NEXT_PUBLIC_API_URL.
- * Update the paths below to match your backend API structure.
+ * Backend uses /user-management for all roles (ADMIN, MERCHANT, AFFILIATE).
  */
 
 import { getBaseUrl } from '../config/base-url';
@@ -18,4 +18,9 @@ export const adminUserRoutes = {
   delete: (id: string) => `${BASE_URL}/user-management/${id}`,
   search: `${BASE_URL}/user-management/search`,
   bulkDelete: `${BASE_URL}/user-management/bulk-delete`,
+  toggleBlockStatus: (id: string) => `${BASE_URL}/user-management/${id}/block`,
+  getAllowedRoles: `${BASE_URL}/user-management/roles/allowed`,
 } as const;
+
+// Alias for backward compatibility
+export const adminMerchantRoutes = adminUserRoutes;
