@@ -69,11 +69,11 @@ const BASE_ADMIN_MENU: MenuConfig = [
   {
     title: 'User Management',
     icon: Users,
-    permissionModule: 'User Management', // Explicit permission module mapping
+    permissionModule: 'User Management',
     requirePermission: true,
     children: [
       { title: 'Admin', path: '/admin/user-management/admin', submodule: 'Admin User' },
-      { title: 'Merchant', path: '/admin/user-management/merchant', submodule: 'User' },
+      { title: 'Merchant', path: '/admin/user-management/merchant', submodule: 'Merchant' },
       { title: 'Affiliate', path: '/admin/user-management/affiliate', submodule: 'Affiliate' },
     ],
   },

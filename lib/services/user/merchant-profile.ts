@@ -31,7 +31,7 @@ export interface MerchantProfileListResponse {
  */
 export async function getMerchantProfiles(): Promise<ApiResponse<MerchantProfileListResponse>> {
   try {
-    const data = await http.get('/user/merchant-profiles');
+    const data = await http.get('/merchant/profile/merchant-profiles');
     return {
       success: true,
       data: data as MerchantProfileListResponse,
@@ -53,7 +53,7 @@ export async function getMerchantProfiles(): Promise<ApiResponse<MerchantProfile
  */
 export async function getPrimaryMerchantProfile(): Promise<ApiResponse<MerchantProfile>> {
   try {
-    const data = await http.get('/user/merchant-profiles/primary');
+    const data = await http.get('/merchant/profile/merchant-profiles/primary');
     return {
       success: true,
       data: data as MerchantProfile,

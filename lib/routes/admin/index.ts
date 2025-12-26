@@ -4,6 +4,8 @@
  */
 
 import { adminUserRoutes } from './user-routes';
+// Alias for backward compatibility
+import { adminUserRoutes as adminMerchantRoutes } from './user-routes';
 import { adminMasterRoutes } from './master-routes';
 import { adminReportRoutes } from './report-routes';
 import { adminTransactionRoutes } from './transaction-routes';
@@ -18,6 +20,8 @@ import { adminSupportTicketRoutes } from './support-ticket-routes';
 
 export const adminModuleRoutes = {
   users: adminUserRoutes,
+  // Alias for backward compatibility
+  merchants: adminMerchantRoutes,
   master: adminMasterRoutes,
   reports: adminReportRoutes,
   transactions: adminTransactionRoutes,

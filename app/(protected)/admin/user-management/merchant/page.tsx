@@ -224,12 +224,12 @@ export default function MerchantUsersPage() {
       const response = await deleteUser(userId);
       handleApiResponse(response, {
         onSuccess: () => {
-          toast.success('User deleted successfully!');
-          // Immediately refetch users list to update the table
+          toast.success('Merchant deleted successfully!');
+          // Immediately refetch merchants list to update the table
           fetchUsers(page, limit, sortBy, sortOrder, filters);
         },
         onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to delete user');
+          toast.error(errorMessage || 'Failed to delete merchant');
         },
         onUnauthorized: () => {
           toast.error('Unauthorized. Please check your authentication.');
@@ -310,7 +310,7 @@ export default function MerchantUsersPage() {
               onReset={handleResetFilters}
             />
             <Button variant="primary" onClick={handleCreateUser}>
-              Create User
+              Create Merchant
             </Button>
           </ToolbarActions>
         </Toolbar>
@@ -322,7 +322,7 @@ export default function MerchantUsersPage() {
           renderCell={renderCell}
           actions={actions}
           enableCheckbox={false}
-          searchPlaceholder="Search users..."
+          searchPlaceholder="Search merchants..."
           searchKeys={['name', 'email', 'role']}
           getRowId={(row: User) => row.id}
           pagination={{
@@ -345,8 +345,8 @@ export default function MerchantUsersPage() {
       <ConfirmComp
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete User"
-        message={`Are you sure you want to delete user "${userToDelete?.name}"? This action cannot be undone.`}
+        title="Delete Merchant"
+        message={`Are you sure you want to delete merchant "${userToDelete?.name}"? This action cannot be undone.`}
         confirmLabel="Yes, Delete"
         cancelLabel="Cancel"
         variant="destructive"

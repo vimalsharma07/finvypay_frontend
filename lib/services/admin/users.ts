@@ -1,16 +1,16 @@
 /**
- * Users API Service
+ * Merchants API Service
  * 
- * Centralized API calls for user management
- * All user-related API calls should be defined here
+ * Centralized API calls for merchant management
+ * All merchant-related API calls should be defined here
  */
 
 import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
 
-// User types matching the actual API response structure
-export interface User {
+// Merchant types matching the actual API response structure
+export interface Merchant {
   id: string;
   email: string;
   name: string;
@@ -33,7 +33,10 @@ export interface User {
   updatedAt: string;
 }
 
-export interface CreateUserPayload {
+// Backward compatibility
+export interface User extends Merchant {}
+
+export interface CreateMerchantPayload {
   email: string;
   name: string;
   password: string;
@@ -41,7 +44,10 @@ export interface CreateUserPayload {
   parentId?: string | null;
 }
 
-export interface UpdateUserPayload {
+// Backward compatibility
+export interface CreateUserPayload extends CreateMerchantPayload {}
+
+export interface UpdateMerchantPayload {
   name?: string;
   email?: string;
   roleId?: number;
@@ -49,7 +55,10 @@ export interface UpdateUserPayload {
   // isDeleted?: boolean;
 }
 
-export interface UserListParams {
+// Backward compatibility
+export interface UpdateUserPayload extends UpdateMerchantPayload {}
+
+export interface MerchantListParams {
   page?: number;
   limit?: number;
   sortBy?: string;
@@ -58,7 +67,10 @@ export interface UserListParams {
   role?: string;
 }
 
-export interface UserListMeta {
+// Backward compatibility
+export interface UserListParams extends MerchantListParams {}
+
+export interface MerchantListMeta {
   currentPage: number;
   itemsPerPage: number;
   totalItems: number;
@@ -67,27 +79,34 @@ export interface UserListMeta {
   hasNextPage: boolean;
 }
 
-export interface UserListData {
-  data: User[];
-  meta: UserListMeta;
+// Backward compatibility
+export interface UserListMeta extends MerchantListMeta {}
+
+export interface MerchantListData {
+  data: Merchant[];
+  meta: MerchantListMeta;
 }
 
-export interface UserListResponse {
+export interface MerchantListResponse {
   success: boolean;
-  data: UserListData;
+  data: MerchantListData;
   message?: string;
 }
 
+// Backward compatibility
+export interface UserListData extends MerchantListData {}
+export interface UserListResponse extends MerchantListResponse {}
+
 /**
- * 1. Get all users (with pagination and filters)
+ * 1. Get all merchants (with pagination and filters)
  */
-export async function getUsers(
-  params?: UserListParams
-): Promise<ApiResponse<UserListResponse>> {
+export async function getMerchants(
+  params?: MerchantListParams
+): Promise<ApiResponse<MerchantListResponse>> {
   try {
     const data = await http.get(adminRoutes.users.list, {
       query: params as Record<string, string | number | boolean | null | undefined>,
-    }) as UserListResponse;
+    }) as MerchantListResponse;
     return {
       status: 200,
       data,
@@ -107,21 +126,28 @@ export async function getUsers(
   }
 }
 
+// Backward compatibility
+export async function getUsers(
+  params?: UserListParams
+): Promise<ApiResponse<UserListResponse>> {
+  return getMerchants(params as MerchantListParams) as Promise<ApiResponse<UserListResponse>>;
+}
+
 /**
- * 2. Get user by ID
+ * 2. Get merchant by ID
  */
-export async function getUserById(id: string): Promise<ApiResponse<User>> {
+export async function getMerchantById(id: string): Promise<ApiResponse<Merchant>> {
   try {
     const response = await http.get(adminRoutes.users.getById(id)) as
       | {
           success: boolean;
-          data: User;
+          data: Merchant;
         }
-      | User;
+      | Merchant;
     
     // Handle API response structure: { success: true, data: {...} }
     if (response && typeof response === 'object' && 'success' in response && 'data' in response) {
-      const apiResponse = response as { success: boolean; data: User };
+      const apiResponse = response as { success: boolean; data: Merchant };
       if (apiResponse.success && apiResponse.data) {
         return {
           status: 200,
@@ -130,17 +156,17 @@ export async function getUserById(id: string): Promise<ApiResponse<User>> {
       }
     }
     
-    // Fallback: if response is directly the user data
+    // Fallback: if response is directly the merchant data
     if (response && typeof response === 'object' && 'id' in response && !('success' in response)) {
       return {
         status: 200,
-        data: response as unknown as User,
+        data: response as unknown as Merchant,
       };
     }
     
     return {
       status: 200,
-      data: response as unknown as User,
+      data: response as unknown as Merchant,
     };
   } catch (error) {
     if (error instanceof ApiError) {
@@ -158,13 +184,13 @@ export async function getUserById(id: string): Promise<ApiResponse<User>> {
 }
 
 /**
- * 3. Create new user
+ * 3. Create new merchant
  */
-export async function createUser(
-  payload: CreateUserPayload
-): Promise<ApiResponse<User>> {
+export async function createMerchant(
+  payload: CreateMerchantPayload
+): Promise<ApiResponse<Merchant>> {
   try {
-    const data = await http.post(adminRoutes.users.create, payload) as User;
+    const data = await http.post(adminRoutes.users.create, payload) as Merchant;
     return {
       status: 200,
       data,
@@ -186,40 +212,55 @@ export async function createUser(
   }
 }
 
+// Backward compatibility
+export async function createUser(
+  payload: CreateUserPayload
+): Promise<ApiResponse<User>> {
+  return createMerchant(payload as CreateMerchantPayload) as Promise<ApiResponse<User>>;
+}
+
 /**
- * 4. Update user (PATCH)
+ * 4. Update merchant (PATCH)
  */
+export async function updateMerchant(
+  id: string,
+  payload: UpdateMerchantPayload
+): Promise<ApiResponse<Merchant>> {
+  try {
+    const data = await http.patch(adminRoutes.users.update(id), payload) as Merchant;
+    return {
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+// Backward compatibility
 export async function updateUser(
   id: string,
   payload: UpdateUserPayload
 ): Promise<ApiResponse<User>> {
-  try {
-    const data = await http.patch(adminRoutes.users.update(id), payload) as User;
-    return {
-      status: 200,
-      data,
-    };
-  } catch (error) {
-    if (error instanceof ApiError) {
-      return {
-        status: error.status,
-        error: error.message,
-        data: error.data,
-        errors: error.data?.errors,
-        message: error.data?.message,
-      };
-    }
-    return {
-      status: 0,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
-  }
+  return updateMerchant(id, payload as UpdateMerchantPayload) as Promise<ApiResponse<User>>;
 }
 
 /**
- * 5. Delete user (returns 204 No Content per REST API standard)
+ * 5. Delete merchant (returns 204 No Content per REST API standard)
  */
-export async function deleteUser(id: string): Promise<ApiResponse<void>> {
+export async function deleteMerchant(id: string): Promise<ApiResponse<void>> {
   try {
     // DELETE requests return 204 No Content with no body
     const response = await http.delete(adminRoutes.users.delete(id));
@@ -251,17 +292,22 @@ export async function deleteUser(id: string): Promise<ApiResponse<void>> {
   }
 }
 
+// Backward compatibility
+export async function deleteUser(id: string): Promise<ApiResponse<void>> {
+  return deleteMerchant(id);
+}
+
 /**
- * Bonus: Search users
+ * Bonus: Search merchants
  */
-export async function searchUsers(
+export async function searchMerchants(
   query: string,
-  params?: Omit<UserListParams, 'search'>
-): Promise<ApiResponse<UserListResponse>> {
+  params?: Omit<MerchantListParams, 'search'>
+): Promise<ApiResponse<MerchantListResponse>> {
   try {
     const data = await http.get(adminRoutes.users.list, {
       query: { ...params, search: query } as Record<string, string | number | boolean | null | undefined>,
-    }) as UserListResponse;
+    }) as MerchantListResponse;
     return {
       status: 200,
       data,
@@ -281,10 +327,18 @@ export async function searchUsers(
   }
 }
 
+// Backward compatibility
+export async function searchUsers(
+  query: string,
+  params?: Omit<UserListParams, 'search'>
+): Promise<ApiResponse<UserListResponse>> {
+  return searchMerchants(query, params as Omit<MerchantListParams, 'search'>) as Promise<ApiResponse<UserListResponse>>;
+}
+
 /**
- * Bonus: Bulk delete users
+ * Bonus: Bulk delete merchants
  */
-export async function bulkDeleteUsers(
+export async function bulkDeleteMerchants(
   ids: string[]
 ): Promise<ApiResponse<{ deleted: number }>> {
   try {
