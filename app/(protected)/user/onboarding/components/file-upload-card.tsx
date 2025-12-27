@@ -47,9 +47,15 @@ export function FileUploadCard({
   const [uploadedPath, setUploadedPath] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // If disabled, it means file is already uploaded
+  // Debug: Log state changes
+  useEffect(() => {
+    console.log('📊 FileUploadCard state:', { uploaded, uploadedPath, disabled, uploading });
+  }, [uploaded, uploadedPath, disabled, uploading]);
+
+  // If disabled, it means file is already uploaded (from parent state)
   useEffect(() => {
     if (disabled) {
+      // When disabled becomes true, show as uploaded
       setUploaded(true);
       setUploadedPath('File already uploaded');
       // Clear any selected file when disabled
@@ -57,12 +63,10 @@ export function FileUploadCard({
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-    } else if (!disabled && uploaded) {
-      // If disabled becomes false and we're in uploaded state, reset
-      // This handles the case where file is removed
-      setUploaded(false);
-      setUploadedPath(null);
     }
+    // IMPORTANT: Don't reset uploaded state when disabled becomes false
+    // The uploaded state is managed by handleUpload success handler
+    // Only handleRemove() should reset the uploaded state
   }, [disabled]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,17 +86,30 @@ export function FileUploadCard({
       const response = await uploadFile(selectedFile, type, directorId);
       handleApiResponse(response, {
         onSuccess: (data) => {
-          if (data && data.success && data.data) {
-            setUploaded(true);
-            setUploadedPath(data.data.filePath);
-            // Clear selected file after successful upload
-            setSelectedFile(null);
-            if (fileInputRef.current) {
-              fileInputRef.current.value = '';
-            }
-            toast.success(`${fileTypeLabels[type]} uploaded successfully`);
-            onUploadSuccess?.(data.data.filePath, data.data.s3Id);
+          // handleApiResponse calls onSuccess with response.data
+          // API returns {success: true, message: "..."} 
+          // So data = {success: true, message: "..."}
+          
+          // IMMEDIATELY set uploaded state - don't wait for any conditions!
+          // If we got here, the upload was successful (status 200)
+          setUploaded(true);
+          
+          // Get filePath from response if available
+          const filePath = data?.data?.filePath || data?.filePath || data?.message || 'File uploaded successfully';
+          setUploadedPath(filePath);
+          
+          // Clear selected file after successful upload
+          setSelectedFile(null);
+          if (fileInputRef.current) {
+            fileInputRef.current.value = '';
           }
+          
+          toast.success(`${fileTypeLabels[type]} uploaded successfully`);
+          
+          // Pass filePath and s3Id to parent callback
+          const pathToPass = data?.data?.filePath || data?.filePath || '';
+          const s3IdToPass = data?.data?.s3Id || data?.s3Id || '';
+          onUploadSuccess?.(pathToPass, s3IdToPass);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || `Failed to upload ${fileTypeLabels[type]}`);

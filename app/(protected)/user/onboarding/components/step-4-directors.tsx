@@ -202,7 +202,18 @@ export function Step4Directors({ onboardingData, onNext, onUpdate }: Step4Direct
     }
   };
 
-  const handleDocumentUploadSuccess = async () => {
+  const handleDocumentUploadSuccess = async (directorId: string, filePath: string) => {
+    // CRITICAL: Immediately update the director in state so UI updates instantly
+    // This makes hasDocument = true immediately, which shows the badge and disables the upload card
+    setDirectors((prevDirectors) =>
+      prevDirectors.map((director) =>
+        director.id === directorId
+          ? { ...director, registerOfDirectorPath: filePath }
+          : director
+      )
+    );
+    
+    // Then refresh from API in background for consistency
     await refreshOnboardingData();
     onUpdate?.();
   };
