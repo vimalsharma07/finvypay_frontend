@@ -95,9 +95,10 @@ export default function SupportPage() {
         const response = await getSupportTickets(params);
         handleApiResponse<SupportTicketListResponse>(response, {
           onSuccess: (data) => {
+            // New format: { success: true, data: [...], meta: {...} }
             if (data && data.success && data.data) {
-              setTickets(data.data.items);
-              setMeta(data.data.meta);
+              setTickets(Array.isArray(data.data) ? data.data : []);
+              setMeta(data.meta);
             } else {
               toast.error('Failed to fetch support tickets - invalid response structure');
             }

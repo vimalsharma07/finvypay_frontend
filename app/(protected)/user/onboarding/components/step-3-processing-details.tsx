@@ -108,24 +108,27 @@ export function Step3ProcessingDetails({
 
         handleApiResponse(industriesResponse, {
           onSuccess: (data) => {
-            if (data && data.success && data.data?.data) {
-              setIndustries(data.data.data);
+            // New format: { success: true, data: [...] }
+            if (data && data.success && data.data) {
+              setIndustries(Array.isArray(data.data) ? data.data : []);
             }
           },
         });
 
         handleApiResponse(countriesResponse, {
           onSuccess: (data) => {
-            if (data && data.success && data.data?.data) {
-              setCountries(data.data.data);
+            // New format: { success: true, data: [...] }
+            if (data && data.success && data.data) {
+              setCountries(Array.isArray(data.data) ? data.data : []);
             }
           },
         });
 
         handleApiResponse(currenciesResponse, {
           onSuccess: (data) => {
-            if (data && data.success && data.data?.data) {
-              setCurrencies(data.data.data);
+            // New format: { success: true, data: [...] }
+            if (data && data.success && data.data) {
+              setCurrencies(Array.isArray(data.data) ? data.data : []);
             }
           },
         });

@@ -64,8 +64,9 @@ export default function CascadingPage() {
       handleApiResponse<CascadingRuleListResponse>(response, {
         onSuccess: (data) => {
           if (data.success) {
-            setCascadings(data.data.data);
-            setMeta(data.data.meta);
+            // New format: { success: true, data: [...], meta: {...} }
+            setCascadings(data.data);
+            setMeta(data.meta);
           }
         },
         onError: (errorMessage) => {

@@ -105,9 +105,10 @@ export default function UserIpAllowlistPage() {
       const response = await getUserIpWhitelist(params);
       handleApiResponse<IpWhitelistListResponse>(response, {
         onSuccess: (data) => {
+          // New format: { success: true, data: [...], meta: {...} }
           if (data && data.success && data.data) {
-            setIpWhitelist(data.data.data);
-            setMeta(data.data.meta);
+            setIpWhitelist(data.data);
+            setMeta(data.meta);
           } else {
             toast.error('Failed to fetch IP whitelist - invalid response structure');
           }

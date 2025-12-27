@@ -38,8 +38,9 @@ export function CountryCodeSelector({
 
         handleApiResponse(response, {
           onSuccess: (data) => {
-            if (data && data.success && data.data?.data) {
-              setCountries(data.data.data);
+            // New format: { success: true, data: [...] }
+            if (data && data.success && data.data) {
+              setCountries(Array.isArray(data.data) ? data.data : []);
             }
           },
           onError: (errorMessage) => {

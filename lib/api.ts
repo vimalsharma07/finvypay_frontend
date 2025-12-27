@@ -392,11 +392,12 @@ export async function apiFetch(
       }
       
       if (!retryResponse.ok) {
+        // Handle standard error format
+        const errorInfo = retryData?.error || {};
         const errorMessage = 
+          errorInfo.message ||
           retryData?.message || 
           retryData?.error || 
-          retryData?.data?.message ||
-          retryData?.data?.error ||
           retryResponse.statusText ||
           'An error occurred';
         
@@ -433,14 +434,29 @@ export async function apiFetch(
     }
   }
 
-  if (!response.ok) {
-    // Handle backend error response structure
-    // Backend might return: { success: false, message: "...", error: "..." }
+  // Handle standard API response format
+  // Check for error response: { success: false, error: { code, message, details } }
+  if (data && typeof data === 'object' && 'success' in data && data.success === false) {
+    const errorInfo = data.error || {};
     const errorMessage = 
+      errorInfo.message || 
+      data.message || 
+      response.statusText ||
+      'An error occurred';
+    
+    throw new ApiError(
+      errorMessage,
+      response.status,
+      data
+    );
+  }
+
+  if (!response.ok) {
+    // Handle non-standard error responses (fallback)
+    const errorMessage = 
+      data?.error?.message ||
       data?.message || 
       data?.error || 
-      data?.data?.message ||
-      data?.data?.error ||
       response.statusText ||
       'An error occurred';
     
@@ -457,8 +473,16 @@ export async function apiFetch(
     return { __status: 204, __noContent: true };
   }
 
-  // Return the response data
-  // Handle both { success: true, data: {...} } and direct data responses
+  // Return the response data in standard format
+  // Standard format: { success: true, data: <T>, meta?: <Object> }
+  // For backward compatibility, also handle direct data responses
+  if (data && typeof data === 'object' && 'success' in data && data.success === true) {
+    // Return the standard format response
+    // Components should access: response.data, response.meta, response.error
+    return data;
+  }
+
+  // Fallback for non-standard responses (shouldn't happen with new backend)
   return data;
 }
 

@@ -108,8 +108,9 @@ export function AddIpDialog({
       });
       handleApiResponse(response, {
         onSuccess: (data) => {
+          // New format: { success: true, data: [...] }
           if (data && data.success && data.data) {
-            setUsers(data.data.data || []);
+            setUsers(Array.isArray(data.data) ? data.data : []);
           }
         },
         onError: (errorMessage) => {

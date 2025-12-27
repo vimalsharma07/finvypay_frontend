@@ -113,9 +113,10 @@ export default function AdminAcquirersPage() {
       });
       handleApiResponse<AcquirerListResponse>(response, {
         onSuccess: (data) => {
+          // New format: { success: true, data: [...], meta: {...} }
           if (data && data.success && data.data) {
-            setAcquirers(data.data.data);
-            setMeta(data.data.meta);
+            setAcquirers(data.data);
+            setMeta(data.meta);
           } else {
             toast.error('Failed to fetch acquirers - invalid response structure');
           }

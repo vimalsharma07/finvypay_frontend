@@ -60,10 +60,11 @@ export default function CountriesPage() {
       handleApiResponse<CountryListResponse>(response, {
         onSuccess: (data) => {
           if (data.success) {
-            setCountries(data.data.data);
-            setMeta(data.data.meta);
-            console.log('Countries list:', data.data.data);
-            console.log('Meta info:', data.data.meta);
+            // New format: { success: true, data: [...], meta: {...} }
+            setCountries(data.data);
+            setMeta(data.meta);
+            console.log('Countries list:', data.data);
+            console.log('Meta info:', data.meta);
           } else {
             console.warn('⚠️ API returned success=false:', data);
           }

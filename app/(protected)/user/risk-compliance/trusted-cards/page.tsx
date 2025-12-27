@@ -85,9 +85,10 @@ export default function TrustedCardsPage() {
         const response = await getCardWhitelist(params);
         handleApiResponse<CardWhitelistListResponse>(response, {
           onSuccess: (data) => {
+            // New format: { success: true, data: [...], meta: {...} }
             if (data && data.success && data.data) {
-              setCardWhitelist(data.data.items);
-              setMeta(data.data.meta);
+              setCardWhitelist(Array.isArray(data.data) ? data.data : []);
+              setMeta(data.meta);
             } else {
               toast.error('Failed to fetch card whitelist - invalid response structure');
             }
