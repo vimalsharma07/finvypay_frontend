@@ -76,8 +76,9 @@ export default function IndustriesPage() {
       handleApiResponse<IndustryListResponse>(response, {
         onSuccess: (data) => {
           if (data.success) {
-            setIndustries(data.data.data);
-            setMeta(data.data.meta);
+            // New format: { success: true, data: [...], meta: {...} }
+            setIndustries(data.data);
+            setMeta(data.meta);
           } else {
             console.warn('⚠️ API returned success=false:', data);
           }

@@ -82,14 +82,17 @@ export interface MerchantListMeta {
 // Backward compatibility
 export interface UserListMeta extends MerchantListMeta {}
 
+// Legacy type - kept for backward compatibility during migration
 export interface MerchantListData {
   data: Merchant[];
   meta: MerchantListMeta;
 }
 
+// New standard format: { success: true, data: Merchant[], meta: MerchantListMeta }
 export interface MerchantListResponse {
   success: boolean;
-  data: MerchantListData;
+  data: Merchant[];
+  meta: MerchantListMeta;
   message?: string;
 }
 

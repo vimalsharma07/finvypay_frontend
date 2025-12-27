@@ -166,8 +166,9 @@ export default function CreateAcquirerAccountPage() {
         // Handle Acquirers List Data
         handleApiResponse<AcquirerListResponse>(acquirersResponse, {
           onSuccess: (data) => {
+            // New format: { success: true, data: [...] }
             if (data && data.success && data.data) {
-              setAcquirers(data.data.data);
+              setAcquirers(Array.isArray(data.data) ? data.data : []);
             }
           },
           onError: (errorMessage) => {
@@ -179,8 +180,9 @@ export default function CreateAcquirerAccountPage() {
         // Handle Countries Data
         handleApiResponse<CountryListResponse>(countriesResponse, {
           onSuccess: (data) => {
-            if (data && data.success && data.data && Array.isArray(data.data.data)) {
-              const countryList: Country[] = data.data.data;
+            // New format: { success: true, data: [...] }
+            if (data && data.success && data.data && Array.isArray(data.data)) {
+              const countryList: Country[] = data.data;
               const transformedCountries = countryList
                 .filter((country) => country.status === 'active' && !country.isDeleted)
                 .map((country) => ({
@@ -200,8 +202,9 @@ export default function CreateAcquirerAccountPage() {
         // Handle Currencies Data
         handleApiResponse<CurrencyListResponse>(currenciesResponse, {
           onSuccess: (data) => {
-            if (data && data.success && data.data && Array.isArray(data.data.data)) {
-              const currencyList: Currency[] = data.data.data;
+            // New format: { success: true, data: [...] }
+            if (data && data.success && data.data && Array.isArray(data.data)) {
+              const currencyList: Currency[] = data.data;
               const currencyCodes = currencyList
                 .filter((currency) => !currency.isDeleted)
                 .map((currency) => currency.code)

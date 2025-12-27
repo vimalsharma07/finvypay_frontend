@@ -73,8 +73,8 @@ const BASE_ADMIN_MENU: MenuConfig = [
     requirePermission: true,
     children: [
       { title: 'Admin', path: '/admin/user-management/admin', submodule: 'Admin User' },
-      { title: 'Merchant', path: '/admin/user-management/merchant', submodule: 'Merchant' },
-      { title: 'Affiliate', path: '/admin/user-management/affiliate', submodule: 'Affiliate' },
+      { title: 'Merchant', path: '/admin/user-management/merchant', submodule: 'Merchant User' },
+      { title: 'Affiliate', path: '/admin/user-management/affiliate', submodule: 'Affiliate User' },
     ],
   },
   {

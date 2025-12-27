@@ -82,8 +82,9 @@ export function handleLoginRedirect(
 
 /**
  * User role types
+ * For User Management: Only ADMIN, MERCHANT, AFFILIATE are supported
  */
-export type UserRole = 'ADMIN' | 'USER' | 'AFFILIATE' | string;
+export type UserRole = 'ADMIN' | 'MERCHANT' | 'AFFILIATE' | string;
 
 /**
  * Get user role from stored user data
@@ -114,7 +115,7 @@ export function getUserRole(pathname?: string): UserRole | null {
     // If role not found in user data, try to infer from URL path
     if (!role && pathname) {
       if (pathname.startsWith('/user/')) {
-        role = 'USER';
+        role = 'MERCHANT'; // Use MERCHANT instead of USER
       } else if (pathname.startsWith('/admin/')) {
         role = 'ADMIN';
       } else if (pathname.startsWith('/affiliate/')) {
@@ -199,7 +200,6 @@ export function getMenuByRole(role?: UserRole | null, pathname?: string): MenuCo
       } catch {
         return ADMIN_MENU;
       }
-    case 'USER':
     case 'MERCHANT':
       // Use getUserMenu() to get permission-filtered menu
       try {
@@ -209,7 +209,6 @@ export function getMenuByRole(role?: UserRole | null, pathname?: string): MenuCo
         return USER_MENU;
       }
     case 'AFFILIATE':
-    case 'AFFILIATE_PARTNER':
       return AFFILIATE_MENU;
     default:
       // Default to admin menu for unknown roles
@@ -263,11 +262,9 @@ export function getRedirectPathByRole(role?: UserRole | null): string {
   switch (normalizedRole) {
     case 'ADMIN':
       return '/admin/dashboard';
-    case 'USER':
     case 'MERCHANT':
       return '/user/dashboard';
     case 'AFFILIATE':
-    case 'AFFILIATE_PARTNER':
       return '/affiliate/dashboard';
     default:
       // Debug: log unknown role (only in development)

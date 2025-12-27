@@ -85,9 +85,10 @@ export default function TransactionsPage() {
         const response = await getProductionTransactions(params);
         handleApiResponse<TransactionListResponse>(response, {
           onSuccess: (data) => {
+            // New format: { success: true, data: [...], meta: {...} }
             if (data && data.success && data.data) {
-              setTransactions(data.data.data);
-              setMeta(data.data.meta);
+              setTransactions(data.data);
+              setMeta(data.meta);
             } else {
               toast.error('Failed to fetch transactions - invalid response structure');
             }

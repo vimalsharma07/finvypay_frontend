@@ -66,8 +66,9 @@ export default function AgreementsPage() {
       handleApiResponse<AgreementListResponse>(response, {
         onSuccess: (data) => {
           if (data.success) {
-            setAgreements(data.data.data);
-            setMeta(data.data.meta);
+            // New format: { success: true, data: [...], meta: {...} }
+            setAgreements(data.data);
+            setMeta(data.meta);
           } else {
             console.warn('⚠️ API returned success=false:', data);
           }

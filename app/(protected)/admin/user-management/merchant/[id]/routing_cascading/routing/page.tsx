@@ -65,8 +65,9 @@ export default function RoutingPage() {
       handleApiResponse<RouteRuleListResponse>(response, {
         onSuccess: (data) => {
           if (data.success) {
-            setRoutes(data.data.data);
-            setMeta(data.data.meta);
+            // New format: { success: true, data: [...], meta: {...} }
+            setRoutes(data.data);
+            setMeta(data.meta);
           }
         },
         onError: (errorMessage) => {

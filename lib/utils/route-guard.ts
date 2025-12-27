@@ -1,19 +1,33 @@
 /**
  * Route Guard Utilities
  * 
- * Utilities for role-based route protection
+ * Utilities for role-based and permission-based route protection
  */
 
 import { UserRole } from './menu-utils';
 
 /**
+ * Permission-based route access rules
+ * Maps specific routes to required permission identifiers
+ * 
+ * For User Management: Supports both ADMIN type and role-specific type permissions
+ */
+const PERMISSION_BASED_ROUTES: Record<string, string[]> = {
+  '/admin/user-management/admin': ['view-admin-users'],
+  '/admin/user-management/merchant': ['view-merchant-users', 'user-view-merchant-users'], // ADMIN type or MERCHANT type
+  '/admin/user-management/affiliate': ['view-affiliate-users', 'affiliate-view-affiliate-users'], // ADMIN type or AFFILIATE type
+};
+
+/**
  * Route access rules
  * Maps route prefixes to allowed roles
+ * 
+ * For User Management: Only ADMIN, MERCHANT, AFFILIATE are supported
  */
 const ROUTE_ACCESS_RULES: Record<string, UserRole[]> = {
   '/admin': ['ADMIN', 'SUPER_ADMIN'],
-  '/user': ['USER', 'MERCHANT'],
-  '/affiliate': ['AFFILIATE', 'AFFILIATE_PARTNER'],
+  '/user': ['MERCHANT'], // Use MERCHANT instead of USER for user management
+  '/affiliate': ['AFFILIATE'], // Remove AFFILIATE_PARTNER
 };
 
 /**
@@ -81,16 +95,17 @@ export function hasRouteAccess(userRole: UserRole | null, pathname: string): boo
   if (isPublicRoute(pathname)) return true;
 
   // Strict role → route matching
+  // For User Management: Only ADMIN, MERCHANT, AFFILIATE are supported
   if (pathname.startsWith("/admin")) {
     return normalizedRole === "ADMIN" || normalizedRole === "SUPER_ADMIN";
   }
 
   if (pathname.startsWith("/user")) {
-    return normalizedRole === "USER";
+    return normalizedRole === "MERCHANT"; // Use MERCHANT instead of USER
   }
 
   if (pathname.startsWith("/affiliate")) {
-    return normalizedRole === "AFFILIATE";
+    return normalizedRole === "AFFILIATE"; // Remove AFFILIATE_PARTNER
   }
 
   // If route does not match any category → allow or deny?
@@ -100,13 +115,50 @@ export function hasRouteAccess(userRole: UserRole | null, pathname: string): boo
 
 
 /**
+ * Check if user has required permission for a route
+ * 
+ * @param pathname - The pathname to check
+ * @param hasPermission - Function to check if user has a permission
+ * @returns True if user has required permission
+ */
+export function hasPermissionForRoute(
+  pathname: string,
+  hasPermission: (identifier: string) => boolean
+): boolean {
+  // Check permission-based routes first
+  for (const [route, requiredPermissions] of Object.entries(PERMISSION_BASED_ROUTES)) {
+    if (pathname.startsWith(route) || pathname === route) {
+      // User needs at least one of the required permissions
+      return requiredPermissions.some(permission => hasPermission(permission));
+    }
+  }
+  
+  // If not a permission-based route, return true (will fall back to role-based check)
+  return true;
+}
+
+/**
  * Check if user is trying to access a route they don't have permission for
  * 
  * @param userRole - The user's role
  * @param pathname - The pathname to check
+ * @param hasPermission - Optional function to check permissions (for permission-based routes)
  * @returns True if access should be denied
  */
-export function shouldDenyAccess(userRole: UserRole | null, pathname: string): boolean {
+export function shouldDenyAccess(
+  userRole: UserRole | null,
+  pathname: string,
+  hasPermission?: (identifier: string) => boolean
+): boolean {
+  // First check permission-based routes if hasPermission is provided
+  if (hasPermission) {
+    const hasPermissionForRouteResult = hasPermissionForRoute(pathname, hasPermission);
+    if (!hasPermissionForRouteResult) {
+      return true; // Deny access if permission check failed
+    }
+  }
+  
+  // Fall back to role-based check for other routes
   return !hasRouteAccess(userRole, pathname);
 }
 

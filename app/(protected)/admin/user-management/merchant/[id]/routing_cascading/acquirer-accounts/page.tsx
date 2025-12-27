@@ -60,8 +60,9 @@ export default function ConnectorsPage() {
       handleApiResponse<MerchantAcquirerAccountListResponse>(response, {
         onSuccess: (data) => {
           if (data.success) {
-            setConnectors(data.data.data);
-            setMeta(data.data.meta);
+            // New format: { success: true, data: [...], meta: {...} }
+            setConnectors(data.data);
+            setMeta(data.meta);
           }
         },
           onError: (errorMessage) => {

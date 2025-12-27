@@ -22,8 +22,9 @@ export async function fetchAdminProviderOptions(token?: string): Promise<Option[
 
     handleApiResponse(response, {
       onSuccess: (data) => {
+        // New format: { success: true, data: [...] }
         if (data && data.success && data.data) {
-          providers = data.data.data.map((acquirer: any) => ({
+          providers = (Array.isArray(data.data) ? data.data : []).map((acquirer: any) => ({
             value: acquirer.id.toString(),
             label: acquirer.acquirerName,
           }));
@@ -70,9 +71,10 @@ export async function fetchAdminProviderConnectorsOptions(
 
     handleApiResponse(response, {
       onSuccess: (data) => {
+        // New format: { success: true, data: [...] }
         if (data && data.success && data.data) {
           // Filter by acquirerId and providerType
-          const filtered = data.data.data.filter((account: any) => {
+          const filtered = (Array.isArray(data.data) ? data.data : []).filter((account: any) => {
             const matchesAcquirer = account.acquirerId === Number(providerId) || 
                                   String(account.acquirerId) === providerId;
             const matchesProviderType = account.providerType === providerType;
@@ -106,8 +108,9 @@ export async function fetchListOfCurrencies(token?: string): Promise<Option[]> {
 
     handleApiResponse(response, {
       onSuccess: (data) => {
+        // New format: { success: true, data: [...] }
         if (data && data.success && data.data) {
-          currencies = data.data.data.map((currency: any) => ({
+          currencies = (Array.isArray(data.data) ? data.data : []).map((currency: any) => ({
             value: currency.code || currency.value,
             label: currency.code || currency.value,
           }));

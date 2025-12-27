@@ -8,10 +8,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { isAuthenticated } from "@/lib/auth-storage";
 import { getUserRole } from "@/lib/utils/menu-utils";
 import { shouldDenyAccess } from "@/lib/utils/route-guard";
+import { useAuth } from "./use-auth";
 
 export function useRouteGuard() {
   const pathname = usePathname();
   const router = useRouter();
+  const { hasPermission } = useAuth();
 
   useEffect(() => {
     // PUBLIC ROUTES (do not guard)
@@ -134,10 +136,10 @@ export function useRouteGuard() {
 
     // 2️⃣ User is authenticated → get role
     const role = getUserRole();
-    // 3️⃣ Deny access based on RBAC rules
-    if (shouldDenyAccess(role, pathname)) {
+    // 3️⃣ Deny access based on RBAC rules (role-based or permission-based)
+    if (shouldDenyAccess(role, pathname, hasPermission)) {
       router.replace("/forbidden");
       return;
     }
-  }, [pathname, router]);
+  }, [pathname, router, hasPermission]);
 }

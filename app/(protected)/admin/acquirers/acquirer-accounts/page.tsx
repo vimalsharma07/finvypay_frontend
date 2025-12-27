@@ -109,17 +109,18 @@ export default function AdminAcquirerAccountsPage() {
       const response = await getAcquirerAccounts(params);
       handleApiResponse<AcquirerAccountListResponse>(response, {
         onSuccess: (data) => {
+          // New format: { success: true, data: [...], meta: {...} }
           if (data && data.success && data.data) {
-            setAcquirerAccounts(data.data.data);
-            setMeta(data.data.meta);
+            setAcquirerAccounts(data.data);
+            setMeta(data.meta);
             
             // If we have accounts and acquirerId, try to get acquirer name from first account
-            if (data.data.data.length > 0 && data.data.data[0].acquirer?.acquirerName) {
+            if (data.data.length > 0 && data.data[0].acquirer?.acquirerName) {
               setAcquirer({
                 id: acquirerIdFromUrl || '',
-                acquirerName: data.data.data[0].acquirer.acquirerName,
-                fileName: data.data.data[0].acquirer.fileName || '',
-                iconUrl: data.data.data[0].acquirer.iconUrl,
+                acquirerName: data.data[0].acquirer.acquirerName,
+                fileName: data.data[0].acquirer.fileName || '',
+                iconUrl: data.data[0].acquirer.iconUrl,
                 fields: {},
                 status: '',
                 isDeleted: false,

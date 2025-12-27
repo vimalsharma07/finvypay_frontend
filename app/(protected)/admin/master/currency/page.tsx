@@ -49,10 +49,11 @@ export default function CurrencyPage() {
       handleApiResponse<CurrencyListResponse>(response, {
         onSuccess: (data) => {
           if (data.success) {
-            setCurrencies(data.data.data);
-            setMeta(data.data.meta);
-            console.log('Currencies list:', data.data.data);
-            console.log('Meta info:', data.data.meta);
+            // New format: { success: true, data: [...], meta: {...} }
+            setCurrencies(data.data);
+            setMeta(data.meta);
+            console.log('Currencies list:', data.data);
+            console.log('Meta info:', data.meta);
           } else {
             console.warn('⚠️ API returned success=false:', data);
           }

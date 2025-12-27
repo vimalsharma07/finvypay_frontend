@@ -63,7 +63,7 @@ export default function MerchantUsersPage() {
         limit: pageLimit,
         sortBy: sortField,
         sortOrder: sortDir,
-        role: 'user', // Default to user role for merchant users page
+        role: 'merchant', // Use merchant role for merchant users page
       };
 
       // Add filter parameters if provided
@@ -80,15 +80,17 @@ export default function MerchantUsersPage() {
       }
 
       const response = await getUsers(params);
+      console.log('Response:', response);
 
       // Handle response using centralized handler
       handleApiResponse<UserListResponse>(response, {
         onSuccess: (data) => {
           if (data.success) {
-            setUsers(data.data.data);
-            setMeta(data.data.meta);
-            console.log('Users list:', data.data.data);
-            console.log('Meta info:', data.data.meta);
+            // New format: { success: true, data: [...], meta: {...} }
+            setUsers(data.data);
+            setMeta(data.meta);
+            console.log('Users list:', data.data);
+            console.log('Meta info:', data.meta);
           } else {
             console.warn('⚠️ API returned success=false:', data);
           }

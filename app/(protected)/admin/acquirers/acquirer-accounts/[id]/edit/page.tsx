@@ -115,8 +115,9 @@ export default function EditAcquirerAccountPage() {
         const response = await getAcquirers({ page: 1, limit: 100 });
         handleApiResponse(response, {
           onSuccess: (data) => {
+            // New format: { success: true, data: [...] }
             if (data && data.success && data.data) {
-              setAcquirers(data.data.data);
+              setAcquirers(Array.isArray(data.data) ? data.data : []);
             }
           },
         });
