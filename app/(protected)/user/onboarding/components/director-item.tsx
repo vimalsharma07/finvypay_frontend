@@ -22,7 +22,7 @@ interface DirectorItemProps {
   director: Director;
   onEdit: (director: Director) => void;
   onDelete: (directorId: string) => Promise<void>;
-  onDocumentUploadSuccess?: () => void;
+  onDocumentUploadSuccess?: (directorId: string, filePath: string) => void;
   isDeleting?: boolean;
 }
 
@@ -89,7 +89,10 @@ export function DirectorItem({
                 label="Register of Director"
                 description="Upload register of director document for this director"
                 required
-                onUploadSuccess={onDocumentUploadSuccess}
+                onUploadSuccess={(filePath, s3Id) => {
+                  // Pass directorId and filePath to parent so it can update state immediately
+                  onDocumentUploadSuccess?.(director.id, filePath);
+                }}
                 disabled={hasDocument}
                 directorId={director.id}
               />
