@@ -63,7 +63,7 @@ export default function MerchantUsersPage() {
         limit: pageLimit,
         sortBy: sortField,
         sortOrder: sortDir,
-        role: 'user', // Default to user role for merchant users page
+        role: 'merchant', // Use merchant role for merchant users page
       };
 
       // Add filter parameters if provided
@@ -80,6 +80,7 @@ export default function MerchantUsersPage() {
       }
 
       const response = await getUsers(params);
+      console.log('Response:', response);
 
       // Handle response using centralized handler
       handleApiResponse<UserListResponse>(response, {

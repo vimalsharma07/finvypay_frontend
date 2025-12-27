@@ -87,11 +87,11 @@ export function AddCardDialog({
   const fetchUsers = async () => {
     setLoadingUsers(true);
     try {
-      // Fetch users with role "user" only
+      // Fetch users with role "merchant" only
       const response = await getUsers({
         limit: 100,
         page: 1,
-        role: 'user',
+        role: 'merchant',
       });
       handleApiResponse(response, {
         onSuccess: (data) => {

@@ -65,7 +65,7 @@ export default function EditMerchantUserPage() {
             setUser(userData);
             
             // Reset form with user data
-            // CRITICAL: For USER category, roleId is set but not editable
+            // CRITICAL: For MERCHANT category, roleId is set but not editable
             form.reset({
               name: userData.name || '',
               email: userData.email || '',
@@ -95,15 +95,15 @@ export default function EditMerchantUserPage() {
     fetchUser();
   }, [userId, router, form]);
 
-  // Role is non-editable for USER category - no need to fetch roles
+  // Role is non-editable for MERCHANT category - no need to fetch roles
 
   const onSubmit = async (data: UpdateUserSchemaType) => {
     if (!userId) return;
 
     setIsSubmitting(true);
     try {
-      // CRITICAL: For USER category, roleId cannot be changed
-      // Backend will enforce this, but we don't send roleId for USER category
+      // CRITICAL: For MERCHANT category, roleId cannot be changed
+      // Backend will enforce this, but we don't send roleId for MERCHANT category
       const updatePayload: any = {
         name: data.name,
         email: data.email,
@@ -111,9 +111,9 @@ export default function EditMerchantUserPage() {
         // isDeleted: data.isDeleted,
       };
       
-      // Only include roleId if user is not USER category (backend will handle USER category)
-      // For USER category, backend will ignore roleId changes
-      if (user && user.role !== 'user') {
+      // Only include roleId if user is not MERCHANT category (backend will handle MERCHANT category)
+      // For MERCHANT category, backend will ignore roleId changes
+      if (user && user.role !== 'merchant') {
         updatePayload.roleId = Number(data.roleId);
       }
       
@@ -246,8 +246,8 @@ export default function EditMerchantUserPage() {
                     )}
                   />
 
-                  {/* Role field - non-editable for USER category */}
-                  {user && user.role === 'user' ? (
+                  {/* Role field - non-editable for MERCHANT category */}
+                  {user && user.role === 'merchant' ? (
                     <FormItem>
                       <FormLabel>Role</FormLabel>
                       <div className="text-sm text-muted-foreground">
@@ -263,7 +263,7 @@ export default function EditMerchantUserPage() {
                     <FormItem>
                       <FormLabel>Role</FormLabel>
                       <div className="text-sm text-muted-foreground">
-                        {user?.role || 'N/A'} (role changes not supported for USER category)
+                        {user?.role || 'N/A'} (role changes not supported for MERCHANT category)
                       </div>
                       <input
                         type="hidden"
