@@ -31,7 +31,7 @@ export default function MerchantUsersPage() {
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState<UserListResponse['data']['meta'] | null>(null);
+  const [meta, setMeta] = useState<UserListResponse['meta'] | null>(null);
   
   // Pagination state
   const [page, setPage] = useState(1);

@@ -33,15 +33,14 @@ export async function getMerchantProfiles(): Promise<ApiResponse<MerchantProfile
   try {
     const data = await http.get('/merchant/profile/merchant-profiles');
     return {
-      success: true,
+      status: 200,
       data: data as MerchantProfileListResponse,
     };
   } catch (error) {
     if (error instanceof ApiError) {
       return {
-        success: false,
+        status: error.status || 500,
         error: error.message,
-        statusCode: error.statusCode,
       };
     }
     throw error;
@@ -55,15 +54,14 @@ export async function getPrimaryMerchantProfile(): Promise<ApiResponse<MerchantP
   try {
     const data = await http.get('/merchant/profile/merchant-profiles/primary');
     return {
-      success: true,
+      status: 200,
       data: data as MerchantProfile,
     };
   } catch (error) {
     if (error instanceof ApiError) {
       return {
-        success: false,
+        status: error.status || 500,
         error: error.message,
-        statusCode: error.statusCode,
       };
     }
     throw error;

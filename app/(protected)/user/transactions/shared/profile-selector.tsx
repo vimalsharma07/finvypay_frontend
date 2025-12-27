@@ -39,7 +39,7 @@ export function ProfileSelector({ value, onChange, className }: ProfileSelectorP
               
               // If no value is set and we have profiles, default to primary
               if (!value && profileList.length > 0) {
-                const primaryProfile = profileList.find(p => p.isPrimary);
+                const primaryProfile = profileList.find((p: MerchantProfile) => p.isPrimary);
                 if (primaryProfile) {
                   onChange(primaryProfile.id);
                 } else if (profileList.length > 0) {
@@ -97,7 +97,7 @@ export function ProfileSelector({ value, onChange, className }: ProfileSelectorP
             <div className="flex items-center gap-2">
               <span>{profile.merchantProfileName}</span>
               {profile.isPrimary && (
-                <Badge variant="default" className="text-xs">
+                <Badge variant="secondary" className="text-xs">
                   Primary
                 </Badge>
               )}

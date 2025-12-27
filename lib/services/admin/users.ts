@@ -186,6 +186,11 @@ export async function getMerchantById(id: string): Promise<ApiResponse<Merchant>
   }
 }
 
+// Backward compatibility
+export async function getUserById(id: string): Promise<ApiResponse<User>> {
+  return getMerchantById(id) as Promise<ApiResponse<User>>;
+}
+
 /**
  * 3. Create new merchant
  */
