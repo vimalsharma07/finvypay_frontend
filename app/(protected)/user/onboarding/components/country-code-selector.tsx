@@ -1,15 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { useEffect, useState, useMemo } from 'react';
+import { SearchSelect } from '@/components/ui/molecules/SearchSelect';
 import { getCountries, Country } from '@/lib/services/admin/countries';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import type { Option } from '@/lib/types/common-types';
 
 interface CountryCodeSelectorProps {
   value?: number;
@@ -57,37 +52,30 @@ export function CountryCodeSelector({
     fetchCountries();
   }, []);
 
-  const selectedCountry = countries.find(
-    (country) => country.id === String(value)
-  );
+  // Convert countries to SearchSelect options format
+  // Format: "PhoneCode (CountryName)" for better searchability
+  // Users can search by phone code (e.g., "+1") or country name (e.g., "United States")
+  const countryOptions: Option[] = useMemo(() => {
+    return countries.map((country) => ({
+      value: country.id,
+      label: `${country.phoneCode} (${country.countryName})`,
+    }));
+  }, [countries]);
+
+  const handleChange = (selectedValue: string) => {
+    onChange(Number(selectedValue));
+  };
 
   return (
-    <Select
-      value={value ? String(value) : undefined}
-      onValueChange={(val) => onChange(Number(val))}
+    <SearchSelect
+      options={countryOptions}
+      value={value ? String(value) : ''}
+      onChange={handleChange}
+      valueToShow="label"
+      valueToSet="value"
+      placeholder={loading ? 'Loading countries...' : 'Select country code'}
       disabled={disabled || loading}
-    >
-      <SelectTrigger>
-        <SelectValue placeholder={loading ? 'Loading...' : 'Select country code'}>
-          {selectedCountry && (
-            <span className="flex items-center gap-2">
-              <span>{selectedCountry.phoneCode}</span>
-              <span className="text-muted-foreground">({selectedCountry.countryName})</span>
-            </span>
-          )}
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        {countries.map((country) => (
-          <SelectItem key={country.id} value={country.id}>
-            <span className="flex items-center gap-2">
-              <span className="font-medium">{country.phoneCode}</span>
-              <span className="text-muted-foreground">{country.countryName}</span>
-            </span>
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    />
   );
 }
 

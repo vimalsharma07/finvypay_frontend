@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { Control } from 'react-hook-form';
 
 interface MultiSelectOption {
@@ -42,6 +44,18 @@ export function MultiSelectField({
   disabled = false,
   variant = 'secondary',
 }: MultiSelectFieldProps) {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredOptions = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    if (!term) return options;
+    return options.filter(
+      (option) =>
+        option.label.toLowerCase().includes(term) ||
+        option.value.toLowerCase().includes(term),
+    );
+  }, [options, searchTerm]);
+
   return (
     <FormField
       control={control}
@@ -65,30 +79,44 @@ export function MultiSelectField({
               </FormControl>
             </PopoverTrigger>
             <PopoverContent className="w-[300px] p-0" align="start">
-              <div className="max-h-[300px] overflow-y-auto p-2">
-                {options.map((option) => (
-                  <div
-                    key={option.value}
-                    className="flex items-center space-x-2 p-2 hover:bg-muted rounded"
-                  >
-                    <Checkbox
-                      id={`${name}-${option.value}`}
-                      checked={field.value.includes(option.value)}
-                      onCheckedChange={(checked) => {
-                        const newValue = checked
-                          ? [...field.value, option.value]
-                          : field.value.filter((c: string) => c !== option.value);
-                        field.onChange(newValue);
-                      }}
-                    />
-                    <label
-                      htmlFor={`${name}-${option.value}`}
-                      className="text-sm font-medium leading-none cursor-pointer flex-1"
-                    >
-                      {option.label}
-                    </label>
-                  </div>
-                ))}
+              <div className="p-2 space-y-2">
+                <Input
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="h-9"
+                />
+                <div className="max-h-[260px] overflow-y-auto">
+                  {filteredOptions.length === 0 ? (
+                    <div className="py-3 text-sm text-muted-foreground px-2">
+                      No options found
+                    </div>
+                  ) : (
+                    filteredOptions.map((option) => (
+                      <div
+                        key={option.value}
+                        className="flex items-center space-x-2 p-2 hover:bg-muted rounded"
+                      >
+                        <Checkbox
+                          id={`${name}-${option.value}`}
+                          checked={field.value.includes(option.value)}
+                          onCheckedChange={(checked) => {
+                            const newValue = checked
+                              ? [...field.value, option.value]
+                              : field.value.filter((c: string) => c !== option.value);
+                            field.onChange(newValue);
+                          }}
+                        />
+                        <label
+                          htmlFor={`${name}-${option.value}`}
+                          className="text-sm font-medium leading-none cursor-pointer flex-1"
+                        >
+                          {option.label}
+                        </label>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </PopoverContent>
           </Popover>
