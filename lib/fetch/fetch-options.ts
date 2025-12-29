@@ -17,7 +17,7 @@ import type { Option } from '../types/common-types';
  */
 export async function fetchAdminProviderOptions(token?: string): Promise<Option[]> {
   try {
-    const response = await getAcquirers({ page: 1, limit: 1000 });
+    const response = await getAcquirers({ page: 1, limit: 100 });
     let providers: Option[] = [];
 
     handleApiResponse(response, {
@@ -63,7 +63,7 @@ export async function fetchAdminProviderConnectorsOptions(
 
     const response = await getAcquirerAccounts({
       page: 1,
-      limit: 1000,
+      limit: 100,
       acquirerId: Number(providerId),
     });
 

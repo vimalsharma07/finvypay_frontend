@@ -30,6 +30,8 @@ import {
   fetchAdminProviderConnectorsOptions,
   fetchListOfCurrencies,
 } from '@/lib/fetch/fetch-options';
+import { getMerchantProfiles } from '@/lib/services/admin/merchant-acquirer-account';
+import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import type { Option } from '@/lib/types/common-types';
 
 interface FormField {
@@ -192,6 +194,8 @@ export function CreateMerchantAcquirerAccountForm({
   const [additionalError, setAdditionalError] = useState<string>('');
   const [providerOptions, setProviderOptions] = useState<Option[]>([]);
   const [currencyOptions, setCurrencyOptions] = useState<Option[]>([]);
+  const [merchantProfileOptions, setMerchantProfileOptions] = useState<Option[]>([]);
+  const [selectedMerchantProfile, setSelectedMerchantProfile] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   type UserConnectorRateSchemaType = any;
@@ -214,14 +218,15 @@ export function CreateMerchantAcquirerAccountForm({
     name: 'mdr',
   });
 
-  // Fetch provider and currency options
+  // Fetch provider, currency, and merchant profile options
   useEffect(() => {
     const fetchOptions = async () => {
       setLoading(true);
       try {
-        const [providers, currencies] = await Promise.all([
+        const [providers, currencies, merchantProfilesResponse] = await Promise.all([
           fetchAdminProviderOptions(),
           fetchListOfCurrencies(),
+          getMerchantProfiles(userId),
         ]);
 
         if (providers.length === 0) {
@@ -233,6 +238,36 @@ export function CreateMerchantAcquirerAccountForm({
 
         setProviderOptions(providers);
         setCurrencyOptions(currencies);
+
+        // Handle merchant profiles response
+        console.log('Merchant profiles API response:', merchantProfilesResponse);
+        handleApiResponse(merchantProfilesResponse, {
+          onSuccess: (data) => {
+            console.log('Merchant profiles onSuccess data:', data);
+            if (data && data.success && data.data) {
+              const profiles = (Array.isArray(data.data) ? data.data : []).map((profile: any) => ({
+                value: profile.id.toString(),
+                label: profile.merchantProfileName || `Profile ${profile.id}`,
+              }));
+              console.log('Mapped merchant profiles:', profiles);
+              setMerchantProfileOptions(profiles);
+              
+              // Auto-select primary profile if available
+              const primaryProfile = data.data.find((p: any) => p.isPrimary);
+              if (primaryProfile && !userProfileId) {
+                setSelectedMerchantProfile(primaryProfile.id.toString());
+              } else if (userProfileId) {
+                setSelectedMerchantProfile(userProfileId.toString());
+              }
+            } else {
+              console.warn('Merchant profiles data structure unexpected:', data);
+            }
+          },
+          onError: (errorMessage) => {
+            console.error('Error fetching merchant profiles:', errorMessage);
+            // Don't show toast error as merchant profiles might be optional
+          },
+        });
       } catch (error) {
         console.error('Error fetching options:', error);
         toast.error('Failed to load options');
@@ -242,7 +277,7 @@ export function CreateMerchantAcquirerAccountForm({
     };
 
     fetchOptions();
-  }, []);
+  }, [userId, userProfileId]);
 
   // Update schema and form fields based on payment method, tab, and crypto flow
   useEffect(() => {
@@ -377,6 +412,7 @@ export function CreateMerchantAcquirerAccountForm({
         rates: data,
         ratesType: selectedTab === 'normal' ? CONNECTOR_RATES_TYPE.NORMAL : CONNECTOR_RATES_TYPE.TIERED,
         ...(selectedPaymentMethod === 'CRYPTO' && cryptoFlow !== undefined && { cryptoFlow }),
+        ...(selectedMerchantProfile && { merchantProfileId: Number(selectedMerchantProfile) }),
       };
 
       await onSubmit(payload);
@@ -473,6 +509,28 @@ export function CreateMerchantAcquirerAccountForm({
               valueToShow="label"
               valueToSet="value"
             />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <Label className="text-foreground text-sm font-semibold">
+              Merchant Profile
+            </Label>
+            {merchantProfileOptions.length > 0 ? (
+              <SearchSelect
+                options={merchantProfileOptions}
+                value={selectedMerchantProfile}
+                onChange={(newValue) => {
+                  setSelectedMerchantProfile(newValue);
+                  setAdditionalError('');
+                }}
+                valueToShow="label"
+                valueToSet="value"
+              />
+            ) : (
+              <div className="text-sm text-muted-foreground py-2 px-3 border rounded-md bg-muted/50">
+                {loading ? 'Loading merchant profiles...' : `No profiles available (count: ${merchantProfileOptions.length})`}
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-1">

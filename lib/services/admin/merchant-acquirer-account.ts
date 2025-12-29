@@ -43,6 +43,25 @@ export interface MerchantAcquirerAccount {
   updatedAt: string;
 }
 
+export interface MerchantProfile {
+  id: string;
+  merchantProfileName: string;
+  userId: string;
+  industryId: string;
+  industry: any;
+  isPrimary: boolean;
+  status: string;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+export interface MerchantProfilesResponse {
+  success: boolean;
+  data: MerchantProfile[];
+}
+
 export interface CreateMerchantAcquirerAccountPayload {
   userId: number;
   acquirerId?: number;
@@ -53,6 +72,7 @@ export interface CreateMerchantAcquirerAccountPayload {
   rates?: Record<string, any>;
   ratesType?: string;
   userProfileId?: number;
+  merchantProfileId?: number;
   paymentMethod?: string;
   providerId?: number;
   connectorId?: number;
@@ -60,7 +80,7 @@ export interface CreateMerchantAcquirerAccountPayload {
 }
 
 const getBaseUrl = () => {
-  return `/api/admin/merchant-acquirer-account`;
+  return `/admin/merchant-acquirer-account`;
 };
 
 /**
@@ -70,7 +90,7 @@ export async function createMerchantAcquirerAccount(
   payload: CreateMerchantAcquirerAccountPayload
 ): Promise<ApiResponse<{ success: boolean; message: string; data: MerchantAcquirerAccount }>> {
   try {
-    const data = await http.post(getBaseUrl(), { body: payload }) as {
+    const data = await http.post(getBaseUrl(), payload) as {
       success: boolean;
       message: string;
       data: MerchantAcquirerAccount;
@@ -102,6 +122,30 @@ export async function getMerchantAcquirerAccountById(
       success: boolean;
       data: MerchantAcquirerAccount;
     };
+    return {
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+      };
+    }
+    throw error;
+  }
+}
+
+/**
+ * Get merchant profiles for a specific merchant
+ */
+export async function getMerchantProfiles(
+  merchantId: string | number
+): Promise<ApiResponse<MerchantProfilesResponse>> {
+  try {
+    const data = await http.get(`${getBaseUrl()}/merchant/${merchantId}/profiles`) as MerchantProfilesResponse;
     return {
       status: 200,
       data,

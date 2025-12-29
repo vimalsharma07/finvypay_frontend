@@ -29,7 +29,8 @@ export interface MerchantAcquirerAccount {
   isDeleted: boolean;
   acquirer?: {
     id: number;
-    name: string;
+    acquirerName: string;
+    name?: string; // For backward compatibility
   };
   acquirerAccount?: {
     id: number;
@@ -39,9 +40,17 @@ export interface MerchantAcquirerAccount {
     flowType: string;
   };
   merchantProfile?: {
-    id: number;
-    name?: string;
+    id: number | string;
+    merchantProfileName?: string;
+    industryId?: number | string;
+    industry?: {
+      id: number | string;
+      name: string;
+      status?: string;
+      isDeleted?: boolean;
+    };
   };
+  industryName?: string; // Top-level field from API response
   createdAt: string;
   updatedAt: string;
 }
@@ -68,9 +77,9 @@ export interface MerchantAcquirerAccountListResponse {
 
 const getBaseUrl = (userId?: string) => {
   if (userId) {
-    return `/api/admin/user-management/${userId}/acquirer-accounts`;
+    return `/user-management/${userId}/acquirer-accounts`;
   }
-  return `/api/admin/merchant-acquirer-account`;
+  return `/admin/merchant-acquirer-account`;
 };
 
 /**

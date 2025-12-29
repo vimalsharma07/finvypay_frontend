@@ -44,16 +44,12 @@ export default function AcquirerAccountsPage() {
   const fetchConnectors = async (
     pageNum: number,
     pageLimit: number,
-    sortField: string,
-    sortDir: 'ASC' | 'DESC',
   ) => {
     setLoading(true);
     try {
       const params: any = {
         page: pageNum,
         limit: pageLimit,
-        sortBy: sortField,
-        sortOrder: sortDir,
         userId: userId,
       };
 
@@ -81,14 +77,14 @@ export default function AcquirerAccountsPage() {
 
   useEffect(() => {
     if (userId) {
-      fetchConnectors(page, limit, sortBy, sortOrder);
+      fetchConnectors(page, limit);
     }
-  }, [userId, page, limit, sortBy, sortOrder]);
+  }, [userId, page, limit]);
 
   // Define table headers
   const headers: TableHeader<MerchantAcquirerAccount>[] = [
     { key: 'name', label: 'Name', sortable: true },
-    { key: 'merchantProfileId', label: 'Merchant Profile ID', sortable: true },
+    { key: 'merchantProfileId', label: 'Industry', sortable: false },
     { key: 'terminalId', label: 'Terminal ID', sortable: true },
     { key: 'gateway', label: 'Acquirer', sortable: false },
     { key: 'acquirerAccount', label: 'Acquirer Account', sortable: false },
@@ -107,9 +103,14 @@ export default function AcquirerAccountsPage() {
       case 'name':
         return <div className="font-medium">{item.name || '-'}</div>;
       case 'merchantProfileId':
+        // Display industry name from merchantProfile.industry.name or top-level industryName
+        const industryName = 
+          item.merchantProfile?.industry?.name || 
+          (item as any).industryName || 
+          '-';
         return (
-          <div className="text-sm font-semibold text-primary">
-            {item.merchantProfileId || '-'}
+          <div className="text-sm font-medium">
+            {industryName}
           </div>
         );
       case 'terminalId':
@@ -120,8 +121,8 @@ export default function AcquirerAccountsPage() {
         );
       case 'gateway':
         return (
-          <div className="text-sm">
-            {item.acquirer?.name || 'N/A'}
+          <div className="text-sm font-medium">
+            {item.acquirer?.acquirerName || item.acquirer?.name || '-'}
           </div>
         );
       case 'acquirerAccount':
