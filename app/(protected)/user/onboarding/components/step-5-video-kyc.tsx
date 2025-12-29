@@ -32,6 +32,17 @@ export function Step5VideoKyc({ onboardingData, onNext, onUpdate }: Step5VideoKy
     }
   }, [onboardingData]);
 
+  // Auto-advance to next step after successful upload (with small delay for UI feedback)
+  useEffect(() => {
+    if (hasUploaded && onboardingData?.onboarding?.videoKycPath && onUpdate) {
+      // Small delay to show success message before advancing
+      const timer = setTimeout(() => {
+        onUpdate();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [hasUploaded, onboardingData?.onboarding?.videoKycPath, onUpdate]);
+
   const handleVideoRecorded = (videoBlob: Blob) => {
     setRecordedVideo(videoBlob);
     setHasUploaded(false);
@@ -42,14 +53,15 @@ export function Step5VideoKyc({ onboardingData, onNext, onUpdate }: Step5VideoKy
     try {
       const response = await uploadFile(videoFile, 'video_kyc');
       handleApiResponse(response, {
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
           if (data && data.success) {
             toast.success('Video KYC uploaded successfully');
             setHasUploaded(true);
             
-            // Refresh onboarding data
-            refreshOnboardingData();
-            onUpdate?.();
+            // Refresh onboarding data and advance to next step
+            await refreshOnboardingData();
+            // onUpdate will handle data refresh and step progression
+            await onUpdate?.();
           }
         },
         onError: (errorMessage) => {

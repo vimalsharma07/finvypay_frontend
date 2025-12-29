@@ -70,11 +70,12 @@ export function Step1KycType({ onNext, onUpdate }: Step1KycTypeProps) {
     try {
       const response = await initializeOnboarding({ kycType: data.kycType });
       handleApiResponse(response, {
-        onSuccess: (responseData) => {
+        onSuccess: async (responseData) => {
           if (responseData && responseData.success) {
             toast.success('Onboarding initialized successfully');
-            onUpdate({ kycType: data.kycType });
-            onNext();
+            // Update parent state and refresh data - this will also advance to step 2
+            await onUpdate({ kycType: data.kycType });
+            // onNext() is now handled in handleKycTypeUpdate
           }
         },
         onError: (errorMessage) => {

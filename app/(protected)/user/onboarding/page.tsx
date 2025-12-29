@@ -138,18 +138,40 @@ export default function OnboardingPage() {
     fetchOnboarding();
   }, []);
 
-  const handleKycTypeUpdate = (data: InitializeOnboardingPayload) => {
+  const handleKycTypeUpdate = async (data: InitializeOnboardingPayload) => {
     setKycType(data.kycType);
     // Update onboarding data optimistically
     if (onboardingData) {
       setOnboardingData({
         ...onboardingData,
+        onboarding: {
+          ...onboardingData.onboarding,
+          kycType: data.kycType,
+        },
+        kycType: data.kycType,
         user: {
           ...onboardingData.user,
           profileStep: 1,
           entityType: data.kycType,
         },
       });
+    }
+    // Refresh onboarding data from server to get latest state
+    try {
+      const response = await getOnboardingStatus();
+      handleApiResponse(response, {
+        onSuccess: (responseData) => {
+          if (responseData && responseData.success && responseData.data) {
+            setOnboardingData(responseData.data);
+            // Ensure we're on step 2 after successful update
+            setCurrentStep(2);
+          }
+        },
+      });
+    } catch (error) {
+      console.error('Failed to refresh onboarding data:', error);
+      // Still advance to step 2 even if refresh fails
+      setCurrentStep(2);
     }
   };
 
@@ -184,9 +206,29 @@ export default function OnboardingPage() {
     // The step progression will be handled by the component
   };
 
-  const handleVideoKycUpdate = () => {
-    // Refresh onboarding data after video KYC update
-    // The step progression will be handled by the component
+  const handleVideoKycUpdate = async () => {
+    // Refresh onboarding data from server to get latest state
+    try {
+      const response = await getOnboardingStatus();
+      handleApiResponse(response, {
+        onSuccess: (responseData) => {
+          if (responseData && responseData.success && responseData.data) {
+            setOnboardingData(responseData.data);
+            // Determine next step based on whether directors step is shown
+            // Recalculate shouldShowDirectorsStep from fresh data
+            const kycType = responseData.data?.kycType || responseData.data?.onboarding?.kycType;
+            const needsDirectorsStep = kycType && kycType !== 'individual';
+            const nextStep = needsDirectorsStep ? 6 : 5; // Agreement step
+            setCurrentStep(nextStep);
+          }
+        },
+      });
+    } catch (error) {
+      console.error('Failed to refresh onboarding data:', error);
+      // Still advance to next step even if refresh fails
+      const nextStep = shouldShowDirectorsStep ? 6 : 5;
+      setCurrentStep(nextStep);
+    }
   };
 
   const handleAgreementUpdate = () => {
