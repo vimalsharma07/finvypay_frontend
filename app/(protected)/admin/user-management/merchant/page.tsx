@@ -25,7 +25,7 @@ import { AdvancedFilter, FilterField } from '../../../components/advanced-filter
 import { ConfirmComp } from '../../../components/confirm-comp';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Pencil, Eye, Plug, Route, Trash2 } from 'lucide-react';
+import { Pencil, Eye, Plug, Route, Trash2, Percent } from 'lucide-react';
 
 export default function MerchantUsersPage() {
   const router = useRouter();
@@ -265,6 +265,12 @@ export default function MerchantUsersPage() {
       label: 'Routing & Cascading',
       icon: Route,
       route: (row: User) => `/admin/user-management/merchant/${row.id}/routing_cascading`,
+      separator: true,
+    },
+    {
+      label: 'Assign Rate',
+      icon: Percent,
+      route: (row: User) => `/admin/user-management/merchant/assign-rates/${row.id}`,
       separator: true,
     },
     {

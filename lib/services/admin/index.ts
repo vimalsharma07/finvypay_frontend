@@ -20,4 +20,5 @@ export * from './industries';
 export * from './agreements';
 export * from './transaction';
 export * from './support-ticket';
+export * from './merchant-rates';
 
