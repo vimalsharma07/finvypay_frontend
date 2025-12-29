@@ -14,7 +14,7 @@ import {
   UserCircle,
   Users,
 } from 'lucide-react';
-import { useMockSession } from '@/hooks/use-mock-session';
+import { useAuth } from '@/hooks/use-auth';
 import { performLogout } from '@/lib/utils/logout';
 import { useTheme } from 'next-themes';
 import { toAbsoluteUrl } from '@/lib/helpers';
@@ -36,7 +36,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 
 export function DropdownMenuUser({ trigger }: { trigger: ReactNode }) {
-  const { data: session } = useMockSession();
+  const { user } = useAuth();
   const { changeLanguage, language } = useLanguage();
   const { theme, setTheme } = useTheme();
 
@@ -58,22 +58,22 @@ export function DropdownMenuUser({ trigger }: { trigger: ReactNode }) {
             <img
               className="w-9 h-9 rounded-full border border-border"
               src={toAbsoluteUrl(
-                session?.user.avatar || '/media/avatars/300-2.png',
+                user?.profileImage || user?.avatarUrl || '/media/avatars/300-2.png',
               )}
               alt="User avatar"
             />
             <div className="flex flex-col">
               <Link
-                href="/account/home/get-started"
+                href="/user/profile"
                 className="text-sm text-mono hover:text-primary font-semibold"
               >
-                {session?.user.name || ''}
+                {user?.name || ''}
               </Link>
               <Link
-                href="mailto:c.fisher@gmail.com"
+                href={user?.email ? `mailto:${user.email}` : '#'}
                 className="text-xs text-muted-foreground hover:text-primary"
               >
-                {session?.user.email || ''}
+                {user?.email || ''}
               </Link>
             </div>
           </div>
