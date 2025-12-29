@@ -116,6 +116,21 @@ export interface RefreshTokenResponse extends AuthResponse {}
  * @param payload - Login credentials
  * @returns Promise with access token and user data
  */
+// Remove non-essential fields from user data before storing locally
+function sanitizeAuthUser(user: any) {
+  if (!user || typeof user !== 'object') return user;
+  const {
+    createdAt,
+    updatedAt,
+    sessionId,
+    tokenExpiry,
+    accessToken,
+    refreshToken,
+    ...rest
+  } = user;
+  return rest;
+}
+
 export async function login(
   payload: LoginPayload
 ): Promise<ApiResponse<AuthResponse>> {
@@ -156,7 +171,7 @@ export async function login(
         refreshToken: refreshTokenValue,
         sessionId: response.data.sessionId,
         tokenExpiry: response.data.tokenExpiry,
-        userData: response.data,
+        userData: sanitizeAuthUser(response.data),
       });
     }
 
@@ -293,7 +308,7 @@ export async function googleLogin(
         accessToken: accessTokenValue,
         sessionId: response.data.sessionId,
         tokenExpiry: response.data.tokenExpiry,
-        userData: response.data,
+        userData: sanitizeAuthUser(response.data),
         // Note: refreshToken no longer stored - it's in httpOnly cookie
       });
     }
@@ -593,7 +608,7 @@ export async function verifyOtp(
         accessToken: accessTokenValue,
         sessionId: response.data.sessionId,
         tokenExpiry: response.data.tokenExpiry,
-        userData: response.data,
+        userData: sanitizeAuthUser(response.data),
       });
     }
 
@@ -765,7 +780,7 @@ export async function refreshToken(): Promise<ApiResponse<RefreshTokenResponse>>
         refreshToken: newRefreshTokenValue,
         sessionId: response.data.sessionId,
         tokenExpiry: response.data.tokenExpiry,
-        userData: response.data,
+        userData: sanitizeAuthUser(response.data),
       });
     }
 

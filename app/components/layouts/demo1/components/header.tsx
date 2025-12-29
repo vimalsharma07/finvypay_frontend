@@ -34,6 +34,7 @@ import { Breadcrumb } from './breadcrumb';
 import { MegaMenu } from './mega-menu';
 import { MegaMenuMobile } from './mega-menu-mobile';
 import { SidebarMenu } from './sidebar-menu';
+import { useAuth } from '@/hooks/use-auth';
 
 export function Header() {
   const [isSidebarSheetOpen, setIsSidebarSheetOpen] = useState(false);
@@ -41,6 +42,7 @@ export function Header() {
 
   const pathname = usePathname();
   const mobileMode = useIsMobile();
+  const { user } = useAuth();
 
   const scrollPosition = useScrollPosition();
   const headerSticky: boolean = scrollPosition > 0;
@@ -181,11 +183,9 @@ export function Header() {
               />
               <UserDropdownMenu
                 trigger={
-                  <img
-                    className="size-9 rounded-full border-2 border-green-500 shrink-0 cursor-pointer"
-                    src={toAbsoluteUrl('/media/avatars/300-2.png')}
-                    alt="User Avatar"
-                  />
+                  <div className="size-9 rounded-full border-2 border-primary/60 bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold uppercase cursor-pointer">
+                    {user?.email?.[0]?.toUpperCase() || 'U'}
+                  </div>
                 }
               />
             </>
