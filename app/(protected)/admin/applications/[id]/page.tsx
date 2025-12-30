@@ -18,7 +18,8 @@ const DATE_FMT = 'yyyy-MM-dd HH:mm';
 const buildFileUrl = (path: string | null) => {
   if (!path) return null;
   if (path.startsWith('http')) return path;
-  const base = process.env.NEXT_PUBLIC_S3_BASE_URL || '';
+  // Use public envs (client component). Ensure NEXT_PUBLIC_AWS_BASE_URL is set in env.
+  const base = process.env.NEXT_PUBLIC_AWS_BASE_URL || process.env.NEXT_PUBLIC_S3_BASE_URL || process.env.AWS_BASE_URL || '';
   return `${base}${path}`;
 };
 

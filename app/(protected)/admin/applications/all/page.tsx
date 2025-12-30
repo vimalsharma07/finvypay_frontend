@@ -14,6 +14,7 @@ import {
   MerchantApplication,
   ApplicationKycStatus,
 } from '@/lib/services/admin/applications';
+import Link from 'next/link';
 import {
   ColumnDef,
   getCoreRowModel,
@@ -190,8 +191,10 @@ export default function AdminApplicationListPage() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem onClick={() => toast.info(`View ${row.original.id}`)}>
-              View
+            <DropdownMenuItem asChild>
+              <Link href={`/admin/applications/${row.original.id}`}>
+                View
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem
               disabled={actioningId === row.original.id}
