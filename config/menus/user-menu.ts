@@ -119,7 +119,10 @@ const BASE_USER_MENU: MenuConfig = [
     title: 'Settings',
     icon: Settings,
     path: '/user/settings',
-    requirePermission: false, // Settings always visible
+    requirePermission: false, 
+    children: [
+      { title: ' Global rate', path: '/user/rates', submodule: 'Rates' },     
+    ],
   },
 ];
 
