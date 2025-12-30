@@ -96,7 +96,7 @@ export default function AdminApplicationsPage() {
                     </div>
                     <CardDescription>{card.description}</CardDescription>
                     <div className="pt-1">
-                      <Button variant="link" className="px-0 text-primary">
+                      <Button variant="ghost" className="px-0 text-primary">
                         View details
                       </Button>
                     </div>

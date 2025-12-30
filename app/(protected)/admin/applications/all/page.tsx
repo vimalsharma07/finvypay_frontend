@@ -54,10 +54,10 @@ export default function AdminApplicationListPage() {
     pageSize: 20,
   });
 
-  const formatStatus = (status?: string) =>
+  const formatStatus = (status?: string | null) =>
     status ? status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : '—';
 
-  const statusVariant = (status?: string) => {
+  const statusVariant = (status?: string | null) => {
     if (!status) return 'outline';
     const normalized = status.toLowerCase();
     if (normalized.includes('approved')) return 'success';
@@ -162,7 +162,7 @@ export default function AdminApplicationListPage() {
       ),
       cell: ({ row }) => (
         <Badge
-          variant={statusVariant(row.original.kycStatus) as any}
+          variant={statusVariant(row.original.kycStatus)}
           className="px-2.5 py-1 text-[11px] font-semibold leading-tight whitespace-normal max-w-[160px] text-left break-words uppercase tracking-wide"
         >
           {formatStatus(row.original.kycStatus)}
@@ -249,7 +249,7 @@ export default function AdminApplicationListPage() {
 
       <Container>
         <DataGrid table={table} recordCount={meta?.total ?? data.length} isLoading={loading}>
-          <DataGridTable table={table} isLoading={loading} />
+          <DataGridTable />
           <DataGridPagination />
         </DataGrid>
       </Container>

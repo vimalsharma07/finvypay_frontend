@@ -141,21 +141,21 @@ export default function OnboardingPage() {
   const handleKycTypeUpdate = async (data: InitializeOnboardingPayload) => {
     setKycType(data.kycType);
     // Update onboarding data optimistically
-    if (onboardingData) {
-      setOnboardingData({
-        ...onboardingData,
-        onboarding: {
-          ...onboardingData.onboarding,
-          kycType: data.kycType,
-        },
+    setOnboardingData((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        onboarding: prev.onboarding
+          ? { ...prev.onboarding, kycType: data.kycType }
+          : prev.onboarding,
         kycType: data.kycType,
         user: {
-          ...onboardingData.user,
+          ...prev.user,
           profileStep: 1,
           entityType: data.kycType,
         },
-      });
-    }
+      };
+    });
     // Refresh onboarding data from server to get latest state
     try {
       const response = await getOnboardingStatus();
