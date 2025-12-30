@@ -11,6 +11,7 @@ import {
   CalendarCheck,
   Captions,
   CheckCircle,
+  ClipboardList,
   Code,
   Codepen,
   Coffee,
@@ -114,6 +115,13 @@ const BASE_ADMIN_MENU: MenuConfig = [
     path: '/admin/acquirers',
     permissionModule: 'Acquirer Management', // Explicit permission module mapping
     requirePermission: true,
+  },
+  {
+    title: 'Applications & Requests',
+    icon: ClipboardList,
+    path: '/admin/applications',
+    permissionModule: 'Application Management', // Explicit permission module mapping
+    requirePermission: false,
   },
   {
     title: 'Master',

@@ -18,6 +18,7 @@ import { adminAcquirerRoutes } from './acquirer-routes';
 import { adminAcquirerAccountsRoutes } from './acquirer-accounts-routes';
 import { adminSupportTicketRoutes } from './support-ticket-routes';
 import { merchantRatesRoutes } from './merchant-rates-routes';
+import { adminApplicationRoutes } from './application-routes';
 
 // Re-export individual route sets for direct imports
 export { merchantRatesRoutes };
@@ -38,4 +39,5 @@ export const adminModuleRoutes = {
   acquirerAccounts: adminAcquirerAccountsRoutes,
   supportTicket: adminSupportTicketRoutes,
   merchantRates: merchantRatesRoutes,
+  applications: adminApplicationRoutes,
 } as const;
