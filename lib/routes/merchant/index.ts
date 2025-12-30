@@ -7,10 +7,12 @@ import { merchantUserRoutes } from './user-routes';
 import { merchantMasterRoutes } from './master-routes';
 import { merchantReportRoutes } from './report-routes';
 import { merchantTransactionRoutes } from './transaction-routes';
+import { merchantRatesRoutes } from './merchant-rates-routes';
 
 export const merchantModuleRoutes = {
   users: merchantUserRoutes,
   master: merchantMasterRoutes,
   reports: merchantReportRoutes,
   transactions: merchantTransactionRoutes,
+  rates: merchantRatesRoutes,
 } as const;

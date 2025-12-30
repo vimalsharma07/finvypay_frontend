@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -16,6 +17,16 @@ import {
 import { getOnboardingStatus, OnboardingData } from '@/lib/services/user/onboarding';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { OnboardingCard } from './onboarding-card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { getMerchantRates, updateMerchantRatesStatus, MerchantRates } from '@/lib/services/user/merchant-rates';
+import { toast } from 'sonner';
 
 /**
  * User Dashboard Content Component
@@ -25,6 +36,10 @@ import { OnboardingCard } from './onboarding-card';
 export function UserDashboardContent() {
   const [onboardingData, setOnboardingData] = useState<OnboardingData | null>(null);
   const [onboardingLoading, setOnboardingLoading] = useState(true);
+  const [merchantRates, setMerchantRates] = useState<MerchantRates | null>(null);
+  const [ratesLoading, setRatesLoading] = useState(true);
+  const [actioningRate, setActioningRate] = useState(false);
+  const [showRatesModal, setShowRatesModal] = useState(false);
 
   // Fetch onboarding status
   useEffect(() => {
@@ -51,6 +66,61 @@ export function UserDashboardContent() {
 
     fetchOnboarding();
   }, []);
+
+  useEffect(() => {
+    const fetchRates = async () => {
+      setRatesLoading(true);
+      try {
+        const response = await getMerchantRates();
+        handleApiResponse(response, {
+          onSuccess: (data) => {
+            if (data?.success && data.data?.merchantRates) {
+              setMerchantRates(data.data.merchantRates);
+              if (data.data.merchantRates.status === 'pending') {
+                setShowRatesModal(true);
+              }
+            } else {
+              setMerchantRates(null);
+            }
+          },
+          onError: (message) => {
+            console.error('Failed to fetch merchant rates:', message);
+          },
+          silent: true,
+        });
+      } catch (error) {
+        console.error('Merchant rates fetch error:', error);
+      } finally {
+        setRatesLoading(false);
+      }
+    };
+
+    fetchRates();
+  }, []);
+
+  const handleRatesStatusChange = async (status: 'approved' | 'rejected') => {
+    if (!merchantRates) return;
+    setActioningRate(true);
+    try {
+      const response = await updateMerchantRatesStatus({ status });
+      handleApiResponse(response, {
+        onSuccess: (data) => {
+          toast.success(data?.message || `Rates ${status}`);
+          setShowRatesModal(false);
+          setMerchantRates((prev) => (prev ? { ...prev, status } : prev));
+        },
+        onError: (message) => {
+          toast.error(message || `Failed to update rates status to ${status}`);
+        },
+        silent: true,
+      });
+    } catch (error) {
+      console.error('Update rates status error:', error);
+      toast.error('Unexpected error while updating rates status');
+    } finally {
+      setActioningRate(false);
+    }
+  };
 
   // TODO: Replace with actual API data
   const stats = {
@@ -83,6 +153,81 @@ export function UserDashboardContent() {
 
   return (
     <Fragment>
+      <Dialog open={showRatesModal} onOpenChange={() => {}}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Merchant Rates Pending Approval</DialogTitle>
+            <DialogDescription>
+              Please review and approve or reject the rates to continue.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            {merchantRates ? (
+              <>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Default MDR</span>
+                  <span className="font-medium">{merchantRates.defaultMdr}%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Visa MDR</span>
+                  <span className="font-medium">{merchantRates.visaMdr}%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Master MDR</span>
+                  <span className="font-medium">{merchantRates.masterMdr}%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Rolling Reserve</span>
+                  <span className="font-medium">{merchantRates.rollingReserve}%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Success Tx Fee</span>
+                  <span className="font-medium">{merchantRates.successTransactionFee}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Declined Tx Fee</span>
+                  <span className="font-medium">{merchantRates.declinedTransactionFee}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Chargeback Fee</span>
+                  <span className="font-medium">{merchantRates.chargebackFee}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Flagged Fee</span>
+                  <span className="font-medium">{merchantRates.flaggedFee}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Setup Fee</span>
+                  <span className="font-medium">{merchantRates.setupFee}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Refund Fee</span>
+                  <span className="font-medium">{merchantRates.refundFee}</span>
+                </div>
+              </>
+            ) : (
+              <div className="text-muted-foreground">No rate data available.</div>
+            )}
+          </div>
+          <DialogFooter className="flex justify-end gap-2">
+            <Button
+              variant="destructive"
+              onClick={() => handleRatesStatusChange('rejected')}
+              disabled={actioningRate || ratesLoading}
+            >
+              {actioningRate ? 'Rejecting...' : 'Reject'}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => handleRatesStatusChange('approved')}
+              disabled={actioningRate || ratesLoading}
+            >
+              {actioningRate ? 'Approving...' : 'Approve'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Onboarding Card - Show if profileStep is 0 (start) or > 0 (resume) */}
       {showOnboarding && (
         <div className="mb-5 lg:mb-7.5">
