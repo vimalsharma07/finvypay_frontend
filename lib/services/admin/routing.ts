@@ -47,16 +47,19 @@ export interface RouteRuleListResponse {
 }
 
 export interface CreateRouteRulePayload {
+  // Backend primary fields
   name: string;
-  config: any;
-  routing_for: string;
+  routingFor: string;
+  config: any[];
+  merchantProfileId: number;
+  merchantAcquirerAccountId: number;
+  splitEnable?: boolean;
+  // Legacy/compat fields (still accepted)
+  routing_for?: string;
   profile_id?: number;
   split_enable?: boolean;
   split_type?: string;
   split_config?: any;
-  // Newer payload shape (backend accepts these keys as well)
-  merchantProfileId?: number;
-  merchantAcquirerAccountId?: number;
 }
 
 export interface UpdateRouteRulePayload extends CreateRouteRulePayload {
@@ -135,10 +138,7 @@ export async function createUserRouting(
 ): Promise<ApiResponse<{ success: boolean; message: string }>> {
   try {
     const data = await http.post(getBaseUrl(userId), {
-      body: {
-        ...payload,
-        user_id: userId,
-      },
+      ...payload,
     }) as { success: boolean; message: string };
     return {
       status: 201,

@@ -334,9 +334,7 @@ export default function RoutingCreatePage() {
     const payload = {
       name,
       routingFor,
-      routing_for: routingFor,
       merchantProfileId: Number(selectedProfileId),
-      profile_id: Number(selectedProfileId),
       merchantAcquirerAccountId: Number(selectedConnectorId),
       config: conditions.map((c) => ({
         category: c.category,
@@ -344,7 +342,6 @@ export default function RoutingCreatePage() {
         value: normalizeConditionValue(c),
       })),
       splitEnable,
-      split_enable: splitEnable,
     };
 
     try {

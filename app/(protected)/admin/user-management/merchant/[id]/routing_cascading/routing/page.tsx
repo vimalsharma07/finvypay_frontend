@@ -123,7 +123,7 @@ export default function RoutingPage() {
             setProfiles(profileList);
 
             const options = profileList.map((profile) => ({
-              value: profile.industryId?.toString() || '',
+              value: profile.id?.toString() || '',
               label: profile.industry?.name || profile.merchantProfileName || `Profile ${profile.id}`,
             }));
             setProfileOptions(options);
@@ -131,9 +131,9 @@ export default function RoutingPage() {
             // Auto-select primary profile (industry id) when available
             const primaryProfile = profileList.find((p) => p.isPrimary);
             if (primaryProfile && !selectedProfileId) {
-              setSelectedProfileId(primaryProfile.industryId?.toString() || '');
+              setSelectedProfileId(primaryProfile.id?.toString() || '');
             } else if (!selectedProfileId && profileList.length > 0) {
-              setSelectedProfileId(profileList[0].industryId?.toString() || '');
+              setSelectedProfileId(profileList[0].id?.toString() || '');
             }
           },
           onError: (errorMessage) => {

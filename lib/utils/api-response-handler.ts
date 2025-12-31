@@ -145,6 +145,15 @@ export function handleApiResponse<T = any>(
     return response.status === 200 || response.status === 204;
   }
 
+  // Treat other 2xx codes (e.g., 201 Created) as success
+  if (response.status >= 200 && response.status < 300) {
+    if (response.data) {
+      onSuccess?.(response.data as T);
+      return true;
+    }
+    return false;
+  }
+
   // Handle unknown status codes
   // Handle error as string or object
   const errorMsg = typeof response.error === 'string' 
