@@ -6,13 +6,16 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
   TrendingUp, 
-  TrendingDown, 
   DollarSign, 
   CreditCard, 
   AlertCircle,
   CheckCircle2,
   Clock,
-  Activity
+  Activity,
+  ArrowRight,
+  Shield,
+  Ticket,
+  BarChart3
 } from 'lucide-react';
 import { getOnboardingStatus, OnboardingData } from '@/lib/services/user/onboarding';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
@@ -267,64 +270,86 @@ export function UserDashboardContent() {
       )}
 
       {/* Stats Grid */}
-      <div className="grid gap-5 lg:gap-7.5 lg:grid-cols-4">
+      <div className="grid gap-5 lg:gap-7.5 lg:grid-cols-4 mt-5 lg:mt-7.5">
         {/* Total Transactions */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+        <Card className="relative overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-primary/10 rounded-full -mr-10 -mt-10 blur-2xl" />
+          <CardHeader className="relative z-10">
+            <CardTitle className="text-sm font-medium text-foreground flex items-center justify-between w-full">
+              <span className="flex-1">Total Transactions</span>
+              <div className="p-2 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <Activity className="h-5 w-5 text-primary" />
+              </div>
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalTransactions.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              <span className="text-success flex items-center gap-1">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold mb-2">{stats.totalTransactions.toLocaleString()}</div>
+            <div className="flex items-center gap-1.5">
+              <Badge variant="success" appearance="light" size="sm" className="text-xs">
                 <TrendingUp className="h-3 w-3" />
                 All time
-              </span>
-            </p>
+              </Badge>
+            </div>
           </CardContent>
         </Card>
 
         {/* Total Amount */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Amount</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+        <Card className="relative overflow-hidden border-[var(--color-info-alpha,var(--color-violet-200))]/30 bg-gradient-to-br from-[var(--color-info-soft,var(--color-violet-50))] to-[var(--color-info-soft,var(--color-violet-100))] dark:from-[var(--color-info-soft,var(--color-violet-950))] dark:to-[var(--color-info-soft,var(--color-violet-900))] shadow-md shadow-[var(--color-info-accent,var(--color-violet-500))]/10 hover:shadow-lg hover:shadow-[var(--color-info-accent,var(--color-violet-500))]/20 transition-all duration-300">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-[var(--color-info-accent,var(--color-violet-500))]/10 rounded-full -mr-10 -mt-10 blur-2xl" />
+          <CardHeader className="relative z-10">
+            <CardTitle className="text-sm font-medium text-foreground flex items-center justify-between w-full">
+              <span className="flex-1">Total Amount</span>
+              <div className="p-2 rounded-lg bg-[var(--color-info-accent,var(--color-violet-500))]/10 flex items-center justify-center shrink-0">
+                <DollarSign className="h-5 w-5 text-[var(--color-info-accent,var(--color-violet-600))]" />
+              </div>
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.totalAmount)}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              <span className="text-success flex items-center gap-1">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold mb-2">{formatCurrency(stats.totalAmount)}</div>
+            <div className="flex items-center gap-1.5">
+              <Badge variant="info" appearance="light" size="sm" className="text-xs">
                 <TrendingUp className="h-3 w-3" />
                 Processed
-              </span>
-            </p>
+              </Badge>
+            </div>
           </CardContent>
         </Card>
 
         {/* Successful Transactions */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Successful</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-success" />
+        <Card className="relative overflow-hidden border-[var(--color-success-alpha,var(--color-green-200))]/30 bg-gradient-to-br from-[var(--color-success-soft,var(--color-green-50))] to-[var(--color-success-soft,var(--color-green-100))] dark:from-[var(--color-success-soft,var(--color-green-950))] dark:to-[var(--color-success-soft,var(--color-green-900))] shadow-md shadow-[var(--color-success-accent,var(--color-green-500))]/10 hover:shadow-lg hover:shadow-[var(--color-success-accent,var(--color-green-500))]/20 transition-all duration-300">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-[var(--color-success-accent,var(--color-green-500))]/10 rounded-full -mr-10 -mt-10 blur-2xl" />
+          <CardHeader className="relative z-10">
+            <CardTitle className="text-sm font-medium text-foreground flex items-center justify-between w-full">
+              <span className="flex-1">Successful</span>
+              <div className="p-2 rounded-lg bg-[var(--color-success-accent,var(--color-green-500))]/10 flex items-center justify-center shrink-0">
+                <CheckCircle2 className="h-5 w-5 text-[var(--color-success-accent,var(--color-green-600))]" />
+              </div>
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.successfulTransactions.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {((stats.successfulTransactions / stats.totalTransactions) * 100).toFixed(1)}% success rate
-            </p>
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold mb-2">{stats.successfulTransactions.toLocaleString()}</div>
+            <div className="flex items-center gap-2">
+              <Badge variant="success" appearance="light" size="sm" className="text-xs">
+                {((stats.successfulTransactions / stats.totalTransactions) * 100).toFixed(1)}% success rate
+              </Badge>
+            </div>
           </CardContent>
         </Card>
 
         {/* Pending Transactions */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
-            <Clock className="h-4 w-4 text-warning" />
+        <Card className="relative overflow-hidden border-[var(--color-warning-alpha,var(--color-yellow-200))]/30 bg-gradient-to-br from-[var(--color-warning-soft,var(--color-yellow-50))] to-[var(--color-warning-soft,var(--color-yellow-100))] dark:from-[var(--color-warning-soft,var(--color-yellow-950))] dark:to-[var(--color-warning-soft,var(--color-yellow-900))] shadow-md shadow-[var(--color-warning-accent,var(--color-yellow-500))]/10 hover:shadow-lg hover:shadow-[var(--color-warning-accent,var(--color-yellow-500))]/20 transition-all duration-300">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-[var(--color-warning-accent,var(--color-yellow-500))]/10 rounded-full -mr-10 -mt-10 blur-2xl" />
+          <CardHeader className="relative z-10">
+            <CardTitle className="text-sm font-medium text-foreground flex items-center justify-between w-full">
+              <span className="flex-1">Pending</span>
+              <div className="p-2 rounded-lg bg-[var(--color-warning-accent,var(--color-yellow-500))]/10 flex items-center justify-center shrink-0">
+                <Clock className="h-5 w-5 text-[var(--color-warning-accent,var(--color-yellow-600))]" />
+              </div>
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.pendingTransactions}</div>
-            <p className="text-xs text-muted-foreground mt-1">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold mb-2">{stats.pendingTransactions}</div>
+            <p className="text-xs text-muted-foreground">
               Awaiting approval
             </p>
           </CardContent>
@@ -332,50 +357,59 @@ export function UserDashboardContent() {
       </div>
 
       {/* Secondary Stats Grid */}
-      <div className="grid gap-5 lg:gap-7.5 lg:grid-cols-3">
+      <div className="grid gap-5 lg:gap-7.5 lg:grid-cols-3 mt-5 lg:mt-7.5">
         {/* Trusted Cards */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <CreditCard className="h-4 w-4" />
+        <Card className="relative overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 group">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full -mr-12 -mt-12 blur-2xl" />
+          <CardHeader className="relative z-10">
+            <CardTitle className="text-sm font-medium flex items-center gap-2.5">
+              <div className="p-1.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                <CreditCard className="h-4 w-4 text-primary" />
+              </div>
               Trusted Cards
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats.totalCards}</div>
-            <p className="text-xs text-muted-foreground mt-2">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold mb-1">{stats.totalCards}</div>
+            <p className="text-xs text-muted-foreground">
               Cards in whitelist
             </p>
           </CardContent>
         </Card>
 
         {/* Active Risks */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-warning" />
+        <Card className="relative overflow-hidden border-[var(--color-warning-alpha,var(--color-yellow-200))]/30 bg-gradient-to-br from-[var(--color-warning-soft,var(--color-yellow-50))] to-[var(--color-warning-soft,var(--color-yellow-100))] dark:from-[var(--color-warning-soft,var(--color-yellow-950))] dark:to-[var(--color-warning-soft,var(--color-yellow-900))] shadow-md shadow-[var(--color-warning-accent,var(--color-yellow-500))]/10 hover:shadow-lg hover:shadow-[var(--color-warning-accent,var(--color-yellow-500))]/20 transition-all duration-300 group">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--color-warning-accent,var(--color-yellow-500))]/10 rounded-full -mr-12 -mt-12 blur-2xl" />
+          <CardHeader className="relative z-10">
+            <CardTitle className="text-sm font-medium flex items-center gap-2.5">
+              <div className="p-1.5 rounded-lg bg-[var(--color-warning-accent,var(--color-yellow-500))]/10 group-hover:bg-[var(--color-warning-accent,var(--color-yellow-500))]/20 transition-colors">
+                <Shield className="h-4 w-4 text-[var(--color-warning-accent,var(--color-yellow-600))]" />
+              </div>
               Active Risks
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats.activeRisks}</div>
-            <p className="text-xs text-muted-foreground mt-2">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold mb-1">{stats.activeRisks}</div>
+            <p className="text-xs text-muted-foreground">
               Risk rules configured
             </p>
           </CardContent>
         </Card>
 
         {/* Support Tickets */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-info" />
+        <Card className="relative overflow-hidden border-[var(--color-info-alpha,var(--color-violet-200))]/30 bg-gradient-to-br from-[var(--color-info-soft,var(--color-violet-50))] to-[var(--color-info-soft,var(--color-violet-100))] dark:from-[var(--color-info-soft,var(--color-violet-950))] dark:to-[var(--color-info-soft,var(--color-violet-900))] shadow-md shadow-[var(--color-info-accent,var(--color-violet-500))]/10 hover:shadow-lg hover:shadow-[var(--color-info-accent,var(--color-violet-500))]/20 transition-all duration-300 group">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--color-info-accent,var(--color-violet-500))]/10 rounded-full -mr-12 -mt-12 blur-2xl" />
+          <CardHeader className="relative z-10">
+            <CardTitle className="text-sm font-medium flex items-center gap-2.5">
+              <div className="p-1.5 rounded-lg bg-[var(--color-info-accent,var(--color-violet-500))]/10 group-hover:bg-[var(--color-info-accent,var(--color-violet-500))]/20 transition-colors">
+                <Ticket className="h-4 w-4 text-[var(--color-info-accent,var(--color-violet-600))]" />
+              </div>
               Open Tickets
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats.openTickets}</div>
-            <p className="text-xs text-muted-foreground mt-2">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold mb-1">{stats.openTickets}</div>
+            <p className="text-xs text-muted-foreground">
               Support tickets
             </p>
           </CardContent>
@@ -383,51 +417,66 @@ export function UserDashboardContent() {
       </div>
 
       {/* Quick Actions */}
-      <Card>
+      <Card className="mt-5 lg:mt-7.5">
         <CardHeader>
-          <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
+          <CardTitle className="text-base font-semibold flex items-center gap-2">
+            <BarChart3 className="h-5 w-5 text-primary" />
+            Quick Actions
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <a
               href="/user/transactions"
-              className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+              className="group flex items-center gap-4 p-4 border-2 rounded-xl hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 hover:shadow-md"
             >
-              <Activity className="h-5 w-5 text-primary" />
-              <div>
-                <div className="font-medium text-sm">View Transactions</div>
+              <div className="p-3 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                <Activity className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <div className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors">View Transactions</div>
                 <div className="text-xs text-muted-foreground">See all transactions</div>
               </div>
+              <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
             </a>
             <a
               href="/user/risk-compliance/trusted-cards"
-              className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+              className="group flex items-center gap-4 p-4 border-2 rounded-xl hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 hover:shadow-md"
             >
-              <CreditCard className="h-5 w-5 text-primary" />
-              <div>
-                <div className="font-medium text-sm">Manage Cards</div>
+              <div className="p-3 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                <CreditCard className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <div className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors">Manage Cards</div>
                 <div className="text-xs text-muted-foreground">Trusted cards</div>
               </div>
+              <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
             </a>
             <a
               href="/user/risk-compliance/manage-risk"
-              className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+              className="group flex items-center gap-4 p-4 border-2 rounded-xl hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 hover:shadow-md"
             >
-              <AlertCircle className="h-5 w-5 text-primary" />
-              <div>
-                <div className="font-medium text-sm">Risk Management</div>
+              <div className="p-3 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                <Shield className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <div className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors">Risk Management</div>
                 <div className="text-xs text-muted-foreground">Configure risks</div>
               </div>
+              <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
             </a>
             <a
               href="/user/support"
-              className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+              className="group flex items-center gap-4 p-4 border-2 rounded-xl hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 hover:shadow-md"
             >
-              <AlertCircle className="h-5 w-5 text-primary" />
-              <div>
-                <div className="font-medium text-sm">Support</div>
+              <div className="p-3 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                <Ticket className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <div className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors">Support</div>
                 <div className="text-xs text-muted-foreground">View tickets</div>
               </div>
+              <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
             </a>
           </div>
         </CardContent>
