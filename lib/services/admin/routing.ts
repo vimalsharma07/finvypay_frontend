@@ -222,7 +222,7 @@ export async function updateUserRoutingStatus(
 ): Promise<ApiResponse<{ success: boolean; message: string }>> {
   try {
     const data = await http.put(`${getBaseUrl(userId)}/${routingId}/status`, {
-      body: { status },
+      status,
     }) as { success: boolean; message: string };
     return {
       status: 200,
@@ -250,7 +250,7 @@ export async function updateUserRoutingCascade(
 ): Promise<ApiResponse<{ success: boolean; message: string }>> {
   try {
     const data = await http.put(`${getBaseUrl(userId)}/${routingId}/cascade`, {
-      body: { is_cascade: isCascade },
+      is_cascade: isCascade,
     }) as { success: boolean; message: string };
     return {
       status: 200,

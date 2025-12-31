@@ -210,7 +210,7 @@ export default function CascadingPage() {
                 handleApiResponse(response, {
                   onSuccess: () => {
                     toast.success('Cascading status updated');
-                    fetchCascadings(page, limit, sortBy, sortOrder);
+                    fetchCascadings(page, limit, sortBy, sortOrder, selectedProfileId);
                   },
                   onError: (errorMessage) => {
                     toast.error(errorMessage || 'Failed to update status');

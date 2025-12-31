@@ -89,7 +89,16 @@ export default function RoutingPage() {
             Array.isArray(data.data) ? data.data : (data.data?.data ?? []);
           const metaData = data.meta ?? (data.data as any)?.meta ?? null;
 
-          setRoutes(list);
+          const normalized = list.map((item: any) => ({
+            ...item,
+            // Normalize naming from backend variations
+            is_cascade: item.is_cascade ?? item.isCascade ?? false,
+            routing_for: item.routing_for ?? item.routingFor ?? item.routing_for,
+            split_enable: item.split_enable ?? item.splitEnable ?? item.split_enable,
+            view_route: item.view_route ?? item.viewRoute ?? item.view_route,
+          }));
+
+          setRoutes(normalized as RouteRule[]);
           setMeta(metaData);
         },
         onError: (errorMessage) => {
@@ -207,7 +216,7 @@ export default function RoutingPage() {
                 handleApiResponse(response, {
                   onSuccess: () => {
                     toast.success('Routing status updated');
-                    fetchRoutings(page, limit, sortBy, sortOrder);
+                    fetchRoutings(page, limit, sortBy, sortOrder, selectedProfileId);
                   },
                   onError: (errorMessage) => {
                     toast.error(errorMessage || 'Failed to update status');
@@ -223,7 +232,6 @@ export default function RoutingPage() {
         return (
           <Switch
             checked={item.is_cascade || false}
-            disabled={item.routing_for !== 'CARD'}
             onCheckedChange={async (checked) => {
               try {
                 const response = await updateUserRoutingCascade(
@@ -234,7 +242,7 @@ export default function RoutingPage() {
                 handleApiResponse(response, {
                   onSuccess: () => {
                     toast.success('Cascade status updated');
-                    fetchRoutings(page, limit, sortBy, sortOrder);
+                    fetchRoutings(page, limit, sortBy, sortOrder, selectedProfileId);
                   },
                   onError: (errorMessage) => {
                     toast.error(errorMessage || 'Failed to update cascade');
