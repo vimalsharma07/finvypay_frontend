@@ -2,6 +2,7 @@ import { Section, Note, CodeBlock } from './components/api-endpoint';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 import { 
   ArrowRight, 
   Shield, 
@@ -25,6 +26,20 @@ export default function DocsOverviewPage() {
         <p className="text-xl text-muted-foreground">
           Comprehensive API documentation for integrating payment processing into your applications.
         </p>
+      </div>
+
+      {/* Hero Image */}
+      <div className="mb-12 flex justify-center">
+        <div className="w-full max-w-3xl">
+          <Image
+            src="/media/svg/docs-overview.svg"
+            alt="API Documentation Overview"
+            width={809}
+            height={682}
+            className="w-full h-auto"
+            priority
+          />
+        </div>
       </div>
 
       <Section title="Overview">
