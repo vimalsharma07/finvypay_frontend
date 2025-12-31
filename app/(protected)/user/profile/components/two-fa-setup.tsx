@@ -11,6 +11,7 @@ import { enableTwoFa, toggleTwoFa } from '@/lib/services/user/two-fa';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
+import { TwoFactorAuthenticationSvg } from '@/components/svg';
 
 export function TwoFaSetup() {
   const router = useRouter();
@@ -254,7 +255,10 @@ export function TwoFaSetup() {
         )}
 
         {!loading && !qrCodeUrl && !error && (
-          <div className="flex flex-col items-center justify-center py-12 space-y-4">
+          <div className="flex flex-col items-center justify-center py-12 space-y-6">
+            <div className="w-full max-w-md mx-auto">
+              <TwoFactorAuthenticationSvg className="w-full h-auto" />
+            </div>
             <div className="text-center space-y-4 max-w-md">
               <p className="text-sm text-muted-foreground">
                 Click the button below to generate a QR code for setting up Two-Factor Authentication.
