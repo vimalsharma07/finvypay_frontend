@@ -12,6 +12,7 @@ import {
   FileText,
   Receipt,
   Settings,
+  BookOpen,
 } from 'lucide-react';
 import { type MenuConfig } from '../types';
 import { filterMenuByPermissions } from '@/lib/utils/permission-menu-matcher';
@@ -123,6 +124,12 @@ const BASE_USER_MENU: MenuConfig = [
     children: [
       { title: ' Global rate', path: '/user/rates', submodule: 'Rates' },     
     ],
+  },
+  {
+    title: 'Docs',
+    icon: BookOpen,
+    path: '/docs',
+    requirePermission: false,
   },
 ];
 
