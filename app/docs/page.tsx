@@ -15,12 +15,17 @@ import {
   RefreshCw,
   Link as LinkIcon,
   Coins,
-  Search
+  Search,
+  ShieldCheck,
+  Gauge,
+  Earth,
+  Key
 } from 'lucide-react';
 
 export default function DocsOverviewPage() {
   return (
     <div className="w-full">
+      {/* Page Title - Full Width */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-4">Payment APIs Documentation</h1>
         <p className="text-xl text-muted-foreground">
@@ -28,57 +33,76 @@ export default function DocsOverviewPage() {
         </p>
       </div>
 
-      {/* Hero Image */}
-      <div className="mb-12 flex justify-center">
-        <div className="w-full max-w-3xl">
+      {/* Overview Section - Full Width */}
+      <div className="mb-12">
+        <h2 className="text-2xl font-bold mb-4">Overview</h2>
+        <p className="text-muted-foreground">
+          The Pay4Tech Payment API provides a unified interface for processing payments across multiple payment methods,
+          including card payments, alternative payment methods (APM), crypto payments, payouts, and payment links.
+        </p>
+      </div>
+
+      {/* Image and Feature Cards - Two Column Layout */}
+      <div className="mb-12 grid md:grid-cols-2 gap-8 items-center">
+        {/* Left: Image */}
+        <div className="flex justify-center md:justify-start">
           <Image
             src="/media/svg/docs-overview.svg"
             alt="API Documentation Overview"
             width={767}
             height={566}
-            className="w-full h-auto"
+            className="w-full h-auto max-w-md"
             priority
           />
         </div>
-      </div>
-
-      <Section title="Overview">
-        <p className="text-muted-foreground mb-4">
-          The Pay4Tech Payment API provides a unified interface for processing payments across multiple payment methods,
-          including card payments, alternative payment methods (APM), crypto payments, payouts, refunds, and payment links.
-        </p>
-
-        <div className="grid md:grid-cols-2 gap-4 my-6">
-          <div className="p-4 border rounded-lg">
-            <Shield className="h-6 w-6 text-primary mb-2" />
-            <h3 className="font-semibold mb-2">Secure & Compliant</h3>
-            <p className="text-sm text-muted-foreground">
-              Bank-level encryption and PCI-DSS compliant infrastructure to protect your transactions.
-            </p>
+        {/* Right: Feature Cards */}
+        <div className="grid gap-4">
+          <div className="p-4 border rounded-lg flex items-start gap-4">
+            <div className="p-3 rounded-lg bg-green-500/10 flex-shrink-0">
+              <ShieldCheck className="h-10 w-10 text-green-600 dark:text-green-400" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold mb-2">Secure & Compliant</h3>
+              <p className="text-sm text-muted-foreground">
+                Bank-level encryption and PCI-DSS compliant infrastructure to protect your transactions.
+              </p>
+            </div>
           </div>
-          <div className="p-4 border rounded-lg">
-            <Zap className="h-6 w-6 text-primary mb-2" />
-            <h3 className="font-semibold mb-2">Fast Processing</h3>
-            <p className="text-sm text-muted-foreground">
-              Real-time transaction processing with optimized infrastructure for instant responses.
-            </p>
+          <div className="p-4 border rounded-lg flex items-start gap-4">
+            <div className="p-3 rounded-lg bg-blue-500/10 flex-shrink-0">
+              <Gauge className="h-10 w-10 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold mb-2">Fast Processing</h3>
+              <p className="text-sm text-muted-foreground">
+                Real-time transaction processing with optimized infrastructure for instant responses.
+              </p>
+            </div>
           </div>
-          <div className="p-4 border rounded-lg">
-            <Globe className="h-6 w-6 text-primary mb-2" />
-            <h3 className="font-semibold mb-2">Global Support</h3>
-            <p className="text-sm text-muted-foreground">
-              Multi-currency support and international payment methods for global reach.
-            </p>
+          <div className="p-4 border rounded-lg flex items-start gap-4">
+            <div className="p-3 rounded-lg bg-purple-500/10 flex-shrink-0">
+              <Earth className="h-10 w-10 text-purple-600 dark:text-purple-400" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold mb-2">Global Support</h3>
+              <p className="text-sm text-muted-foreground">
+                Multi-currency support and international payment methods for global reach.
+              </p>
+            </div>
           </div>
-          <div className="p-4 border rounded-lg">
-            <Lock className="h-6 w-6 text-primary mb-2" />
-            <h3 className="font-semibold mb-2">API Key Authentication</h3>
-            <p className="text-sm text-muted-foreground">
-              Secure API key-based authentication for all payment endpoints.
-            </p>
+          <div className="p-4 border rounded-lg flex items-start gap-4">
+            <div className="p-3 rounded-lg bg-orange-500/10 flex-shrink-0">
+              <Key className="h-10 w-10 text-orange-600 dark:text-orange-400" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold mb-2">API Key Authentication</h3>
+              <p className="text-sm text-muted-foreground">
+                Secure API key-based authentication for all payment endpoints.
+              </p>
+            </div>
           </div>
         </div>
-      </Section>
+      </div>
 
       <Section title="Base URL & Environments">
         <p className="text-muted-foreground mb-4">

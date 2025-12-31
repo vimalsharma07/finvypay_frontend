@@ -108,7 +108,7 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
           {/* Main Content - Centered with constrained width */}
           <main className="flex-1 min-w-0 flex justify-center">
             <div className="w-full prose prose-slate dark:prose-invert">
-              <div className="max-w-4xl mx-auto">
+              <div className={pathname === '/docs' ? 'max-w-6xl mx-auto' : 'max-w-4xl mx-auto'}>
                 {children}
               </div>
             </div>
