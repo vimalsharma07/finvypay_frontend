@@ -186,12 +186,14 @@ export function Header() {
                 }
               />
               {merchantLabel && (
-                <Badge
-                  variant="outline"
-                  className="px-3 py-1 text-xs font-medium whitespace-nowrap hidden sm:inline-flex bg-amber-100 text-amber-800 border border-amber-200"
-                >
-                  {merchantLabel}
-                </Badge>
+                <Link href="/user/profile-selection" className="hidden sm:inline-flex">
+                  <Badge
+                    variant="outline"
+                    className="px-3 py-1 text-xs font-medium whitespace-nowrap bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 transition-colors"
+                  >
+                    {merchantLabel}
+                  </Badge>
+                </Link>
               )}
               <UserDropdownMenu
                 trigger={
