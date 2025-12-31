@@ -39,14 +39,10 @@ export interface RouteRuleListMeta {
   hasNextPage: boolean;
 }
 
-export interface RouteRuleListData {
-  data: RouteRule[];
-  meta: RouteRuleListMeta;
-}
-
 export interface RouteRuleListResponse {
   success: boolean;
-  data: RouteRuleListData;
+  data: RouteRule[] | { data: RouteRule[]; meta?: RouteRuleListMeta };
+  meta?: RouteRuleListMeta;
   message?: string;
 }
 
@@ -64,19 +60,23 @@ export interface UpdateRouteRulePayload extends CreateRouteRulePayload {
   id: string;
 }
 
-const getBaseUrl = (userId: string) => {
-  return `/api/admin/user-management/${userId}/routing`;
+const getBaseUrl = (userId: string, profileId?: string | number) => {
+  if (profileId !== undefined && profileId !== null) {
+    return `/user-management/${userId}/routing/profile/${profileId}`;
+  }
+  return `/user-management/${userId}/routing`;
 };
 
 /**
- * Get all routing rules for a user
+ * Get all routing rules for a user (optionally scoped to a profile/industry)
  */
 export async function getUserRoutings(
   userId: string,
-  params?: Record<string, any>
+  params?: Record<string, any>,
+  profileId?: string | number
 ): Promise<ApiResponse<RouteRuleListResponse>> {
   try {
-    const data = await http.get(getBaseUrl(userId), {
+    const data = await http.get(getBaseUrl(userId, profileId), {
       query: params as Record<string, string | number | boolean | null | undefined>,
     }) as RouteRuleListResponse;
     return {

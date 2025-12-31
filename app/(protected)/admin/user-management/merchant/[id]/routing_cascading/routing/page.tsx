@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Container } from '@/components/common/container';
 import {
@@ -18,6 +18,9 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
+import { SearchSelect } from '@/components/ui/molecules/SearchSelect';
+import { ContentLoader } from '@/components/common/content-loader';
+import { ConfirmComp } from '../../../../../../components/confirm-comp';
 import {
   getUserRoutings,
   createUserRouting,
@@ -27,22 +30,34 @@ import {
   updateUserRoutingStatus,
   updateUserRoutingCascade,
   RouteRule,
+  RouteRuleListMeta,
   RouteRuleListResponse,
 } from '@/lib/services/admin/routing';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import {
+  getMerchantProfiles,
+  type MerchantProfile,
+} from '@/lib/services/admin/merchant-acquirer-account';
+import type { Option } from '@/lib/types/common-types';
 
 export default function RoutingPage() {
   const params = useParams();
   const userId = params.id as string;
   const [loading, setLoading] = useState(true);
+  const [profilesLoading, setProfilesLoading] = useState(true);
   const [routes, setRoutes] = useState<RouteRule[]>([]);
-  const [meta, setMeta] = useState<RouteRuleListResponse['data']['meta'] | null>(
-    null,
-  );
+  const [meta, setMeta] = useState<RouteRuleListMeta | null>(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [sortBy, setSortBy] = useState<string>('priority');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('ASC');
+  const [profiles, setProfiles] = useState<MerchantProfile[]>([]);
+  const [profileOptions, setProfileOptions] = useState<Option[]>([]);
+  const [selectedProfileId, setSelectedProfileId] = useState<string>('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [routeToDelete, setRouteToDelete] = useState<RouteRule | null>(null);
+
+  const isTableLoading = loading || profilesLoading;
 
   // Fetch routing rules
   const fetchRoutings = async (
@@ -50,6 +65,7 @@ export default function RoutingPage() {
     pageLimit: number,
     sortField: string,
     sortDir: 'ASC' | 'DESC',
+    profileId?: string,
   ) => {
     setLoading(true);
     try {
@@ -60,15 +76,21 @@ export default function RoutingPage() {
         sortOrder: sortDir,
       };
 
-      const response = await getUserRoutings(userId, params);
+      const response = await getUserRoutings(userId, params, profileId);
 
       handleApiResponse<RouteRuleListResponse>(response, {
         onSuccess: (data) => {
-          if (data.success) {
-            // New format: { success: true, data: [...], meta: {...} }
-            setRoutes(data.data);
-            setMeta(data.meta);
-          }
+          if (!data?.success) return;
+
+          // Support both formats:
+          // 1) { success, data: RouteRule[], meta }
+          // 2) { success, data: { data: RouteRule[], meta } }
+          const list =
+            Array.isArray(data.data) ? data.data : (data.data?.data ?? []);
+          const metaData = data.meta ?? (data.data as any)?.meta ?? null;
+
+          setRoutes(list);
+          setMeta(metaData);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to load routing rules');
@@ -83,13 +105,53 @@ export default function RoutingPage() {
   };
 
   useEffect(() => {
-    if (userId) {
-      fetchRoutings(page, limit, sortBy, sortOrder);
+    if (userId && selectedProfileId) {
+      fetchRoutings(page, limit, sortBy, sortOrder, selectedProfileId);
     }
-  }, [userId, page, limit, sortBy, sortOrder]);
+  }, [userId, page, limit, sortBy, sortOrder, selectedProfileId]);
+
+  // Fetch merchant profiles to drive routing context
+  useEffect(() => {
+    const loadProfiles = async () => {
+      setProfilesLoading(true);
+      try {
+        const response = await getMerchantProfiles(userId);
+        handleApiResponse(response, {
+          onSuccess: (payload) => {
+            if (!payload?.success || !payload.data) return;
+            const profileList = Array.isArray(payload.data) ? payload.data : [];
+            setProfiles(profileList);
+
+            const options = profileList.map((profile) => ({
+              value: profile.industryId?.toString() || '',
+              label: profile.industry?.name || profile.merchantProfileName || `Profile ${profile.id}`,
+            }));
+            setProfileOptions(options);
+
+            // Auto-select primary profile (industry id) when available
+            const primaryProfile = profileList.find((p) => p.isPrimary);
+            if (primaryProfile && !selectedProfileId) {
+              setSelectedProfileId(primaryProfile.industryId?.toString() || '');
+            } else if (!selectedProfileId && profileList.length > 0) {
+              setSelectedProfileId(profileList[0].industryId?.toString() || '');
+            }
+          },
+          onError: (errorMessage) => {
+            toast.error(errorMessage || 'Failed to load merchant profiles');
+          },
+        });
+      } catch (error) {
+        toast.error('An unexpected error occurred while loading profiles');
+      } finally {
+        setProfilesLoading(false);
+      }
+    };
+
+    loadProfiles();
+  }, [userId]);
 
   // Define table headers
-  const headers: TableHeader<RouteRule>[] = [
+  const headers: TableHeader<RouteRule>[] = useMemo(() => [
     { key: 'name', label: 'Name', sortable: true },
     { key: 'priority', label: 'Priority', sortable: true },
     { key: 'view_route', label: 'View Route', sortable: false },
@@ -98,7 +160,7 @@ export default function RoutingPage() {
     { key: 'status', label: 'Status', sortable: false },
     { key: 'is_cascade', label: 'Cascade', sortable: false },
     { key: 'split_enable', label: 'Split Enabled', sortable: false },
-  ];
+  ], []);
 
   // Render cell function
   const renderCell = (item: RouteRule, key: keyof RouteRule | string) => {
@@ -201,33 +263,20 @@ export default function RoutingPage() {
   // Define actions
   const actions: TableAction<RouteRule>[] = [
     {
+      label: 'View',
+      route: (row: RouteRule) =>
+        `/admin/user-management/merchant/${userId}/routing_cascading/routing/${row.id}`,
+    },
+    {
       label: 'Edit',
       route: (row: RouteRule) =>
         `/admin/user-management/merchant/${userId}/routing_cascading/routing/${row.id}/edit`,
     },
     {
       label: 'Delete',
-      onClick: async (row: RouteRule) => {
-        if (
-          confirm(
-            `Are you sure you want to delete routing rule "${row.name}"?`,
-          )
-        ) {
-          try {
-            const response = await deleteUserRouting(userId, row.id);
-            handleApiResponse(response, {
-              onSuccess: () => {
-                toast.success('Routing rule deleted successfully');
-                fetchRoutings(page, limit, sortBy, sortOrder);
-              },
-              onError: (errorMessage) => {
-                toast.error(errorMessage || 'Failed to delete routing rule');
-              },
-            });
-          } catch (error) {
-            toast.error('An unexpected error occurred');
-          }
-        }
+      onClick: (row: RouteRule) => {
+        setRouteToDelete(row);
+        setDeleteDialogOpen(true);
       },
       variant: 'destructive',
       separator: true,
@@ -275,6 +324,34 @@ export default function RoutingPage() {
         </Toolbar>
       </Container>
       <Container>
+        <div className="flex flex-col gap-3 mb-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-semibold text-foreground">Merchant Profile (Industry)</p>
+              <p className="text-xs text-muted-foreground">
+                Select an industry to load routing rules scoped to that profile.
+              </p>
+            </div>
+            <div className="w-full md:w-80">
+              {profilesLoading ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <ContentLoader />
+                  <span>Loading profiles...</span>
+                </div>
+              ) : (
+                <SearchSelect
+                  options={profileOptions}
+                  value={selectedProfileId}
+                  onChange={(val) => {
+                    setSelectedProfileId(val);
+                    setPage(1);
+                  }}
+                  placeholder="Select profile (industry)"
+                />
+              )}
+            </div>
+          </div>
+        </div>
         <TableComp
           data={routes}
           headers={headers}
@@ -296,9 +373,43 @@ export default function RoutingPage() {
             sortOrder: sortOrder,
             onSortChange: handleSortChange,
           }}
-          loading={loading}
+          loading={isTableLoading}
         />
       </Container>
+
+      <ConfirmComp
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Routing Rule"
+        message={
+          routeToDelete
+            ? `Are you sure you want to delete routing rule "${routeToDelete.name}"? This action cannot be undone.`
+            : 'Are you sure you want to delete this routing rule?'
+        }
+        confirmLabel="Yes, Delete"
+        cancelLabel="Cancel"
+        variant="destructive"
+        onConfirm={async () => {
+          if (!routeToDelete) return;
+          try {
+            const response = await deleteUserRouting(userId, routeToDelete.id);
+            handleApiResponse(response, {
+              onSuccess: () => {
+                toast.success('Routing rule deleted successfully');
+                fetchRoutings(page, limit, sortBy, sortOrder, selectedProfileId);
+              },
+              onError: (errorMessage) => {
+                toast.error(errorMessage || 'Failed to delete routing rule');
+              },
+            });
+          } catch (error) {
+            toast.error('An unexpected error occurred');
+          } finally {
+            setRouteToDelete(null);
+          }
+        }}
+        onCancel={() => setRouteToDelete(null)}
+      />
     </Fragment>
   );
 }
