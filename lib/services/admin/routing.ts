@@ -54,6 +54,9 @@ export interface CreateRouteRulePayload {
   split_enable?: boolean;
   split_type?: string;
   split_config?: any;
+  // Newer payload shape (backend accepts these keys as well)
+  merchantProfileId?: number;
+  merchantAcquirerAccountId?: number;
 }
 
 export interface UpdateRouteRulePayload extends CreateRouteRulePayload {
