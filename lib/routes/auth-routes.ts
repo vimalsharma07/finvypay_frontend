@@ -22,5 +22,6 @@ export const authRoutes = {
   sendOtp: '/auth/email',
   verifyOtp: '/auth/email/verify',
   permissions: '/auth/permissions',
+  verify2FA: '/auth/2fa/verify',
 } as const;
 

@@ -9,6 +9,7 @@ import { Container } from '@/components/common/container';
 import { useAuth } from '@/hooks/use-auth';
 import { Shield, KeyRound, Mail, User, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { TwoFaSetup } from './components/two-fa-setup';
+import { TwoFaManage } from './components/two-fa-manage';
 
 const labelClass = 'text-xs uppercase tracking-wide text-muted-foreground';
 const valueClass = 'text-sm font-semibold text-foreground';
@@ -16,6 +17,7 @@ const valueClass = 'text-sm font-semibold text-foreground';
 export default function UserProfilePage() {
   const { user } = useAuth();
   const [showTwoFaSetup, setShowTwoFaSetup] = useState(false);
+  const [isTwoFaEnabled, setIsTwoFaEnabled] = useState(false);
 
   // Check if 2FA is disabled - show setup component automatically
   useEffect(() => {
@@ -24,7 +26,9 @@ export default function UserProfilePage() {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
           const userData = JSON.parse(storedUser);
-          setShowTwoFaSetup(userData && userData.isTwoFaEnabled === false);
+          const twoFaEnabled = userData && userData.isTwoFaEnabled === true;
+          setShowTwoFaSetup(!twoFaEnabled);
+          setIsTwoFaEnabled(twoFaEnabled);
         }
       } catch (error) {
         console.error('Failed to read user data from localStorage:', error);
@@ -51,11 +55,22 @@ export default function UserProfilePage() {
     return <Badge variant="destructive">{status}</Badge>;
   };
 
+  const handleTwoFaStatusChange = (enabled: boolean) => {
+    setIsTwoFaEnabled(enabled);
+    setShowTwoFaSetup(!enabled);
+  };
+
   return (
     <Container>
-      {showTwoFaSetup && (
+      {!isTwoFaEnabled && showTwoFaSetup && (
         <div className="mb-5 lg:mb-7.5">
           <TwoFaSetup />
+        </div>
+      )}
+
+      {isTwoFaEnabled && (
+        <div className="mb-5 lg:mb-7.5">
+          <TwoFaManage isEnabled={true} onStatusChange={handleTwoFaStatusChange} />
         </div>
       )}
       
@@ -138,6 +153,14 @@ export default function UserProfilePage() {
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                {isTwoFaEnabled ? (
+                  <CheckCircle2 className="h-4 w-4 text-success" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 text-warning" />
+                )}
+                <span>Two-Factor Authentication: {isTwoFaEnabled ? 'Enabled' : 'Disabled'}</span>
+              </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <CheckCircle2 className="h-4 w-4 text-success" />
                 <span>IP Whitelist: {(user as any)?.ipEnabled ? 'Enabled' : 'Disabled'}</span>
