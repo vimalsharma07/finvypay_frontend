@@ -24,8 +24,8 @@ export default function RoutingCascadingLayout({
   const userId = params.id as string;
 
   const basePath = `/admin/user-management/merchant/${userId}/routing_cascading`;
-  const isRouting = pathname?.includes('/routing');
-  const isCascading = pathname?.includes('/cascading');
+  const isCascading = pathname?.includes('/routing_cascading/cascading');
+  const isRouting = pathname?.includes('/routing_cascading/routing') && !isCascading;
 
   return (
     <>

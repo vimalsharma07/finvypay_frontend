@@ -50,28 +50,34 @@ export interface CascadingRuleListResponse {
   message?: string;
 }
 
+export interface CascadingConfigEntry {
+  merchantAcquirerAccountId: string;
+  merchantAcquirerAccountName: string;
+}
+
 export interface CreateCascadingRulePayload {
   name: string;
-  connector_id: string;
+  merchantProfileId: number;
+  merchantAcquirerAccountId: number;
   type: string;
-  duration: string;
-  config: Array<{
-    connector_id: string;
-    connector_name: string;
-    number?: number;
-    amount?: number;
-    minutes?: string;
-  }>;
-  cascading_for: number;
+  cascadingFor?: number;
+  status?: boolean;
+  config: CascadingConfigEntry[];
+  // Legacy/compat fields
   profile_id?: number;
+  connector_id?: string;
+  cascading_for?: number;
 }
 
 export interface UpdateCascadingRulePayload extends CreateCascadingRulePayload {
   id: string;
 }
 
-const getBaseUrl = (userId: string) => {
-  return `/api/admin/user-management/${userId}/cascading`;
+const getBaseUrl = (userId: string, profileId?: string | number) => {
+  if (profileId !== undefined && profileId !== null) {
+    return `/user-management/${userId}/cascading/profile/${profileId}`;
+  }
+  return `/user-management/${userId}/cascading`;
 };
 
 /**
@@ -79,10 +85,11 @@ const getBaseUrl = (userId: string) => {
  */
 export async function getUserCascadings(
   userId: string,
-  params?: Record<string, any>
+  params?: Record<string, any>,
+  profileId?: string | number
 ): Promise<ApiResponse<CascadingRuleListResponse>> {
   try {
-    const data = await http.get(getBaseUrl(userId), {
+    const data = await http.get(getBaseUrl(userId, profileId), {
       query: params as Record<string, string | number | boolean | null | undefined>,
     }) as CascadingRuleListResponse;
     return {
@@ -138,10 +145,7 @@ export async function createUserCascading(
 ): Promise<ApiResponse<{ success: boolean; message: string }>> {
   try {
     const data = await http.post(getBaseUrl(userId), {
-      body: {
-        ...payload,
-        user_id: userId,
-      },
+      ...payload,
     }) as { success: boolean; message: string };
     return {
       status: 201,
@@ -169,10 +173,7 @@ export async function updateUserCascading(
 ): Promise<ApiResponse<{ success: boolean; message: string }>> {
   try {
     const data = await http.put(`${getBaseUrl(userId)}/${cascadingId}`, {
-      body: {
-        ...payload,
-        user_id: userId,
-      },
+      ...payload,
     }) as { success: boolean; message: string };
     return {
       status: 200,

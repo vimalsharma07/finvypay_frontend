@@ -30,7 +30,10 @@ import {
   fetchAdminProviderConnectorsOptions,
   fetchListOfCurrencies,
 } from '@/lib/fetch/fetch-options';
-import { getMerchantProfiles } from '@/lib/services/admin/merchant-acquirer-account';
+import {
+  getMerchantProfiles,
+  type MerchantProfile as AdminMerchantProfile,
+} from '@/lib/services/admin/merchant-acquirer-account';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import type { Option } from '@/lib/types/common-types';
 
@@ -195,7 +198,9 @@ export function CreateMerchantAcquirerAccountForm({
   const [providerOptions, setProviderOptions] = useState<Option[]>([]);
   const [currencyOptions, setCurrencyOptions] = useState<Option[]>([]);
   const [merchantProfileOptions, setMerchantProfileOptions] = useState<Option[]>([]);
+  const [merchantProfiles, setMerchantProfiles] = useState<AdminMerchantProfile[]>([]);
   const [selectedMerchantProfile, setSelectedMerchantProfile] = useState<string>('');
+  const [selectedIndustryId, setSelectedIndustryId] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   type UserConnectorRateSchemaType = any;
@@ -245,19 +250,30 @@ export function CreateMerchantAcquirerAccountForm({
           onSuccess: (data) => {
             console.log('Merchant profiles onSuccess data:', data);
             if (data && data.success && data.data) {
-              const profiles = (Array.isArray(data.data) ? data.data : []).map((profile: any) => ({
+              const profiles = (Array.isArray(data.data) ? data.data : []) as AdminMerchantProfile[];
+              setMerchantProfiles(profiles);
+
+              const profileOptions = profiles.map((profile) => ({
                 value: profile.id.toString(),
-                label: profile.merchantProfileName || `Profile ${profile.id}`,
+                label:
+                  profile.industry?.name ||
+                  profile.merchantProfileName ||
+                  `Profile ${profile.id}`,
               }));
-              console.log('Mapped merchant profiles:', profiles);
-              setMerchantProfileOptions(profiles);
-              
+              console.log('Mapped merchant profiles:', profileOptions);
+              setMerchantProfileOptions(profileOptions);
+
               // Auto-select primary profile if available
-              const primaryProfile = data.data.find((p: any) => p.isPrimary);
+              const primaryProfile = profiles.find((p) => p.isPrimary);
               if (primaryProfile && !userProfileId) {
                 setSelectedMerchantProfile(primaryProfile.id.toString());
+                setSelectedIndustryId(primaryProfile.industryId?.toString() || '');
               } else if (userProfileId) {
+                const matchedProfile = profiles.find(
+                  (profile) => profile.id.toString() === userProfileId.toString()
+                );
                 setSelectedMerchantProfile(userProfileId.toString());
+                setSelectedIndustryId(matchedProfile?.industryId?.toString() || '');
               }
             } else {
               console.warn('Merchant profiles data structure unexpected:', data);
@@ -413,6 +429,7 @@ export function CreateMerchantAcquirerAccountForm({
         ratesType: selectedTab === 'normal' ? CONNECTOR_RATES_TYPE.NORMAL : CONNECTOR_RATES_TYPE.TIERED,
         ...(selectedPaymentMethod === 'CRYPTO' && cryptoFlow !== undefined && { cryptoFlow }),
         ...(selectedMerchantProfile && { merchantProfileId: Number(selectedMerchantProfile) }),
+        ...(selectedIndustryId && { industryId: Number(selectedIndustryId) }),
       };
 
       await onSubmit(payload);
@@ -521,6 +538,10 @@ export function CreateMerchantAcquirerAccountForm({
                 value={selectedMerchantProfile}
                 onChange={(newValue) => {
                   setSelectedMerchantProfile(newValue);
+                  const matchedProfile = merchantProfiles.find(
+                    (profile) => profile.id.toString() === newValue
+                  );
+                  setSelectedIndustryId(matchedProfile?.industryId?.toString() || '');
                   setAdditionalError('');
                 }}
                 valueToShow="label"
