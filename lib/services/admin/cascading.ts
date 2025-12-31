@@ -50,20 +50,23 @@ export interface CascadingRuleListResponse {
   message?: string;
 }
 
+export interface CascadingConfigEntry {
+  merchantAcquirerAccountId: string;
+  merchantAcquirerAccountName: string;
+}
+
 export interface CreateCascadingRulePayload {
   name: string;
-  connector_id: string;
+  merchantProfileId: number;
+  merchantAcquirerAccountId: number;
   type: string;
-  duration: string;
-  config: Array<{
-    connector_id: string;
-    connector_name: string;
-    number?: number;
-    amount?: number;
-    minutes?: string;
-  }>;
-  cascading_for: number;
+  cascadingFor?: number;
+  status?: boolean;
+  config: CascadingConfigEntry[];
+  // Legacy/compat fields
   profile_id?: number;
+  connector_id?: string;
+  cascading_for?: number;
 }
 
 export interface UpdateCascadingRulePayload extends CreateCascadingRulePayload {
@@ -142,10 +145,7 @@ export async function createUserCascading(
 ): Promise<ApiResponse<{ success: boolean; message: string }>> {
   try {
     const data = await http.post(getBaseUrl(userId), {
-      body: {
-        ...payload,
-        user_id: userId,
-      },
+      ...payload,
     }) as { success: boolean; message: string };
     return {
       status: 201,
@@ -173,10 +173,7 @@ export async function updateUserCascading(
 ): Promise<ApiResponse<{ success: boolean; message: string }>> {
   try {
     const data = await http.put(`${getBaseUrl(userId)}/${cascadingId}`, {
-      body: {
-        ...payload,
-        user_id: userId,
-      },
+      ...payload,
     }) as { success: boolean; message: string };
     return {
       status: 200,
