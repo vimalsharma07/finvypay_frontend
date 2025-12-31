@@ -26,11 +26,15 @@ const BASE_USER_MENU: MenuConfig = [
     requirePermission: false, // Dashboard always visible
   },
   {
-    title: 'Connectors',
+    title: 'Acquirer Accounts',
     icon: Cpu,
-    path: '/user/connectors',
-    permissionModule: 'Connector Management',
-    requirePermission: true,
+    permissionModule: 'Acquirer Accounts',
+    requirePermission: false,
+    children: [
+      { title: ' Aquirer Accounts', path: '/user/acquirer-accounts', submodule: 'aquirer accounts' },
+      { title: 'Aquire Requests', path: '/user/acquirer-requests', submodule: 'Aquire Requests' },
+     
+    ],
   },
   {
     title: 'Wallet',
@@ -69,11 +73,14 @@ const BASE_USER_MENU: MenuConfig = [
     ],
   },
   {
-    title: 'Routing',
+    title: 'Routing & Cascading',
     icon: Route,
-    path: '/user/routing',
     permissionModule: 'Routing Management',
-    requirePermission: true,
+    requirePermission: false,
+    children: [
+      { title: 'Routing', path: '/user/routing', submodule: 'Routing' },
+      { title: 'Cascading', path: '/user/cascading', submodule: 'Cascading' },
+    ],
   },
   {
     title: 'Payment Links',

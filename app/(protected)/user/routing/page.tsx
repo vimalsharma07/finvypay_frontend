@@ -1,7 +1,7 @@
 'use client';
 
-import { Fragment, useEffect, useMemo, useState } from 'react';
-import { useParams } from 'next/navigation';
+import React, { useEffect, useMemo, useState, Fragment } from 'react';
+import { useRouter } from 'next/navigation';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -9,57 +9,57 @@ import {
   ToolbarActions,
 } from '@/layouts/demo1/components/toolbar';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
 import {
   TableComp,
   TableHeader,
-  TableAction,
-} from '../../../../../../components/table-comp';
+} from '../../components/table-comp';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { toast } from 'sonner';
 import { SearchSelect } from '@/components/ui/molecules/SearchSelect';
 import { ContentLoader } from '@/components/common/content-loader';
-import { ConfirmComp } from '../../../../../../components/confirm-comp';
-import {
-  getUserRoutings,
-  createUserRouting,
-  updateUserRouting,
-  deleteUserRouting,
-  updateUserRoutingPriority,
-  updateUserRoutingStatus,
-  updateUserRoutingCascade,
-  RouteRule,
-  RouteRuleListMeta,
-  RouteRuleListResponse,
-} from '@/lib/services/admin/routing';
+import { ConfirmComp } from '../../components/confirm-comp';
+import { toast } from 'sonner';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
-  getMerchantProfiles,
-  type MerchantProfile,
-} from '@/lib/services/admin/merchant-acquirer-account';
+  getUserMerchantRoutings,
+  deleteUserMerchantRouting,
+  UserRouteRule,
+  UserRouteRuleListResponse,
+  UserRouteRuleListMeta,
+} from '@/lib/services/user/routing';
+import {
+  updateUserRoutingStatus,
+  updateUserRoutingCascade,
+} from '@/lib/services/admin/routing';
+import type { TableAction } from '../../components/table-comp';
 import type { Option } from '@/lib/types/common-types';
+import { useAuth } from '@/hooks/use-auth';
 
-export default function RoutingPage() {
-  const params = useParams();
-  const userId = params.id as string;
+export default function UserRoutingPage() {
+  const router = useRouter();
+  const { user } = useAuth();
+  const [profileList, setProfileList] = useState<
+    Array<{ id: number | string; merchantProfileName?: string; industry?: { name?: string }; isPrimary?: boolean }>
+  >([]);
+
   const [loading, setLoading] = useState(true);
-  const [profilesLoading, setProfilesLoading] = useState(true);
-  const [routes, setRoutes] = useState<RouteRule[]>([]);
-  const [meta, setMeta] = useState<RouteRuleListMeta | null>(null);
+  const [routes, setRoutes] = useState<UserRouteRule[]>([]);
+  const [meta, setMeta] = useState<UserRouteRuleListMeta | null>(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [sortBy, setSortBy] = useState<string>('priority');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('ASC');
-  const [profiles, setProfiles] = useState<MerchantProfile[]>([]);
+
   const [profileOptions, setProfileOptions] = useState<Option[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState<string>('');
+  const [profilesLoading, setProfilesLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [routeToDelete, setRouteToDelete] = useState<RouteRule | null>(null);
+  const [routeToDelete, setRouteToDelete] = useState<UserRouteRule | null>(null);
 
   const isTableLoading = loading || profilesLoading;
+  const userId = user?.id?.toString() || '';
 
-  // Fetch routing rules
+  // Fetch routing rules (user-scoped service)
   const fetchRoutings = async (
     pageNum: number,
     pageLimit: number,
@@ -67,6 +67,7 @@ export default function RoutingPage() {
     sortDir: 'ASC' | 'DESC',
     profileId?: string,
   ) => {
+    if (!userId) return;
     setLoading(true);
     try {
       const params: any = {
@@ -74,31 +75,24 @@ export default function RoutingPage() {
         limit: pageLimit,
         sortBy: sortField,
         sortOrder: sortDir,
+        ...(profileId && { profileId }),
       };
 
-      const response = await getUserRoutings(userId, params, profileId);
+      const response = await getUserMerchantRoutings(params);
 
-      handleApiResponse<RouteRuleListResponse>(response, {
+      handleApiResponse<UserRouteRuleListResponse>(response, {
         onSuccess: (data) => {
           if (!data?.success) return;
-
-          // Support both formats:
-          // 1) { success, data: RouteRule[], meta }
-          // 2) { success, data: { data: RouteRule[], meta } }
-          const list =
-            Array.isArray(data.data) ? data.data : (data.data?.data ?? []);
+          const list = Array.isArray(data.data) ? data.data : (data.data?.data ?? []);
           const metaData = data.meta ?? (data.data as any)?.meta ?? null;
-
           const normalized = list.map((item: any) => ({
             ...item,
-            // Normalize naming from backend variations
-            is_cascade: item.is_cascade ?? item.isCascade ?? false,
-            routing_for: item.routing_for ?? item.routingFor ?? item.routing_for,
-            split_enable: item.split_enable ?? item.splitEnable ?? item.split_enable,
-            view_route: item.view_route ?? item.viewRoute ?? item.view_route,
+            isCascade: item.isCascade ?? item.is_cascade ?? false,
+            routingFor: item.routingFor ?? item.routing_for ?? item.routingFor,
+            splitEnable: item.splitEnable ?? item.split_enable ?? item.splitEnable,
+            viewRoute: item.viewRoute ?? item.view_route ?? item.viewRoute,
           }));
-
-          setRoutes(normalized as RouteRule[]);
+          setRoutes(normalized as UserRouteRule[]);
           setMeta(metaData);
         },
         onError: (errorMessage) => {
@@ -106,75 +100,70 @@ export default function RoutingPage() {
         },
       });
     } catch (error) {
-      console.error('Fetch routing error:', error);
       toast.error('An unexpected error occurred');
     } finally {
       setLoading(false);
     }
   };
 
+  // Load routes when profile or pagination changes
   useEffect(() => {
     if (userId && selectedProfileId) {
       fetchRoutings(page, limit, sortBy, sortOrder, selectedProfileId);
     }
   }, [userId, page, limit, sortBy, sortOrder, selectedProfileId]);
 
-  // Fetch merchant profiles to drive routing context
+  // Prepare merchant profiles from user data/local storage
   useEffect(() => {
-    const loadProfiles = async () => {
-      setProfilesLoading(true);
+    if (user?.merchantProfiles && Array.isArray(user.merchantProfiles)) {
+      setProfileList(user.merchantProfiles as any[]);
+      return;
+    }
+    if (typeof window !== 'undefined') {
       try {
-        const response = await getMerchantProfiles(userId);
-        handleApiResponse(response, {
-          onSuccess: (payload) => {
-            if (!payload?.success || !payload.data) return;
-            const profileList = Array.isArray(payload.data) ? payload.data : [];
-            setProfiles(profileList);
-
-            const options = profileList.map((profile: MerchantProfile) => ({
-              value: profile.id?.toString() || '',
-              label: profile.industry?.name || profile.merchantProfileName || `Profile ${profile.id}`,
-            }));
-            setProfileOptions(options);
-
-            // Auto-select primary profile (industry id) when available
-            const primaryProfile = profileList.find(
-              (p: MerchantProfile) => p.isPrimary
-            );
-            if (primaryProfile && !selectedProfileId) {
-              setSelectedProfileId(primaryProfile.id?.toString() || '');
-            } else if (!selectedProfileId && profileList.length > 0) {
-              setSelectedProfileId(profileList[0].id?.toString() || '');
-            }
-          },
-          onError: (errorMessage) => {
-            toast.error(errorMessage || 'Failed to load merchant profiles');
-          },
-        });
-      } catch (error) {
-        toast.error('An unexpected error occurred while loading profiles');
-      } finally {
-        setProfilesLoading(false);
+        const raw = localStorage.getItem('user');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed?.merchantProfiles)) {
+            setProfileList(parsed.merchantProfiles);
+          }
+        }
+      } catch {
+        // ignore parse errors
       }
-    };
+    }
+  }, [user]);
 
-    loadProfiles();
-  }, [userId]);
+  useEffect(() => {
+    setProfilesLoading(true);
+    const options = profileList.map((p) => ({
+      value: p.id.toString(),
+      label: p.merchantProfileName || p.industry?.name || `Profile ${p.id}`,
+    }));
+    setProfileOptions(options);
 
-  // Define table headers
-  const headers: TableHeader<RouteRule>[] = useMemo(() => [
+    if (!selectedProfileId && options.length > 0) {
+      const primary = profileList.find((p) => p.isPrimary);
+      const nextProfileId = (primary?.id ?? profileList[0]?.id)?.toString() || '';
+      if (nextProfileId) {
+        setSelectedProfileId(nextProfileId);
+      }
+    }
+    setProfilesLoading(false);
+  }, [profileList, selectedProfileId]);
+
+  const headers: TableHeader<UserRouteRule>[] = useMemo(() => [
     { key: 'name', label: 'Name', sortable: true },
     { key: 'priority', label: 'Priority', sortable: true },
-    { key: 'view_route', label: 'View Route', sortable: false },
+    { key: 'viewRoute', label: 'View Route', sortable: false },
     { key: 'merchantConnector', label: 'Gateway Connector', sortable: false },
-    { key: 'routing_for', label: 'Route Handler', sortable: true },
+    { key: 'routingFor', label: 'Route Handler', sortable: true },
     { key: 'status', label: 'Status', sortable: false },
-    { key: 'is_cascade', label: 'Cascade', sortable: false },
-    { key: 'split_enable', label: 'Split Enabled', sortable: false },
+    { key: 'isCascade', label: 'Cascade', sortable: false },
+    { key: 'splitEnable', label: 'Split Enabled', sortable: false },
   ], []);
 
-  // Render cell function
-  const renderCell = (item: RouteRule, key: keyof RouteRule | string) => {
+  const renderCell = (item: UserRouteRule, key: keyof UserRouteRule | string) => {
     switch (key) {
       case 'name':
         return <div className="font-medium">{item.name}</div>;
@@ -187,7 +176,7 @@ export default function RoutingPage() {
       case 'view_route':
         return (
           <div className="text-sm text-muted-foreground max-w-xs truncate">
-            {item.view_route || '-'}
+            {item.viewRoute || '-'}
           </div>
         );
       case 'merchantConnector':
@@ -199,7 +188,7 @@ export default function RoutingPage() {
       case 'routing_for':
         return (
           <Badge variant="outline" className="capitalize">
-            {item.routing_for}
+            {item.routingFor}
           </Badge>
         );
       case 'status':
@@ -222,7 +211,7 @@ export default function RoutingPage() {
                     toast.error(errorMessage || 'Failed to update status');
                   },
                 });
-              } catch (error) {
+              } catch {
                 toast.error('An unexpected error occurred');
               }
             }}
@@ -231,7 +220,7 @@ export default function RoutingPage() {
       case 'is_cascade':
         return (
           <Switch
-            checked={item.is_cascade || false}
+            checked={item.isCascade || false}
             onCheckedChange={async (checked) => {
               try {
                 const response = await updateUserRoutingCascade(
@@ -248,7 +237,7 @@ export default function RoutingPage() {
                     toast.error(errorMessage || 'Failed to update cascade');
                   },
                 });
-              } catch (error) {
+              } catch {
                 toast.error('An unexpected error occurred');
               }
             }}
@@ -256,12 +245,12 @@ export default function RoutingPage() {
         );
       case 'split_enable':
         return (
-          <Badge variant={item.split_enable ? 'success' : 'secondary'}>
-            {item.split_enable ? 'Yes' : 'No'}
+          <Badge variant={item.splitEnable ? 'success' : 'secondary'}>
+            {item.splitEnable ? 'Yes' : 'No'}
           </Badge>
         );
       default:
-        const value = item[key as keyof RouteRule];
+        const value = item[key as keyof UserRouteRule];
         return (
           <div className="text-foreground font-normal">
             {value != null ? String(value) : '-'}
@@ -270,21 +259,18 @@ export default function RoutingPage() {
     }
   };
 
-  // Define actions
-  const actions: TableAction<RouteRule>[] = [
+  const actions: TableAction<UserRouteRule>[] = [
     {
       label: 'View',
-      route: (row: RouteRule) =>
-        `/admin/user-management/merchant/${userId}/routing_cascading/routing/${row.id}`,
+      route: (row: UserRouteRule) => `/user/routing/${row.id}`,
     },
     {
       label: 'Edit',
-      route: (row: RouteRule) =>
-        `/admin/user-management/merchant/${userId}/routing_cascading/routing/${row.id}/edit`,
+      route: (row: UserRouteRule) => `/user/routing/${row.id}/edit`,
     },
     {
       label: 'Delete',
-      onClick: (row: RouteRule) => {
+      onClick: (row: UserRouteRule) => {
         setRouteToDelete(row);
         setDeleteDialogOpen(true);
       },
@@ -292,24 +278,6 @@ export default function RoutingPage() {
       separator: true,
     },
   ];
-
-  // Handle page change
-  const handlePageChange = (pageIndex: number) => {
-    setPage(pageIndex + 1);
-  };
-
-  // Handle page size change
-  const handlePageSizeChange = (newPageSize: number) => {
-    setLimit(newPageSize);
-    setPage(1);
-  };
-
-  // Handle sort change
-  const handleSortChange = (newSortBy: string, newSortOrder: 'ASC' | 'DESC') => {
-    setSortBy(newSortBy);
-    setSortOrder(newSortOrder);
-    setPage(1);
-  };
 
   return (
     <Fragment>
@@ -320,15 +288,8 @@ export default function RoutingPage() {
             description="Manage routing rules for payment processing"
           />
           <ToolbarActions>
-            <Button
-              variant="primary"
-              onClick={() => {
-                // Navigate to create routing page
-                window.location.href = `/admin/user-management/merchant/${userId}/routing_cascading/routing/create`;
-              }}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create Routing Rule
+            <Button variant="outline" onClick={() => router.push('/user/profile-selection')}>
+              Change Profile
             </Button>
           </ToolbarActions>
         </Toolbar>
@@ -337,9 +298,9 @@ export default function RoutingPage() {
         <div className="flex flex-col gap-3 mb-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div className="flex flex-col gap-1">
-              <p className="text-sm font-semibold text-foreground">Merchant Profile (Industry)</p>
+              <p className="text-sm font-semibold text-foreground">Merchant Profile</p>
               <p className="text-xs text-muted-foreground">
-                Select an industry to load routing rules scoped to that profile.
+                Select a profile to load routing rules.
               </p>
             </div>
             <div className="w-full md:w-80">
@@ -356,12 +317,13 @@ export default function RoutingPage() {
                     setSelectedProfileId(val);
                     setPage(1);
                   }}
-                  placeholder="Select profile (industry)"
+                  placeholder="Select profile"
                 />
               )}
             </div>
           </div>
         </div>
+
         <TableComp
           data={routes}
           headers={headers}
@@ -370,23 +332,29 @@ export default function RoutingPage() {
           enableCheckbox={false}
           searchPlaceholder="Search routing rules..."
           searchKeys={['name', 'view_route']}
-          getRowId={(row: RouteRule) => String(row.id)}
+          getRowId={(row: UserRouteRule) => String(row.id)}
           pagination={{
             pageSize: limit,
             pageIndex: page - 1,
             totalCount: meta?.totalItems ?? 0,
-            onPageChange: handlePageChange,
-            onPageSizeChange: handlePageSizeChange,
+            onPageChange: (pageIndex) => setPage(pageIndex + 1),
+            onPageSizeChange: (newSize) => {
+              setLimit(newSize);
+              setPage(1);
+            },
           }}
           sorting={{
             sortBy: sortBy,
             sortOrder: sortOrder,
-            onSortChange: handleSortChange,
+            onSortChange: (newSortBy, newSortOrder) => {
+              setSortBy(newSortBy);
+              setSortOrder(newSortOrder);
+              setPage(1);
+            },
           }}
           loading={isTableLoading}
         />
       </Container>
-
       <ConfirmComp
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
@@ -402,7 +370,7 @@ export default function RoutingPage() {
         onConfirm={async () => {
           if (!routeToDelete) return;
           try {
-            const response = await deleteUserRouting(userId, routeToDelete.id);
+            const response = await deleteUserMerchantRouting(routeToDelete.id);
             handleApiResponse(response, {
               onSuccess: () => {
                 toast.success('Routing rule deleted successfully');
@@ -412,7 +380,7 @@ export default function RoutingPage() {
                 toast.error(errorMessage || 'Failed to delete routing rule');
               },
             });
-          } catch (error) {
+          } catch {
             toast.error('An unexpected error occurred');
           } finally {
             setRouteToDelete(null);

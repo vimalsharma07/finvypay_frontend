@@ -229,7 +229,7 @@ export async function updateUserCascadingStatus(
 ): Promise<ApiResponse<{ success: boolean; message: string }>> {
   try {
     const data = await http.put(`${getBaseUrl(userId)}/${cascadingId}/status`, {
-      body: { status },
+      status,
     }) as { success: boolean; message: string };
     return {
       status: 200,
