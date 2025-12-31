@@ -69,11 +69,14 @@ const BASE_USER_MENU: MenuConfig = [
     ],
   },
   {
-    title: 'Routing',
+    title: 'Routing & Cascading',
     icon: Route,
-    path: '/user/routing',
     permissionModule: 'Routing Management',
-    requirePermission: true,
+    requirePermission: false,
+    children: [
+      { title: 'Routing', path: '/user/routing', submodule: 'Routing' },
+      { title: 'Cascading', path: '/user/cascading', submodule: 'Cascading' },
+    ],
   },
   {
     title: 'Payment Links',
