@@ -80,6 +80,14 @@ export interface VerifyRegistrationOtpPayload {
   otp: string;
 }
 
+// Verify 2FA payload
+export interface Verify2FAPayload {
+  email: string;
+  otp: string;
+  device?: string;
+  os?: string;
+}
+
 // Refresh token payload
 export interface RefreshTokenPayload {
   refreshToken: string;
@@ -101,6 +109,7 @@ export interface AuthResponse {
     [key: string]: any;
   };
   message?: string;
+  requires2FA?: boolean;
 }
 
 // Refresh token response
@@ -650,6 +659,70 @@ export async function verifyRegistrationOtp(
         auth: false,
       }
     ) as { success: boolean; message: string };
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Verify 2FA OTP for login
+ * 
+ * @param payload - Email and OTP (and optionally device, os)
+ * @returns Promise with access token and user data
+ */
+export async function verify2FA(
+  payload: Verify2FAPayload
+): Promise<ApiResponse<AuthResponse>> {
+  try {
+    const response = await http.post(
+      authRoutes.verify2FA,
+      payload,
+      {
+        auth: false,
+      }
+    ) as AuthResponse;
+
+    // If verification is successful, store auth data
+    if (response?.success && response?.data?.accessToken) {
+      const accessTokenValue = typeof response.data.accessToken === 'object' && response.data.accessToken !== null
+        ? (response.data.accessToken as any).accessToken || response.data.accessToken
+        : response.data.accessToken;
+      
+      const refreshTokenValue = typeof response.data.refreshToken === 'object' && response.data.refreshToken !== null
+        ? (response.data.refreshToken as any).refreshToken || response.data.refreshToken
+        : response.data.refreshToken;
+      
+      // Set access token in memory
+      if (typeof window !== 'undefined') {
+        const { setAccessToken } = await import('../../api');
+        setAccessToken(accessTokenValue);
+      }
+      
+      storeAuthData({
+        accessToken: accessTokenValue,
+        refreshToken: refreshTokenValue,
+        sessionId: response.data.sessionId,
+        tokenExpiry: response.data.tokenExpiry,
+        userData: sanitizeAuthUser(response.data),
+      });
+    }
 
     return {
       status: 200,

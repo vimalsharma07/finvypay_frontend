@@ -17,6 +17,8 @@ import {
 import { getOnboardingStatus, OnboardingData } from '@/lib/services/user/onboarding';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { OnboardingCard } from './onboarding-card';
+import { TwoFaBanner } from './two-fa-banner';
+import { useAuth } from '@/hooks/use-auth';
 import {
   Dialog,
   DialogContent,
@@ -34,12 +36,30 @@ import { toast } from 'sonner';
  * Displays user-specific dashboard widgets and statistics
  */
 export function UserDashboardContent() {
+  const { user } = useAuth();
   const [onboardingData, setOnboardingData] = useState<OnboardingData | null>(null);
   const [onboardingLoading, setOnboardingLoading] = useState(true);
   const [merchantRates, setMerchantRates] = useState<MerchantRates | null>(null);
   const [ratesLoading, setRatesLoading] = useState(true);
   const [actioningRate, setActioningRate] = useState(false);
   const [showRatesModal, setShowRatesModal] = useState(false);
+  const [showTwoFaBanner, setShowTwoFaBanner] = useState(false);
+
+  // Get full user data from localStorage (includes isTwoFaEnabled)
+  // Zustand store only has id, email, role, so we need to check localStorage directly
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          setShowTwoFaBanner(userData && userData.isTwoFaEnabled === false);
+        }
+      } catch (error) {
+        console.error('Failed to read user data from localStorage:', error);
+      }
+    }
+  }, []);
 
   // Fetch onboarding status
   useEffect(() => {
@@ -228,6 +248,14 @@ export function UserDashboardContent() {
         </DialogContent>
       </Dialog>
 
+      {/* 2FA Banner - Show if 2FA is not enabled */}
+      {showTwoFaBanner && (
+        <div className="mb-5 lg:mb-7.5">
+          <TwoFaBanner show={true} />
+        </div>
+      )}
+
+      
       {/* Onboarding Card - Show if profileStep is 0 (start) or > 0 (resume) */}
       {showOnboarding && (
         <div className="mb-5 lg:mb-7.5">

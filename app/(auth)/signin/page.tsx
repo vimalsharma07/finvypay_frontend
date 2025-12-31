@@ -225,6 +225,14 @@ export default function Page() {
       handleApiResponse(response, {
         onSuccess: async (data) => {
           try {
+            // Check if 2FA is required
+            if (data?.requires2FA === true) {
+              // Redirect to 2FA verification page with email
+              router.push(`/2fa-verify?email=${encodeURIComponent(values.email)}`);
+              setIsProcessing(false);
+              return;
+            }
+
             // Step 3: Fetch and store permissions after successful login
             await fetchAndStorePermissions();
             
