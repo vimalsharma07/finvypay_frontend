@@ -30,7 +30,7 @@ const QueryProvider = ({ children }: { children: ReactNode }) => {
                 </Alert>
               ),
               {
-                position: 'top-center',
+                position: 'top-right',
               },
             );
           },
