@@ -23,5 +23,6 @@ export const authRoutes = {
   verifyOtp: '/auth/email/verify',
   permissions: '/auth/permissions',
   verify2FA: '/auth/2fa/verify',
+  profile: '/auth/profile',
 } as const;
 
