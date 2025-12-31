@@ -245,14 +245,14 @@ export default function CascadingCreatePage() {
           title="Create Cascading Rule"
           description="Define cascading chain and settings"
         />
-        <ToolbarActions className="gap-2">
+        <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => router.push(backUrl)}>
             Cancel
           </Button>
           <Button variant="primary" disabled={submitting || isLoading} onClick={handleSubmit}>
             {submitting ? 'Creating...' : 'Create'}
           </Button>
-        </ToolbarActions>
+        </div>
       </Toolbar>
 
       {isLoading ? (

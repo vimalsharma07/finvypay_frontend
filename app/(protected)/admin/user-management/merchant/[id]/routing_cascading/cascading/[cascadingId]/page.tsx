@@ -136,14 +136,14 @@ export default function CascadingViewPage() {
           title={cascade.name || 'Cascading Detail'}
           description="Review cascading rule configuration and chain"
         />
-        <ToolbarActions className="gap-2">
+        <div className="flex items-center gap-2">
           <Link href={`${backUrl}/${cascadingId}/edit`}>
             <Button variant="outline">Edit</Button>
           </Link>
           <Button variant="secondary" onClick={() => router.push(backUrl)}>
             Back
           </Button>
-        </ToolbarActions>
+        </div>
       </Toolbar>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">

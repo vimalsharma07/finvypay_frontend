@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
-  ToolbarActions,
   ToolbarHeading,
 } from '@/layouts/demo1/components/toolbar';
 import { Button } from '@/components/ui/button';
@@ -311,14 +310,14 @@ export default function CascadingEditPage() {
           title="Edit Cascading Rule"
           description="Update cascading chain and settings"
         />
-        <ToolbarActions className="gap-2">
+        <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => router.push(backUrl)}>
             Cancel
           </Button>
           <Button variant="primary" disabled={submitting || isLoading} onClick={handleSubmit}>
             {submitting ? 'Updating...' : 'Update'}
           </Button>
-        </ToolbarActions>
+        </div>
       </Toolbar>
 
       {isLoading ? (
