@@ -34,8 +34,8 @@ export default function DocsOverviewPage() {
           <Image
             src="/media/svg/docs-overview.svg"
             alt="API Documentation Overview"
-            width={809}
-            height={682}
+            width={767}
+            height={566}
             className="w-full h-auto"
             priority
           />
