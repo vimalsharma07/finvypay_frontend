@@ -96,10 +96,10 @@ export function TwoFaManage({ isEnabled, onStatusChange }: TwoFaManageProps) {
       // 2FA is enabled - show disable option
       return (
         <Card>
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-success/10 flex items-center justify-center">
-                <CheckCircle2 className="h-5 w-5 text-success" />
+          <CardHeader className="my-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <CheckCircle2 className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <CardTitle>Two-Factor Authentication Enabled</CardTitle>
@@ -110,9 +110,9 @@ export function TwoFaManage({ isEnabled, onStatusChange }: TwoFaManageProps) {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Alert>
-              <CheckCircle2 className="h-4 w-4" />
-              <AlertDescription>
+            <Alert className="border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
+              <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-500" />
+              <AlertDescription className="text-amber-900 dark:text-amber-200">
                 Two-factor authentication is currently enabled on your account. You can disable it by entering your authentication code below.
               </AlertDescription>
             </Alert>

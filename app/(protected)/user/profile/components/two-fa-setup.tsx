@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, Loader2, CheckCircle2, AlertCircle, RefreshCw, Copy, Check } from 'lucide-react';
+import { Shield, Loader2, CheckCircle2, AlertCircle, RefreshCw, Copy, Check, Lock, Ban, Award, Heart } from 'lucide-react';
 import { enableTwoFa, toggleTwoFa } from '@/lib/services/user/two-fa';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
@@ -340,17 +340,85 @@ export function TwoFaSetup() {
         )}
 
         {!loading && !qrCodeUrl && !error && (
-          <div className="flex flex-col items-center justify-center py-12 space-y-6">
-            <div className="w-full max-w-md mx-auto">
-              <TwoFactorAuthenticationSvg className="w-full h-auto" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center py-8">
+            {/* Left Side: SVG */}
+            <div className="flex items-center justify-center">
+              <div className="w-full max-w-md">
+                <TwoFactorAuthenticationSvg className="w-full h-auto" />
+              </div>
             </div>
-            <div className="text-center space-y-4 max-w-md">
-              <p className="text-sm text-muted-foreground">
-                Click the button below to generate a QR code for setting up Two-Factor Authentication.
-              </p>
-              <Button onClick={fetchQrCode} variant="primary" size="lg">
-                Generate QR Code
-              </Button>
+
+            {/* Right Side: Content and Button */}
+            <div className="flex flex-col space-y-6">
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-foreground">
+                  Why Enable Two-Factor Authentication?
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Lock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm text-foreground">Enhanced Security</p>
+                      <p className="text-sm text-muted-foreground">
+                        Protect your account even if your password is compromised. 2FA adds an extra layer of security that requires both your password and a code from your device.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className="h-10 w-10 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Ban className="h-6 w-6 text-red-600 dark:text-red-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm text-foreground">Prevent Unauthorized Access</p>
+                      <p className="text-sm text-muted-foreground">
+                        Even if someone gets your password, they can't access your account without your authenticator app. Your account stays secure.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Award className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm text-foreground">Industry Standard</p>
+                      <p className="text-sm text-muted-foreground">
+                        Two-factor authentication is recommended by security experts and used by major platforms to protect user accounts.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Heart className="h-6 w-6 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm text-foreground">Peace of Mind</p>
+                      <p className="text-sm text-muted-foreground">
+                        Know that your sensitive data and transactions are protected with an additional security layer.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="pt-4 flex flex-col items-center">
+                <Button 
+                  onClick={fetchQrCode} 
+                  variant="primary" 
+                  size="lg"
+                  className="w-full lg:w-auto px-8 py-6 text-base"
+                >
+                  <Shield className="mr-2 h-5 w-5" />
+                  Generate QR Code
+                </Button>
+                <p className="text-xs text-muted-foreground mt-3 text-center">
+                  Click the button above to generate a QR code for setting up Two-Factor Authentication.
+                </p>
+              </div>
             </div>
           </div>
         )}
