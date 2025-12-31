@@ -879,6 +879,75 @@ export async function refreshToken(): Promise<ApiResponse<RefreshTokenResponse>>
 }
 
 /**
+ * Get user profile
+ * 
+ * @returns Promise with user profile data including 2FA status
+ */
+export async function getProfile(): Promise<ApiResponse<any>> {
+  try {
+    const response = await http.get(
+      authRoutes.profile,
+      {
+        auth: true, // Requires authentication
+      }
+    ) as any;
+
+    // Handle nested response structure: {success: true, data: {...}} or direct user object
+    const userData = response?.data || response;
+    
+    // Update localStorage and Zustand store with the profile data
+    if (typeof window !== 'undefined' && userData) {
+      try {
+        const storedUser = localStorage.getItem('user');
+        let updatedUser;
+        if (storedUser) {
+          const existingUserData = JSON.parse(storedUser);
+          // Merge the profile data with existing user data
+          updatedUser = { ...existingUserData, ...userData };
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+        } else {
+          // If no user data exists, store the profile directly
+          updatedUser = userData;
+          localStorage.setItem('user', JSON.stringify(userData));
+        }
+        
+        // Also update Zustand store if available
+        try {
+          const { useAuthStore } = require('@/lib/stores/auth-store');
+          useAuthStore.getState().setUser(updatedUser);
+        } catch (storeError) {
+          // Zustand store not available, that's okay
+          if (process.env.NODE_ENV === 'development') {
+            console.debug('Zustand store not available for profile update');
+          }
+        }
+      } catch (err) {
+        console.error('Failed to update user data in localStorage:', err);
+      }
+    }
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
  * Get user permissions
  * 
  * @returns Promise with user permissions data

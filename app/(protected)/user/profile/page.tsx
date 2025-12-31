@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Shield, KeyRound, Mail, User, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { TwoFaSetup } from './components/two-fa-setup';
 import { TwoFaManage } from './components/two-fa-manage';
+import { getProfile } from '@/lib/services/auth';
 
 const labelClass = 'text-xs uppercase tracking-wide text-muted-foreground';
 const valueClass = 'text-sm font-semibold text-foreground';
@@ -19,26 +20,94 @@ export default function UserProfilePage() {
   const [showTwoFaSetup, setShowTwoFaSetup] = useState(false);
   const [isTwoFaEnabled, setIsTwoFaEnabled] = useState(false);
   const [hasTwoFaToken, setHasTwoFaToken] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Check if 2FA is disabled - show setup or re-enable component
+  // Fetch profile and check 2FA status
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    const fetchProfile = async () => {
+      setIsLoading(true);
       try {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          const userData = JSON.parse(storedUser);
-          const twoFaEnabled = userData && userData.isTwoFaEnabled === true;
+        // Fetch latest profile from backend
+        const response = await getProfile();
+        console.log('Profile response:', response);
+        
+        if (response.status === 200 && response.data) {
+          // Handle nested response structure: {success: true, data: {...}}
+          // or direct user object
+          const userData = response.data.data || response.data;
+          console.log('User data from profile:', userData);
+          console.log('isTwoFaEnabled:', userData?.isTwoFaEnabled, 'type:', typeof userData?.isTwoFaEnabled);
+          console.log('twoFaToken:', userData?.twoFaToken ? 'exists' : 'missing');
+          
+          // Handle both boolean true and string 'true' cases
+          const twoFaEnabled = userData && (
+            userData.isTwoFaEnabled === true || 
+            userData.isTwoFaEnabled === 'true' ||
+            userData.isTwoFaEnabled === 1
+          );
           const twoFaToken = userData && userData.twoFaToken;
+          
+          console.log('Parsed - twoFaEnabled:', twoFaEnabled, 'hasTwoFaToken:', !!twoFaToken);
           
           setIsTwoFaEnabled(twoFaEnabled);
           setHasTwoFaToken(!!twoFaToken);
           // Show setup/re-enable if 2FA is disabled
           setShowTwoFaSetup(!twoFaEnabled);
+        } else {
+          console.warn('Profile response invalid:', response);
+          // Fallback to localStorage
+          if (typeof window !== 'undefined') {
+            try {
+              const storedUser = localStorage.getItem('user');
+              if (storedUser) {
+                const userData = JSON.parse(storedUser);
+                console.log('Fallback to localStorage - userData:', userData);
+                const twoFaEnabled = userData && (
+                  userData.isTwoFaEnabled === true || 
+                  userData.isTwoFaEnabled === 'true' ||
+                  userData.isTwoFaEnabled === 1
+                );
+                const twoFaToken = userData && userData.twoFaToken;
+                
+                setIsTwoFaEnabled(twoFaEnabled);
+                setHasTwoFaToken(!!twoFaToken);
+                setShowTwoFaSetup(!twoFaEnabled);
+              }
+            } catch (err) {
+              console.error('Failed to read user data from localStorage:', err);
+            }
+          }
         }
       } catch (error) {
-        console.error('Failed to read user data from localStorage:', error);
+        console.error('Failed to fetch profile:', error);
+        // Fallback to localStorage if API call fails
+        if (typeof window !== 'undefined') {
+          try {
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+              const userData = JSON.parse(storedUser);
+              console.log('Fallback to localStorage - userData:', userData);
+              const twoFaEnabled = userData && (
+                userData.isTwoFaEnabled === true || 
+                userData.isTwoFaEnabled === 'true' ||
+                userData.isTwoFaEnabled === 1
+              );
+              const twoFaToken = userData && userData.twoFaToken;
+              
+              setIsTwoFaEnabled(twoFaEnabled);
+              setHasTwoFaToken(!!twoFaToken);
+              setShowTwoFaSetup(!twoFaEnabled);
+            }
+          } catch (err) {
+            console.error('Failed to read user data from localStorage:', err);
+          }
+        }
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
+
+    fetchProfile();
   }, []);
 
   const initials = useMemo(() => {
