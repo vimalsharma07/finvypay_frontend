@@ -306,6 +306,50 @@ export async function deleteUser(id: string): Promise<ApiResponse<void>> {
 }
 
 /**
+ * 6. Disable Two-Factor Authentication for a merchant
+ * PUT /user-management/:id/disable-2fa
+ */
+export async function disableMerchant2Fa(id: string): Promise<ApiResponse<{ message: string }>> {
+  try {
+    const data = await http.put(adminRoutes.users.disable2Fa(id), {}) as { message: string };
+    return {
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      // Handle error data that might be an object with nested error structure
+      const errorData = error.data;
+      let errorMessage = error.message;
+      
+      // Check if error.data.error is an object (like { code, message, details })
+      if (errorData?.error && typeof errorData.error === 'object') {
+        errorMessage = errorData.error.message || errorData.error.code || error.message;
+      } else if (typeof errorData?.error === 'string') {
+        errorMessage = errorData.error;
+      }
+      
+      return {
+        status: error.status,
+        error: errorMessage,
+        data: errorData,
+        errors: errorData?.errors,
+        message: errorData?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+// Backward compatibility
+export async function disableUser2Fa(id: string): Promise<ApiResponse<{ message: string }>> {
+  return disableMerchant2Fa(id);
+}
+
+/**
  * Bonus: Search merchants
  */
 export async function searchMerchants(

@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Shield, Loader2, CheckCircle2, AlertCircle, RefreshCw, Copy, Check } from 'lucide-react';
 import { enableTwoFa, toggleTwoFa } from '@/lib/services/user/two-fa';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
@@ -23,6 +23,7 @@ export function TwoFaSetup() {
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<string>('');
   const [isEnabled, setIsEnabled] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const fetchQrCode = async () => {
     setLoading(true);
@@ -147,8 +148,8 @@ export function TwoFaSetup() {
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-center gap-3">
+      <CardHeader className="my-4">
+        <div className="flex items-center gap-3 mb-4">
           <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
             <Shield className="h-5 w-5 text-primary" />
           </div>
@@ -177,32 +178,78 @@ export function TwoFaSetup() {
 
         {!loading && qrCodeUrl && message && !isEnabled && (
           <div className="space-y-6">
-            <Alert>
-              <CheckCircle2 className="h-4 w-4" />
-              <AlertDescription>{message}</AlertDescription>
+            <Alert className="border-primary/30 bg-primary/5">
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              <AlertDescription className="text-primary/90">{message}</AlertDescription>
             </Alert>
 
-            <div className="flex flex-col items-center space-y-4">
-              <div className="p-4 bg-white rounded-lg border-2 border-border">
-                <img 
-                  src={qrCodeUrl} 
-                  alt="2FA QR Code" 
-                  className="w-64 h-64"
-                />
-              </div>
-              
-              {secret && (
-                <div className="w-full max-w-md">
-                  <p className="text-sm text-muted-foreground mb-2 text-center">
-                    Can't scan? Enter this code manually:
-                  </p>
-                  <div className="p-3 bg-muted rounded-lg text-center">
-                    <code className="text-sm font-mono break-all">{secret}</code>
+            {/* Two-column layout for larger screens */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+              {/* Left Column: QR Code and Secret */}
+              <div className="flex flex-col items-center space-y-4">
+                <div className="p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg border-2 border-primary shadow-lg relative overflow-hidden">
+                  {/* Decorative corner accents */}
+                  <div className="absolute top-0 left-0 w-16 h-16 bg-primary/30 rounded-br-full -translate-x-1/2 -translate-y-1/2"></div>
+                  <div className="absolute bottom-0 right-0 w-16 h-16 bg-primary/30 rounded-tl-full translate-x-1/2 translate-y-1/2"></div>
+                  
+                  <div className="relative bg-white p-3 rounded-md">
+                    <img 
+                      src={qrCodeUrl} 
+                      alt="2FA QR Code" 
+                      className="w-full max-w-xs h-auto drop-shadow-md"
+                    />
                   </div>
                 </div>
-              )}
+                
+                {secret && (
+                  <div className="w-full">
+                    <p className="text-sm text-muted-foreground mb-2 text-center">
+                      Can't scan? Enter this code manually:
+                    </p>
+                    <div className="relative p-3 bg-muted rounded-lg">
+                      <code className="text-sm font-mono break-all block pr-10">{secret}</code>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="absolute top-2 right-2 h-7 w-7 p-0"
+                        onClick={async () => {
+                          try {
+                            await navigator.clipboard.writeText(secret);
+                            setCopied(true);
+                            toast.success('Secret code copied to clipboard');
+                            setTimeout(() => setCopied(false), 2000);
+                          } catch (err) {
+                            toast.error('Failed to copy code');
+                          }
+                        }}
+                      >
+                        {copied ? (
+                          <Check className="h-4 w-4 text-success" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
-              <div className="w-full max-w-md space-y-3 pt-4">
+                {!token && (
+                  <div className="w-full pt-2">
+                    <Button 
+                      onClick={fetchQrCode} 
+                      variant="outline" 
+                      disabled={verifying || loading}
+                      className="w-full border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50"
+                    >
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Regenerate QR Code
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column: Instructions and Verification Form */}
+              <div className="flex flex-col space-y-4">
                 <div className="text-sm text-muted-foreground space-y-2">
                   <p className="font-semibold text-foreground">Instructions:</p>
                   <ol className="list-decimal list-inside space-y-1 ml-2">
@@ -211,84 +258,73 @@ export function TwoFaSetup() {
                     <li>Wait for a 6-digit code to appear in your app (codes refresh every 30 seconds)</li>
                     <li>Enter the current 6-digit code from your app below to complete setup</li>
                   </ol>
-                  <Alert className="mt-3">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription className="text-xs">
-                      <strong>Important:</strong> Do not regenerate the QR code after scanning. Use the code from your authenticator app that matches this QR code.
+                  <Alert className="mt-3 border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
+                    <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-500" />
+                    <AlertDescription className="text-sm text-amber-900 dark:text-amber-200">
+                      <strong className="font-semibold">Important:</strong> Do not regenerate the QR code after scanning. Use the code from your authenticator app that matches this QR code.
                     </AlertDescription>
                   </Alert>
                 </div>
-              </div>
 
-              {/* Verification Input */}
-              <div className="w-full max-w-md space-y-3 pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="token" className="text-sm font-medium">
-                    Enter 6-digit code from your authenticator app
-                  </Label>
-                  <Input
-                    id="token"
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={6}
-                    value={token}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, ''); // Only allow digits
-                      setToken(value);
-                      setError(null); // Clear error when user types
-                    }}
-                    placeholder="000000"
-                    className="text-center text-2xl font-mono tracking-widest"
-                    disabled={verifying}
-                  />
-                  <p className="text-xs text-muted-foreground text-center mt-1">
-                    ⏱️ Codes refresh every 30 seconds - use the current code displayed in your app
-                  </p>
-                  {error && (
-                    <Alert variant="destructive" className="mt-2">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                  )}
+                {/* Verification Input */}
+                <div className="space-y-3 pt-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="token" className="text-sm font-medium">
+                      Enter 6-digit code from your authenticator app
+                    </Label>
+                    <Input
+                      id="token"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={6}
+                      value={token}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, ''); // Only allow digits
+                        setToken(value);
+                        setError(null); // Clear error when user types
+                      }}
+                      placeholder="000000"
+                      className="text-center text-2xl font-mono tracking-widest"
+                      disabled={verifying}
+                    />
+                    <p className="text-xs text-muted-foreground text-center mt-1">
+                      ⏱️ Codes refresh every 30 seconds - use the current code displayed in your app
+                    </p>
+                    {error && (
+                      <Alert variant="destructive" className="mt-2">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>{error}</AlertDescription>
+                      </Alert>
+                    )}
+                  </div>
+                  <Button
+                    onClick={handleVerify}
+                    disabled={verifying || token.length !== 6}
+                    className="w-full"
+                    variant="primary"
+                  >
+                    {verifying ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Verifying...
+                      </>
+                    ) : (
+                      'Verify & Enable 2FA'
+                    )}
+                  </Button>
                 </div>
-                <Button
-                  onClick={handleVerify}
-                  disabled={verifying || token.length !== 6}
-                  className="w-full"
-                  variant="primary"
-                >
-                  {verifying ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Verifying...
-                    </>
-                  ) : (
-                    'Verify & Enable 2FA'
-                  )}
-                </Button>
+
+                {token && (
+                  <div className="text-center pt-2">
+                    <p className="text-xs text-muted-foreground">
+                      Note: If you regenerate the QR code, you'll need to scan the new code with your authenticator app. 
+                      Your current code will not work with a new QR code.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
-
-            {!token && (
-              <div className="flex justify-center pt-4">
-                <Button 
-                  onClick={fetchQrCode} 
-                  variant="outline" 
-                  disabled={verifying || loading}
-                >
-                  Regenerate QR Code
-                </Button>
-              </div>
-            )}
-            {token && (
-              <div className="text-center pt-2">
-                <p className="text-xs text-muted-foreground">
-                  Note: If you regenerate the QR code, you'll need to scan the new code with your authenticator app. 
-                  Your current code will not work with a new QR code.
-                </p>
-              </div>
-            )}
           </div>
         )}
 

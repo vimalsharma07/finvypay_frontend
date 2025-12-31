@@ -60,7 +60,10 @@ export function handleApiResponse<T = any>(
     },
 
     400: () => {
-      const errorMsg = response.error || 'Bad Request';
+      // Handle error as string or object
+      const errorMsg = typeof response.error === 'string' 
+        ? response.error 
+        : (response.error?.message || response.error?.code || 'Bad Request');
       if (!silent) {
         console.error('❌ Bad Request (400):', errorMsg);
         if (response.errors) {
@@ -76,15 +79,19 @@ export function handleApiResponse<T = any>(
     },
 
     401: () => {
-      const errorMsg = response.error || 'Unauthorized';
+      // Handle error as string or object
+      const errorMsg = typeof response.error === 'string' 
+        ? response.error 
+        : (response.error?.message || response.error?.code || 'Unauthorized');
       if (!silent) {
         console.error('❌ Unauthorized (401):', errorMsg);
         console.log('Please check your authentication token');
       }
       
       // If error message indicates session expiry, trigger logout event
-      if (errorMsg.toLowerCase().includes('session expired') || 
-          errorMsg.toLowerCase().includes('login again')) {
+      const errorMsgLower = typeof errorMsg === 'string' ? errorMsg.toLowerCase() : '';
+      if (errorMsgLower.includes('session expired') || 
+          errorMsgLower.includes('login again')) {
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('auth:logout', { 
             detail: { reason: 'refresh_failed', message: errorMsg } 
@@ -97,7 +104,10 @@ export function handleApiResponse<T = any>(
     },
 
     403: () => {
-      const errorMsg = response.error || 'Forbidden';
+      // Handle error as string or object
+      const errorMsg = typeof response.error === 'string' 
+        ? response.error 
+        : (response.error?.message || response.error?.code || 'Forbidden');
       if (!silent) {
         console.error('❌ Forbidden (403):', errorMsg);
       }
@@ -105,7 +115,10 @@ export function handleApiResponse<T = any>(
     },
 
     404: () => {
-      const errorMsg = response.error || 'Not Found';
+      // Handle error as string or object
+      const errorMsg = typeof response.error === 'string' 
+        ? response.error 
+        : (response.error?.message || response.error?.code || 'Not Found');
       if (!silent) {
         console.error('❌ Not Found (404):', errorMsg);
       }
@@ -113,7 +126,10 @@ export function handleApiResponse<T = any>(
     },
 
     500: () => {
-      const errorMsg = response.error || 'Internal Server Error';
+      // Handle error as string or object
+      const errorMsg = typeof response.error === 'string' 
+        ? response.error 
+        : (response.error?.message || response.error?.code || 'Internal Server Error');
       if (!silent) {
         console.error('❌ Server Error (500):', errorMsg);
       }
@@ -130,7 +146,10 @@ export function handleApiResponse<T = any>(
   }
 
   // Handle unknown status codes
-  const errorMsg = response.error || `HTTP Error: ${response.status}`;
+  // Handle error as string or object
+  const errorMsg = typeof response.error === 'string' 
+    ? response.error 
+    : (response.error?.message || response.error?.code || `HTTP Error: ${response.status}`);
   if (!silent) {
     console.error(`❌ Error (${response.status}):`, errorMsg);
   }

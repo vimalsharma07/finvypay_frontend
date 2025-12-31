@@ -10,6 +10,7 @@ import { Container } from '@/components/common/container';
 import {
   getUsers,
   deleteUser,
+  disableUser2Fa,
   User,
   UserListResponse,
 } from '@/lib/services/admin/users';
@@ -25,7 +26,7 @@ import { AdvancedFilter, FilterField } from '../../../components/advanced-filter
 import { ConfirmComp } from '../../../components/confirm-comp';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Pencil, Eye, Plug, Route, Trash2, Percent } from 'lucide-react';
+import { Pencil, Eye, Plug, Route, Trash2, Percent, Shield } from 'lucide-react';
 
 export default function MerchantUsersPage() {
   const router = useRouter();
@@ -44,6 +45,11 @@ export default function MerchantUsersPage() {
   // Delete dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  
+  // Reset 2FA dialog state
+  const [reset2FaDialogOpen, setReset2FaDialogOpen] = useState(false);
+  const [userToReset2Fa, setUserToReset2Fa] = useState<User | null>(null);
+  const [resetting2Fa, setResetting2Fa] = useState(false);
   
   // Filter state
   const [filters, setFilters] = useState<Record<string, string>>({});
@@ -243,6 +249,34 @@ export default function MerchantUsersPage() {
     }
   };
 
+  // Reset 2FA handler
+  const handleReset2Fa = async (userId: string) => {
+    setResetting2Fa(true);
+    try {
+      const response = await disableUser2Fa(userId);
+      handleApiResponse(response, {
+        onSuccess: (data) => {
+          toast.success(data?.message || 'Two-Factor Authentication reset successfully!');
+          // Immediately refetch merchants list to update the table
+          fetchUsers(page, limit, sortBy, sortOrder, filters);
+          setReset2FaDialogOpen(false);
+          setUserToReset2Fa(null);
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to reset Two-Factor Authentication');
+        },
+        onUnauthorized: () => {
+          toast.error('Unauthorized. Please check your authentication.');
+        },
+      });
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+      console.error('Reset 2FA error:', error);
+    } finally {
+      setResetting2Fa(false);
+    }
+  };
+
   // Define actions
   const actions: TableAction<User>[] = [
     {
@@ -271,6 +305,15 @@ export default function MerchantUsersPage() {
       label: 'Assign Rate',
       icon: Percent,
       route: (row: User) => `/admin/user-management/merchant/assign-rates/${row.id}`,
+      separator: true,
+    },
+    {
+      label: 'Reset Two-Factor Authentication',
+      icon: Shield,
+      onClick: (row: User) => {
+        setUserToReset2Fa(row);
+        setReset2FaDialogOpen(true);
+      },
       separator: true,
     },
     {
@@ -366,6 +409,26 @@ export default function MerchantUsersPage() {
         }}
         onCancel={() => {
           setUserToDelete(null);
+        }}
+      />
+
+      {/* Reset 2FA Confirmation Dialog */}
+      <ConfirmComp
+        open={reset2FaDialogOpen}
+        onOpenChange={setReset2FaDialogOpen}
+        title="Reset Two-Factor Authentication"
+        message={`Are you sure you want to reset Two-Factor Authentication for merchant "${userToReset2Fa?.name}" (${userToReset2Fa?.email})? This will disable 2FA for their account and they will need to set it up again.`}
+        confirmLabel={resetting2Fa ? "Resetting..." : "Yes, Reset 2FA"}
+        cancelLabel="Cancel"
+        onConfirm={async () => {
+          if (userToReset2Fa && !resetting2Fa) {
+            await handleReset2Fa(userToReset2Fa.id);
+          }
+        }}
+        onCancel={() => {
+          if (!resetting2Fa) {
+            setUserToReset2Fa(null);
+          }
         }}
       />
     </Fragment>

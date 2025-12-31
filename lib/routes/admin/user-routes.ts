@@ -19,6 +19,7 @@ export const adminUserRoutes = {
   search: `${BASE_URL}/user-management/search`,
   bulkDelete: `${BASE_URL}/user-management/bulk-delete`,
   toggleBlockStatus: (id: string) => `${BASE_URL}/user-management/${id}/block`,
+  disable2Fa: (id: string) => `${BASE_URL}/user-management/${id}/disable-2fa`,
   getAllowedRoles: `${BASE_URL}/user-management/roles/allowed`,
 } as const;
 
