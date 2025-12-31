@@ -122,14 +122,16 @@ export default function RoutingPage() {
             const profileList = Array.isArray(payload.data) ? payload.data : [];
             setProfiles(profileList);
 
-            const options = profileList.map((profile) => ({
+            const options = profileList.map((profile: MerchantProfile) => ({
               value: profile.id?.toString() || '',
               label: profile.industry?.name || profile.merchantProfileName || `Profile ${profile.id}`,
             }));
             setProfileOptions(options);
 
             // Auto-select primary profile (industry id) when available
-            const primaryProfile = profileList.find((p) => p.isPrimary);
+            const primaryProfile = profileList.find(
+              (p: MerchantProfile) => p.isPrimary
+            );
             if (primaryProfile && !selectedProfileId) {
               setSelectedProfileId(primaryProfile.id?.toString() || '');
             } else if (!selectedProfileId && profileList.length > 0) {

@@ -166,10 +166,7 @@ export async function updateUserRouting(
 ): Promise<ApiResponse<{ success: boolean; message: string }>> {
   try {
     const data = await http.put(`${getBaseUrl(userId)}/${routingId}/update`, {
-      body: {
-        ...payload,
-        user_id: userId,
-      },
+      ...payload,
     }) as { success: boolean; message: string };
     return {
       status: 200,

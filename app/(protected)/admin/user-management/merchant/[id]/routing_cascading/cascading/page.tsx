@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Container } from '@/components/common/container';
 import {
@@ -29,6 +29,13 @@ import {
   CascadingRuleListResponse,
 } from '@/lib/services/admin/cascading';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import {
+  getMerchantProfiles,
+  type MerchantProfile,
+} from '@/lib/services/admin/merchant-acquirer-account';
+import { SearchSelect } from '@/components/ui/molecules/SearchSelect';
+import { ContentLoader } from '@/components/common/content-loader';
+import type { Option } from '@/lib/types/common-types';
 
 export default function CascadingPage() {
   const params = useParams();
@@ -42,6 +49,12 @@ export default function CascadingPage() {
   const [limit, setLimit] = useState(10);
   const [sortBy, setSortBy] = useState<string>('priority');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('ASC');
+  const [profiles, setProfiles] = useState<MerchantProfile[]>([]);
+  const [profileOptions, setProfileOptions] = useState<Option[]>([]);
+  const [selectedProfileId, setSelectedProfileId] = useState<string>('');
+  const [profilesLoading, setProfilesLoading] = useState(true);
+
+  const isTableLoading = loading || profilesLoading;
 
   // Fetch cascading rules
   const fetchCascadings = async (
@@ -49,6 +62,7 @@ export default function CascadingPage() {
     pageLimit: number,
     sortField: string,
     sortDir: 'ASC' | 'DESC',
+    profileId?: string,
   ) => {
     setLoading(true);
     try {
@@ -59,7 +73,7 @@ export default function CascadingPage() {
         sortOrder: sortDir,
       };
 
-      const response = await getUserCascadings(userId, params);
+      const response = await getUserCascadings(userId, params, profileId);
 
       handleApiResponse<CascadingRuleListResponse>(response, {
         onSuccess: (data) => {
@@ -82,10 +96,51 @@ export default function CascadingPage() {
   };
 
   useEffect(() => {
-    if (userId) {
-      fetchCascadings(page, limit, sortBy, sortOrder);
+    if (userId && selectedProfileId) {
+      fetchCascadings(page, limit, sortBy, sortOrder, selectedProfileId);
     }
-  }, [userId, page, limit, sortBy, sortOrder]);
+  }, [userId, page, limit, sortBy, sortOrder, selectedProfileId]);
+
+  // Fetch merchant profiles (reuse routing pattern)
+  useEffect(() => {
+    const loadProfiles = async () => {
+      setProfilesLoading(true);
+      try {
+        const response = await getMerchantProfiles(userId);
+        handleApiResponse(response, {
+          onSuccess: (payload) => {
+            if (!payload?.success || !payload.data) return;
+            const list = Array.isArray(payload.data) ? payload.data : [];
+            setProfiles(list);
+            const options = list.map((p: MerchantProfile) => ({
+              value: p.id.toString(),
+              label: p.industry?.name || p.merchantProfileName || `Profile ${p.id}`,
+            }));
+            setProfileOptions(options);
+
+            // Auto-select primary or first profile
+            if (!selectedProfileId) {
+              const primary = list.find((p: MerchantProfile) => p.isPrimary);
+              if (primary) {
+                setSelectedProfileId(primary.id.toString());
+              } else if (list.length > 0) {
+                setSelectedProfileId(list[0].id.toString());
+              }
+            }
+          },
+          onError: (errorMessage) => {
+            toast.error(errorMessage || 'Failed to load merchant profiles');
+          },
+        });
+      } catch (error) {
+        toast.error('An unexpected error occurred while loading profiles');
+      } finally {
+        setProfilesLoading(false);
+      }
+    };
+
+    loadProfiles();
+  }, [userId, selectedProfileId]);
 
   // Define table headers
   const headers: TableHeader<CascadingRule>[] = [
@@ -251,6 +306,35 @@ export default function CascadingPage() {
         </Toolbar>
       </Container>
       <Container>
+        <div className="flex flex-col gap-3 mb-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-semibold text-foreground">Merchant Profile (Industry)</p>
+              <p className="text-xs text-muted-foreground">
+                Select an industry to load cascading rules scoped to that profile.
+              </p>
+            </div>
+            <div className="w-full md:w-80">
+              {profilesLoading ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <ContentLoader />
+                  <span>Loading profiles...</span>
+                </div>
+              ) : (
+                <SearchSelect
+                  options={profileOptions}
+                  value={selectedProfileId}
+                  onChange={(val) => {
+                    setSelectedProfileId(val);
+                    setPage(1);
+                  }}
+                  placeholder="Select profile (industry)"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+
         <TableComp
           data={cascadings}
           headers={headers}
@@ -272,7 +356,7 @@ export default function CascadingPage() {
             sortOrder: sortOrder,
             onSortChange: handleSortChange,
           }}
-          loading={loading}
+          loading={isTableLoading}
         />
       </Container>
     </Fragment>

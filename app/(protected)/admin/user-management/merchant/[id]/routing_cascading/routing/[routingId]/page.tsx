@@ -132,7 +132,7 @@ export default function RoutingViewPage() {
           title={routeDetail.name || 'Routing Detail'}
           description="Review routing rule configuration and connector details"
         />
-        <ToolbarActions className="gap-2">
+        <ToolbarActions>
           <Link href={`${backUrl}/${routingId}/edit`}>
             <Button variant="outline">Edit</Button>
           </Link>

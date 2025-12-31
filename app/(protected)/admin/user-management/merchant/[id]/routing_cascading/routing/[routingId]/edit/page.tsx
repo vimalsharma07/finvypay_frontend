@@ -35,7 +35,11 @@ import {
   getUserConnectors,
   type MerchantAcquirerAccount,
 } from '@/lib/services/admin/connectors';
-import { createUserRouting } from '@/lib/services/admin/routing';
+import {
+  getUserRoutingById,
+  updateUserRouting,
+  type RouteRule,
+} from '@/lib/services/admin/routing';
 import type { Option } from '@/lib/types/common-types';
 import { fetchListOfCurrencies } from '@/lib/fetch/fetch-options';
 import {
@@ -59,10 +63,30 @@ type Condition = {
   value: string;
 };
 
-export default function RoutingCreatePage() {
+function normalizeConditionValue(
+  condition: Condition,
+  inputType: ConditionInputType,
+): string | number | string[] {
+  if (inputType === 'multi-select' || inputType === 'multi-input') {
+    return condition.value
+      .split(',')
+      .map((v) => v.trim())
+      .filter(Boolean);
+  }
+
+  if (condition.category === 'amount') {
+    const num = Number(condition.value);
+    return Number.isNaN(num) ? condition.value : num;
+  }
+
+  return condition.value;
+}
+
+export default function RoutingEditPage() {
   const params = useParams();
   const router = useRouter();
   const userId = params.id as string;
+  const routingId = params.routingId as string;
 
   const [name, setName] = useState('');
   const [routingFor, setRoutingFor] = useState('CARD');
@@ -77,12 +101,14 @@ export default function RoutingCreatePage() {
   const [connectorOptions, setConnectorOptions] = useState<Option[]>([]);
   const [connectorsLoading, setConnectorsLoading] = useState(false);
   const [selectedConnectorId, setSelectedConnectorId] = useState<string>('');
+  const [pendingConnectorId, setPendingConnectorId] = useState<string>('');
 
   const [conditions, setConditions] = useState<Condition[]>([
     { category: 'amount', operator: '>=', value: '' },
   ]);
 
   const [currencyOptions, setCurrencyOptions] = useState<Option[]>([]);
+  const [loadingDetail, setLoadingDetail] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   const backUrl = useMemo(
@@ -90,6 +116,70 @@ export default function RoutingCreatePage() {
       `/admin/user-management/merchant/${userId}/routing_cascading/routing`,
     [userId],
   );
+
+  // Fetch existing routing detail
+  useEffect(() => {
+    const loadDetail = async () => {
+      setLoadingDetail(true);
+      try {
+        const response = await getUserRoutingById(userId, routingId);
+        handleApiResponse(response, {
+          onSuccess: (payload) => {
+            const data = (payload as any)?.data ?? payload;
+            if (!data) return;
+            setName(data.name || '');
+            setRoutingFor(data.routing_for || data.routingFor || 'CARD');
+            setSplitEnable(data.split_enable ?? data.splitEnable ?? false);
+
+            const profileId =
+              data.merchantProfileId ||
+              data.profile_id ||
+              data.merchantProfile?.id ||
+              data.merchant_profile_id;
+            if (profileId) {
+              setSelectedProfileId(profileId.toString());
+            }
+
+            const connectorId =
+              data.merchantAcquirerAccountId ||
+              data.connector_id ||
+              data.merchantConnector?.id ||
+              data.merchant_acquirer_account_id;
+            if (connectorId) {
+              setSelectedConnectorId(connectorId.toString());
+              setPendingConnectorId(connectorId.toString());
+            }
+
+            const cfg = Array.isArray(data.config) ? data.config : [];
+            if (cfg.length > 0) {
+              setConditions(
+                cfg.map((c: any) => ({
+                  category: c.category || '',
+                  operator: c.operator || '',
+                  value: Array.isArray(c.value)
+                    ? c.value.join(',')
+                    : c.value !== undefined && c.value !== null
+                      ? String(c.value)
+                      : '',
+                })),
+              );
+            }
+          },
+          onError: (errorMessage) => {
+            toast.error(errorMessage || 'Failed to load routing detail');
+          },
+        });
+      } catch (error) {
+        toast.error('An unexpected error occurred while loading routing');
+      } finally {
+        setLoadingDetail(false);
+      }
+    };
+
+    if (userId && routingId) {
+      loadDetail();
+    }
+  }, [userId, routingId]);
 
   // Fetch profiles
   useEffect(() => {
@@ -108,11 +198,14 @@ export default function RoutingCreatePage() {
             }));
             setProfileOptions(options);
 
-            const primary = list.find((p: MerchantProfile) => p.isPrimary);
-            if (primary) {
-              setSelectedProfileId(primary.id.toString());
-            } else if (list.length > 0) {
-              setSelectedProfileId(list[0].id.toString());
+            // If nothing selected yet, use primary or first
+            if (!selectedProfileId) {
+              const primary = list.find((p: MerchantProfile) => p.isPrimary);
+              if (primary) {
+                setSelectedProfileId(primary.id.toString());
+              } else if (list.length > 0) {
+                setSelectedProfileId(list[0].id.toString());
+              }
             }
           },
           onError: (errorMessage) => {
@@ -127,7 +220,7 @@ export default function RoutingCreatePage() {
     };
 
     loadProfiles();
-  }, [userId]);
+  }, [userId, selectedProfileId]);
 
   // Fetch currencies for condition select
   useEffect(() => {
@@ -140,8 +233,8 @@ export default function RoutingCreatePage() {
             value: c.value || c.code || '',
           })),
         );
-      } catch (error) {
-        // swallow; not critical
+      } catch {
+        // non-critical
       }
     };
     loadCurrencies();
@@ -168,7 +261,15 @@ export default function RoutingCreatePage() {
               label: conn.name || `Connector ${conn.id}`,
             }));
             setConnectorOptions(options);
-            setSelectedConnectorId(options[0]?.value || '');
+
+            // preserve existing connector if available
+            if (pendingConnectorId && options.some((o: Option) => o.value === pendingConnectorId)) {
+              setSelectedConnectorId(pendingConnectorId);
+            } else if (!pendingConnectorId && options.length > 0) {
+              setSelectedConnectorId(options[0].value);
+            } else if (!options.some((o: Option) => o.value === selectedConnectorId)) {
+              setSelectedConnectorId(options[0]?.value || '');
+            }
           },
           onError: (errorMessage) => {
             toast.error(errorMessage || 'Failed to load connectors');
@@ -182,7 +283,12 @@ export default function RoutingCreatePage() {
     };
 
     loadConnectors();
-  }, [userId, selectedProfileId]);
+  }, [userId, selectedProfileId, pendingConnectorId, selectedConnectorId]);
+
+  const getInputType = (category: string, operator: string): ConditionInputType => {
+    const operators = CONDITION_OPERATOR_MAP[category] || [];
+    return operators.find((op) => op.value === operator)?.inputType || 'input';
+  };
 
   const handleConditionChange = (
     index: number,
@@ -192,14 +298,11 @@ export default function RoutingCreatePage() {
     setConditions((prev) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
-
-      // Reset operator/value when category changes
       if (field === 'category') {
-        const operators = CONDITION_OPERATOR_MAP[value] || [];
-        updated[index].operator = operators[0]?.value || '';
+        const ops = CONDITION_OPERATOR_MAP[value] || [];
+        updated[index].operator = ops[0]?.value || '';
         updated[index].value = '';
       }
-
       return updated;
     });
   };
@@ -210,11 +313,6 @@ export default function RoutingCreatePage() {
 
   const removeCondition = (index: number) => {
     setConditions((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const getInputType = (category: string, operator: string): ConditionInputType => {
-    const operators = CONDITION_OPERATOR_MAP[category] || [];
-    return operators.find((op) => op.value === operator)?.inputType || 'input';
   };
 
   const renderValueInput = (condition: Condition, idx: number) => {
@@ -290,25 +388,6 @@ export default function RoutingCreatePage() {
     );
   };
 
-  const normalizeConditionValue = (
-    condition: Condition,
-  ): string | number | string[] => {
-    const inputType = getInputType(condition.category, condition.operator);
-    if (inputType === 'multi-select' || inputType === 'multi-input') {
-      return condition.value
-        .split(',')
-        .map((v) => v.trim())
-        .filter(Boolean);
-    }
-
-    if (condition.category === 'amount') {
-      const num = Number(condition.value);
-      return Number.isNaN(num) ? condition.value : num;
-    }
-
-    return condition.value;
-  };
-
   const handleSubmit = async () => {
     if (!name.trim()) {
       toast.error('Name is required');
@@ -334,26 +413,29 @@ export default function RoutingCreatePage() {
     const payload = {
       name,
       routingFor,
-      merchantProfileId: Number(selectedProfileId),
+    //   merchantProfileId: Number(selectedProfileId),
       merchantAcquirerAccountId: Number(selectedConnectorId),
-      config: conditions.map((c) => ({
-        category: c.category,
-        operator: c.operator,
-        value: normalizeConditionValue(c),
-      })),
+      config: conditions.map((c) => {
+        const inputType = getInputType(c.category, c.operator);
+        return {
+          category: c.category,
+          operator: c.operator,
+          value: normalizeConditionValue(c, inputType),
+        };
+      }),
       splitEnable,
     };
 
     try {
       setSubmitting(true);
-      const response = await createUserRouting(userId, payload as any);
+      const response = await updateUserRouting(userId, routingId, payload as any);
       handleApiResponse(response, {
         onSuccess: () => {
-          toast.success('Routing rule created successfully');
+          toast.success('Routing rule updated successfully');
           router.push(backUrl);
         },
         onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to create routing rule');
+          toast.error(errorMessage || 'Failed to update routing rule');
         },
       });
     } catch (error) {
@@ -363,21 +445,21 @@ export default function RoutingCreatePage() {
     }
   };
 
-  const isLoading = profilesLoading || (selectedProfileId ? connectorsLoading : false);
+  const isLoading = profilesLoading || loadingDetail || (selectedProfileId ? connectorsLoading : false);
 
   return (
     <Container>
       <Toolbar>
         <ToolbarHeading
-          title="Create Routing Rule"
-          description="Define routing conditions and connector"
+          title="Edit Routing Rule"
+          description="Update routing conditions and connector"
         />
         <ToolbarActions>
           <Button variant="outline" onClick={() => router.push(backUrl)}>
             Cancel
           </Button>
           <Button variant="primary" disabled={submitting || isLoading} onClick={handleSubmit}>
-            {submitting ? 'Creating...' : 'Create'}
+            {submitting ? 'Updating...' : 'Update'}
           </Button>
         </ToolbarActions>
       </Toolbar>
@@ -445,6 +527,7 @@ export default function RoutingCreatePage() {
                   value={selectedProfileId}
                   onChange={(val) => {
                     setSelectedProfileId(val);
+                    setPendingConnectorId('');
                     setSelectedConnectorId('');
                   }}
                   placeholder="Select merchant profile"

@@ -61,9 +61,10 @@ export function handleApiResponse<T = any>(
 
     400: () => {
       // Handle error as string or object
+      const errorObj = response.error as any;
       const errorMsg = typeof response.error === 'string' 
         ? response.error 
-        : (response.error?.message || response.error?.code || 'Bad Request');
+        : (errorObj?.message || errorObj?.code || 'Bad Request');
       if (!silent) {
         console.error('❌ Bad Request (400):', errorMsg);
         if (response.errors) {
@@ -80,9 +81,10 @@ export function handleApiResponse<T = any>(
 
     401: () => {
       // Handle error as string or object
+      const errorObj = response.error as any;
       const errorMsg = typeof response.error === 'string' 
         ? response.error 
-        : (response.error?.message || response.error?.code || 'Unauthorized');
+        : (errorObj?.message || errorObj?.code || 'Unauthorized');
       if (!silent) {
         console.error('❌ Unauthorized (401):', errorMsg);
         console.log('Please check your authentication token');
@@ -105,9 +107,10 @@ export function handleApiResponse<T = any>(
 
     403: () => {
       // Handle error as string or object
+      const errorObj = response.error as any;
       const errorMsg = typeof response.error === 'string' 
         ? response.error 
-        : (response.error?.message || response.error?.code || 'Forbidden');
+        : (errorObj?.message || errorObj?.code || 'Forbidden');
       if (!silent) {
         console.error('❌ Forbidden (403):', errorMsg);
       }
@@ -116,9 +119,10 @@ export function handleApiResponse<T = any>(
 
     404: () => {
       // Handle error as string or object
+      const errorObj = response.error as any;
       const errorMsg = typeof response.error === 'string' 
         ? response.error 
-        : (response.error?.message || response.error?.code || 'Not Found');
+        : (errorObj?.message || errorObj?.code || 'Not Found');
       if (!silent) {
         console.error('❌ Not Found (404):', errorMsg);
       }
@@ -127,9 +131,10 @@ export function handleApiResponse<T = any>(
 
     500: () => {
       // Handle error as string or object
+      const errorObj = response.error as any;
       const errorMsg = typeof response.error === 'string' 
         ? response.error 
-        : (response.error?.message || response.error?.code || 'Internal Server Error');
+        : (errorObj?.message || errorObj?.code || 'Internal Server Error');
       if (!silent) {
         console.error('❌ Server Error (500):', errorMsg);
       }
@@ -156,9 +161,10 @@ export function handleApiResponse<T = any>(
 
   // Handle unknown status codes
   // Handle error as string or object
+  const errorObj = response.error as any;
   const errorMsg = typeof response.error === 'string' 
     ? response.error 
-    : (response.error?.message || response.error?.code || `HTTP Error: ${response.status}`);
+    : (errorObj?.message || errorObj?.code || `HTTP Error: ${response.status}`);
   if (!silent) {
     console.error(`❌ Error (${response.status}):`, errorMsg);
   }
