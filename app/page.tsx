@@ -7,7 +7,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, CreditCard, Shield, Zap, Globe } from 'lucide-react';
+import { ArrowRight, CreditCard, Shield, Zap, Globe, BookOpen } from 'lucide-react';
 
 export default function LandingPage() {
   return (
@@ -20,6 +20,9 @@ export default function LandingPage() {
             <span className="text-xl font-bold">Pay4Tech</span>
           </div>
           <div className="flex items-center gap-4">
+            <Link href="/docs">
+              <Button variant="ghost">Docs</Button>
+            </Link>
             <Link href="/signin">
               <Button variant="ghost">Sign In</Button>
             </Link>
@@ -52,6 +55,12 @@ export default function LandingPage() {
             <Link href="/signin">
               <Button size="lg" variant="outline">
                 Sign In
+              </Button>
+            </Link>
+            <Link href="/docs">
+              <Button size="lg" variant="secondary" className="gap-2">
+                <BookOpen className="h-4 w-4" />
+                Docs
               </Button>
             </Link>
           </div>
