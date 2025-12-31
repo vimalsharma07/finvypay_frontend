@@ -52,7 +52,7 @@ export function RecaptchaPopover({
             </Alert>
           ),
           {
-            position: 'top-center',
+            position: 'top-right',
           },
         );
         return;
@@ -70,7 +70,7 @@ export function RecaptchaPopover({
           </Alert>
         ),
         {
-          position: 'top-center',
+          position: 'top-right',
         },
       );
       return;

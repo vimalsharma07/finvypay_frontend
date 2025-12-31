@@ -3,7 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Clock, AlertCircle, Rocket, Sparkles } from 'lucide-react';
 import { OnboardingData } from '@/lib/services/user/onboarding';
 import Link from 'next/link';
 
@@ -143,17 +143,26 @@ export function OnboardingCard({ onboardingData, loading = false }: OnboardingCa
   return (
     <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
       <CardContent className="p-6">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              {isStarted ? 'Complete Your Profile Verification' : 'Welcome! Let\'s Get Started'}
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              {isStarted 
-                ? 'Continue your onboarding process to complete your profile verification and unlock all features.'
-                : 'Complete your profile verification to start processing transactions and access all features.'
-              }
-            </p>
+        <div className="flex items-center justify-between gap-6">
+          <div className="flex items-center gap-6 flex-1">
+            {!isStarted && (
+              <div className="flex-shrink-0">
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center shadow-lg shadow-primary/20">
+                  <Sparkles className="h-8 w-8 text-primary" />
+                </div>
+              </div>
+            )}
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                {isStarted ? 'Complete Your Profile Verification' : 'Welcome! Let\'s Get Started'}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {isStarted 
+                  ? 'Continue your onboarding process to complete your profile verification and unlock all features.'
+                  : 'Complete your profile verification to start processing transactions and access all features.'
+                }
+              </p>
+            </div>
           </div>
           <div className="flex-shrink-0">
             <Button 
@@ -163,6 +172,7 @@ export function OnboardingCard({ onboardingData, loading = false }: OnboardingCa
               asChild
             >
               <Link href="/user/onboarding">
+                <Rocket className="h-4 w-4" />
                 {isStarted ? 'Resume Onboarding' : 'Start Onboarding'}
                 <ArrowRight className="h-4 w-4" />
               </Link>

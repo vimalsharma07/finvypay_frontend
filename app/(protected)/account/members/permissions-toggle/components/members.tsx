@@ -457,7 +457,7 @@ function ActionsCell({ row }: { row: Row<IMembersData> }) {
         </Alert>
       ),
       {
-        position: 'top-center',
+        position: 'top-right',
       },
     );
   };

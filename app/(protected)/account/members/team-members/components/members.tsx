@@ -713,7 +713,7 @@ function ActionsCell({ row }: { row: Row<IData> }) {
         </Alert>
       ),
       {
-        position: 'top-center',
+        position: 'top-right',
       },
     );
   };
