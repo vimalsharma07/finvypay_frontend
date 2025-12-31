@@ -44,6 +44,7 @@ const PUBLIC_ROUTES = [
   '/forbidden',
   '/not-found',
   '/error',
+  '/docs',
 ];
 
 /**

@@ -25,6 +25,7 @@ export function useRouteGuard() {
       "/reset-password",
       "/verify-email",
       "/change-password",
+      "/docs",
       // Public Profile routes
       "/public-profile/profiles/default",
       "/public-profile/profiles/creator",
