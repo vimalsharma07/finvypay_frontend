@@ -41,7 +41,7 @@ export function TwoFaBanner({ show = true }: TwoFaBannerProps) {
               className="gap-2"
               asChild
             >
-              <Link href="/account/home/settings-sidebar#auth_two_factor">
+              <Link href="/user/profile">
                 Enable 2FA
                 <ArrowRight className="h-4 w-4" />
               </Link>

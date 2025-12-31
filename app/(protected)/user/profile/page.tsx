@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,12 +8,29 @@ import { Separator } from '@/components/ui/separator';
 import { Container } from '@/components/common/container';
 import { useAuth } from '@/hooks/use-auth';
 import { Shield, KeyRound, Mail, User, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { TwoFaSetup } from './components/two-fa-setup';
 
 const labelClass = 'text-xs uppercase tracking-wide text-muted-foreground';
 const valueClass = 'text-sm font-semibold text-foreground';
 
 export default function UserProfilePage() {
   const { user } = useAuth();
+  const [showTwoFaSetup, setShowTwoFaSetup] = useState(false);
+
+  // Check if 2FA is disabled - show setup component automatically
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          setShowTwoFaSetup(userData && userData.isTwoFaEnabled === false);
+        }
+      } catch (error) {
+        console.error('Failed to read user data from localStorage:', error);
+      }
+    }
+  }, []);
 
   const initials = useMemo(() => {
     const source = user?.name || user?.email || '';
@@ -36,6 +53,12 @@ export default function UserProfilePage() {
 
   return (
     <Container>
+      {showTwoFaSetup && (
+        <div className="mb-5 lg:mb-7.5">
+          <TwoFaSetup />
+        </div>
+      )}
+      
       <div className="grid gap-5 lg:gap-7.5 lg:grid-cols-3">
         {/* Profile summary */}
         <Card className="lg:col-span-1">
