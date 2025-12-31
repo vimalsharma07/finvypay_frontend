@@ -11,7 +11,7 @@ import { enableTwoFa, toggleTwoFa } from '@/lib/services/user/two-fa';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
-import { TwoFactorAuthenticationSvg } from '@/components/svg';
+import Image from 'next/image';
 
 export function TwoFaSetup() {
   const router = useRouter();
@@ -344,7 +344,13 @@ export function TwoFaSetup() {
             {/* Left Side: SVG */}
             <div className="flex items-center justify-center">
               <div className="w-full max-w-md">
-                <TwoFactorAuthenticationSvg className="w-full h-auto" />
+                <Image
+                  src="/media/svg/two-factor-authentication.svg"
+                  alt="Two Factor Authentication"
+                  width={800}
+                  height={490}
+                  className="w-full h-auto"
+                />
               </div>
             </div>
 
