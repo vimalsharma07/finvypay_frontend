@@ -15,7 +15,7 @@ export default function RefundsPage() {
           method="POST"
           path="/api/v1/production/refund"
           description="Processes a refund for a successful transaction. If amount is not provided, full refund is processed."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Request Body</h4>
           <CodeBlock
@@ -88,7 +88,7 @@ export default function RefundsPage() {
           method="POST"
           path="/api/v1/sandbox/refund"
           description="Processes a refund in sandbox mode for testing."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Request Body</h4>
           <p className="text-sm text-muted-foreground mb-2">

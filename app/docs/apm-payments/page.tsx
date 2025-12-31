@@ -15,7 +15,7 @@ export default function ApmPaymentsPage() {
           method="POST"
           path="/api/v1/production/apm"
           description="Processes Alternative Payment Method payment (PayPal, Apple Pay, Google Pay, etc.)"
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Request Body</h4>
           <CodeBlock
@@ -124,7 +124,7 @@ export default function ApmPaymentsPage() {
           method="POST"
           path="/api/v1/sandbox/apm"
           description="Processes APM payment in sandbox mode for testing."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Request Body</h4>
           <p className="text-sm text-muted-foreground mb-2">

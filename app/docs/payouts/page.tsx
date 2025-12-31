@@ -15,7 +15,7 @@ export default function PayoutsPage() {
           method="POST"
           path="/api/v1/production/payout"
           description="Creates a payout to a beneficiary."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Request Body</h4>
           <CodeBlock
@@ -105,7 +105,7 @@ export default function PayoutsPage() {
           method="POST"
           path="/api/v1/sandbox/payout"
           description="Creates a payout in sandbox mode for testing."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Request Body</h4>
           <p className="text-sm text-muted-foreground mb-2">
@@ -129,7 +129,7 @@ export default function PayoutsPage() {
           method="GET"
           path="/api/v1/production/payout/:id/status"
           description="Returns the current status of a payout."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Path Parameters</h4>
           <div className="overflow-x-auto">
@@ -177,7 +177,7 @@ export default function PayoutsPage() {
           method="GET"
           path="/api/v1/sandbox/payout/:id/status"
           description="Returns the current status of a payout in sandbox mode."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Path Parameters</h4>
           <p className="text-sm text-muted-foreground mb-2">

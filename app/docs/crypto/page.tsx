@@ -15,7 +15,7 @@ export default function CryptoPage() {
           method="POST"
           path="/api/v1/production/crypto/payment-link"
           description="Creates a crypto payment link with wallet address and QR code for customers to send cryptocurrency."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Request Body</h4>
           <CodeBlock
@@ -111,7 +111,7 @@ export default function CryptoPage() {
           method="POST"
           path="/api/v1/production/crypto"
           description="Processes crypto exchange or on-ramp transaction."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Request Body</h4>
           <CodeBlock
@@ -132,7 +132,7 @@ export default function CryptoPage() {
           method="POST"
           path="/api/v1/sandbox/crypto"
           description="Processes crypto exchange in sandbox mode for testing."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Request Body</h4>
           <p className="text-sm text-muted-foreground mb-2">
@@ -156,7 +156,7 @@ export default function CryptoPage() {
           method="POST"
           path="/api/v1/production/crypto/payin"
           description="Processes crypto payin transaction."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Request Body</h4>
           <CodeBlock
@@ -177,7 +177,7 @@ export default function CryptoPage() {
           method="POST"
           path="/api/v1/sandbox/crypto/payin"
           description="Processes crypto payin in sandbox mode for testing."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Request Body</h4>
           <p className="text-sm text-muted-foreground mb-2">
@@ -191,7 +191,7 @@ export default function CryptoPage() {
           method="POST"
           path="/api/v1/production/crypto/currencies"
           description="Returns list of supported cryptocurrencies."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <ResponseExample
             title="Success Response"

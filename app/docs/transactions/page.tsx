@@ -16,6 +16,7 @@ export default function TransactionsPage() {
           path="/api/production/status/:id"
           description="Returns the current status of a transaction. No authentication required."
           requiresAuth={false}
+          requiresApiKey={false}
         >
           <h4 className="font-semibold mb-2">Path Parameters</h4>
           <div className="overflow-x-auto">
@@ -82,7 +83,7 @@ export default function TransactionsPage() {
           method="GET"
           path="/api/v1/production-transactions"
           description="Returns paginated list of production transactions with filtering options."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Query Parameters</h4>
           <div className="overflow-x-auto">
@@ -180,7 +181,7 @@ export default function TransactionsPage() {
           method="GET"
           path="/api/v1/sandbox-transactions"
           description="Returns paginated list of sandbox transactions."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Query Parameters</h4>
           <p className="text-sm text-muted-foreground mb-2">
@@ -194,7 +195,7 @@ export default function TransactionsPage() {
           method="GET"
           path="/api/v1/production-wallet-transactions"
           description="Returns paginated list of production wallet/payout transactions."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Query Parameters</h4>
           <div className="overflow-x-auto">
@@ -231,7 +232,7 @@ export default function TransactionsPage() {
           method="GET"
           path="/api/v1/sandbox-wallet-transactions"
           description="Returns paginated list of sandbox wallet/payout transactions."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Query Parameters</h4>
           <p className="text-sm text-muted-foreground mb-2">

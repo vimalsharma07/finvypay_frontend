@@ -15,7 +15,7 @@ export default function CardPaymentsPage() {
           method="POST"
           path="/api/v1/production/card"
           description="Processes a card payment directly without redirecting the user. This endpoint is suitable for server-side integrations where you handle card data securely."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Request Body</h4>
           <CodeBlock
@@ -172,7 +172,7 @@ export default function CardPaymentsPage() {
           method="POST"
           path="/api/v1/sandbox/card"
           description="Uses test gateway for sandbox testing. All transactions are simulated and do not process real payments."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Request Body</h4>
           <p className="text-sm text-muted-foreground mb-2">
@@ -241,7 +241,7 @@ export default function CardPaymentsPage() {
           method="POST"
           path="/api/v1/production/hosted/card"
           description="Creates a hosted payment page. Returns a redirect URL for the customer to complete payment on our secure payment page."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Request Body</h4>
           <CodeBlock
@@ -339,7 +339,7 @@ export default function CardPaymentsPage() {
           method="POST"
           path="/api/v1/sandbox/hosted/card"
           description="Creates a hosted payment page for sandbox testing. Same functionality as production but uses test gateway."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Request Body</h4>
           <p className="text-sm text-muted-foreground mb-2">
@@ -364,7 +364,7 @@ export default function CardPaymentsPage() {
           method="POST"
           path="/api/v1/production/hosted/card/verify"
           description="Verifies and processes card details after customer returns from hosted payment page."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Request Body</h4>
           <CodeBlock
@@ -451,7 +451,7 @@ export default function CardPaymentsPage() {
           method="POST"
           path="/api/v1/sandbox/hosted/card/verify"
           description="Verifies and processes card details after customer returns from hosted payment page (sandbox mode)."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Request Body</h4>
           <p className="text-sm text-muted-foreground mb-2">

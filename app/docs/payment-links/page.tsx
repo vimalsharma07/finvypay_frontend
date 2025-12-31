@@ -15,7 +15,7 @@ export default function PaymentLinksPage() {
           method="POST"
           path="/api/v1/payment-link"
           description="Creates a shareable payment link that can be sent to customers via email, SMS, or any other channel."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Request Body</h4>
           <CodeBlock
@@ -130,7 +130,7 @@ export default function PaymentLinksPage() {
           method="GET"
           path="/api/v1/payment-templates"
           description="Returns available payment link templates that can be used to customize the payment page appearance."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <ResponseExample
             title="Success Response"

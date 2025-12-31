@@ -82,7 +82,7 @@ export default function DocsOverviewPage() {
         </p>
         <CodeBlock
           title="Authorization Header"
-          code={`Authorization: Bearer YOUR_SECRET_KEY`}
+          code={`Authorization: Bearer your_api_key_or_sandbox_api_key`}
         />
         <Note type="warning">
           <strong>Important:</strong> Keep your API keys secure. Never expose them in client-side code or commit them to version control.
@@ -273,7 +273,7 @@ BLOCKED - Transaction blocked due to security/compliance`}
           title="Example: Process Card Payment"
           code={`curl -X POST https://api.pay4tech.com/api/v1/sandbox/card \\
   -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer YOUR_SECRET_KEY" \\
+  -H "Authorization: Bearer your_api_key_or_sandbox_api_key" \\
   -d '{
     "orderId": "ORD-12345",
     "amount": 100.50,

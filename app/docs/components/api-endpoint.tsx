@@ -12,6 +12,7 @@ interface ApiEndpointProps {
   path: string;
   description?: string;
   requiresAuth?: boolean;
+  requiresApiKey?: boolean;
   children?: ReactNode;
 }
 
@@ -27,7 +28,8 @@ export function ApiEndpoint({
   method,
   path,
   description,
-  requiresAuth = true,
+  requiresAuth = false,
+  requiresApiKey = false,
   children,
 }: ApiEndpointProps) {
   return (
@@ -39,11 +41,18 @@ export function ApiEndpoint({
           </Badge>
           <Code className="text-sm font-mono">{path}</Code>
         </div>
-        {requiresAuth && (
-          <Badge variant="outline" className="text-xs">
-            Requires Auth
-          </Badge>
-        )}
+        <div className="flex items-center gap-2">
+          {requiresApiKey && (
+            <Badge variant="outline" className="text-xs">
+              Requires API Key
+            </Badge>
+          )}
+          {requiresAuth && !requiresApiKey && (
+            <Badge variant="outline" className="text-xs">
+              Requires Auth
+            </Badge>
+          )}
+        </div>
       </div>
       {description && (
         <div className="px-4 py-3 border-b">

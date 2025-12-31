@@ -15,7 +15,7 @@ export default function WalletPage() {
           method="GET"
           path="/api/v1/wallet"
           description="Returns wallet balance and details for the authenticated user."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <ResponseExample
             title="Success Response"
@@ -39,7 +39,7 @@ export default function WalletPage() {
           method="POST"
           path="/api/v1/wallet/estimate-payout"
           description="Calculates fees and net amount for a payout before processing."
-          requiresAuth={true}
+          requiresApiKey={true}
         >
           <h4 className="font-semibold mb-2">Request Body</h4>
           <CodeBlock

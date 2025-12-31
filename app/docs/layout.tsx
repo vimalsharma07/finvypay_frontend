@@ -33,9 +33,9 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen bg-background w-full">
+    <div className="min-h-screen bg-background w-full relative">
       {/* Header */}
-      <header className="border-b sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="w-full px-4 py-4">
           <div className="flex items-center justify-between mx-auto">
             <Link href="/docs" className="flex items-center gap-2">
@@ -54,11 +54,11 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <div className="w-full px-4 py-8">
+      <div className="w-full px-4 py-8 pt-24">
         <div className="flex gap-8">
           {/* Sidebar */}
           <aside className="w-64 flex-shrink-0">
-            <nav className="sticky top-24 space-y-1">
+            <nav className="sticky top-28 space-y-1">
               {docsNavItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href || (item.href !== '/docs' && pathname.startsWith(item.href));
