@@ -2,7 +2,20 @@ import { Section, Note, CodeBlock } from './components/api-endpoint';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Shield, Zap, Globe, Lock } from 'lucide-react';
+import { 
+  ArrowRight, 
+  Shield, 
+  Zap, 
+  Globe, 
+  Lock,
+  CreditCard,
+  FileText,
+  Wallet,
+  RefreshCw,
+  Link as LinkIcon,
+  Coins,
+  Search
+} from 'lucide-react';
 
 export default function DocsOverviewPage() {
   return (
@@ -140,15 +153,36 @@ export default function DocsOverviewPage() {
         <p className="text-muted-foreground mb-4">
           The API uses standard HTTP status codes to indicate success or failure:
         </p>
-        <ul className="list-disc list-inside space-y-2 text-muted-foreground mb-4">
-          <li><code>200 OK</code> - Request succeeded</li>
-          <li><code>400 Bad Request</code> - Invalid request parameters</li>
-          <li><code>401 Unauthorized</code> - Invalid or missing API key</li>
-          <li><code>403 Forbidden</code> - API key lacks required permissions</li>
-          <li><code>404 Not Found</code> - Resource not found</li>
-          <li><code>429 Too Many Requests</code> - Rate limit exceeded</li>
-          <li><code>500 Internal Server Error</code> - Server error</li>
-        </ul>
+        <div className="space-y-3 mb-4">
+          <div className="flex items-center gap-3">
+            <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 font-mono text-xs px-2 py-1">200 OK</Badge>
+            <span className="text-sm text-foreground">Request succeeded</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Badge className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20 font-mono text-xs px-2 py-1">400 Bad Request</Badge>
+            <span className="text-sm text-foreground">Invalid request parameters</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Badge className="bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 font-mono text-xs px-2 py-1">401 Unauthorized</Badge>
+            <span className="text-sm text-foreground">Invalid or missing API key</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Badge className="bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 font-mono text-xs px-2 py-1">403 Forbidden</Badge>
+            <span className="text-sm text-foreground">API key lacks required permissions</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Badge className="bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 font-mono text-xs px-2 py-1">404 Not Found</Badge>
+            <span className="text-sm text-foreground">Resource not found</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Badge className="bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20 font-mono text-xs px-2 py-1">429 Too Many Requests</Badge>
+            <span className="text-sm text-foreground">Rate limit exceeded</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Badge className="bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 font-mono text-xs px-2 py-1">500 Internal Server Error</Badge>
+            <span className="text-sm text-foreground">Server error</span>
+          </div>
+        </div>
         <CodeBlock
           title="Error Response Format"
           code={`{
@@ -169,11 +203,20 @@ export default function DocsOverviewPage() {
         <p className="text-muted-foreground mb-4">
           To ensure fair usage and system stability, API requests are rate-limited:
         </p>
-        <ul className="list-disc list-inside space-y-2 text-muted-foreground mb-4">
-          <li><strong>Standard Tier:</strong> 100 requests per minute per API key</li>
-          <li><strong>Premium Tier:</strong> 500 requests per minute per API key</li>
-          <li><strong>Enterprise Tier:</strong> Custom rate limits based on agreement</li>
-        </ul>
+        <div className="space-y-3 mb-4">
+          <div className="flex items-center gap-3">
+            <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 font-semibold text-xs px-3 py-1">Standard Tier</Badge>
+            <span className="text-sm text-foreground font-medium">100 requests per minute per API key</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Badge className="bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20 font-semibold text-xs px-3 py-1">Premium Tier</Badge>
+            <span className="text-sm text-foreground font-medium">500 requests per minute per API key</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Badge className="bg-primary/10 text-primary border-primary/20 font-semibold text-xs px-3 py-1">Enterprise Tier</Badge>
+            <span className="text-sm text-foreground font-medium">Custom rate limits based on agreement</span>
+          </div>
+        </div>
         <p className="text-muted-foreground mb-4">
           Rate limit information is included in response headers:
         </p>
@@ -211,12 +254,20 @@ X-RateLimit-Reset: 1640995200`}
           Webhooks allow you to receive real-time notifications about transaction status changes. Configure your
           webhook URL when creating a payment, and we will send POST requests to your endpoint when events occur.
         </p>
-        <CodeBlock
-          title="Webhook Events"
-          code={`SUCCESS - Transaction successfully processed
-FAILED - Transaction failed
-BLOCKED - Transaction blocked due to security/compliance`}
-        />
+        <div className="space-y-3 mb-4">
+          <div className="flex items-center gap-3">
+            <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 font-mono text-xs px-2 py-1">SUCCESS</Badge>
+            <span className="text-sm text-foreground">Transaction successfully processed</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Badge className="bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 font-mono text-xs px-2 py-1">FAILED</Badge>
+            <span className="text-sm text-foreground">Transaction failed</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Badge className="bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20 font-mono text-xs px-2 py-1">BLOCKED</Badge>
+            <span className="text-sm text-foreground">Transaction blocked due to security/compliance</span>
+          </div>
+        </div>
         <p className="text-muted-foreground mt-4 mb-4">
           Webhook requests include a signature header for verification:
         </p>
@@ -271,6 +322,7 @@ BLOCKED - Transaction blocked due to security/compliance`}
         </p>
         <CodeBlock
           title="Example: Process Card Payment"
+          language="bash"
           code={`curl -X POST https://api.pay4tech.com/api/v1/sandbox/card \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer your_api_key_or_sandbox_api_key" \\
@@ -298,53 +350,148 @@ BLOCKED - Transaction blocked due to security/compliance`}
 
       <Section title="API Categories">
         <div className="grid md:grid-cols-2 gap-4 my-6">
-          <Link href="/docs/card-payments" className="p-4 border rounded-lg hover:bg-muted transition-colors">
-            <h3 className="font-semibold mb-2">Card Payments</h3>
-            <p className="text-sm text-muted-foreground">
-              Process credit and debit card payments with server-to-server or hosted payment pages.
-            </p>
+          <Link 
+            href="/docs/card-payments" 
+            className="group p-5 border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 flex items-start justify-between gap-4"
+          >
+            <div className="flex items-start gap-4 flex-1">
+              <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 group-hover:bg-blue-500/20 transition-colors">
+                <CreditCard className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold mb-2 text-foreground group-hover:text-primary transition-colors">Card Payments</h3>
+                <p className="text-sm text-muted-foreground">
+                  Process credit and debit card payments with server-to-server or hosted payment pages.
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0" />
           </Link>
-          <Link href="/docs/apm-payments" className="p-4 border rounded-lg hover:bg-muted transition-colors">
-            <h3 className="font-semibold mb-2">APM Payments</h3>
-            <p className="text-sm text-muted-foreground">
-              Accept alternative payment methods like PayPal, Apple Pay, and Google Pay.
-            </p>
+          
+          <Link 
+            href="/docs/apm-payments" 
+            className="group p-5 border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 flex items-start justify-between gap-4"
+          >
+            <div className="flex items-start gap-4 flex-1">
+              <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 group-hover:bg-purple-500/20 transition-colors">
+                <FileText className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold mb-2 text-foreground group-hover:text-primary transition-colors">APM Payments</h3>
+                <p className="text-sm text-muted-foreground">
+                  Accept alternative payment methods like PayPal, Apple Pay, and Google Pay.
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0" />
           </Link>
-          <Link href="/docs/payouts" className="p-4 border rounded-lg hover:bg-muted transition-colors">
-            <h3 className="font-semibold mb-2">Payouts</h3>
-            <p className="text-sm text-muted-foreground">
-              Send payments to beneficiaries, check payout status, and manage transfers.
-            </p>
+          
+          <Link 
+            href="/docs/payouts" 
+            className="group p-5 border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 flex items-start justify-between gap-4"
+          >
+            <div className="flex items-start gap-4 flex-1">
+              <div className="p-2 rounded-lg bg-green-500/10 text-green-600 dark:text-green-400 group-hover:bg-green-500/20 transition-colors">
+                <Wallet className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold mb-2 text-foreground group-hover:text-primary transition-colors">Payouts</h3>
+                <p className="text-sm text-muted-foreground">
+                  Send payments to beneficiaries, check payout status, and manage transfers.
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0" />
           </Link>
-          <Link href="/docs/wallet" className="p-4 border rounded-lg hover:bg-muted transition-colors">
-            <h3 className="font-semibold mb-2">Wallet</h3>
-            <p className="text-sm text-muted-foreground">
-              Check wallet balance, estimate payout amounts, and manage wallet transactions.
-            </p>
+          
+          <Link 
+            href="/docs/wallet" 
+            className="group p-5 border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 flex items-start justify-between gap-4"
+          >
+            <div className="flex items-start gap-4 flex-1">
+              <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 group-hover:bg-amber-500/20 transition-colors">
+                <Wallet className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold mb-2 text-foreground group-hover:text-primary transition-colors">Wallet</h3>
+                <p className="text-sm text-muted-foreground">
+                  Check wallet balance, estimate payout amounts, and manage wallet transactions.
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0" />
           </Link>
-          <Link href="/docs/refunds" className="p-4 border rounded-lg hover:bg-muted transition-colors">
-            <h3 className="font-semibold mb-2">Refunds</h3>
-            <p className="text-sm text-muted-foreground">
-              Process full or partial refunds for successful transactions.
-            </p>
+          
+          <Link 
+            href="/docs/refunds" 
+            className="group p-5 border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 flex items-start justify-between gap-4"
+          >
+            <div className="flex items-start gap-4 flex-1">
+              <div className="p-2 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 group-hover:bg-orange-500/20 transition-colors">
+                <RefreshCw className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold mb-2 text-foreground group-hover:text-primary transition-colors">Refunds</h3>
+                <p className="text-sm text-muted-foreground">
+                  Process full or partial refunds for successful transactions.
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0" />
           </Link>
-          <Link href="/docs/payment-links" className="p-4 border rounded-lg hover:bg-muted transition-colors">
-            <h3 className="font-semibold mb-2">Payment Links</h3>
-            <p className="text-sm text-muted-foreground">
-              Create shareable payment links for customers to complete payments.
-            </p>
+          
+          <Link 
+            href="/docs/payment-links" 
+            className="group p-5 border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 flex items-start justify-between gap-4"
+          >
+            <div className="flex items-start gap-4 flex-1">
+              <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-500/20 transition-colors">
+                <LinkIcon className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold mb-2 text-foreground group-hover:text-primary transition-colors">Payment Links</h3>
+                <p className="text-sm text-muted-foreground">
+                  Create shareable payment links for customers to complete payments.
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0" />
           </Link>
-          <Link href="/docs/crypto" className="p-4 border rounded-lg hover:bg-muted transition-colors">
-            <h3 className="font-semibold mb-2">Crypto Payments</h3>
-            <p className="text-sm text-muted-foreground">
-              Accept cryptocurrency payments, create crypto payment links, and process crypto exchanges.
-            </p>
+          
+          <Link 
+            href="/docs/crypto" 
+            className="group p-5 border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 flex items-start justify-between gap-4"
+          >
+            <div className="flex items-start gap-4 flex-1">
+              <div className="p-2 rounded-lg bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 group-hover:bg-yellow-500/20 transition-colors">
+                <Coins className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold mb-2 text-foreground group-hover:text-primary transition-colors">Crypto Payments</h3>
+                <p className="text-sm text-muted-foreground">
+                  Accept cryptocurrency payments, create crypto payment links, and process crypto exchanges.
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0" />
           </Link>
-          <Link href="/docs/transactions" className="p-4 border rounded-lg hover:bg-muted transition-colors">
-            <h3 className="font-semibold mb-2">Transactions</h3>
-            <p className="text-sm text-muted-foreground">
-              Query transaction status, retrieve transaction history, and filter transactions.
-            </p>
+          
+          <Link 
+            href="/docs/transactions" 
+            className="group p-5 border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 flex items-start justify-between gap-4"
+          >
+            <div className="flex items-start gap-4 flex-1">
+              <div className="p-2 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400 group-hover:bg-teal-500/20 transition-colors">
+                <Search className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold mb-2 text-foreground group-hover:text-primary transition-colors">Transactions</h3>
+                <p className="text-sm text-muted-foreground">
+                  Query transaction status, retrieve transaction history, and filter transactions.
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0" />
           </Link>
         </div>
       </Section>

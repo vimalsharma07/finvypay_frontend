@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -14,7 +14,10 @@ import {
   Coins, 
   RefreshCw,
   Search,
-  BookOpen
+  BookOpen,
+  Home,
+  LogIn,
+  ArrowUp
 } from 'lucide-react';
 
 const docsNavItems = [
@@ -31,6 +34,21 @@ const docsNavItems = [
 
 export default function DocsLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show button when user scrolls down more than 300px
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="min-h-screen bg-background w-full relative">
@@ -44,10 +62,16 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
             </Link>
             <div className="flex items-center gap-4">
               <Link href="/">
-                <Button variant="ghost" size="sm">Back to Home</Button>
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <Home className="h-4 w-4" />
+                  Back to Home
+                </Button>
               </Link>
               <Link href="/signin">
-                <Button size="sm">Sign In</Button>
+                <Button size="sm" className="gap-2">
+                  <LogIn className="h-4 w-4" />
+                  Sign In
+                </Button>
               </Link>
             </div>
           </div>
@@ -100,6 +124,17 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </footer>
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <Button
+          onClick={scrollToTop}
+          className="fixed bottom-8 right-8 z-50 rounded-full h-12 w-12 p-0 shadow-lg hover:shadow-xl transition-all duration-300"
+          size="icon"
+        >
+          <ArrowUp className="h-5 w-5" />
+        </Button>
+      )}
     </div>
   );
 }
