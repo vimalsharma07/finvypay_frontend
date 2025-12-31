@@ -74,10 +74,23 @@ export function TwoFaSetup() {
     setError(null);
 
     try {
+      // Ensure token is a string (not number) - backend expects string
+      const tokenString = String(token).trim();
+      
+      // Log for debugging (remove in production)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔐 2FA Verification Request:', {
+          enable: true,
+          secret: secret?.substring(0, 10) + '...', // Only log first 10 chars for security
+          token: tokenString,
+          tokenLength: tokenString.length,
+        });
+      }
+
       const response = await toggleTwoFa({
         enable: true,
         secret: secret,
-        token: token,
+        token: tokenString,
       });
 
       handleApiResponse(response, {
@@ -104,9 +117,21 @@ export function TwoFaSetup() {
             }, 1500);
           }
         },
-        onError: (errorMessage) => {
-          setError(errorMessage || 'Failed to verify code. Please try again.');
-          toast.error(errorMessage || 'Verification failed');
+        onError: (errorMessage, statusCode) => {
+          // Log detailed error for debugging
+          console.error('❌ 2FA Verification Failed:', {
+            errorMessage,
+            statusCode,
+            tokenLength: token.length,
+            tokenValue: token,
+            secretExists: !!secret,
+            secretLength: secret?.length,
+          });
+          
+          // Provide more helpful error message
+          const friendlyError = errorMessage || 'Failed to verify code. Please try again.';
+          setError(friendlyError + ' Make sure you\'re entering the CURRENT code from your authenticator app (codes change every 30 seconds).');
+          toast.error(friendlyError);
         },
       });
     } catch (err) {
@@ -183,8 +208,15 @@ export function TwoFaSetup() {
                   <ol className="list-decimal list-inside space-y-1 ml-2">
                     <li>Open your authenticator app (Google Authenticator, Authy, Microsoft Authenticator, etc.)</li>
                     <li>Scan the QR code above or enter the secret code manually</li>
-                    <li>Enter the 6-digit code from your app below to complete setup</li>
+                    <li>Wait for a 6-digit code to appear in your app (codes refresh every 30 seconds)</li>
+                    <li>Enter the current 6-digit code from your app below to complete setup</li>
                   </ol>
+                  <Alert className="mt-3">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="text-xs">
+                      <strong>Important:</strong> Do not regenerate the QR code after scanning. Use the code from your authenticator app that matches this QR code.
+                    </AlertDescription>
+                  </Alert>
                 </div>
               </div>
 
@@ -210,6 +242,9 @@ export function TwoFaSetup() {
                     className="text-center text-2xl font-mono tracking-widest"
                     disabled={verifying}
                   />
+                  <p className="text-xs text-muted-foreground text-center mt-1">
+                    ⏱️ Codes refresh every 30 seconds - use the current code displayed in your app
+                  </p>
                   {error && (
                     <Alert variant="destructive" className="mt-2">
                       <AlertCircle className="h-4 w-4" />
@@ -235,11 +270,25 @@ export function TwoFaSetup() {
               </div>
             </div>
 
-            <div className="flex justify-center pt-4">
-              <Button onClick={fetchQrCode} variant="outline" disabled={verifying}>
-                Regenerate QR Code
-              </Button>
-            </div>
+            {!token && (
+              <div className="flex justify-center pt-4">
+                <Button 
+                  onClick={fetchQrCode} 
+                  variant="outline" 
+                  disabled={verifying || loading}
+                >
+                  Regenerate QR Code
+                </Button>
+              </div>
+            )}
+            {token && (
+              <div className="text-center pt-2">
+                <p className="text-xs text-muted-foreground">
+                  Note: If you regenerate the QR code, you'll need to scan the new code with your authenticator app. 
+                  Your current code will not work with a new QR code.
+                </p>
+              </div>
+            )}
           </div>
         )}
 

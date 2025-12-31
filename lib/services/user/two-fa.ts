@@ -69,7 +69,17 @@ export async function toggleTwoFa(
   payload: TwoFaToggleRequest
 ): Promise<ApiResponse<TwoFaToggleResponse>> {
   try {
-    const response = await http.put('/merchant/2fa/status', payload) as TwoFaToggleResponse;
+    // Ensure token is sent as string (not number)
+    const requestPayload = {
+      ...payload,
+      token: String(payload.token),
+      secret: payload.secret ? String(payload.secret) : undefined,
+    };
+
+    const response = await http.put('/merchant/2fa/status', requestPayload, {
+      auth: true,
+      json: true,
+    }) as TwoFaToggleResponse;
 
     return {
       status: 200,

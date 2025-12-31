@@ -18,8 +18,9 @@ export default function UserProfilePage() {
   const { user } = useAuth();
   const [showTwoFaSetup, setShowTwoFaSetup] = useState(false);
   const [isTwoFaEnabled, setIsTwoFaEnabled] = useState(false);
+  const [hasTwoFaToken, setHasTwoFaToken] = useState(false);
 
-  // Check if 2FA is disabled - show setup component automatically
+  // Check if 2FA is disabled - show setup or re-enable component
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -27,8 +28,12 @@ export default function UserProfilePage() {
         if (storedUser) {
           const userData = JSON.parse(storedUser);
           const twoFaEnabled = userData && userData.isTwoFaEnabled === true;
-          setShowTwoFaSetup(!twoFaEnabled);
+          const twoFaToken = userData && userData.twoFaToken;
+          
           setIsTwoFaEnabled(twoFaEnabled);
+          setHasTwoFaToken(!!twoFaToken);
+          // Show setup/re-enable if 2FA is disabled
+          setShowTwoFaSetup(!twoFaEnabled);
         }
       } catch (error) {
         console.error('Failed to read user data from localStorage:', error);
@@ -64,7 +69,13 @@ export default function UserProfilePage() {
     <Container>
       {!isTwoFaEnabled && showTwoFaSetup && (
         <div className="mb-5 lg:mb-7.5">
-          <TwoFaSetup />
+          {hasTwoFaToken ? (
+            // Re-enable 2FA (has existing token, no QR code needed)
+            <TwoFaManage isEnabled={false} onStatusChange={handleTwoFaStatusChange} />
+          ) : (
+            // First-time setup (no token, need QR code)
+            <TwoFaSetup />
+          )}
         </div>
       )}
 

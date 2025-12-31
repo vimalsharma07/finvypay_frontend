@@ -52,6 +52,8 @@ export function TwoFaManage({ isEnabled, onStatusChange }: TwoFaManageProps) {
                 if (storedUser) {
                   const userData = JSON.parse(storedUser);
                   userData.isTwoFaEnabled = enable;
+                  // If disabling, keep twoFaToken (don't remove it)
+                  // If enabling, ensure twoFaToken is preserved
                   localStorage.setItem('user', JSON.stringify(userData));
                 }
               } catch (err) {
@@ -89,40 +91,80 @@ export function TwoFaManage({ isEnabled, onStatusChange }: TwoFaManageProps) {
   };
 
   if (!showTokenInput) {
-    return (
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-success/10 flex items-center justify-center">
-              <CheckCircle2 className="h-5 w-5 text-success" />
+    // Show different UI based on whether 2FA is enabled or disabled
+    if (isEnabled) {
+      // 2FA is enabled - show disable option
+      return (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-success/10 flex items-center justify-center">
+                <CheckCircle2 className="h-5 w-5 text-success" />
+              </div>
+              <div>
+                <CardTitle>Two-Factor Authentication Enabled</CardTitle>
+                <CardDescription>
+                  Your account is protected with two-factor authentication
+                </CardDescription>
+              </div>
             </div>
-            <div>
-              <CardTitle>Two-Factor Authentication Enabled</CardTitle>
-              <CardDescription>
-                Your account is protected with two-factor authentication
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Alert>
-            <CheckCircle2 className="h-4 w-4" />
-            <AlertDescription>
-              Two-factor authentication is currently enabled on your account. You can disable it by entering your authentication code below.
-            </AlertDescription>
-          </Alert>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert>
+              <CheckCircle2 className="h-4 w-4" />
+              <AlertDescription>
+                Two-factor authentication is currently enabled on your account. You can disable it by entering your authentication code below.
+              </AlertDescription>
+            </Alert>
 
-          <Button
-            variant="destructive"
-            onClick={() => setShowTokenInput(true)}
-            className="w-full"
-          >
-            <Unlock className="mr-2 h-4 w-4" />
-            Disable 2FA
-          </Button>
-        </CardContent>
-      </Card>
-    );
+            <Button
+              variant="destructive"
+              onClick={() => setShowTokenInput(true)}
+              className="w-full"
+            >
+              <Unlock className="mr-2 h-4 w-4" />
+              Disable 2FA
+            </Button>
+          </CardContent>
+        </Card>
+      );
+    } else {
+      // 2FA is disabled but has token - show re-enable option
+      return (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-warning/10 flex items-center justify-center">
+                <Lock className="h-5 w-5 text-warning" />
+              </div>
+              <div>
+                <CardTitle>Re-enable Two-Factor Authentication</CardTitle>
+                <CardDescription>
+                  Your 2FA was previously set up. Re-enable it with your authenticator app.
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert>
+              <Shield className="h-4 w-4" />
+              <AlertDescription>
+                Two-factor authentication is currently disabled. You can re-enable it by entering a code from your authenticator app. No need to scan a new QR code.
+              </AlertDescription>
+            </Alert>
+
+            <Button
+              variant="primary"
+              onClick={() => setShowTokenInput(true)}
+              className="w-full"
+            >
+              <Lock className="mr-2 h-4 w-4" />
+              Re-enable 2FA
+            </Button>
+          </CardContent>
+        </Card>
+      );
+    }
   }
 
   return (
