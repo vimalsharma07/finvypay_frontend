@@ -30,7 +30,6 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Container } from '@/components/common/container';
-import { StoreClientTopbar } from '@/app/(protected)/store-client/components/common/topbar';
 import { Breadcrumb } from './breadcrumb';
 import { MegaMenu } from './mega-menu';
 import { MegaMenuMobile } from './mega-menu-mobile';
@@ -147,17 +146,11 @@ export function Header() {
         </div>
 
         {/* Main Content (MegaMenu or Breadcrumbs) */}
-        {isUserPath ? null : pathname.startsWith('/account') ? (
-          <Breadcrumb />
-        ) : (
-          !mobileMode && <MegaMenu />
-        )}
+        {isUserPath ? null : !mobileMode && <MegaMenu />}
 
         {/* HeaderTopbar */}
         <div className="flex items-center gap-3 ms-auto">
-          {pathname.startsWith('/store-client') ? (
-            <StoreClientTopbar />
-          ) : isUserPath ? (
+          {isUserPath ? (
             <>
               {!mobileMode && (
                 <SearchDialog

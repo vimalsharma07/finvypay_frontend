@@ -2,7 +2,6 @@ import {
   Home,
   Cpu,
   Wallet,
-  Users,
   CircleDollarSign,
   FileBarChart,
   Route,
@@ -42,13 +41,6 @@ const BASE_USER_MENU: MenuConfig = [
     path: '/user/wallet',
     permissionModule: 'Wallet Management',
     requirePermission: true,
-  },
-  {
-    title: 'User Management',
-    icon: Users,
-    path: '/user/user-management',
-    permissionModule: 'User Management',
-    requirePermission: false,
   },
   {
     title: 'Transactions',

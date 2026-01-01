@@ -14,6 +14,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { EllipsisVertical, Search, X, LucideIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -41,6 +42,44 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import Link from 'next/link';
 import { User } from '@/lib/services/admin/users';
+import type { DataGridProps } from '@/components/ui/data-grid';
+
+/**
+ * Shared table layout configuration for modern fintech design
+ */
+export const modernTableLayout: DataGridProps<any>['tableLayout'] = {
+  cellBorder: false,
+  rowBorder: true,
+  rowRounded: false,
+  stripped: false,
+  headerBackground: true,
+  headerBorder: true,
+  headerSticky: true,
+  width: 'fixed',
+};
+
+/**
+ * Shared table class names for modern fintech design
+ */
+export const modernTableClassNames: DataGridProps<any>['tableClassNames'] = {
+  base: 'text-sm',
+  header: 'bg-gradient-to-b from-muted/40 to-muted/20 border-b border-border',
+  headerRow: 'h-14',
+  headerSticky: 'sticky top-0 z-10 bg-background/98 backdrop-blur-md shadow-sm border-b border-border',
+  body: '',
+  bodyRow: 'h-14 hover:bg-primary/5 hover:border-l-2 hover:border-l-primary transition-all duration-200 cursor-pointer border-b border-border/30',
+  edgeCell: '',
+};
+
+/**
+ * Shared Card class names for modern table containers
+ */
+export const modernTableCardClasses = {
+  card: 'rounded-2xl border-border/50 bg-card shadow-sm',
+  header: 'border-b border-border/50 bg-muted/20',
+  table: 'overflow-hidden',
+  footer: 'border-t border-border/50 bg-muted/10',
+};
 
 // Header definition matching old project pattern
 export interface TableHeader<T> {
@@ -386,43 +425,52 @@ export function TableComp<T extends Record<string, any>>({
       table={table}
       recordCount={recordCount}
       isLoading={loading}
-      tableLayout={{
-        cellBorder: true,
-      }}
+      tableLayout={modernTableLayout}
+      tableClassNames={modernTableClassNames}
     >
-      <Card>
-        <CardHeader>
+      <Card className={modernTableCardClasses.card}>
+        <CardHeader className={modernTableCardClasses.header}>
           <CardHeading>
-            <div className="flex items-center gap-2.5">
-              <div className="relative">
-                <Search className="size-4 text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2" />
-                <Input
-                  placeholder={searchPlaceholder}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="ps-9 w-40"
-                />
-                {searchQuery.length > 0 && (
-                  <Button
-                    mode="icon"
-                    variant="ghost"
-                    className="absolute end-1.5 top-1/2 -translate-y-1/2 h-6 w-6"
-                    onClick={() => setSearchQuery('')}
-                  >
-                    <X />
-                  </Button>
+            <div className="relative w-full max-w-lg my-2 group">
+              <Search className={cn(
+                "absolute left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none size-4.5 transition-all duration-200",
+                searchQuery 
+                  ? "text-primary" 
+                  : "text-muted-foreground group-focus-within:text-primary"
+              )} />
+              <Input
+                placeholder={searchPlaceholder}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className={cn(
+                  "pl-11 pr-10 h-9 text-sm w-full",
+                  "bg-background border-border/60",
+                  "focus-visible:border-primary/50 focus-visible:ring-primary/20",
+                  "transition-all duration-200",
+                  "shadow-sm hover:shadow-md focus-visible:shadow-lg",
+                  searchQuery && "border-primary/30 bg-primary/5"
                 )}
-              </div>
+              />
+              {searchQuery.length > 0 && (
+                <Button
+                  mode="icon"
+                  variant="ghost"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 rounded-md hover:bg-muted/80 transition-colors"
+                  onClick={() => setSearchQuery('')}
+                >
+                  <X className="size-3.5 text-muted-foreground hover:text-foreground" />
+                </Button>
+              )}
             </div>
           </CardHeading>
         </CardHeader>
-        <CardTable>
-          <ScrollArea>
+        <CardTable className={modernTableCardClasses.table}>
+          <ScrollArea className="w-full">
             <DataGridTable />
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
         </CardTable>
-        <CardFooter>
+        <CardFooter className={modernTableCardClasses.footer}>
           <DataGridPagination />
         </CardFooter>
       </Card>

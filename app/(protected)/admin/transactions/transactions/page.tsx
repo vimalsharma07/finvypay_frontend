@@ -57,6 +57,7 @@ import { getCountries } from '@/lib/services/admin/countries';
 import { getTimeZones } from '@/i18n/timezones';
 import { Button } from '@/components/ui/button';
 import { Filter as FilterIcon } from 'lucide-react';
+import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -530,13 +531,11 @@ export default function TransactionsPage() {
           table={table}
           recordCount={meta?.totalItems || filteredData.length}
           isLoading={loading}
-          tableLayout={{
-            cellBorder: true,
-            width: 'fixed',
-          }}
+          tableLayout={modernTableLayout}
+          tableClassNames={modernTableClassNames}
         >
-          <Card>
-            <CardHeader>
+          <Card className={modernTableCardClasses.card}>
+            <CardHeader className={modernTableCardClasses.header}>
               <CardHeading>
                 <SearchInput
                   value={searchQuery}
@@ -545,13 +544,13 @@ export default function TransactionsPage() {
                 />
               </CardHeading>
             </CardHeader>
-            <CardTable>
+            <CardTable className={modernTableCardClasses.table}>
               <ScrollArea className="w-full">
                 <DataGridTable />
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </CardTable>
-            <CardFooter>
+            <CardFooter className={modernTableCardClasses.footer}>
               <DataGridPagination />
             </CardFooter>
           </Card>

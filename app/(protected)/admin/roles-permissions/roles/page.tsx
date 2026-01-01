@@ -41,6 +41,8 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Search, X, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TableActionMenu, TableActionMenuItem } from '@/app/(protected)/components/table-action-menu';
+import { cn } from '@/lib/utils';
+import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -278,42 +280,68 @@ export default function AdminRolesPage() {
           recordCount={filteredData.length}
           isLoading={loading}
           tableLayout={{
-            cellBorder: true,
+            cellBorder: false,
+            rowBorder: true,
+            rowRounded: false,
+            stripped: false,
+            headerBackground: true,
+            headerBorder: true,
+            headerSticky: true,
+            width: 'fixed',
+          }}
+          tableClassNames={{
+            base: 'text-sm',
+            header: 'bg-gradient-to-b from-muted/40 to-muted/20 border-b border-border',
+            headerRow: 'h-14',
+            headerSticky: 'sticky top-0 z-10 bg-background/98 backdrop-blur-md shadow-sm border-b border-border',
+            body: '',
+            bodyRow: 'h-14 hover:bg-primary/5 hover:border-l-2 hover:border-l-primary transition-all duration-200 cursor-pointer border-b border-border/30',
+            edgeCell: '',
           }}
         >
-          <Card>
-            <CardHeader>
+          <Card className="rounded-2xl border-border/50 bg-card shadow-sm">
+            <CardHeader className="border-b border-border/50 bg-muted/20">
               <CardHeading>
-                <div className="flex items-center gap-2.5">
-                  <div className="relative">
-                    <Search className="size-4 text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2" />
-                    <Input
-                      placeholder="Search roles..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="ps-9 w-40"
-                    />
-                    {searchQuery.length > 0 && (
-                      <Button
-                        mode="icon"
-                        variant="ghost"
-                        className="absolute end-1.5 top-1/2 -translate-y-1/2 h-6 w-6"
-                        onClick={() => setSearchQuery('')}
-                      >
-                        <X />
-                      </Button>
+                <div className="relative w-full max-w-lg my-2 group">
+                  <Search className={cn(
+                    "absolute left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none size-4.5 transition-all duration-200",
+                    searchQuery 
+                      ? "text-primary" 
+                      : "text-muted-foreground group-focus-within:text-primary"
+                  )} />
+                  <Input
+                    placeholder="Search roles..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className={cn(
+                      "pl-11 pr-10 h-9 text-sm w-full",
+                      "bg-background border-border/60",
+                      "focus-visible:border-primary/50 focus-visible:ring-primary/20",
+                      "transition-all duration-200",
+                      "shadow-sm hover:shadow-md focus-visible:shadow-lg",
+                      searchQuery && "border-primary/30 bg-primary/5"
                     )}
-                  </div>
+                  />
+                  {searchQuery.length > 0 && (
+                    <Button
+                      mode="icon"
+                      variant="ghost"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 rounded-md hover:bg-muted/80 transition-colors"
+                      onClick={() => setSearchQuery('')}
+                    >
+                      <X className="size-3.5 text-muted-foreground hover:text-foreground" />
+                    </Button>
+                  )}
                 </div>
               </CardHeading>
             </CardHeader>
-            <CardTable>
-              <ScrollArea>
+            <CardTable className="overflow-hidden">
+              <ScrollArea className="w-full">
                 <DataGridTable />
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </CardTable>
-            <CardFooter>
+            <CardFooter className="border-t border-border/50 bg-muted/10">
               <DataGridPagination />
             </CardFooter>
           </Card>
