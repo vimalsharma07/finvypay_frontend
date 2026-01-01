@@ -39,6 +39,14 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  Card,
+  CardFooter,
+  CardHeader,
+  CardHeading,
+  CardTable,
+} from '@/components/ui/card';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 const DATE_FMT = 'yyyy-MM-dd HH:mm';
 
@@ -234,7 +242,7 @@ export default function AdminApplicationListPage() {
   });
 
   return (
-    <Fragment>
+    <div className="overflow-x-hidden">
       <Container>
         <Toolbar>
           <ToolbarHeading
@@ -248,12 +256,32 @@ export default function AdminApplicationListPage() {
       </Container>
 
       <Container>
-        <DataGrid table={table} recordCount={meta?.total ?? data.length} isLoading={loading}>
-          <DataGridTable />
-          <DataGridPagination />
+        <DataGrid
+          table={table}
+          recordCount={meta?.total ?? data.length}
+          isLoading={loading}
+          tableLayout={{
+            cellBorder: true,
+            width: 'fixed',
+          }}
+        >
+          <Card>
+            <CardHeader>
+              <CardHeading>All merchant applications</CardHeading>
+            </CardHeader>
+            <CardTable>
+              <ScrollArea className="w-full">
+                <DataGridTable />
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </CardTable>
+            <CardFooter>
+              <DataGridPagination />
+            </CardFooter>
+          </Card>
         </DataGrid>
       </Container>
-    </Fragment>
+    </div>
   );
 }
 
