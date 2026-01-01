@@ -42,7 +42,15 @@ import {
   SearchUsersItem,
 } from './';
 
-export function SearchDialog({ trigger }: { trigger: ReactNode }) {
+export function SearchDialog({ 
+  trigger, 
+  open, 
+  onOpenChange 
+}: { 
+  trigger?: ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
   const [searchInput, setSearchInput] = useState('');
 
   const mixedSettingsItems: SearchSettingsItem[] = [
@@ -242,8 +250,8 @@ export function SearchDialog({ trigger }: { trigger: ReactNode }) {
   ];
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="lg:max-w-[600px] lg:top-[15%] lg:translate-y-0 p-0 [&_[data-slot=dialog-close]]:top-5.5 [&_[data-slot=dialog-close]]:end-5.5">
         <DialogHeader className="px-4 py-1 mb-1">
           <DialogTitle></DialogTitle>

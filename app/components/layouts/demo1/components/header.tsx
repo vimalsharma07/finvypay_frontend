@@ -1,17 +1,14 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { SearchDialog } from '@/partials/dialogs/search/search-dialog';
-import { AppsDropdownMenu } from '@/partials/topbar/apps-dropdown-menu';
-import { ChatSheet } from '@/partials/topbar/chat-sheet';
 import { NotificationsSheet } from '@/partials/topbar/notifications-sheet';
 import { UserDropdownMenu } from '@/partials/topbar/user-dropdown-menu';
 import {
   Bell,
-  LayoutGrid,
   Menu,
-  MessageCircleMore,
   Search,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -19,6 +16,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useScrollPosition } from '@/hooks/use-scroll-position';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   Sheet,
   SheetBody,
@@ -33,6 +31,10 @@ import { useAuth } from '@/hooks/use-auth';
 
 export function Header() {
   const [isSidebarSheetOpen, setIsSidebarSheetOpen] = useState(false);
+  const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isMac, setIsMac] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const pathname = usePathname();
   const mobileMode = useIsMobile();
@@ -73,6 +75,36 @@ export function Header() {
     setIsSidebarSheetOpen(false);
   }, [pathname]);
 
+  // Detect Mac platform
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsMac(navigator.platform.toUpperCase().indexOf('MAC') >= 0);
+    }
+  }, []);
+
+  // Handle CTRL+K / CMD+K keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        if (mobileMode) {
+          setIsSearchDialogOpen(true);
+        } else {
+          // Focus the search input or open dialog if not visible
+          if (searchInputRef.current) {
+            searchInputRef.current.focus();
+            searchInputRef.current.select();
+          } else {
+            setIsSearchDialogOpen(true);
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mobileMode]);
+
   return (
     <header
       className={cn(
@@ -80,7 +112,7 @@ export function Header() {
         headerSticky && 'border-b border-border',
       )}
     >
-      <Container className="flex justify-between items-stretch lg:gap-4">
+      <Container className="flex items-center justify-between gap-4">
         {/* Mobile Menu Button */}
         {mobileMode && (
           <div className="flex items-center">
@@ -107,24 +139,54 @@ export function Header() {
           </div>
         )}
 
+        {/* Search Input - Desktop */}
+        {!mobileMode && (
+          <div className="flex-1 max-w-md mx-auto">
+            <div className="relative group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <Input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsSearchDialogOpen(true)}
+                placeholder="Search..."
+                className="pl-9 pr-20 h-9 bg-muted/50 border-border/50 focus-visible:ring-primary focus-visible:border-primary"
+              />
+              <kbd className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                <span className="text-xs">{isMac ? '⌘' : 'Ctrl'}</span>K
+              </kbd>
+            </div>
+          </div>
+        )}
+
+        {/* Search Dialog - Desktop (controlled) */}
+        {!mobileMode && (
+          <SearchDialog
+            open={isSearchDialogOpen}
+            onOpenChange={setIsSearchDialogOpen}
+          />
+        )}
+
         {/* HeaderTopbar */}
-        <div className="flex items-center gap-3 ms-auto">
+        <div className="flex items-center gap-3 shrink-0">
+          {/* Search Dialog - Mobile (on right side) */}
+          {mobileMode && (
+            <SearchDialog
+              trigger={
+                <Button
+                  variant="ghost"
+                  mode="icon"
+                  shape="circle"
+                  className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary"
+                >
+                  <Search className="size-4.5!" />
+                </Button>
+              }
+            />
+          )}
           {isUserPath ? (
             <>
-              {!mobileMode && (
-                <SearchDialog
-                  trigger={
-                    <Button
-                      variant="ghost"
-                      mode="icon"
-                      shape="circle"
-                      className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary"
-                    >
-                      <Search className="size-4.5!" />
-                    </Button>
-                  }
-                />
-              )}
               <NotificationsSheet
                 trigger={
                   <Button
@@ -157,20 +219,6 @@ export function Header() {
             </>
           ) : (
             <>
-              {!mobileMode && (
-                <SearchDialog
-                  trigger={
-                    <Button
-                      variant="ghost"
-                      mode="icon"
-                      shape="circle"
-                      className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary"
-                    >
-                      <Search className="size-4.5!" />
-                    </Button>
-                  }
-                />
-              )}
               <NotificationsSheet
                 trigger={
                   <Button
@@ -180,30 +228,6 @@ export function Header() {
                     className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary"
                   >
                     <Bell className="size-4.5!" />
-                  </Button>
-                }
-              />
-              <ChatSheet
-                trigger={
-                  <Button
-                    variant="ghost"
-                    mode="icon"
-                    shape="circle"
-                    className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary"
-                  >
-                    <MessageCircleMore className="size-4.5!" />
-                  </Button>
-                }
-              />
-              <AppsDropdownMenu
-                trigger={
-                  <Button
-                    variant="ghost"
-                    mode="icon"
-                    shape="circle"
-                    className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary"
-                  >
-                    <LayoutGrid className="size-4.5!" />
                   </Button>
                 }
               />
