@@ -82,7 +82,12 @@ export function Filter({
       }
     });
 
-    setFilterValues(processedFilters);
+    // Avoid state updates if nothing changed to prevent render loops
+    setFilterValues((prev) => {
+      const prevString = JSON.stringify(prev);
+      const nextString = JSON.stringify(processedFilters);
+      return prevString === nextString ? prev : processedFilters;
+    });
   }, [currentFilters, filtersSchema]);
 
   const handleInputChange = (field: keyof FilterFields, value: string) => {
@@ -118,18 +123,33 @@ export function Filter({
     (field: keyof FilterFields, range: DateRange | null) => {
       if (range?.startDate && range?.endDate) {
         if (field === "created_at") {
-          setFilterValues((prev: FilterFields) => ({
-            ...prev,
-            start_date: formatDate(range.startDate!),
-            end_date: formatDate(range.endDate!),
-          }));
+          setFilterValues((prev: FilterFields) => {
+            const nextStart = formatDate(range.startDate!);
+            const nextEnd = formatDate(range.endDate!);
+            if (prev.start_date === nextStart && prev.end_date === nextEnd) return prev;
+            return {
+              ...prev,
+              start_date: nextStart,
+              end_date: nextEnd,
+            };
+          });
         } else {
           const key = String(field);
-          setFilterValues((prev: FilterFields) => ({
-            ...prev,
-            [`${key}_start`]: formatDate(range.startDate!),
-            [`${key}_end`]: formatDate(range.endDate!),
-          }));
+          setFilterValues((prev: FilterFields) => {
+            const nextStart = formatDate(range.startDate!);
+            const nextEnd = formatDate(range.endDate!);
+            if (
+              prev[`${key}_start`] === nextStart &&
+              prev[`${key}_end`] === nextEnd
+            ) {
+              return prev;
+            }
+            return {
+              ...prev,
+              [`${key}_start`]: nextStart,
+              [`${key}_end`]: nextEnd,
+            };
+          });
         }
       } else {
         const key = String(field);
