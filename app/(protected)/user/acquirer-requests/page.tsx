@@ -243,7 +243,7 @@ export default function UserAcquirerRequestsPage() {
           pagination={{
             pageSize: limit,
             pageIndex: page - 1,
-            totalCount: meta?.total ?? meta?.totalItems ?? 0,
+            totalCount: meta?.total ?? 0,
             onPageChange: (pageIndex) => setPage(pageIndex + 1),
             onPageSizeChange: (newSize) => {
               setLimit(newSize);

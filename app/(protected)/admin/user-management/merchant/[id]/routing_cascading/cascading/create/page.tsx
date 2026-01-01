@@ -405,11 +405,14 @@ export default function CascadingCreatePage() {
                         <SelectValue placeholder="Select connector" />
                       </SelectTrigger>
                       <SelectContent>
-                        {connectorOptions.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
+                        {connectorOptions.map((opt) => {
+                          const value = opt.value === null ? 'null' : String(opt.value);
+                          return (
+                            <SelectItem key={value} value={value}>
                             {opt.label}
-                          </SelectItem>
-                        ))}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   </div>
