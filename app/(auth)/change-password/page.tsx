@@ -7,7 +7,6 @@ import { AlertCircle, Check, Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { changePassword } from '@/lib/services/auth';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
-import { apiFetch } from '@/lib/api';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -49,26 +48,10 @@ export default function Page() {
   });
 
   useEffect(() => {
-    const verifyToken = async () => {
-      try {
-        setVerifyingToken(true);
-
-        await apiFetch('/api/auth/reset-password-verify', 'POST', {
-          body: { token },
-          auth: false,
-        });
-
-        setIsValidToken(true);
-      } catch (error: any) {
-        const errorMessage = error?.data?.message || error?.message || 'Invalid or expired token.';
-        setError(errorMessage);
-      } finally {
-        setVerifyingToken(false);
-      }
-    };
-
+    // Token will be validated when password is changed
+    // No need for separate verification step
     if (token) {
-      verifyToken();
+      setIsValidToken(true);
     } else {
       setError('No reset token provided.');
     }
