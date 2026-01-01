@@ -115,3 +115,33 @@ export function formatDateTime(input: Date | string | number): string {
     hour12: true,
   });
 }
+
+export type GenerateFilterInput = Record<
+  string,
+  string | number | boolean | string[] | number[] | null | undefined
+>;
+
+/**
+ * Convert filter form values into a query-friendly object.
+ * - drops undefined/null/empty-string
+ * - joins arrays into comma-delimited strings
+ */
+export function generateFilterQuery(filters: GenerateFilterInput) {
+  const query: Record<string, string | number | boolean> = {};
+
+  Object.entries(filters || {}).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
+
+    if (Array.isArray(value)) {
+      if (value.length === 0) return;
+      query[key] = value.join(',');
+      return;
+    }
+
+    if (value === '') return;
+
+    query[key] = value;
+  });
+
+  return query;
+}
