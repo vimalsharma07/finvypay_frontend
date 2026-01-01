@@ -5,7 +5,7 @@ import { Slot as SlotPrimitive } from 'radix-ui';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'cursor-pointer group whitespace-nowrap focus-visible:outline-hidden inline-flex items-center justify-center has-data-[arrow=true]:justify-between whitespace-nowrap text-sm font-medium ring-offset-background transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-60 [&_svg]:shrink-0',
+  'cursor-pointer group whitespace-nowrap focus-visible:outline-hidden inline-flex items-center justify-center has-data-[arrow=true]:justify-between whitespace-nowrap text-sm font-medium ring-offset-background transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-60 [&_svg]:shrink-0 relative overflow-hidden',
   {
     variants: {
       variant: {
@@ -377,6 +377,16 @@ function Button({
     asChild?: boolean;
   }) {
   const Comp = asChild ? SlotPrimitive.Slot : 'button';
+  
+  // Determine ripple class based on variant
+  const getRippleClass = () => {
+    if (mode === 'link') return '';
+    if (variant === 'ghost' || variant === 'outline' || variant === 'dashed') {
+      return 'dark-ripple';
+    }
+    return 'primary-ripple';
+  };
+
   return (
     <Comp
       data-slot="button"
@@ -394,6 +404,8 @@ function Button({
           className,
         }),
         asChild && props.disabled && 'pointer-events-none opacity-50',
+        mode !== 'link' && 'ripple-effect',
+        getRippleClass(),
       )}
       {...(selected && { 'data-state': 'open' })}
       {...props}
