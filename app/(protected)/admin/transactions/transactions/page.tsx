@@ -531,12 +531,27 @@ export default function TransactionsPage() {
           recordCount={meta?.totalItems || filteredData.length}
           isLoading={loading}
           tableLayout={{
-            cellBorder: true,
+            cellBorder: false,
+            rowBorder: true,
+            rowRounded: false,
+            stripped: false,
+            headerBackground: true,
+            headerBorder: true,
+            headerSticky: true,
             width: 'fixed',
           }}
+          tableClassNames={{
+            base: 'text-sm',
+            header: 'bg-muted/30 border-b border-border/50',
+            headerRow: 'h-12',
+            headerSticky: 'sticky top-0 z-10 bg-background/95 backdrop-blur-sm shadow-sm',
+            body: '',
+            bodyRow: 'h-14 hover:bg-muted/40 transition-colors duration-150 cursor-pointer border-b border-border/30',
+            edgeCell: '',
+          }}
         >
-          <Card>
-            <CardHeader>
+          <Card className="rounded-2xl border-border/50 bg-card shadow-sm">
+            <CardHeader className="border-b border-border/50 bg-muted/20">
               <CardHeading>
                 <SearchInput
                   value={searchQuery}
@@ -545,13 +560,13 @@ export default function TransactionsPage() {
                 />
               </CardHeading>
             </CardHeader>
-            <CardTable>
+            <CardTable className="overflow-hidden">
               <ScrollArea className="w-full">
                 <DataGridTable />
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </CardTable>
-            <CardFooter>
+            <CardFooter className="border-t border-border/50 bg-muted/10">
               <DataGridPagination />
             </CardFooter>
           </Card>
