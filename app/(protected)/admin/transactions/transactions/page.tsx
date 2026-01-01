@@ -57,6 +57,7 @@ import { getCountries } from '@/lib/services/admin/countries';
 import { getTimeZones } from '@/i18n/timezones';
 import { Button } from '@/components/ui/button';
 import { Filter as FilterIcon } from 'lucide-react';
+import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -530,28 +531,11 @@ export default function TransactionsPage() {
           table={table}
           recordCount={meta?.totalItems || filteredData.length}
           isLoading={loading}
-          tableLayout={{
-            cellBorder: false,
-            rowBorder: true,
-            rowRounded: false,
-            stripped: false,
-            headerBackground: true,
-            headerBorder: true,
-            headerSticky: true,
-            width: 'fixed',
-          }}
-          tableClassNames={{
-            base: 'text-sm',
-            header: 'bg-gradient-to-b from-muted/40 to-muted/20 border-b border-border',
-            headerRow: 'h-14',
-            headerSticky: 'sticky top-0 z-10 bg-background/98 backdrop-blur-md shadow-sm border-b border-border',
-            body: '',
-            bodyRow: 'h-14 hover:bg-primary/5 hover:border-l-2 hover:border-l-primary transition-all duration-200 cursor-pointer border-b border-border/30',
-            edgeCell: '',
-          }}
+          tableLayout={modernTableLayout}
+          tableClassNames={modernTableClassNames}
         >
-          <Card className="rounded-2xl border-border/50 bg-card shadow-sm">
-            <CardHeader className="border-b border-border/50 bg-muted/20">
+          <Card className={modernTableCardClasses.card}>
+            <CardHeader className={modernTableCardClasses.header}>
               <CardHeading>
                 <SearchInput
                   value={searchQuery}
@@ -560,13 +544,13 @@ export default function TransactionsPage() {
                 />
               </CardHeading>
             </CardHeader>
-            <CardTable className="overflow-hidden">
+            <CardTable className={modernTableCardClasses.table}>
               <ScrollArea className="w-full">
                 <DataGridTable />
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </CardTable>
-            <CardFooter className="border-t border-border/50 bg-muted/10">
+            <CardFooter className={modernTableCardClasses.footer}>
               <DataGridPagination />
             </CardFooter>
           </Card>

@@ -49,6 +49,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 import { TicketActionMenu } from './components/ticket-action-menu';
 import { SearchInput } from './components/search-input';
 import { EditTicketDialog } from './components/edit-ticket-dialog';
@@ -426,13 +427,11 @@ export default function SupportPage() {
           table={table}
           recordCount={meta?.totalItems || filteredData.length}
           isLoading={loading}
-          tableLayout={{
-            cellBorder: true,
-            width: 'fixed',
-          }}
+          tableLayout={modernTableLayout}
+          tableClassNames={modernTableClassNames}
         >
-          <Card>
-            <CardHeader>
+          <Card className={modernTableCardClasses.card}>
+            <CardHeader className={modernTableCardClasses.header}>
               <CardHeading>
                 <SearchInput
                   value={searchQuery}
@@ -441,13 +440,13 @@ export default function SupportPage() {
                 />
               </CardHeading>
             </CardHeader>
-            <CardTable>
+            <CardTable className={modernTableCardClasses.table}>
               <ScrollArea className="w-full">
                 <DataGridTable />
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </CardTable>
-            <CardFooter>
+            <CardFooter className={modernTableCardClasses.footer}>
               <DataGridPagination />
             </CardFooter>
           </Card>

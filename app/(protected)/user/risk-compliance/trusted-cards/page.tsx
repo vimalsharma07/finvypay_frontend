@@ -52,6 +52,7 @@ import { TableActionButtons } from './components/table-action-buttons';
 import { SearchInput } from './components/search-input';
 import { AddCardDialog } from './components/add-card-dialog';
 import { EditCardDialog } from './components/edit-card-dialog';
+import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 
 export default function TrustedCardsPage() {
   const [cardWhitelist, setCardWhitelist] = useState<CardWhitelist[]>([]);
@@ -347,12 +348,11 @@ export default function TrustedCardsPage() {
           table={table}
           recordCount={meta?.totalItems || filteredData.length}
           isLoading={loading}
-          tableLayout={{
-            cellBorder: true,
-          }}
+          tableLayout={modernTableLayout}
+          tableClassNames={modernTableClassNames}
         >
-          <Card>
-            <CardHeader>
+          <Card className={modernTableCardClasses.card}>
+            <CardHeader className={modernTableCardClasses.header}>
               <CardHeading>
                 <SearchInput
                   value={searchQuery}
@@ -361,13 +361,13 @@ export default function TrustedCardsPage() {
                 />
               </CardHeading>
             </CardHeader>
-            <CardTable>
-              <ScrollArea>
+            <CardTable className={modernTableCardClasses.table}>
+              <ScrollArea className="w-full">
                 <DataGridTable />
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </CardTable>
-            <CardFooter>
+            <CardFooter className={modernTableCardClasses.footer}>
               <DataGridPagination />
             </CardFooter>
           </Card>

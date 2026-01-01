@@ -49,6 +49,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { TicketActionMenu } from './components/ticket-action-menu';
 import { SearchInput } from './components/search-input';
+import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 
 export default function SupportTicketsPage() {
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
@@ -386,12 +387,11 @@ export default function SupportTicketsPage() {
           table={table}
           recordCount={meta?.totalItems || filteredData.length}
           isLoading={loading}
-          tableLayout={{
-            cellBorder: true,
-          }}
+          tableLayout={modernTableLayout}
+          tableClassNames={modernTableClassNames}
         >
-          <Card>
-            <CardHeader>
+          <Card className={modernTableCardClasses.card}>
+            <CardHeader className={modernTableCardClasses.header}>
               <CardHeading>
                 <SearchInput
                   value={searchQuery}
@@ -400,13 +400,15 @@ export default function SupportTicketsPage() {
                 />
               </CardHeading>
             </CardHeader>
-            <CardTable>
+            <CardTable className={modernTableCardClasses.table}>
               <ScrollArea className="w-full">
                 <DataGridTable />
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
-              <DataGridPagination />
             </CardTable>
+            <CardFooter className={modernTableCardClasses.footer}>
+              <DataGridPagination />
+            </CardFooter>
           </Card>
         </DataGrid>
       </Container>

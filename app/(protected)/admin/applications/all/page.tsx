@@ -28,6 +28,8 @@ import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardFooter, CardTable } from '@/components/ui/card';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -39,14 +41,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import {
-  Card,
-  CardFooter,
-  CardHeader,
-  CardHeading,
-  CardTable,
-} from '@/components/ui/card';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 
 const DATE_FMT = 'yyyy-MM-dd HH:mm';
 
@@ -256,26 +251,21 @@ export default function AdminApplicationListPage() {
       </Container>
 
       <Container>
-        <DataGrid
-          table={table}
-          recordCount={meta?.total ?? data.length}
+        <DataGrid 
+          table={table} 
+          recordCount={meta?.total ?? data.length} 
           isLoading={loading}
-          tableLayout={{
-            cellBorder: true,
-            width: 'fixed',
-          }}
+          tableLayout={modernTableLayout}
+          tableClassNames={modernTableClassNames}
         >
-          <Card>
-            <CardHeader>
-              <CardHeading>All merchant applications</CardHeading>
-            </CardHeader>
-            <CardTable>
+          <Card className={modernTableCardClasses.card}>
+            <CardTable className={modernTableCardClasses.table}>
               <ScrollArea className="w-full">
                 <DataGridTable />
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </CardTable>
-            <CardFooter>
+            <CardFooter className={modernTableCardClasses.footer}>
               <DataGridPagination />
             </CardFooter>
           </Card>
