@@ -228,10 +228,11 @@ export default function RoutingEditPage() {
       try {
         const currencies = await fetchListOfCurrencies();
         setCurrencyOptions(
-          currencies.map((c: { label?: string; code?: string; value?: string }) => ({
-            label: c.label || c.code || c.value || '',
-            value: c.value || c.code || '',
-          })),
+          currencies.map((c: { label?: string; code?: string; value?: string | number | null }) => {
+            const label = c.label || c.code || String(c.value ?? '');
+            const value = String(c.value ?? c.code ?? '');
+            return { label, value };
+          }),
         );
       } catch {
         // non-critical

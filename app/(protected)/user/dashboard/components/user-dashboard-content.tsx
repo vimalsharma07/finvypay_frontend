@@ -148,7 +148,7 @@ export function UserDashboardContent() {
   // TODO: Replace with actual API data
   const stats = {
     totalTransactions: 1250,
-    totalAmount: 125000.50,
+    totalAmount: 125000,
     pendingTransactions: 45,
     successfulTransactions: 1205,
     failedTransactions: 0,

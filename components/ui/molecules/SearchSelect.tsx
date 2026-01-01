@@ -67,14 +67,14 @@ export function SearchSelect({
             <CommandEmpty>No option found.</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
-                <CommandItem
-                  key={option[valueToSet]}
-                  value={option[valueToShow]}
-                  onSelect={() => {
-                    onChange(option[valueToSet]);
-                    setOpen(false);
-                  }}
-                >
+            <CommandItem
+              key={String(option[valueToSet])}
+              value={String(option[valueToShow] ?? option[valueToSet] ?? '')}
+              onSelect={() => {
+                onChange(String(option[valueToSet]));
+                setOpen(false);
+              }}
+            >
                   <Check
                     className={cn(
                       'mr-2 h-4 w-4',
