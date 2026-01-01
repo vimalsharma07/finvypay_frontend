@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { SearchDialog } from '@/partials/dialogs/search/search-dialog';
 import { AppsDropdownMenu } from '@/partials/topbar/apps-dropdown-menu';
@@ -14,9 +13,7 @@ import {
   Menu,
   MessageCircleMore,
   Search,
-  SquareChevronRight,
 } from 'lucide-react';
-import { toAbsoluteUrl } from '@/lib/helpers';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useScrollPosition } from '@/hooks/use-scroll-position';
@@ -31,14 +28,11 @@ import {
 } from '@/components/ui/sheet';
 import { Container } from '@/components/common/container';
 import { Breadcrumb } from './breadcrumb';
-import { MegaMenu } from './mega-menu';
-import { MegaMenuMobile } from './mega-menu-mobile';
 import { SidebarMenu } from './sidebar-menu';
 import { useAuth } from '@/hooks/use-auth';
 
 export function Header() {
   const [isSidebarSheetOpen, setIsSidebarSheetOpen] = useState(false);
-  const [isMegaMenuSheetOpen, setIsMegaMenuSheetOpen] = useState(false);
 
   const pathname = usePathname();
   const mobileMode = useIsMobile();
@@ -77,7 +71,6 @@ export function Header() {
   // Close sheet when route changes
   useEffect(() => {
     setIsSidebarSheetOpen(false);
-    setIsMegaMenuSheetOpen(false);
   }, [pathname]);
 
   return (
@@ -88,65 +81,31 @@ export function Header() {
       )}
     >
       <Container className="flex justify-between items-stretch lg:gap-4">
-        {/* HeaderLogo */}
-        <div className="flex lg:hidden items-center gap-2.5">
-          <Link href="/" className="shrink-0">
-            <img
-              src={toAbsoluteUrl('/media/app/mini-logo.svg')}
-              className="h-[25px] w-full"
-              alt="mini-logo"
-            />
-          </Link>
+        {/* Mobile Menu Button */}
+        {mobileMode && (
           <div className="flex items-center">
-            {mobileMode && (
-              <Sheet
-                open={isSidebarSheetOpen}
-                onOpenChange={setIsSidebarSheetOpen}
+            <Sheet
+              open={isSidebarSheetOpen}
+              onOpenChange={setIsSidebarSheetOpen}
+            >
+              <SheetTrigger asChild>
+                <Button variant="ghost" mode="icon">
+                  <Menu className="text-muted-foreground/70" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent
+                className="p-0 gap-0 w-[275px]"
+                side="left"
+                close={false}
               >
-                <SheetTrigger asChild>
-                  <Button variant="ghost" mode="icon">
-                    <Menu className="text-muted-foreground/70" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent
-                  className="p-0 gap-0 w-[275px]"
-                  side="left"
-                  close={false}
-                >
-                  <SheetHeader className="p-0 space-y-0" />
-                  <SheetBody className="p-0 overflow-y-auto">
-                    <SidebarMenu />
-                  </SheetBody>
-                </SheetContent>
-              </Sheet>
-            )}
-            {mobileMode && (
-              <Sheet
-                open={isMegaMenuSheetOpen}
-                onOpenChange={setIsMegaMenuSheetOpen}
-              >
-                <SheetTrigger asChild>
-                  <Button variant="ghost" mode="icon">
-                    <SquareChevronRight className="text-muted-foreground/70" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent
-                  className="p-0 gap-0 w-[275px]"
-                  side="left"
-                  close={false}
-                >
-                  <SheetHeader className="p-0 space-y-0" />
-                  <SheetBody className="p-0 overflow-y-auto">
-                    <MegaMenuMobile />
-                  </SheetBody>
-                </SheetContent>
-              </Sheet>
-            )}
+                <SheetHeader className="p-0 space-y-0" />
+                <SheetBody className="p-0 overflow-y-auto">
+                  <SidebarMenu />
+                </SheetBody>
+              </SheetContent>
+            </Sheet>
           </div>
-        </div>
-
-        {/* Main Content (MegaMenu or Breadcrumbs) */}
-        {isUserPath ? null : !mobileMode && <MegaMenu />}
+        )}
 
         {/* HeaderTopbar */}
         <div className="flex items-center gap-3 ms-auto">
