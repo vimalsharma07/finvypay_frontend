@@ -69,7 +69,7 @@ export function getTransactionColumns(
       id: 'user',
       accessorFn: (row) => `${row.firstName} ${row.lastName}`,
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="USER" />
+        <DataGridColumnHeader column={column} title="User" />
       ),
       cell: ({ row }) => {
         const fullName = `${row.original.firstName} ${row.original.lastName}`.trim();
@@ -99,7 +99,7 @@ export function getTransactionColumns(
       id: 'transactionId',
       accessorKey: 'transactionId',
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="TRANSACTION ID" />
+        <DataGridColumnHeader column={column} title="Transaction ID" />
       ),
       cell: ({ row }) => {
         return (
@@ -120,7 +120,7 @@ export function getTransactionColumns(
       id: 'country',
       accessorKey: 'country',
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="COUNTRY" />
+        <DataGridColumnHeader column={column} title="Country" />
       ),
       cell: ({ row }) => {
         const getFlagEmoji = (code: string) => {
@@ -146,7 +146,7 @@ export function getTransactionColumns(
       id: 'gatewayId',
       accessorKey: 'gatewayId',
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="GATEWAY" />
+        <DataGridColumnHeader column={column} title="Gateway" />
       ),
       cell: ({ row }) => {
         return (
@@ -166,7 +166,7 @@ export function getTransactionColumns(
       id: 'amountInUsd',
       accessorKey: 'amountInUsd',
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="AMOUNT (USD)" />
+        <DataGridColumnHeader column={column} title="Amount (USD)" />
       ),
       cell: ({ row }) => {
         const status = row.original.status;
@@ -194,7 +194,7 @@ export function getTransactionColumns(
       id: 'status',
       accessorKey: 'status',
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="STATUS" />
+        <DataGridColumnHeader column={column} title="Status" />
       ),
       cell: ({ row }) => {
         const status = row.original.status;
@@ -230,7 +230,7 @@ export function getTransactionColumns(
       id: 'transactionDate',
       accessorKey: 'transactionDate',
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="TRANSACTION DATE" />
+        <DataGridColumnHeader column={column} title="Transaction Date" />
       ),
       cell: ({ row }) => {
         const fullDate = (() => {
@@ -266,7 +266,7 @@ export function getTransactionColumns(
       id: 'merchantUser',
       accessorFn: (row) => row.user?.name || '',
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="MERCHANT USER" />
+        <DataGridColumnHeader column={column} title="Merchant User" />
       ),
       cell: ({ row }) => {
         return (
@@ -285,7 +285,7 @@ export function getTransactionColumns(
       {
         id: 'actions',
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="ACTION" />
+          <DataGridColumnHeader column={column} title="Action" />
         ),
         cell: ({ row }) => (
           <TransactionActionMenu

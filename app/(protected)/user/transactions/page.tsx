@@ -212,11 +212,11 @@ export default function TransactionsPage() {
           }}
           tableClassNames={{
             base: 'text-sm',
-            header: 'bg-muted/30 border-b border-border/50',
-            headerRow: 'h-12',
-            headerSticky: 'sticky top-0 z-10 bg-background/95 backdrop-blur-sm shadow-sm',
+            header: 'bg-gradient-to-b from-muted/40 to-muted/20 border-b border-border',
+            headerRow: 'h-14',
+            headerSticky: 'sticky top-0 z-10 bg-background/98 backdrop-blur-md shadow-sm border-b border-border',
             body: '',
-            bodyRow: 'h-14 hover:bg-muted/40 transition-colors duration-150 cursor-pointer border-b border-border/30',
+            bodyRow: 'h-14 hover:bg-primary/5 hover:border-l-2 hover:border-l-primary transition-all duration-200 cursor-pointer border-b border-border/30',
             edgeCell: '',
           }}
         >
