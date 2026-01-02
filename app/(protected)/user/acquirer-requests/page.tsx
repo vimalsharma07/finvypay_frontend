@@ -1,7 +1,7 @@
 'use client';
 
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
-import { FileText, Plus, X } from 'lucide-react';
+import { FileText, Plus, X, Eye, DollarSign } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -204,10 +204,12 @@ export default function UserAcquirerRequestsPage() {
   const actions: TableAction<UserAcquirerRequest>[] = [
     {
       label: 'View',
+      icon: Eye,
       route: (row: UserAcquirerRequest) => `/user/acquirer-requests/${row.id}`,
     },
     {
       label: 'View Rates',
+      icon: DollarSign,
       onClick: (row: UserAcquirerRequest) => {
         setSelectedRates(row.acquirerAccount?.rates);
         setSelectedName(row.acquirerAccount?.name || 'Acquirer Account');

@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
-import { Building, Plus } from 'lucide-react';
+import { Building, Plus, Pencil, Trash2 } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -258,12 +258,14 @@ export default function IndustriesPage() {
   const actions: TableAction<Industry>[] = [
     {
       label: 'Edit',
+      icon: Pencil,
       onClick: (row: Industry) => {
         handleEditIndustry(row);
       },
     },
     {
       label: 'Delete',
+      icon: Trash2,
       onClick: (row: Industry) => {
         setIndustryToDelete(row);
         setDeleteDialogOpen(true);

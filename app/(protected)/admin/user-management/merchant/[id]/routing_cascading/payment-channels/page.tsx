@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Cpu } from 'lucide-react';
+import { Cpu, Eye, Pencil, Trash2 } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -178,16 +178,19 @@ export default function ConnectorsPage() {
   const actions: TableAction<MerchantAcquirerAccount>[] = [
     {
       label: 'View',
+      icon: Eye,
       route: (row: MerchantAcquirerAccount) =>
         `/admin/merchant-acquirer-account/${row.id}`,
     },
     {
       label: 'Edit',
+      icon: Pencil,
       route: (row: MerchantAcquirerAccount) =>
         `/admin/merchant-acquirer-account/${row.id}/edit`,
     },
     {
       label: 'Delete',
+      icon: Trash2,
       onClick: async (row: MerchantAcquirerAccount) => {
         if (confirm(`Are you sure you want to delete acquirer account "${row.name}"?`)) {
           // TODO: Implement delete

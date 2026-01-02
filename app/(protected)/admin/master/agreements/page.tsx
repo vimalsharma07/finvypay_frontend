@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
-import { FileText } from 'lucide-react';
+import { FileText, Pencil, Trash2 } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -180,12 +180,14 @@ export default function AgreementsPage() {
   const actions: TableAction<Agreement>[] = [
     {
       label: 'Edit',
+      icon: Pencil,
       onClick: (row: Agreement) => {
         handleEditAgreement(row);
       },
     },
     {
       label: 'Delete',
+      icon: Trash2,
       onClick: (row: Agreement) => {
         setAgreementToDelete(row);
         setDeleteDialogOpen(true);

@@ -2,7 +2,7 @@
 
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Link2, UserCircle } from 'lucide-react';
+import { Link2, UserCircle, Eye, Pencil, Trash2 } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -197,14 +197,17 @@ export default function UserCascadingPage() {
   const actions: TableAction<UserCascadingRule>[] = [
     {
       label: 'View',
+      icon: Eye,
       route: (row: UserCascadingRule) => `/user/cascading/${row.id}`,
     },
     {
       label: 'Edit',
+      icon: Pencil,
       route: (row: UserCascadingRule) => `/user/cascading/${row.id}/edit`,
     },
     {
       label: 'Delete',
+      icon: Trash2,
       onClick: (row: UserCascadingRule) => {
         setCascadeToDelete(row);
         setDeleteDialogOpen(true);

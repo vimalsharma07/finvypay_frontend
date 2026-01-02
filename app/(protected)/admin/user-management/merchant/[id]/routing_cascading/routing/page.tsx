@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Route } from 'lucide-react';
+import { Route, Eye, Pencil, Trash2 } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -275,16 +275,19 @@ export default function RoutingPage() {
   const actions: TableAction<RouteRule>[] = [
     {
       label: 'View',
+      icon: Eye,
       route: (row: RouteRule) =>
         `/admin/user-management/merchant/${userId}/routing_cascading/routing/${row.id}`,
     },
     {
       label: 'Edit',
+      icon: Pencil,
       route: (row: RouteRule) =>
         `/admin/user-management/merchant/${userId}/routing_cascading/routing/${row.id}/edit`,
     },
     {
       label: 'Delete',
+      icon: Trash2,
       onClick: (row: RouteRule) => {
         setRouteToDelete(row);
         setDeleteDialogOpen(true);

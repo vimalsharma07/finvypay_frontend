@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
-import { Shield, Plus } from 'lucide-react';
+import { Shield, Plus, Pencil, Eye, Trash2 } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -241,14 +241,17 @@ export default function AdminUsersPage() {
   const actions: TableAction<User>[] = [
     {
       label: 'Edit',
+      icon: Pencil,
       route: (row: User) => `/admin/user-management/admin/${row.id}/edit`,
     },
     {
       label: 'View',
+      icon: Eye,
       route: (row: User) => `/admin/user-management/admin/${row.id}`,
     },
     {
       label: 'Delete',
+      icon: Trash2,
       onClick: (row: User) => {
         setUserToDelete(row);
         setDeleteDialogOpen(true);

@@ -40,7 +40,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, Eye, CheckCircle2, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 
@@ -196,14 +196,17 @@ export default function AdminApplicationListPage() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
             <DropdownMenuItem asChild>
-              <Link href={`/admin/applications/${row.original.id}`}>
+              <Link href={`/admin/applications/${row.original.id}`} className="flex items-center gap-2">
+                <Eye className="h-4 w-4" />
                 View
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem
               disabled={actioningId === row.original.id}
               onClick={() => handleChangeStatus(row.original.id, 'approved')}
+              className="flex items-center gap-2"
             >
+              <CheckCircle2 className="h-4 w-4" />
               <span className={cn('text-success', actioningId === row.original.id && 'opacity-70')}>
                 {actioningId === row.original.id ? 'Approving...' : 'Approve'}
               </span>
@@ -211,7 +214,9 @@ export default function AdminApplicationListPage() {
             <DropdownMenuItem
               disabled={actioningId === row.original.id}
               onClick={() => handleChangeStatus(row.original.id, 'rejected')}
+              className="flex items-center gap-2"
             >
+              <XCircle className="h-4 w-4" />
               <span className={cn('text-destructive', actioningId === row.original.id && 'opacity-70')}>
                 {actioningId === row.original.id ? 'Rejecting...' : 'Reject'}
               </span>

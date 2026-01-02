@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
-import { Globe, Plus } from 'lucide-react';
+import { Globe, Plus, Eye, Pencil, Trash2 } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -236,14 +236,17 @@ export default function CountriesPage() {
   const actions: TableAction<Country>[] = [
     {
       label: 'View',
+      icon: Eye,
       route: (row: Country) => `/admin/master/countries/${row.id}`,
     },
     {
       label: 'Edit',
+      icon: Pencil,
       route: (row: Country) => `/admin/master/countries/${row.id}/edit`,
     },
     {
       label: 'Delete',
+      icon: Trash2,
       onClick: (row: Country) => {
         setCountryToDelete(row);
         setDeleteDialogOpen(true);
