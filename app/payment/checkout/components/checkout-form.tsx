@@ -102,7 +102,6 @@ export function CheckoutForm() {
     mode: 'onBlur',
   });
 
-  // Keep form in sync with URL prefill while leaving fields editable
   useEffect(() => {
     form.reset(initialValues);
   }, [form, initialValues]);
@@ -116,7 +115,6 @@ export function CheckoutForm() {
   );
 
   const handleSubmit = (values: CheckoutFormValues) => {
-    // You can wire this into your real submission handler.
     console.log('Checkout submission payload', {
       ...values,
       amount: Number(values.amount),
@@ -213,47 +211,47 @@ export function CheckoutForm() {
               )}
             />
 
-              <div className="grid gap-4 md:grid-cols-3">
-                <FormField
-                  control={form.control}
-                  name="city"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>City</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="San Francisco" autoComplete="address-level2" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="state"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>State</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="CA" autoComplete="address-level1" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="zip"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>ZIP</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="94107" autoComplete="postal-code" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <FormField
+                control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>City</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="San Francisco" autoComplete="address-level2" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="state"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>State</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="CA" autoComplete="address-level1" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="zip"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ZIP</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="94107" autoComplete="postal-code" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}
@@ -388,4 +386,5 @@ export function CheckoutForm() {
     </Card>
   );
 }
+
 
