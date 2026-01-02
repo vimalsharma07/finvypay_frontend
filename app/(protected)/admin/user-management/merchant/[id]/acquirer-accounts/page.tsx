@@ -17,6 +17,8 @@ import {
 } from '../../../../../components/table-comp';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -29,11 +31,19 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   getUserConnectors,
   MerchantAcquirerAccount,
   MerchantAcquirerAccountListResponse,
 } from '@/lib/services/admin/connectors';
-import { softDeleteMerchantAcquirerAccount } from '@/lib/services/admin/acquirer-accounts';
+import { softDeleteMerchantAcquirerAccount, rejectMerchantAcquirerAccount, RejectMerchantAcquirerAccountPayload } from '@/lib/services/admin/acquirer-accounts';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import Link from 'next/link';
 
@@ -53,6 +63,10 @@ export default function AcquirerAccountsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState<MerchantAcquirerAccount | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [accountToReject, setAccountToReject] = useState<MerchantAcquirerAccount | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejecting, setRejecting] = useState(false);
 
   // Fetch connectors
   const fetchConnectors = async (
@@ -203,6 +217,14 @@ export default function AcquirerAccountsPage() {
         `/admin/merchant-acquirer-account/${row.id}/edit`,
     },
     {
+      label: 'Reject Acquirer',
+      onClick: (row: MerchantAcquirerAccount) => {
+        setAccountToReject(row);
+        setRejectDialogOpen(true);
+      },
+      variant: 'destructive',
+    },
+    {
       label: 'Delete',
       onClick: (row: MerchantAcquirerAccount) => {
         setAccountToDelete(row);
@@ -229,6 +251,40 @@ export default function AcquirerAccountsPage() {
     setSortBy(newSortBy);
     setSortOrder(newSortOrder);
     setPage(1);
+  };
+
+  // Handle reject acquirer account
+  const handleRejectAcquirerAccount = async () => {
+    if (!accountToReject || !rejectReason.trim()) return;
+
+    setRejecting(true);
+    try {
+      const payload: RejectMerchantAcquirerAccountPayload = {
+        adminRejectReason: rejectReason.trim(),
+      };
+
+      const response = await rejectMerchantAcquirerAccount(accountToReject.id, payload);
+      handleApiResponse(response, {
+        onSuccess: () => {
+          toast.success('Acquirer account rejected successfully!');
+          setRejectDialogOpen(false);
+          setAccountToReject(null);
+          setRejectReason('');
+          fetchConnectors(page, limit);
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to reject acquirer account');
+        },
+        onUnauthorized: () => {
+          toast.error('Unauthorized. Please check your authentication.');
+        },
+      });
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+      console.error('Reject acquirer account error:', error);
+    } finally {
+      setRejecting(false);
+    }
   };
 
   // Handle soft delete acquirer account
@@ -334,6 +390,52 @@ export default function AcquirerAccountsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Reject Acquirer Account Dialog */}
+      <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Reject Acquirer Account</DialogTitle>
+            <DialogDescription>
+              Provide a reason for rejecting the acquirer account &quot;{accountToReject?.name}&quot;.
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="reject-reason">Rejection Reason</Label>
+              <Textarea
+                id="reject-reason"
+                placeholder="Please provide a detailed reason for rejection..."
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                className="min-h-[100px]"
+                disabled={rejecting}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              disabled={rejecting}
+              onClick={() => {
+                setRejectDialogOpen(false);
+                setAccountToReject(null);
+                setRejectReason('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleRejectAcquirerAccount}
+              disabled={rejecting || !rejectReason.trim()}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {rejecting ? 'Rejecting...' : 'Reject Account'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Fragment>
   );
 }

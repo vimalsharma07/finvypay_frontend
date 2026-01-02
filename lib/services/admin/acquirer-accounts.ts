@@ -360,3 +360,224 @@ export async function softDeleteMerchantAcquirerAccount(
     };
   }
 }
+
+// Merchant Acquirer Account Detail Types
+export interface MerchantAcquirerAccountUser {
+  id: string;
+  parentId: string | null;
+  email: string;
+  name: string;
+  password: string;
+  role: string;
+  roleId: number;
+  otp: string | null;
+  otpExpiry: string | null;
+  emailVerifiedAt: string;
+  isBlocked: boolean;
+  isDeleted: boolean;
+  uniqueId: string;
+  isTwoFaEnabled: boolean;
+  twoFaToken: string | null;
+  provider: string;
+  oauthId: string | null;
+  profileImage: string | null;
+  avatarUrl: string | null;
+  kycRejectReason: string | null;
+  isProfileCompleted: boolean;
+  isKycCompleted: boolean | null;
+  kycStatus: string;
+  videoKycRequired: boolean;
+  videoKycSkipped: boolean;
+  profileStep: number;
+  agreementSignedAt: string;
+  agreementStatus: number;
+  agreementRemark: string | null;
+  entityType: string;
+  currentProfileId: string | null;
+  encryptionKey: string;
+  testSecretKey: string;
+  liveSecretKey: string | null;
+  referralPartnerId: string | null;
+  referralPartnerCommission: string | null;
+  settlementFee: string | null;
+  ipEnabled: boolean;
+  binEnabled: boolean;
+  cardWlEnabled: boolean;
+  webhookHash: string | null;
+  isPasswordChanged: boolean | null;
+  penaltyAmount: string;
+  sendTransactionEmail: boolean;
+  socialMediaInfo: string | null;
+  notificationEmails: string | null;
+  permissions: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MerchantAcquirerAccountAcquirer {
+  id: number;
+  acquirerName: string;
+  fileName: string;
+  iconUrl: string | null;
+  fields: Record<string, any>;
+  status: string;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MerchantAcquirerAccountDetail {
+  id: string;
+  userId: string;
+  user: MerchantAcquirerAccountUser;
+  merchantProfileId: string;
+  acquirerId: number;
+  acquirer: MerchantAcquirerAccountAcquirer;
+  acquirerAccountId: number;
+  acquirerAccount: AcquirerAccount;
+  name: string;
+  terminalId: string;
+  description: string;
+  status: number;
+  adminRejectReason: string | null;
+  merchantRejectReason: string | null;
+  rates: Record<string, string>;
+  ratesPdfUrl: string | null;
+  currencyCode: string;
+  ratesType: string;
+  isActive: boolean;
+  isPrimary: boolean;
+  secretKey: string;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GetMerchantAcquirerAccountResponse {
+  success: boolean;
+  data: MerchantAcquirerAccountDetail;
+  message?: string;
+}
+
+export interface UpdateMerchantAcquirerAccountPayload {
+  acquirerId: number;
+  acquirerAccountId: number;
+  name: string;
+  description: string;
+  status: number;
+  isActive: boolean;
+  rates?: {
+    base_mdr?: string;
+    visa_mdr?: string;
+    setup_fee?: string;
+    master_mdr?: string;
+    refund_fee?: string;
+    flagged_fee?: string;
+    chargeback_fee?: string;
+    rolling_reserve?: string;
+    success_transaction_fee?: string;
+    declined_transaction_fee?: string;
+  };
+}
+
+export interface UpdateMerchantAcquirerAccountResponse {
+  success: boolean;
+  message?: string;
+  data?: MerchantAcquirerAccountDetail;
+}
+
+export interface RejectMerchantAcquirerAccountPayload {
+  adminRejectReason: string;
+}
+
+export interface RejectMerchantAcquirerAccountResponse {
+  success: boolean;
+  message?: string;
+  data?: MerchantAcquirerAccountDetail;
+}
+
+/**
+ * Get merchant acquirer account by ID
+ */
+export async function getMerchantAcquirerAccount(
+  id: string | number
+): Promise<ApiResponse<GetMerchantAcquirerAccountResponse>> {
+  try {
+    const response = await http.get(adminRoutes.acquirerAccounts.getMerchantAcquirerAccount(id)) as GetMerchantAcquirerAccountResponse;
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Update merchant acquirer account
+ */
+export async function updateMerchantAcquirerAccount(
+  id: string | number,
+  payload: UpdateMerchantAcquirerAccountPayload
+): Promise<ApiResponse<UpdateMerchantAcquirerAccountResponse>> {
+  try {
+    const response = await http.put(adminRoutes.acquirerAccounts.updateMerchantAcquirerAccount(id), payload) as UpdateMerchantAcquirerAccountResponse;
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Reject merchant acquirer account
+ */
+export async function rejectMerchantAcquirerAccount(
+  id: string | number,
+  payload: RejectMerchantAcquirerAccountPayload
+): Promise<ApiResponse<RejectMerchantAcquirerAccountResponse>> {
+  try {
+    const response = await http.put(adminRoutes.acquirerAccounts.rejectMerchantAcquirerAccount(id), payload) as RejectMerchantAcquirerAccountResponse;
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
