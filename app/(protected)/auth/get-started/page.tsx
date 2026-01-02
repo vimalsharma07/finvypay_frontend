@@ -11,7 +11,6 @@ import {
 import { useSettings } from '@/providers/settings-provider';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/common/container';
-import { PageNavbar } from '@/app/(protected)/account/page-navbar';
 import { AccountGetStartedContent } from '@/app/(protected)/auth/get-started/content';
 
 export default function AccountGetStartedPage() {
@@ -19,7 +18,6 @@ export default function AccountGetStartedPage() {
 
   return (
     <Fragment>
-      <PageNavbar />
       {settings?.layout === 'demo1' && (
         <Container>
           <Toolbar>
