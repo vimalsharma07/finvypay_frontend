@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
+import { Globe } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -259,7 +260,8 @@ export default function CountriesPage() {
           <Toolbar>
             <ToolbarHeading
               title="Countries"
-              description="Manage and view all countries"
+              description="Manage and view all countries with their details, currency codes, and status for merchant onboarding and transaction processing"
+              icon={Globe}
             />
           </Toolbar>
         </Container>

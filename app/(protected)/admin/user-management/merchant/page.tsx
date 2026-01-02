@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
+import { Store } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -335,7 +336,8 @@ export default function MerchantUsersPage() {
           <Toolbar>
             <ToolbarHeading
               title="Merchants"
-              description="Manage and view all merchant users"
+              description="Create, edit, and manage merchant accounts with profiles, payment settings, routing configurations, and transaction monitoring"
+              icon={Store}
             />
           </Toolbar>
         </Container>

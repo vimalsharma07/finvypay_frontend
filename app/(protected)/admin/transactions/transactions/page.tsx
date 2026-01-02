@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { CreditCard } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -493,7 +494,8 @@ export default function TransactionsPage() {
           <Toolbar>
             <ToolbarHeading
               title="Transactions"
-              description="View and manage all production transactions"
+              description="View, monitor, and manage all production payment transactions with detailed analytics, filtering, and transaction actions"
+              icon={CreditCard}
             />
           </Toolbar>
         </Container>
@@ -511,7 +513,8 @@ export default function TransactionsPage() {
           <div className="flex items-center justify-between w-full">
             <ToolbarHeading
               title="Transactions"
-              description="View and manage all production transactions"
+              description="View, monitor, and manage all production payment transactions with detailed analytics, filtering, and transaction actions"
+              icon={CreditCard}
             />
             <Button
               variant="outline"

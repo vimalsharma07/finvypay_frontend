@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { LifeBuoy } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -360,7 +361,8 @@ export default function SupportTicketsPage() {
           <Toolbar>
             <ToolbarHeading
               title="Support Tickets"
-              description="Manage and view all support tickets"
+              description="View, respond to, and manage customer support tickets with status tracking and resolution management"
+              icon={LifeBuoy}
             />
           </Toolbar>
         </Container>

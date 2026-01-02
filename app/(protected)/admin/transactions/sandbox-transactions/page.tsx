@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { CreditCard } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -192,7 +193,8 @@ export default function SandboxTransactionsPage() {
           <Toolbar>
             <ToolbarHeading
               title="Sandbox Transactions"
-              description="View and manage all sandbox transactions"
+              description="View and manage all sandbox test transactions for development, testing, and integration validation"
+              icon={CreditCard}
             />
           </Toolbar>
         </Container>

@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
+import { Coins } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -165,7 +166,8 @@ export default function CurrencyPage() {
           <Toolbar>
             <ToolbarHeading
               title="Currency"
-              description="View all currency codes and their values"
+              description="View and manage all currency codes, exchange rates, and their values for multi-currency transaction processing"
+              icon={Coins}
             />
           </Toolbar>
         </Container>

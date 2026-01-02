@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
+import { Users } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -269,7 +270,8 @@ export default function AffiliateUsersPage() {
           <Toolbar>
             <ToolbarHeading
               title="Affiliates"
-              description="Manage and view all affiliate users"
+              description="Create, edit, and manage affiliate accounts with commission structures, referral tracking, and performance analytics"
+              icon={Users}
             />
           </Toolbar>
         </Container>

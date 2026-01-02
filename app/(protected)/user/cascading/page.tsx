@@ -2,6 +2,7 @@
 
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Link2 } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -228,10 +229,11 @@ export default function UserCascadingPage() {
     <Fragment>
       <Container>
         <Toolbar>
-          <ToolbarHeading
-            title="Cascading Rules"
-            description="View cascading rules for payment processing"
-          />
+            <ToolbarHeading
+              title="Cascading Rules"
+              description="View and manage cascading payment rules that automatically route transactions through multiple acquirers in sequence"
+              icon={Link2}
+            />
           <ToolbarActions>
             <Button variant="outline" onClick={() => router.push('/user/profile-selection')}>
               Change Profile

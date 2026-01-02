@@ -2,6 +2,7 @@
 
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Cpu } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -207,10 +208,11 @@ export default function UserAcquirerAccountsPage() {
     <Fragment>
       <Container>
         <Toolbar>
-          <ToolbarHeading
-            title="Acquirer Accounts"
-            description="View available merchant acquirer accounts"
-          />
+            <ToolbarHeading
+              title="Acquirer Accounts"
+              description="View and manage your payment gateway acquirer accounts with configuration details and connection status"
+              icon={Cpu}
+            />
           <ToolbarActions />
         </Toolbar>
       </Container>

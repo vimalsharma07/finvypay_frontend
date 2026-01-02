@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useMemo, useState } from 'react';
+import { ShieldUser } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -248,7 +249,8 @@ export default function AdminRolesPage() {
           <Toolbar>
             <ToolbarHeading
               title="Roles"
-              description="Manage and view all roles"
+              description="Create, edit, and manage user roles with assigned permissions for access control and security management"
+              icon={ShieldUser}
             />
           </Toolbar>
         </Container>

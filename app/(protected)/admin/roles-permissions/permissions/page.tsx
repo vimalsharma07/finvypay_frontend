@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Key } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -234,7 +235,8 @@ export default function AdminPermissionsPage() {
           <Toolbar>
             <ToolbarHeading
               title="Permissions"
-              description="Manage and view all permissions"
+              description="View and manage system permissions that can be assigned to roles for granular access control and security"
+              icon={Key}
             />
           </Toolbar>
         </Container>

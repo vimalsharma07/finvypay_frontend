@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
+import { FileText } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -201,7 +202,8 @@ export default function AgreementsPage() {
           <Toolbar>
             <ToolbarHeading
               title="Agreements"
-              description="Manage and view all agreements"
+              description="Create, edit, and manage legal agreements and contract templates for merchant onboarding and compliance"
+              icon={FileText}
             />
           </Toolbar>
         </Container>

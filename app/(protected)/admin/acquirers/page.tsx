@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
+import { Plug } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -28,7 +29,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch, SwitchWrapper } from '@/components/ui/switch';
-import { Search, X, Pencil, Trash2, Plus, ArrowRight, MoreVertical, Plug } from 'lucide-react';
+import { Search, X, Pencil, Trash2, Plus, ArrowRight, MoreVertical } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -214,7 +215,8 @@ export default function AdminAcquirersPage() {
           <Toolbar>
             <ToolbarHeading
               title="Acquirers"
-              description="Manage and view all payment acquirers"
+              description="Create, edit, and manage payment gateway acquirers with configuration settings and account management"
+              icon={Plug}
             />
           </Toolbar>
         </Container>

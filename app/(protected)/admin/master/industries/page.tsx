@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
+import { Building } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -279,7 +280,8 @@ export default function IndustriesPage() {
           <Toolbar>
             <ToolbarHeading
               title="Industries"
-              description="Manage and view all industries"
+              description="Create, edit, and manage industry categories for merchant classification and organization"
+              icon={Building}
             />
           </Toolbar>
         </Container>
@@ -296,7 +298,8 @@ export default function IndustriesPage() {
         <Toolbar>
           <ToolbarHeading
             title="Industries"
-            description="Manage and view all industries"
+            description="Create, edit, and manage industry categories for merchant classification and organization"
+            icon={Building}
           />
           <ToolbarActions>
             <Button variant="primary" onClick={() => setCreateDialogOpen(true)}>

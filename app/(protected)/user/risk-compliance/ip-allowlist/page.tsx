@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Network } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -388,7 +389,8 @@ export default function UserIpAllowlistPage() {
           <Toolbar>
             <ToolbarHeading
               title="IP Allowlist"
-              description="Manage your IP allowlist entries"
+              description="Add and manage IP address allowlist entries for secure access control and enhanced security"
+              icon={Network}
             />
           </Toolbar>
         </Container>
