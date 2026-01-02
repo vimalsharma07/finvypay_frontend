@@ -429,7 +429,6 @@ export function CreateMerchantAcquirerAccountForm({
         ratesType: selectedTab === 'normal' ? CONNECTOR_RATES_TYPE.NORMAL : CONNECTOR_RATES_TYPE.TIERED,
         ...(selectedPaymentMethod === 'CRYPTO' && cryptoFlow !== undefined && { cryptoFlow }),
         ...(selectedMerchantProfile && { merchantProfileId: Number(selectedMerchantProfile) }),
-        ...(selectedIndustryId && { industryId: Number(selectedIndustryId) }),
       };
 
       await onSubmit(payload);
