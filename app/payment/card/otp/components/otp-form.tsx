@@ -54,16 +54,14 @@ export function OtpForm() {
   return (
     <div className="flex justify-center">
       <Card className="shadow-sm border border-muted w-full max-w-md">
-        <CardHeader className="pb-2">
-          <div className="flex items-center gap-2 justify-center">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
-              1
-            </div>
-            <div className="text-center">
-              <CardTitle className="text-base leading-tight">Enter OTP</CardTitle>
-              <p className="text-sm text-muted-foreground">6-digit card verification code</p>
-            </div>
+        <CardHeader className="space-y-3 items-center text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <span className="text-sm font-semibold">OTP</span>
           </div>
+          <CardTitle className="text-xl font-semibold text-foreground">Enter OTP</CardTitle>
+          <p className="text-sm text-muted-foreground max-w-md">
+            6-digit card verification code
+          </p>
         </CardHeader>
 
         <CardContent className="pt-2">

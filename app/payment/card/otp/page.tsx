@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { OtpForm } from './components/otp-form';
 
 export const metadata: Metadata = {
-  title: 'OTP Verification',
+  title: 'Card OTP Verification',
 };
 
 export default function OtpPage() {
