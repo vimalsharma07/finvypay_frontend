@@ -26,7 +26,7 @@ const cardsConfig = [
     key: 'merchantAcquirerRequestPendingCount' as const,
     title: 'Pending Acquirer Requests',
     description: 'Merchants waiting for acquirer mapping',
-    href: '/admin/acquirers/acquirer-accounts',
+    href: '/admin/acquirers/requests',
     icon: Clock3,
   },
 ];
