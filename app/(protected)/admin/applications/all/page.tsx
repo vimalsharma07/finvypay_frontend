@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { ClipboardList } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -240,10 +241,11 @@ export default function AdminApplicationListPage() {
     <div className="overflow-x-hidden">
       <Container>
         <Toolbar>
-          <ToolbarHeading
-            title="Applications"
-            description="All merchant applications"
-          />
+            <ToolbarHeading
+              title="Applications"
+              description="Review, approve, and manage merchant onboarding applications with status tracking and application details"
+              icon={ClipboardList}
+            />
           <ToolbarActions>
             {/* reserved for filters or bulk actions */}
           </ToolbarActions>

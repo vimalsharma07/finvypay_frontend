@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { CreditCard } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -317,7 +318,8 @@ export default function TrustedCardsPage() {
           <Toolbar>
             <ToolbarHeading
               title="Trusted Cards"
-              description="Manage and view all trusted card whitelist entries"
+              description="Manage trusted card whitelist entries to bypass fraud checks for verified payment cards"
+              icon={CreditCard}
             />
           </Toolbar>
         </Container>

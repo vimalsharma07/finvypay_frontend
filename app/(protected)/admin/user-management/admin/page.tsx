@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
+import { Shield } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -264,7 +265,8 @@ export default function AdminUsersPage() {
           <Toolbar>
             <ToolbarHeading
               title="Admins"
-              description="Manage and view all admin users "
+              description="Create, edit, and manage admin user accounts with roles, permissions, and access controls for system administration"
+              icon={Shield}
             />
           </Toolbar>
         </Container>

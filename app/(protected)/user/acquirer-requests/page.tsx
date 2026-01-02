@@ -1,6 +1,7 @@
 'use client';
 
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import { FileText } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -219,10 +220,11 @@ export default function UserAcquirerRequestsPage() {
     <Fragment>
       <Container>
         <Toolbar>
-          <ToolbarHeading
-            title="Acquirer Requests"
-            description="View acquirer requests and details"
-          />
+            <ToolbarHeading
+              title="Acquirer Requests"
+              description="View and manage your acquirer account requests with status tracking and approval workflow"
+              icon={FileText}
+            />
           <ToolbarActions>
             <Button asChild variant="primary">
               <Link href="/user/acquirer-requests/create">Apply New Acquirer</Link>

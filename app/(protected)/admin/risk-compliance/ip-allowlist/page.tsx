@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Network } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -408,7 +409,8 @@ export default function AdminIpWhitelistPage() {
           <Toolbar>
             <ToolbarHeading
               title="IP Whitelist"
-              description="Manage and view all IP whitelist entries"
+              description="Add, edit, and manage IP address whitelist entries for secure access control and fraud prevention"
+              icon={Network}
             />
           </Toolbar>
         </Container>

@@ -2,6 +2,7 @@
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { Cpu } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -446,7 +447,8 @@ export default function AdminAcquirerAccountsPage() {
           <Toolbar>
             <ToolbarHeading
               title="Acquirer Accounts"
-              description="Manage and view all acquirer accounts"
+              description="View and manage payment gateway acquirer accounts with configuration settings, connection status, and account details"
+              icon={Cpu}
             />
           </Toolbar>
         </Container>
@@ -463,11 +465,12 @@ export default function AdminAcquirerAccountsPage() {
         <Toolbar>
           <ToolbarHeading
             title="Acquirer Accounts"
+            icon={Cpu}
             description={
               acquirerIdFromUrl && acquirer
                 ? (
                     <span className="flex items-center gap-2 flex-wrap">
-                      <span className="text-muted-foreground">Manage and view acquirer accounts for</span>
+                      <span className="text-muted-foreground">View and manage payment gateway acquirer accounts with configuration settings for</span>
                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary font-semibold border border-primary/20">
                         {acquirer.iconUrl && (() => {
                           const iconUrl = getIconUrl(acquirer.iconUrl);
@@ -488,8 +491,8 @@ export default function AdminAcquirerAccountsPage() {
                     </span>
                   )
                 : acquirerIdFromUrl
-                ? `Manage and view acquirer accounts for acquirer ID: ${acquirerIdFromUrl}`
-                : 'Manage and view all acquirer accounts'
+                ? `View and manage payment gateway acquirer accounts with configuration settings for acquirer ID: ${acquirerIdFromUrl}`
+                : 'View and manage payment gateway acquirer accounts with configuration settings, connection status, and account details'
             }
           />
           <ToolbarActions>

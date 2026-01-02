@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment } from 'react';
+import { LayoutGrid } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -18,10 +19,11 @@ export default function UserDashboardPage() {
     <Fragment>
       <Container>
         <Toolbar>
-          <ToolbarHeading
-            title="Dashboard"
-            description="Overview of your transactions, cards, and account activity"
-          />
+            <ToolbarHeading
+              title="Dashboard"
+              description="Overview of your payment transactions, account activity, revenue analytics, and key performance metrics"
+              icon={LayoutGrid}
+            />
         </Toolbar>
       </Container>
       <Container>

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState, Fragment } from 'react';
 import { useRouter } from 'next/navigation';
+import { Route } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -283,10 +284,11 @@ export default function UserRoutingPage() {
     <Fragment>
       <Container>
         <Toolbar>
-          <ToolbarHeading
-            title="Routing Rules"
-            description="Manage routing rules for payment processing"
-          />
+            <ToolbarHeading
+              title="Routing Rules"
+              description="Create, edit, and manage payment routing rules to optimize transaction processing across multiple acquirers"
+              icon={Route}
+            />
           <ToolbarActions>
             <Button variant="outline" onClick={() => router.push('/user/profile-selection')}>
               Change Profile

@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { ShieldCheck } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -330,7 +331,8 @@ export default function ManageRiskPage() {
           <Toolbar>
             <ToolbarHeading
               title="Manage Risk"
-              description="Manage and view all risk management entries"
+              description="Configure and manage risk management rules, thresholds, and fraud detection settings for transaction security"
+              icon={ShieldCheck}
             />
           </Toolbar>
         </Container>
