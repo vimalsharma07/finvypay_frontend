@@ -352,10 +352,11 @@ export default function MerchantUsersPage() {
     <Fragment>
       <Container>
         <Toolbar>
-          <ToolbarHeading
-            title="Merchants"
-            description="Manage and view all merchant users"
-          />
+            <ToolbarHeading
+              title="Merchants"
+              description="Create, edit, and manage merchant accounts with profiles, payment settings, routing configurations, and transaction monitoring"
+              icon={Store}
+            />
           <ToolbarActions>
             <AdvancedFilter
               fields={filterFields}

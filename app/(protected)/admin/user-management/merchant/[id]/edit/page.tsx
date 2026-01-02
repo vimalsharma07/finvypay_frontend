@@ -4,7 +4,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Store } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -165,7 +165,8 @@ export default function EditMerchantUserPage() {
           <Toolbar>
             <ToolbarHeading
               title="Edit Merchant"
-              description="Update merchant information"
+              description="Update merchant account details including profile information, payment settings, and configuration"
+              icon={Store}
             />
           </Toolbar>
         </Container>

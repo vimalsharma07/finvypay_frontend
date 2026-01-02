@@ -9,6 +9,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Percent } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import { Toolbar, ToolbarHeading, ToolbarActions } from '@/layouts/demo1/components/toolbar';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
@@ -194,7 +195,8 @@ export default function AssignRatesPage() {
       <Toolbar>
         <ToolbarHeading
           title="Assign Rates"
-          description="Set default rates for the merchant"
+          description="Configure and assign default processing rates including MDR, transaction fees, chargeback fees, and reserve percentages for this merchant"
+          icon={Percent}
         />
         <ToolbarActions>
           <Button variant="outline" onClick={() => router.back()}>

@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { Link2 } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -279,7 +280,8 @@ export default function CascadingPage() {
         <Toolbar>
           <ToolbarHeading
             title="Cascading Rules"
-            description="Manage cascading configurations for payment processing"
+            description="Create, edit, and manage cascading payment rules that automatically route transactions through multiple acquirers in sequence"
+            icon={Link2}
           />
           <ToolbarActions>
             <Button

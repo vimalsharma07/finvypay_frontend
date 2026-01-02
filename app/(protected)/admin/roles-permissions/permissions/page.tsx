@@ -251,10 +251,11 @@ export default function AdminPermissionsPage() {
     <Fragment>
       <Container>
         <Toolbar>
-          <ToolbarHeading
-            title="Permissions"
-            description="Manage and view all permissions"
-          />
+            <ToolbarHeading
+              title="Permissions"
+              description="View and manage system permissions that can be assigned to roles for granular access control and security"
+              icon={Key}
+            />
           <ToolbarActions>
             <Button variant="primary" onClick={() => router.push('/admin/roles-permissions/permissions/create')}>
               Create Permission

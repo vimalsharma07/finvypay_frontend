@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { ClipboardList, Clock3 } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -11,7 +12,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { getApplicationCounts, ApplicationCounts } from '@/lib/services/admin/applications';
-import { ClipboardList, Clock3 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const cardsConfig = [
@@ -70,7 +70,8 @@ export default function AdminApplicationsPage() {
         <Toolbar>
           <ToolbarHeading
             title="Applications"
-            description="Overview of merchant applications and acquirer requests"
+            description="Overview dashboard for merchant onboarding applications, acquirer requests, and application status tracking"
+            icon={ClipboardList}
           />
         </Toolbar>
       </Container>

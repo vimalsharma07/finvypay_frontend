@@ -6,7 +6,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
-import { ArrowLeft, Plus, X, Upload, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Plus, X, Upload, Image as ImageIcon, Plug } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -237,7 +237,8 @@ export default function CreateAcquirerPage() {
         <Toolbar>
           <ToolbarHeading
             title="Create Acquirer"
-            description="Create a new payment acquirer"
+            description="Create a new payment gateway acquirer with name, configuration settings, and integration details"
+            icon={Plug}
           />
           <div className="flex items-center">
             <Link

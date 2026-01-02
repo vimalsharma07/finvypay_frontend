@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Edit } from 'lucide-react';
+import { ArrowLeft, Edit, Globe } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -83,7 +83,8 @@ export default function ViewCountryPage() {
           <Toolbar>
             <ToolbarHeading
               title="Country Details"
-              description="View country information"
+              description="View complete country information including country name, currency codes, currency symbols, status, and configuration details"
+              icon={Globe}
             />
           </Toolbar>
         </Container>

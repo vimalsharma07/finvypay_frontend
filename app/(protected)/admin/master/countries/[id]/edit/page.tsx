@@ -4,7 +4,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Globe } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -189,7 +189,8 @@ export default function EditCountryPage() {
           <Toolbar>
             <ToolbarHeading
               title="Edit Country"
-              description="Update country information"
+              description="Update country details including country name, currency codes, currency symbols, and status settings"
+              icon={Globe}
             />
           </Toolbar>
         </Container>

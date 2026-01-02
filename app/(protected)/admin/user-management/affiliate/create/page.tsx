@@ -4,7 +4,7 @@ import { Fragment, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Users } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -104,7 +104,8 @@ export default function CreateAffiliateUserPage() {
         <Toolbar>
           <ToolbarHeading
             title="Create User"
-            description="Add a new user to the system"
+            description="Create a new affiliate user account with profile information, commission structure, and referral settings"
+            icon={Users}
           />
         </Toolbar>
       </Container>

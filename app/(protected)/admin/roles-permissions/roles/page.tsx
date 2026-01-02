@@ -265,10 +265,11 @@ export default function AdminRolesPage() {
     <Fragment>
       <Container>
         <Toolbar>
-          <ToolbarHeading
-            title="Roles"
-            description="Manage and view all roles"
-          />
+            <ToolbarHeading
+              title="Roles"
+              description="Create, edit, and manage user roles with assigned permissions for access control and security management"
+              icon={ShieldUser}
+            />
           <ToolbarActions>
             <Button variant="primary" onClick={() => router.push('/admin/roles-permissions/roles/create')}>
               Create Role

@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { Cpu } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -222,7 +223,8 @@ export default function ConnectorsPage() {
         <Toolbar>
           <ToolbarHeading
             title="Gateways (Acquirer Accounts)"
-            description="Manage acquirer accounts and gateways for merchant user"
+            description="View and manage payment gateway acquirer accounts and connectors assigned to this merchant for transaction processing"
+            icon={Cpu}
           />
           <ToolbarActions>
             <Button

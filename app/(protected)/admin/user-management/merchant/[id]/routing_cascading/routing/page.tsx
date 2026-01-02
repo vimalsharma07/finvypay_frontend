@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { Route } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -317,7 +318,8 @@ export default function RoutingPage() {
         <Toolbar>
           <ToolbarHeading
             title="Routing Rules"
-            description="Manage routing rules for payment processing"
+            description="Create, edit, and manage payment routing rules with conditions, priorities, and connector assignments for transaction optimization"
+            icon={Route}
           />
           <ToolbarActions>
             <Button

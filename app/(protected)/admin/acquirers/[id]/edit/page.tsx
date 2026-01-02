@@ -6,7 +6,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
-import { ArrowLeft, Plus, X, Upload, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Plus, X, Upload, Image as ImageIcon, Plug } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -338,7 +338,8 @@ export default function EditAcquirerPage() {
           <Toolbar>
             <ToolbarHeading
               title="Edit Acquirer"
-              description="Update acquirer details"
+              description="Update payment gateway acquirer details including name, configuration settings, and integration parameters"
+              icon={Plug}
             />
           </Toolbar>
           <div className="flex items-center justify-center py-12">
@@ -358,7 +359,8 @@ export default function EditAcquirerPage() {
           <Toolbar>
             <ToolbarHeading
               title="Edit Acquirer"
-              description="Update acquirer details"
+              description="Update payment gateway acquirer details including name, configuration settings, and integration parameters"
+              icon={Plug}
             />
           </Toolbar>
           <div className="flex items-center justify-center py-12">

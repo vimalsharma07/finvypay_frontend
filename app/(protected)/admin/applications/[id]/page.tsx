@@ -4,6 +4,7 @@ import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { ClipboardList } from 'lucide-react';
 import { Toolbar, ToolbarHeading } from '@/layouts/demo1/components/toolbar';
 import { Container } from '@/components/common/container';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -89,7 +90,8 @@ export default function AdminApplicationDetailPage() {
         <Toolbar>
           <ToolbarHeading
             title="Application Details"
-            description={`Application ID: ${data?.onboarding?.id || merchantId || ''}`}
+            description={`View complete merchant application details, onboarding information, and documents for Application ID: ${data?.onboarding?.id || merchantId || ''}`}
+            icon={ClipboardList}
           />
         </Toolbar>
       </Container>

@@ -4,7 +4,7 @@ import { Fragment, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Store } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -144,7 +144,8 @@ export default function CreateMerchantUserPage() {
         <Toolbar>
           <ToolbarHeading
             title="Create Merchant"
-            description="Add a new merchant to the system"
+            description="Create a new merchant account with profile information, payment settings, and initial configuration"
+            icon={Store}
           />
         </Toolbar>
       </Container>

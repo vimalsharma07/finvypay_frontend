@@ -6,7 +6,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Cpu } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -302,7 +302,8 @@ export default function CreateAcquirerAccountPage() {
           <Toolbar>
             <ToolbarHeading
               title="Create Acquirer Account"
-              description="Create a new acquirer account for the acquirer"
+              description="Create a new payment gateway acquirer account with connection settings, credentials, and configuration parameters"
+              icon={Cpu}
             />
           </Toolbar>
           <div className="flex items-center justify-center py-12">

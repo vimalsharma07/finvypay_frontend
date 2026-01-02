@@ -4,7 +4,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Shield } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -186,7 +186,8 @@ export default function EditUserPage() {
           <Toolbar>
             <ToolbarHeading
               title="Edit User"
-              description="Update user information"
+              description="Update admin user account details including profile information, role assignment, and permissions"
+              icon={Shield}
             />
           </Toolbar>
         </Container>

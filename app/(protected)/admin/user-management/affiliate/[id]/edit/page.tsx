@@ -4,7 +4,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Users } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -186,7 +186,8 @@ export default function EditAffiliateUserPage() {
           <Toolbar>
             <ToolbarHeading
               title="Edit Affiliate User"
-              description="Update affiliate user information"
+              description="Update affiliate account details including profile information, commission structure, and referral settings"
+              icon={Users}
             />
           </Toolbar>
         </Container>

@@ -281,10 +281,11 @@ export default function AdminUsersPage() {
     <Fragment>
       <Container>
         <Toolbar>
-          <ToolbarHeading
-            title="Admins"
-            description="Manage and view all admin users "
-          />
+            <ToolbarHeading
+              title="Admins"
+              description="Create, edit, and manage admin user accounts with roles, permissions, and access controls for system administration"
+              icon={Shield}
+            />
           <ToolbarActions>
             <AdvancedFilter
               fields={filterFields}

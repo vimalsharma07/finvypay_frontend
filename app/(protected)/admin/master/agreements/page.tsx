@@ -218,10 +218,11 @@ export default function AgreementsPage() {
     <Fragment>
       <Container>
         <Toolbar>
-          <ToolbarHeading
-            title="Agreements"
-            description="Manage and view all agreements"
-          />
+            <ToolbarHeading
+              title="Agreements"
+              description="Create, edit, and manage legal agreements and contract templates for merchant onboarding and compliance"
+              icon={FileText}
+            />
           <ToolbarActions>
             {/* Create button can be added here in future */}
           </ToolbarActions>

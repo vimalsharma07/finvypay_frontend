@@ -4,7 +4,7 @@ import { Fragment, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Globe } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -130,7 +130,8 @@ export default function CreateCountryPage() {
         <Toolbar>
           <ToolbarHeading
             title="Create Country"
-            description="Add a new country to the system"
+            description="Add a new country with country name, currency code, currency symbol, and status configuration for merchant onboarding"
+            icon={Globe}
           />
         </Toolbar>
       </Container>

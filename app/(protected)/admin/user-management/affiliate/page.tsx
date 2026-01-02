@@ -286,10 +286,11 @@ export default function AffiliateUsersPage() {
     <Fragment>
       <Container>
         <Toolbar>
-          <ToolbarHeading
-            title="Affiliates"
-            description="Manage and view all affiliate users"
-          />
+            <ToolbarHeading
+              title="Affiliates"
+              description="Create, edit, and manage affiliate accounts with commission structures, referral tracking, and performance analytics"
+              icon={Users}
+            />
           <ToolbarActions>
             <AdvancedFilter
               fields={filterFields}

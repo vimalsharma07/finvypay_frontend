@@ -352,10 +352,11 @@ export default function TrustedCardsPage() {
     <Fragment>
       <Container>
         <Toolbar>
-          <ToolbarHeading
-            title="Trusted Cards"
-            description="Manage and view all trusted card whitelist entries"
-          />
+            <ToolbarHeading
+              title="Trusted Cards"
+              description="Manage trusted card whitelist entries to bypass fraud checks for verified and trusted payment cards"
+              icon={CreditCard}
+            />
           <ToolbarActions>
             <Button variant="primary" onClick={() => setAddDialogOpen(true)}>
               Add Card

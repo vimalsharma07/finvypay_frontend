@@ -231,10 +231,11 @@ export default function AdminAcquirersPage() {
     <Fragment>
       <Container>
         <Toolbar>
-          <ToolbarHeading
-            title="Acquirers"
-            description="Manage and view all payment acquirers"
-          />
+            <ToolbarHeading
+              title="Acquirers"
+              description="Create, edit, and manage payment gateway acquirers with configuration settings and account management"
+              icon={Plug}
+            />
           <ToolbarActions>
             <div className="flex items-center gap-2">
                   <div className="relative">

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Link2 } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -134,7 +135,8 @@ export default function CascadingViewPage() {
       <Toolbar>
         <ToolbarHeading
           title={cascade.name || 'Cascading Detail'}
-          description="Review cascading rule configuration and chain"
+          description={`Review complete cascading rule configuration including acquirer chain sequence, priorities, status, and fallback settings for ${cascade.name || 'this rule'}`}
+          icon={Link2}
         />
         <div className="flex items-center gap-2">
           <Link href={`${backUrl}/${cascadingId}/edit`}>

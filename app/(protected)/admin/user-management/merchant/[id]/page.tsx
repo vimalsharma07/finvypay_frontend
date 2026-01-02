@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Edit } from 'lucide-react';
+import { ArrowLeft, Edit, Store } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -94,7 +94,8 @@ export default function ViewMerchantUserPage() {
           <Toolbar>
             <ToolbarHeading
               title="Merchant User Details"
-              description="View merchant user information"
+              description="View complete merchant account information including profile details, payment settings, routing configurations, and transaction history"
+              icon={Store}
             />
           </Toolbar>
         </Container>

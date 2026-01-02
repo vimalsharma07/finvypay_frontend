@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Key } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -111,7 +111,8 @@ export default function CreatePermissionPage() {
         <Toolbar>
           <ToolbarHeading
             title="Add Permission"
-            description="Create a new permission"
+            description="Create a new system permission that can be assigned to roles for granular access control"
+            icon={Key}
           />
           <div className="flex items-center">
             <Link

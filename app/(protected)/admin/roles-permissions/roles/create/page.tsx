@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ShieldUser } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -271,7 +271,8 @@ export default function CreateRolePage() {
         <Toolbar>
           <ToolbarHeading
             title="Add Role"
-            description="Create a new role with specific permissions"
+            description="Create a new user role with assigned permissions for access control and security management"
+            icon={ShieldUser}
           />
           <div className="flex items-center">
             <Link

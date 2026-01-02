@@ -2,6 +2,7 @@
 
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { LifeBuoy } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -132,7 +133,8 @@ export default function ViewTicketPage() {
           <Toolbar>
             <ToolbarHeading
               title="View Ticket"
-              description="Loading ticket details..."
+              description="Loading support ticket details and conversation history..."
+              icon={LifeBuoy}
             />
           </Toolbar>
         </Container>
@@ -153,7 +155,8 @@ export default function ViewTicketPage() {
           <Toolbar>
             <ToolbarHeading
               title="View Ticket"
-              description="Ticket not found"
+              description="Support ticket not found or you don't have access to view this ticket"
+              icon={LifeBuoy}
             />
           </Toolbar>
         </Container>
@@ -180,7 +183,8 @@ export default function ViewTicketPage() {
         <Toolbar>
           <ToolbarHeading
             title={`Ticket #${ticket.id}`}
-            description="View support ticket details"
+            description={`View support ticket details, status, conversation history, and attachments for ticket #${ticket.id}`}
+            icon={LifeBuoy}
           />
           <ToolbarActions>
             <Button variant="outline" onClick={() => router.push('/user/support')}>

@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Key } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -175,7 +175,8 @@ export default function EditPermissionPage() {
           <Toolbar>
             <ToolbarHeading
               title="Edit Permission"
-              description="Update permission details"
+              description="Update permission name, description, and module assignment for access control management"
+              icon={Key}
             />
           </Toolbar>
           <div className="flex items-center justify-center py-12">
@@ -195,7 +196,8 @@ export default function EditPermissionPage() {
           <Toolbar>
             <ToolbarHeading
               title="Edit Permission"
-              description="Update permission details"
+              description="Update permission name, description, and module assignment for access control management"
+              icon={Key}
             />
           </Toolbar>
           <div className="flex items-center justify-center py-12">

@@ -347,10 +347,11 @@ export default function ManageRiskPage() {
     <Fragment>
       <Container>
         <Toolbar>
-          <ToolbarHeading
-            title="Manage Risk"
-            description="Manage and view all risk management entries"
-          />
+            <ToolbarHeading
+              title="Manage Risk"
+              description="Configure and manage risk management rules, thresholds, and fraud detection settings for transaction security"
+              icon={ShieldCheck}
+            />
           <ToolbarActions>
             <Button variant="primary" onClick={() => setAddDialogOpen(true)}>
               Create Risk
