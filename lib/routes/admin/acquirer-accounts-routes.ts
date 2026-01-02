@@ -14,5 +14,6 @@ export const adminAcquirerAccountsRoutes = {
   update: (id: string | number) => `${BASE_URL}/admin/acquirer-accounts/${id}`,
   updateStatus: (id: string | number) => `${BASE_URL}/admin/acquirer-accounts/${id}/status`,
   delete: (id: string | number) => `${BASE_URL}/admin/acquirer-accounts/${id}`,
+  softDelete: (id: string | number) => `${BASE_URL}/admin/merchant-acquirer-account/${id}/soft-delete`,
 } as const;
 

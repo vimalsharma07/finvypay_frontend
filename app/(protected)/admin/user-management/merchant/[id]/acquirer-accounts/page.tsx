@@ -19,10 +19,21 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   getUserConnectors,
   MerchantAcquirerAccount,
   MerchantAcquirerAccountListResponse,
 } from '@/lib/services/admin/connectors';
+import { softDeleteMerchantAcquirerAccount } from '@/lib/services/admin/acquirer-accounts';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import Link from 'next/link';
 
@@ -39,6 +50,9 @@ export default function AcquirerAccountsPage() {
   const [limit, setLimit] = useState(10);
   const [sortBy, setSortBy] = useState<string>('createdAt');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [accountToDelete, setAccountToDelete] = useState<MerchantAcquirerAccount | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Fetch connectors
   const fetchConnectors = async (
@@ -190,11 +204,9 @@ export default function AcquirerAccountsPage() {
     },
     {
       label: 'Delete',
-      onClick: async (row: MerchantAcquirerAccount) => {
-        if (confirm(`Are you sure you want to delete acquirer account "${row.name}"?`)) {
-          // TODO: Implement delete
-          toast.info('Delete functionality coming soon');
-        }
+      onClick: (row: MerchantAcquirerAccount) => {
+        setAccountToDelete(row);
+        setDeleteDialogOpen(true);
       },
       variant: 'destructive',
       separator: true,
@@ -217,6 +229,35 @@ export default function AcquirerAccountsPage() {
     setSortBy(newSortBy);
     setSortOrder(newSortOrder);
     setPage(1);
+  };
+
+  // Handle soft delete acquirer account
+  const handleSoftDeleteAcquirerAccount = async () => {
+    if (!accountToDelete) return;
+
+    setDeleting(true);
+    try {
+      const response = await softDeleteMerchantAcquirerAccount(accountToDelete.id);
+      handleApiResponse(response, {
+        onSuccess: () => {
+          toast.success('Acquirer account deleted successfully!');
+          setDeleteDialogOpen(false);
+          setAccountToDelete(null);
+          fetchConnectors(page, limit);
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to delete acquirer account');
+        },
+        onUnauthorized: () => {
+          toast.error('Unauthorized. Please check your authentication.');
+        },
+      });
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+      console.error('Soft delete acquirer account error:', error);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
@@ -271,6 +312,28 @@ export default function AcquirerAccountsPage() {
           loading={loading}
         />
       </Container>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Acquirer Account</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete acquirer account &quot;{accountToDelete?.name}&quot;? This action will soft delete the account and it can be restored later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleSoftDeleteAcquirerAccount}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Fragment>
   );
 }

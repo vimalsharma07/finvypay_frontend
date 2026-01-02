@@ -328,3 +328,35 @@ export async function deleteAcquirerAccount(
     };
   }
 }
+
+/**
+ * Soft delete merchant acquirer account
+ */
+export async function softDeleteMerchantAcquirerAccount(
+  id: string | number
+): Promise<ApiResponse<{ success: boolean; message?: string }>> {
+  try {
+    const data = await http.put(adminRoutes.acquirerAccounts.softDelete(id)) as {
+      success: boolean;
+      message?: string;
+    };
+    return {
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+        errors: error.data?.errors,
+        message: error.data?.message,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
