@@ -10,6 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { X, Trash2, Check } from 'lucide-react';
 
 export interface ConfirmCompProps {
   open: boolean;
@@ -58,6 +59,7 @@ export function ConfirmComp({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel onClick={handleCancel}>
+            <X className="h-4 w-4" />
             {cancelLabel}
           </AlertDialogCancel>
           <AlertDialogAction
@@ -68,6 +70,11 @@ export function ConfirmComp({
                 : ''
             }
           >
+            {variant === 'destructive' ? (
+              <Trash2 className="h-4 w-4" />
+            ) : (
+              <Check className="h-4 w-4" />
+            )}
             {confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>

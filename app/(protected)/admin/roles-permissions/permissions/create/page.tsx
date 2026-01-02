@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
-import { ArrowLeft, Key } from 'lucide-react';
+import { ArrowLeft, Key, X, Plus } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -311,9 +311,11 @@ export default function CreatePermissionPage() {
                   onClick={() => router.push('/admin/permissions')}
                   disabled={submitting}
                 >
+                  <X className="h-4 w-4" />
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary" disabled={submitting}>
+                  <Plus className="h-4 w-4" />
                   {submitting ? 'Creating...' : 'Create Permission'}
                 </Button>
               </div>

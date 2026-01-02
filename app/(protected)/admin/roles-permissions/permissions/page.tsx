@@ -39,7 +39,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Search, X, Pencil, Trash2 } from 'lucide-react';
+import { Search, X, Pencil, Trash2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TableActionMenu, TableActionMenuItem } from '@/app/(protected)/components/table-action-menu';
 import { cn } from '@/lib/utils';
@@ -258,6 +258,7 @@ export default function AdminPermissionsPage() {
             />
           <ToolbarActions>
             <Button variant="primary" onClick={() => router.push('/admin/roles-permissions/permissions/create')}>
+              <Plus className="h-4 w-4" />
               Create Permission
             </Button>
           </ToolbarActions>
@@ -346,12 +347,16 @@ export default function AdminPermissionsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>
+              <X className="h-4 w-4" />
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeletePermission}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
+              <Trash2 className="h-4 w-4" />
               {deleting ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>

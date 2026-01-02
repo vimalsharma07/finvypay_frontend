@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import { CreditCard } from 'lucide-react';
+import { CreditCard, Plus, X, Trash2, LoaderCircleIcon } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -341,6 +341,7 @@ export default function TrustedCardsPage() {
           />
           <ToolbarActions>
             <Button variant="primary" onClick={() => setAddDialogOpen(true)}>
+              <Plus className="h-4 w-4 me-1" />
               Create Trusted Card
             </Button>
           </ToolbarActions>
@@ -401,13 +402,26 @@ export default function TrustedCardsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>
+              <X className="h-4 w-4 me-1" />
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteCard}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleting ? 'Deleting...' : 'Delete'}
+              {deleting ? (
+                <>
+                  <LoaderCircleIcon className="h-4 w-4 animate-spin me-1" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 me-1" />
+                  Delete
+                </>
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

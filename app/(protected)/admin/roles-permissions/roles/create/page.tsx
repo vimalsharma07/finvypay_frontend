@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
-import { ArrowLeft, ShieldUser } from 'lucide-react';
+import { ArrowLeft, ShieldUser, X, Plus } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -464,9 +464,11 @@ export default function CreateRolePage() {
                   variant="outline"
                   onClick={() => router.push('/admin/roles-permissions/roles')}
                 >
+                  <X className="h-4 w-4" />
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary">
+                  <Plus className="h-4 w-4" />
                   Add Role
                 </Button>
               </div>

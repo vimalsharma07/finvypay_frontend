@@ -33,6 +33,7 @@ import { Button } from '@/components/ui/button';
 import { RiskManagement, getRiskTypes, RiskType } from '@/lib/services/user/risk-management';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
+import { X, Save } from 'lucide-react';
 
 // Form schema
 const editRiskSchema = z.object({
@@ -220,6 +221,7 @@ export function EditRiskDialog({
                   onClick={() => handleClose(false)}
                   disabled={isSubmitting}
                 >
+                  <X className="h-4 w-4" />
                   Cancel
                 </Button>
                 <Button 
@@ -227,6 +229,7 @@ export function EditRiskDialog({
                   variant="primary" 
                   disabled={isSubmitting || loadingRiskTypes}
                 >
+                  <Save className="h-4 w-4" />
                   {isSubmitting ? 'Updating...' : 'Update'}
                 </Button>
               </DialogFooter>

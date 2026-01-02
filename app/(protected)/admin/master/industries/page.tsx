@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
-import { Building } from 'lucide-react';
+import { Building, Plus } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -303,6 +303,7 @@ export default function IndustriesPage() {
           />
           <ToolbarActions>
             <Button variant="primary" onClick={() => setCreateDialogOpen(true)}>
+              <Plus className="h-4 w-4" />
               Create Industry
             </Button>
           </ToolbarActions>

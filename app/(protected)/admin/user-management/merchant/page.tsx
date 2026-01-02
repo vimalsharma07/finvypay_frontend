@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
-import { Store } from 'lucide-react';
+import { Store, Plus } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -364,6 +364,7 @@ export default function MerchantUsersPage() {
               onReset={handleResetFilters}
             />
             <Button variant="primary" onClick={handleCreateUser}>
+              <Plus className="h-4 w-4" />
               Create Merchant
             </Button>
           </ToolbarActions>

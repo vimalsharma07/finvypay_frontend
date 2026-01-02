@@ -4,7 +4,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft, Globe } from 'lucide-react';
+import { ArrowLeft, Globe, X, Save } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -464,10 +464,12 @@ export default function EditCountryPage() {
                 <div className="flex justify-end gap-4 pt-4">
                   <Link href={`/admin/master/countries/${countryId}`}>
                     <Button type="button" variant="outline" disabled={isSubmitting}>
+                      <X className="h-4 w-4" />
                       Cancel
                     </Button>
                   </Link>
                   <Button type="submit" disabled={isSubmitting}>
+                    <Save className="h-4 w-4" />
                     {isSubmitting ? 'Updating...' : 'Update Country'}
                   </Button>
                 </div>

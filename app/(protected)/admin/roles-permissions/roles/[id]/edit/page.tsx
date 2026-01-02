@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
-import { ArrowLeft, ShieldUser } from 'lucide-react';
+import { ArrowLeft, ShieldUser, X, Save } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -667,9 +667,11 @@ export default function EditRolePage() {
                   onClick={() => router.push('/admin/roles-permissions/roles')}
                   disabled={submitting}
                 >
+                  <X className="h-4 w-4" />
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary" disabled={submitting}>
+                  <Save className="h-4 w-4" />
                   {submitting ? 'Updating...' : 'Update Role'}
                 </Button>
               </div>

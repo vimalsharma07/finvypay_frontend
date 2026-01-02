@@ -549,9 +549,11 @@ export default function CreateAcquirerPage() {
                   onClick={() => router.push('/admin/acquirers')}
                   disabled={submitting}
                 >
+                  <X className="h-4 w-4" />
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary" disabled={submitting}>
+                  <Plus className="h-4 w-4" />
                   {submitting ? 'Creating...' : 'Create Acquirer'}
                 </Button>
               </div>

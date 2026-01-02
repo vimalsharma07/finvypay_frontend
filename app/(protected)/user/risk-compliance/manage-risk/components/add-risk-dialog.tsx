@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { getRiskTypes, RiskType } from '@/lib/services/user/risk-management';
+import { X, Plus } from 'lucide-react';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 
@@ -199,6 +200,7 @@ export function AddRiskDialog({
                   onClick={() => handleClose(false)}
                   disabled={isSubmitting}
                 >
+                  <X className="h-4 w-4" />
                   Cancel
                 </Button>
                 <Button 
@@ -206,6 +208,7 @@ export function AddRiskDialog({
                   variant="primary" 
                   disabled={isSubmitting || loadingRiskTypes}
                 >
+                  <Plus className="h-4 w-4" />
                   {isSubmitting ? 'Creating...' : 'Create'}
                 </Button>
               </DialogFooter>

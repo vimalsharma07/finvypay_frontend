@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
-import { Shield } from 'lucide-react';
+import { Shield, Plus } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -293,7 +293,8 @@ export default function AdminUsersPage() {
               onReset={handleResetFilters}
             />
             <Button variant="primary" onClick={handleCreateUser}>
-              Create User
+              <Plus className="h-4 w-4 me-1" />
+              Create Admin
             </Button>
           </ToolbarActions>
         </Toolbar>

@@ -4,7 +4,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft, Shield } from 'lucide-react';
+import { ArrowLeft, Shield, X, Save } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -77,7 +77,7 @@ export default function EditUserPage() {
             });
           },
           onError: (errorMessage) => {
-            toast.error(errorMessage || 'Failed to load user');
+            toast.error(errorMessage || 'Failed to load admin');
             router.push('/admin/user-management/admin');
           },
           onUnauthorized: () => {
@@ -142,7 +142,7 @@ export default function EditUserPage() {
 
       handleApiResponse<User>(response, {
         onSuccess: (userData) => {
-          toast.success('User updated successfully!');
+          toast.success('Admin updated successfully!');
           router.push('/admin/user-management/admin');
         },
         onValidationError: (errors, messages) => {
@@ -165,7 +165,7 @@ export default function EditUserPage() {
           toast.error(errorMessage);
         },
         onError: (errorMessage, status) => {
-          toast.error(errorMessage || 'Failed to update user');
+          toast.error(errorMessage || 'Failed to update admin');
         },
         onUnauthorized: () => {
           toast.error('Unauthorized. Please check your authentication.');
@@ -185,7 +185,7 @@ export default function EditUserPage() {
         <Container>
           <Toolbar>
             <ToolbarHeading
-              title="Edit User"
+              title="Edit Admin"
               description="Update admin user account details including profile information, role assignment, and permissions"
               icon={Shield}
             />
@@ -207,8 +207,8 @@ export default function EditUserPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Edit User"
-            description="Update user information"
+            title="Edit Admin"
+            description="Update admin information"
           />
         </Toolbar>
       </Container>
@@ -221,7 +221,7 @@ export default function EditUserPage() {
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
               </Link>
-              <CardTitle>User Information</CardTitle>
+              <CardTitle>Admin Information</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
@@ -283,7 +283,7 @@ export default function EditUserPage() {
                         <div className="space-y-0.5">
                           <FormLabel className="text-base">Blocked Status</FormLabel>
                           <div className="text-sm text-muted-foreground">
-                            Block or unblock this user
+                            Block or unblock this admin
                           </div>
                         </div>
                         <FormControl>
@@ -305,7 +305,7 @@ export default function EditUserPage() {
                         <div className="space-y-0.5">
                           <FormLabel className="text-base">Deleted Status</FormLabel>
                           <div className="text-sm text-muted-foreground">
-                            Mark user as deleted
+                            Mark admin as deleted
                           </div>
                         </div>
                         <FormControl>
@@ -327,10 +327,12 @@ export default function EditUserPage() {
                     onClick={() => router.back()}
                     disabled={isSubmitting}
                   >
+                    <X className="h-4 w-4 me-1" />
                     Cancel
                   </Button>
                   <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'Updating...' : 'Update User'}
+                    <Save className="h-4 w-4 me-1" />
+                    {isSubmitting ? 'Updating...' : 'Update Admin'}
                   </Button>
                 </div>
               </form>

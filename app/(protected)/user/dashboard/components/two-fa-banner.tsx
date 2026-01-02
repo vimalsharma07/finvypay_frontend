@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Shield, ArrowRight } from 'lucide-react';
+import { Shield, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 
 interface TwoFaBannerProps {
@@ -42,8 +42,8 @@ export function TwoFaBanner({ show = true }: TwoFaBannerProps) {
               asChild
             >
               <Link href="/user/profile">
+                <ShieldCheck className="h-4 w-4 me-2" />
                 Enable 2FA
-                <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
           </div>

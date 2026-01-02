@@ -4,7 +4,7 @@ import { Fragment, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft, Globe } from 'lucide-react';
+import { ArrowLeft, Globe, X, Plus } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -384,10 +384,12 @@ export default function CreateCountryPage() {
                 <div className="flex justify-end gap-4 pt-4">
                   <Link href="/admin/master/countries">
                     <Button type="button" variant="outline" disabled={isSubmitting}>
+                      <X className="h-4 w-4" />
                       Cancel
                     </Button>
                   </Link>
                   <Button type="submit" disabled={isSubmitting}>
+                    <Plus className="h-4 w-4" />
                     {isSubmitting ? 'Creating...' : 'Create Country'}
                   </Button>
                 </div>

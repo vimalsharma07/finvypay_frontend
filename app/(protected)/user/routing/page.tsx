@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState, Fragment } from 'react';
 import { useRouter } from 'next/navigation';
-import { Route } from 'lucide-react';
+import { Route, UserCircle } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -297,7 +297,8 @@ export default function UserRoutingPage() {
             >
               Create Routing
             </Button>
-            <Button variant="outline" onClick={() => router.push('/user/profile-selection')}>
+            <Button variant="secondary" onClick={() => router.push('/user/profile-selection')}>
+              <UserCircle className="h-4 w-4 me-1" />
               Change Profile
             </Button>
           </ToolbarActions>

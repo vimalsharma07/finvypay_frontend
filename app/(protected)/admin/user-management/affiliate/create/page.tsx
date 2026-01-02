@@ -4,7 +4,7 @@ import { Fragment, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft, Users } from 'lucide-react';
+import { ArrowLeft, Users, X, Plus } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -62,7 +62,7 @@ export default function CreateAffiliateUserPage() {
 
       handleApiResponse<User>(response, {
         onSuccess: () => {
-          toast.success('User created successfully!');
+          toast.success('Affiliate created successfully!');
           router.push('/admin/user-management/affiliate');
         },
         onValidationError: (errors, messages) => {
@@ -84,7 +84,7 @@ export default function CreateAffiliateUserPage() {
           toast.error(errorMessage);
         },
         onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to create user');
+          toast.error(errorMessage || 'Failed to create affiliate');
         },
         onUnauthorized: () => {
           toast.error('Unauthorized. Please check your authentication.');
@@ -92,7 +92,7 @@ export default function CreateAffiliateUserPage() {
       });
     } catch (error) {
       toast.error('An unexpected error occurred');
-      console.error('Create user error:', error);
+      console.error('Create affiliate error:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -103,7 +103,7 @@ export default function CreateAffiliateUserPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Create User"
+            title="Create Affiliate"
             description="Create a new affiliate user account with profile information, commission structure, and referral settings"
             icon={Users}
           />
@@ -118,7 +118,7 @@ export default function CreateAffiliateUserPage() {
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
               </Link>
-              <CardTitle>User Information</CardTitle>
+              <CardTitle>Affiliate Information</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
@@ -136,7 +136,7 @@ export default function CreateAffiliateUserPage() {
                         <FormLabel>Name *</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Enter user name"
+                            placeholder="Enter affiliate name"
                             {...field}
                             disabled={isSubmitting}
                           />
@@ -185,10 +185,12 @@ export default function CreateAffiliateUserPage() {
                     onClick={() => router.back()}
                     disabled={isSubmitting}
                   >
+                    <X className="h-4 w-4 me-1" />
                     Cancel
                   </Button>
                   <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'Creating...' : 'Create User'}
+                    <Plus className="h-4 w-4 me-1" />
+                    {isSubmitting ? 'Creating...' : 'Create Affiliate'}
                   </Button>
                 </div>
               </form>

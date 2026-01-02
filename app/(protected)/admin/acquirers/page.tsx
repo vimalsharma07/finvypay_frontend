@@ -29,7 +29,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch, SwitchWrapper } from '@/components/ui/switch';
-import { Search, X, Pencil, Trash2, Plus, ArrowRight, MoreVertical } from 'lucide-react';
+import { Search, X, Pencil, Trash2, Plus, ArrowRight, MoreVertical, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -413,6 +413,7 @@ export default function AdminAcquirersPage() {
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1 || loading}
                   >
+                    <ChevronLeft className="h-4 w-4" />
                     Previous
                   </Button>
                   <div className="text-sm text-muted-foreground">
@@ -425,6 +426,7 @@ export default function AdminAcquirersPage() {
                     disabled={currentPage === totalPages || loading}
                   >
                     Next
+                    <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -442,12 +444,16 @@ export default function AdminAcquirersPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>
+              <X className="h-4 w-4" />
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteAcquirer}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
+              <Trash2 className="h-4 w-4" />
               {deleting ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>

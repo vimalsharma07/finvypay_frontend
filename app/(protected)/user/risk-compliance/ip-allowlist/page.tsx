@@ -40,7 +40,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Search, X, Pencil, Trash2 } from 'lucide-react';
+import { Search, X, Pencil, Trash2, Plus, Save, LoaderCircleIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
@@ -412,6 +412,7 @@ export default function UserIpAllowlistPage() {
           />
           <ToolbarActions>
             <Button variant="primary" onClick={() => setAddDialogOpen(true)}>
+              <Plus className="h-4 w-4 me-1" />
               Add IP Address
             </Button>
           </ToolbarActions>
@@ -522,6 +523,7 @@ export default function UserIpAllowlistPage() {
               }}
               disabled={updating}
             >
+              <X className="h-4 w-4 me-1" />
               Cancel
             </Button>
             <Button
@@ -529,6 +531,7 @@ export default function UserIpAllowlistPage() {
               onClick={handleUpdateIp}
               disabled={updating || !editIp.trim()}
             >
+              <Save className="h-4 w-4 me-1" />
               {updating ? 'Updating...' : 'Update IP'}
             </Button>
           </DialogFooter>
@@ -553,13 +556,26 @@ export default function UserIpAllowlistPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>
+              <X className="h-4 w-4 me-1" />
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteIp}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleting ? 'Deleting...' : 'Delete'}
+              {deleting ? (
+                <>
+                  <LoaderCircleIcon className="h-4 w-4 animate-spin me-1" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 me-1" />
+                  Delete
+                </>
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

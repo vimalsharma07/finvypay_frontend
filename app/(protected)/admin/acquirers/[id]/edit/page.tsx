@@ -6,7 +6,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
-import { ArrowLeft, Plus, X, Upload, Image as ImageIcon, Plug } from 'lucide-react';
+import { ArrowLeft, Plus, X, Upload, Image as ImageIcon, Plug, Save } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -673,9 +673,11 @@ export default function EditAcquirerPage() {
                   onClick={() => router.push('/admin/acquirers')}
                   disabled={submitting}
                 >
+                  <X className="h-4 w-4" />
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary" disabled={submitting}>
+                  <Save className="h-4 w-4" />
                   {submitting ? 'Updating...' : 'Update Acquirer'}
                 </Button>
               </div>

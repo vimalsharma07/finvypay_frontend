@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
-import { Globe } from 'lucide-react';
+import { Globe, Plus } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -283,6 +283,7 @@ export default function CountriesPage() {
             />
           <ToolbarActions>
             <Button variant="primary" onClick={handleCreateCountry}>
+              <Plus className="h-4 w-4" />
               Create Country
             </Button>
           </ToolbarActions>

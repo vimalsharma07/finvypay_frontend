@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ClipboardList, Clock3 } from 'lucide-react';
+import { ClipboardList, Clock3, ArrowRight } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -99,6 +99,7 @@ export default function AdminApplicationsPage() {
                     <div className="pt-1">
                       <Button variant="ghost" className="px-0 text-primary">
                         View details
+                        <ArrowRight className="h-4 w-4 ml-1" />
                       </Button>
                     </div>
                   </CardContent>
