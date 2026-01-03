@@ -38,3 +38,29 @@ export const createRoutingSchema = z.object({
 // Type definitions
 export type CreateRoutingFormData = z.infer<typeof createRoutingSchema>;
 export type RoutingConfigItem = z.infer<typeof routingConfigItemSchema>;
+
+// Create cascading schema
+export const createCascadingSchema = z.object({
+  name: z.string()
+    .min(1, 'Cascading name is required')
+    .max(190, 'Cascading name must be less than or equal to 190 characters')
+    .refine((val) => !/^\s*$/.test(val), 'Cascading name cannot contain only spaces'),
+
+  merchantProfileId: z.number().int().positive('Merchant profile ID must be a positive integer'),
+
+  merchantAcquirerAccountId: z.number().int().positive('Primary acquirer account ID must be a positive integer'),
+
+  type: z.enum(['DECLINED', 'FAILED', 'TIMEOUT', 'INSUFFICIENT_FUNDS'], {
+    errorMap: () => ({ message: 'Invalid cascading type. Must be one of: DECLINED, FAILED, TIMEOUT, INSUFFICIENT_FUNDS' })
+  }),
+
+  cascadingFor: z.number().int().positive('Secondary acquirer account ID must be a positive integer'),
+
+  status: z.boolean()
+}).refine((data) => data.merchantAcquirerAccountId !== data.cascadingFor, {
+  message: 'Primary and secondary accounts must be different',
+  path: ['cascadingFor']
+});
+
+// Type definitions
+export type CreateCascadingFormData = z.infer<typeof createCascadingSchema>;
