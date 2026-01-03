@@ -3,7 +3,6 @@
 import { ReactNode } from 'react';
 import { useParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Route } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,

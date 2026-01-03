@@ -2,7 +2,7 @@
 
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Link2, UserCircle, Eye, Pencil, Trash2 } from 'lucide-react';
+import { Link2, Eye, Pencil, Trash2 } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -238,9 +238,12 @@ export default function UserCascadingPage() {
               icon={Link2}
             />
           <ToolbarActions>
-            <Button variant="secondary" onClick={() => router.push('/user/profile-selection')}>
-              <UserCircle className="h-4 w-4 me-1" />
-              Change Profile
+            <Button
+              variant="primary"
+              onClick={() => router.push(`/user/cascading/create?profileId=${selectedProfileId}`)}
+              disabled={!selectedProfileId}
+            >
+              Create Cascading
             </Button>
           </ToolbarActions>
         </Toolbar>
