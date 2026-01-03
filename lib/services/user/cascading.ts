@@ -92,4 +92,40 @@ export async function deleteUserMerchantCascading(
   }
 }
 
+export async function createUserMerchantCascading(
+  payload: {
+    name: string;
+    merchantProfileId: number;
+    merchantAcquirerAccountId: number;
+    type: string;
+    cascadingFor: number;
+    status: boolean;
+    config: Array<{
+      merchantAcquirerAccountId: string;
+      merchantAcquirerAccountName: string;
+    }>;
+  }
+): Promise<ApiResponse<{ success: boolean; message: string; data?: any }>> {
+  try {
+    const data = await http.post(getBaseUrl(), payload) as {
+      success: boolean;
+      message: string;
+      data?: any;
+    };
+    return {
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+      };
+    }
+    throw error;
+  }
+}
+
 
