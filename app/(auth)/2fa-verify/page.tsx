@@ -121,28 +121,28 @@ function Verify2FAContent() {
   return (
     <div className="w-full space-y-6">
       {/* Header */}
-      <div className="space-y-1.5 pb-3">
+      <div className="space-y-2 pb-2">
         <div className="mx-auto h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
           <Shield className="h-6 w-6 text-primary" />
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-center">
-          Verify Two-Factor Authentication
+        <h1 className="text-3xl font-bold tracking-tight text-center">
+          Two-Factor Authentication
         </h1>
         <p className="text-sm text-muted-foreground text-center">
           Enter the 6-digit code from your authenticator app
         </p>
         <p className="text-xs text-muted-foreground text-center">
-          Code for: <span className="font-medium">{email}</span>
+          Verifying for: <span className="font-semibold text-foreground">{email}</span>
         </p>
       </div>
 
       {/* Error Alert */}
       {error && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="border-destructive/50">
           <AlertIcon>
             <AlertCircle className="h-4 w-4" />
           </AlertIcon>
-          <AlertTitle>{error}</AlertTitle>
+          <AlertTitle className="text-sm">{error}</AlertTitle>
         </Alert>
       )}
 
@@ -154,7 +154,7 @@ function Verify2FAContent() {
               name="otp"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Authentication Code</FormLabel>
+                  <FormLabel className="text-sm font-medium text-center w-full">Authentication code</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -163,45 +163,49 @@ function Verify2FAContent() {
                       pattern="[0-9]*"
                       maxLength={6}
                       placeholder="000000"
-                      className="text-center text-2xl font-mono tracking-widest"
+                      className="text-center text-2xl font-mono tracking-widest h-14"
                       disabled={isProcessing}
                       onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, ''); // Only allow digits
+                        const value = e.target.value.replace(/\D/g, '');
                         field.onChange(value);
                       }}
                     />
                   </FormControl>
                   <FormMessage />
-                  <p className="text-xs text-muted-foreground mt-2">
+                  <p className="text-xs text-muted-foreground mt-3 text-center leading-relaxed">
                     Open your authenticator app (Google Authenticator, Authy, Microsoft Authenticator, etc.) and enter the 6-digit code displayed.
                   </p>
                 </FormItem>
               )}
             />
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isProcessing}
-              size="lg"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Verifying...
-                </>
-              ) : (
-                'Verify & Continue'
-              )}
-            </Button>
+            <div className="pt-2">
+              <Button
+                type="submit"
+                className="w-full h-11 text-base font-semibold"
+                disabled={isProcessing}
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  <>
+                    <Shield className="mr-2 h-4 w-4" />
+                    Verify & Continue
+                  </>
+                )}
+              </Button>
+            </div>
         </form>
       </Form>
 
       {/* Footer Links */}
-      <div className="text-center">
+      <div className="text-center pt-2">
         <p className="text-sm text-muted-foreground">
           Having trouble?{' '}
-          <Link href="/signin" className="text-primary hover:underline">
+          <Link href="/signin" className="font-semibold text-primary hover:text-primary/80 transition-colors">
             Back to sign in
           </Link>
         </p>

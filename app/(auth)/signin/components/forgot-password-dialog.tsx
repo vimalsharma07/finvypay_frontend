@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { AlertCircle, CheckCircle2, LoaderCircleIcon } from 'lucide-react';
+import { AlertCircle, CheckCircle2, LoaderCircleIcon, Mail } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -136,22 +136,31 @@ export function ForgotPasswordDialog({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Forgot Password?</DialogTitle>
-          <DialogDescription>
-            Enter your email address and we'll send you a link to reset your password.
-          </DialogDescription>
+        <DialogHeader className="space-y-4 pb-2">
+          <div className="flex justify-center">
+            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Mail className="h-6 w-6 text-primary" />
+            </div>
+          </div>
+          <div className="space-y-2 text-center">
+            <DialogTitle className="text-2xl font-bold tracking-tight">
+              Forgot Password?
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              Enter your email address and we&apos;ll send you a link to reset your password.
+            </DialogDescription>
+          </div>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Success Message */}
             {displaySuccess && (
-              <Alert variant="success" className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
+              <Alert className="bg-green-50 dark:bg-green-950/50 border-green-200 dark:border-green-800">
                 <AlertIcon>
                   <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
                 </AlertIcon>
-                <AlertTitle className="text-green-800 dark:text-green-200">
+                <AlertTitle className="text-sm text-green-800 dark:text-green-200">
                   {displaySuccess}
                 </AlertTitle>
               </Alert>
@@ -159,11 +168,11 @@ export function ForgotPasswordDialog({
 
             {/* Error Message */}
             {displayError && !displaySuccess && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" className="border-destructive/50">
                 <AlertIcon>
-                  <AlertCircle />
+                  <AlertCircle className="h-4 w-4" />
                 </AlertIcon>
-                <AlertTitle>{displayError}</AlertTitle>
+                <AlertTitle className="text-sm">{displayError}</AlertTitle>
               </Alert>
             )}
 
@@ -173,13 +182,14 @@ export function ForgotPasswordDialog({
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email Address</FormLabel>
+                  <FormLabel className="text-sm font-medium">Email address</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Enter your email address"
+                      placeholder="name@example.com"
                       type="email"
                       autoComplete="email"
                       disabled={isProcessing || !!displaySuccess}
+                      className="h-11"
                       {...field}
                     />
                   </FormControl>
@@ -191,16 +201,16 @@ export function ForgotPasswordDialog({
             {/* Cooldown Timer */}
             {cooldownRemaining > 0 && (
               <div className="text-sm text-muted-foreground text-center">
-                Please wait {cooldownRemaining} seconds before requesting another reset link.
+                Please wait <span className="font-semibold text-foreground">{cooldownRemaining}</span> seconds before requesting another reset link.
               </div>
             )}
 
             {/* Submit Button */}
-            <div className="flex flex-col gap-2 pt-2">
+            <div className="flex flex-col gap-3 pt-2">
               <Button
                 type="submit"
                 disabled={isProcessing || !canSend || !!displaySuccess}
-                className="w-full"
+                className="w-full h-11 text-base font-semibold"
               >
                 {isProcessing ? (
                   <>
@@ -208,9 +218,15 @@ export function ForgotPasswordDialog({
                     Sending...
                   </>
                 ) : displaySuccess ? (
-                  'Reset Link Sent'
+                  <>
+                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                    Reset Link Sent
+                  </>
                 ) : (
-                  'Send Reset Link'
+                  <>
+                    <Mail className="mr-2 h-4 w-4" />
+                    Send Reset Link
+                  </>
                 )}
               </Button>
 
@@ -220,7 +236,7 @@ export function ForgotPasswordDialog({
                   type="button"
                   variant="outline"
                   onClick={() => handleClose(false)}
-                  className="w-full"
+                  className="w-full h-11"
                 >
                   Close
                 </Button>

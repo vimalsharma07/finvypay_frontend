@@ -287,14 +287,19 @@ export default function Page() {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="block w-full space-y-5"
+            className="block w-full space-y-6"
           >
-        <div className="space-y-1.5 pb-3">
-          <h1 className="text-2xl font-semibold tracking-tight text-center">
-            Account Login
+        <div className="space-y-2 pb-2">
+          <div className="flex justify-center mb-4">
+            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <LogIn className="h-6 w-6 text-primary" />
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-center">
+            Welcome Back
           </h1>
           <p className="text-sm text-muted-foreground text-center">
-            Sign in to your  account
+            Sign in to your account to continue
           </p>
         </div>
 
@@ -304,6 +309,7 @@ export default function Page() {
             type="button"
             onClick={signInWithGoogle}
             disabled={isGoogleProcessing || isProcessing}
+            className="w-full h-11 border-2 hover:bg-muted/50 transition-all"
           >
             {isGoogleProcessing ? (
               <LoaderCircleIcon className="size-4 animate-spin mr-2" />
@@ -314,120 +320,143 @@ export default function Page() {
           </Button>
         </div>
 
-        <div className="relative py-1.5">
+        <div className="relative py-2">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
+            <span className="w-full border-t border-border/50" />
           </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">or</span>
+          <div className="relative flex justify-center text-xs uppercase tracking-wider">
+            <span className="bg-card px-3 text-muted-foreground font-medium">or continue with</span>
           </div>
         </div>
 
         {(error || googleError) && (
-          <Alert variant="destructive">
+          <Alert variant="destructive" className="border-destructive/50">
             <AlertIcon>
-              <AlertCircle />
+              <AlertCircle className="h-4 w-4" />
             </AlertIcon>
-            <AlertTitle>{error || googleError}</AlertTitle>
+            <AlertTitle className="text-sm">{error || googleError}</AlertTitle>
           </Alert>
         )}
 
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter your email address" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="space-y-4">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium">Email address</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="name@example.com" 
+                    className="h-11"
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <div className="flex justify-between items-center gap-2.5">
-                <FormLabel>Password</FormLabel>
-                <button
-                  type="button"
-                  onClick={() => setForgotPasswordOpen(true)}
-                  className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
-                >
-                  Forgot Password?
-                </button>
-              </div>
-              <div className="relative">
-                <Input
-                  placeholder="Enter your password"
-                  type={passwordVisible ? 'text' : 'password'} // Toggle input type
-                  {...field}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  mode="icon"
-                  size="sm"
-                  onClick={() => setPasswordVisible(!passwordVisible)} // Toggle visibility
-                  className="absolute end-0 top-1/2 -translate-y-1/2 h-7 w-7 me-1.5 bg-transparent!"
-                  aria-label={
-                    passwordVisible ? 'Hide password' : 'Show password'
-                  }
-                >
-                  {passwordVisible ? (
-                    <EyeOff className="text-muted-foreground" />
-                  ) : (
-                    <Eye className="text-muted-foreground" />
-                  )}
-                </Button>
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex justify-between items-center gap-2.5 mb-1.5">
+                  <FormLabel className="text-sm font-medium">Password</FormLabel>
+                  <button
+                    type="button"
+                    onClick={() => setForgotPasswordOpen(true)}
+                    className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+                <div className="relative">
+                  <Input
+                    placeholder="Enter your password"
+                    type={passwordVisible ? 'text' : 'password'}
+                    className="h-11 pr-10"
+                    {...field}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    mode="icon"
+                    size="sm"
+                    onClick={() => setPasswordVisible(!passwordVisible)}
+                    className="absolute end-0 top-1/2 -translate-y-1/2 h-8 w-8 me-1.5 bg-transparent! hover:bg-transparent"
+                    aria-label={
+                      passwordVisible ? 'Hide password' : 'Show password'
+                    }
+                  >
+                    {passwordVisible ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <div className="flex items-center space-x-2">
           <FormField
             control={form.control}
             name="rememberMe"
             render={({ field }) => (
-              <>
+              <div className="flex items-center space-x-2">
                 <Checkbox
                   id="remember-me"
                   checked={field.value}
                   onCheckedChange={(checked) => field.onChange(!!checked)}
+                  className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                 />
                 <label
                   htmlFor="remember-me"
-                  className="text-sm leading-none text-muted-foreground"
+                  className="text-sm leading-none text-muted-foreground cursor-pointer select-none"
                 >
-                  Remember me
+                  Remember me for 30 days
                 </label>
-              </>
+              </div>
             )}
           />
         </div>
 
-        <div className="flex flex-col gap-2.5">
-          <Button type="submit" disabled={isProcessing}>
-            {isProcessing ? <LoaderCircleIcon className="size-4 animate-spin" /> : <LogIn className="h-4 w-4" />}
-            Continue
+        <div className="flex flex-col gap-3 pt-2">
+          <Button 
+            type="submit" 
+            disabled={isProcessing}
+            className="w-full h-11 text-base font-semibold"
+          >
+            {isProcessing ? (
+              <>
+                <LoaderCircleIcon className="size-4 animate-spin mr-2" />
+                Signing in...
+              </>
+            ) : (
+              <>
+                <LogIn className="h-4 w-4 mr-2" />
+                Sign in
+              </>
+            )}
           </Button>
         </div>
 
-        <p className="text-sm text-muted-foreground text-center">
-          Don&apos;t have a  account?{' '}
-          <Link
-            href="/signup"
-            className="text-sm font-semibold text-foreground hover:text-primary"
-          >
-            Create Account
-          </Link>
-        </p>
+        <div className="pt-2">
+          <p className="text-sm text-center text-muted-foreground">
+            Don&apos;t have an account?{' '}
+            <Link
+              href="/signup"
+              className="font-semibold text-primary hover:text-primary/80 transition-colors"
+            >
+              Sign up
+            </Link>
+          </p>
+        </div>
       </form>
         </Form>
       )}
@@ -437,14 +466,19 @@ export default function Page() {
       <Form {...otpEmailForm}>
         <form
           onSubmit={otpEmailForm.handleSubmit(onOtpEmailSubmit)}
-          className="block w-full space-y-5"
+          className="block w-full space-y-6"
         >
-          <div className="space-y-1.5 pb-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-center">
-              Account Login
+          <div className="space-y-2 pb-2">
+            <div className="flex justify-center mb-4">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Mail className="h-6 w-6 text-primary" />
+              </div>
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight text-center">
+              Sign in with OTP
             </h1>
             <p className="text-sm text-muted-foreground text-center">
-              Sign in to your  account
+              We&apos;ll send you a one-time password
             </p>
           </div>
 
@@ -454,6 +488,7 @@ export default function Page() {
               type="button"
               onClick={signInWithGoogle}
               disabled={isGoogleProcessing || isSendingOtp}
+              className="w-full h-11 border-2 hover:bg-muted/50 transition-all"
             >
               {isGoogleProcessing ? (
                 <LoaderCircleIcon className="size-4 animate-spin mr-2" />
@@ -464,30 +499,30 @@ export default function Page() {
             </Button>
           </div>
 
-          <div className="relative py-1.5">
+          <div className="relative py-2">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+              <span className="w-full border-t border-border/50" />
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">or</span>
+            <div className="relative flex justify-center text-xs uppercase tracking-wider">
+              <span className="bg-card px-3 text-muted-foreground font-medium">or continue with</span>
             </div>
           </div>
 
           {(error || googleError || otpError) && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="border-destructive/50">
               <AlertIcon>
-                <AlertCircle />
+                <AlertCircle className="h-4 w-4" />
               </AlertIcon>
-              <AlertTitle>{error || googleError || otpError}</AlertTitle>
+              <AlertTitle className="text-sm">{error || googleError || otpError}</AlertTitle>
             </Alert>
           )}
 
           {otpSuccess && (
-            <Alert variant="success" className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
+            <Alert className="bg-green-50 dark:bg-green-950/50 border-green-200 dark:border-green-800">
               <AlertIcon>
-                <AlertCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
               </AlertIcon>
-              <AlertTitle className="text-green-800 dark:text-green-200">
+              <AlertTitle className="text-sm text-green-800 dark:text-green-200">
                 {otpSuccess}
               </AlertTitle>
             </Alert>
@@ -498,17 +533,26 @@ export default function Page() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel className="text-sm font-medium">Email address</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter your email address" type="email" {...field} />
+                  <Input 
+                    placeholder="name@example.com" 
+                    type="email" 
+                    className="h-11"
+                    {...field} 
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <div className="flex flex-col gap-2.5">
-            <Button type="submit" disabled={isSendingOtp}>
+          <div className="flex flex-col gap-3 pt-2">
+            <Button 
+              type="submit" 
+              disabled={isSendingOtp}
+              className="w-full h-11 text-base font-semibold"
+            >
               {isSendingOtp ? (
                 <>
                   <LoaderCircleIcon className="size-4 animate-spin mr-2" />
@@ -516,22 +560,24 @@ export default function Page() {
                 </>
               ) : (
                 <>
-                  <Mail className="h-4 w-4" />
+                  <Mail className="h-4 w-4 mr-2" />
                   Send OTP
                 </>
               )}
             </Button>
           </div>
 
-          <p className="text-sm text-muted-foreground text-center">
-            Don&apos;t have a  account?{' '}
-            <Link
-              href="/signup"
-              className="text-sm font-semibold text-foreground hover:text-primary"
-            >
-              Create Account
-            </Link>
-          </p>
+          <div className="pt-2">
+            <p className="text-sm text-center text-muted-foreground">
+              Don&apos;t have an account?{' '}
+              <Link
+                href="/signup"
+                className="font-semibold text-primary hover:text-primary/80 transition-colors"
+              >
+                Sign up
+              </Link>
+            </p>
+          </div>
         </form>
       </Form>
     )}
@@ -541,23 +587,31 @@ export default function Page() {
       <Form {...otpForm}>
         <form
           onSubmit={otpForm.handleSubmit(onOtpVerifySubmit)}
-          className="block w-full space-y-5"
+          className="block w-full space-y-6"
         >
-          <div className="space-y-1.5 pb-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-center">
-              Enter OTP
+          <div className="space-y-2 pb-2">
+            <div className="flex justify-center mb-4">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Mail className="h-6 w-6 text-primary" />
+              </div>
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight text-center">
+              Verify Your Email
             </h1>
             <p className="text-sm text-muted-foreground text-center">
-              We&apos;ve sent a 6-digit code to {otpEmail}
+              We&apos;ve sent a 6-digit code to
+            </p>
+            <p className="text-sm font-semibold text-center text-foreground">
+              {otpEmail}
             </p>
           </div>
 
           {(error || otpError) && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="border-destructive/50">
               <AlertIcon>
-                <AlertCircle />
+                <AlertCircle className="h-4 w-4" />
               </AlertIcon>
-              <AlertTitle>{error || otpError}</AlertTitle>
+              <AlertTitle className="text-sm">{error || otpError}</AlertTitle>
             </Alert>
           )}
 
@@ -573,44 +627,46 @@ export default function Page() {
               
               return (
                 <FormItem>
-                  <FormLabel>Enter OTP</FormLabel>
+                  <FormLabel className="text-sm font-medium text-center w-full">Enter verification code</FormLabel>
                   <FormControl>
-                    <InputOTP
-                      maxLength={6}
-                      pattern="[0-9]*"
-                      value={currentValue}
-                      onChange={(value) => {
-                        const numericValue = value.replace(/\D/g, '').slice(0, 6);
-                        setOtpValue(numericValue);
-                        field.onChange(numericValue, { shouldValidate: false });
-                        otpForm.clearErrors('otp');
-                        setError(null);
-                      }}
-                    >
-                      <InputOTPGroup>
-                        <InputOTPSlot index={0} />
-                        <InputOTPSlot index={1} />
-                        <InputOTPSlot index={2} />
-                        <InputOTPSlot index={3} />
-                        <InputOTPSlot index={4} />
-                        <InputOTPSlot index={5} />
-                      </InputOTPGroup>
-                    </InputOTP>
+                    <div className="flex justify-center">
+                      <InputOTP
+                        maxLength={6}
+                        pattern="[0-9]*"
+                        value={currentValue}
+                        onChange={(value) => {
+                          const numericValue = value.replace(/\D/g, '').slice(0, 6);
+                          setOtpValue(numericValue);
+                          field.onChange(numericValue, { shouldValidate: false });
+                          otpForm.clearErrors('otp');
+                          setError(null);
+                        }}
+                      >
+                        <InputOTPGroup className="gap-2">
+                          <InputOTPSlot index={0} className="h-12 w-12 text-lg font-semibold" />
+                          <InputOTPSlot index={1} className="h-12 w-12 text-lg font-semibold" />
+                          <InputOTPSlot index={2} className="h-12 w-12 text-lg font-semibold" />
+                          <InputOTPSlot index={3} className="h-12 w-12 text-lg font-semibold" />
+                          <InputOTPSlot index={4} className="h-12 w-12 text-lg font-semibold" />
+                          <InputOTPSlot index={5} className="h-12 w-12 text-lg font-semibold" />
+                        </InputOTPGroup>
+                      </InputOTP>
+                    </div>
                   </FormControl>
-                  <FormMessage />
-                  <p className="text-xs text-muted-foreground mt-2">
+                  <FormMessage className="text-center" />
+                  <p className="text-xs text-muted-foreground mt-3 text-center">
                     Didn&apos;t receive the code?{' '}
                     <button
                       type="button"
                       onClick={handleResendOtp}
                       disabled={resendCooldown > 0 || isSendingOtp || !otpEmail}
-                      className="font-semibold text-foreground hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="font-semibold text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       {isSendingOtp
                         ? 'Sending...'
                         : resendCooldown > 0
                         ? `Resend in ${resendCooldown}s`
-                        : 'Resend OTP'}
+                        : 'Resend code'}
                     </button>
                   </p>
                 </FormItem>
@@ -618,14 +674,14 @@ export default function Page() {
             }}
           />
 
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-3 pt-2">
             <Button
               type="submit"
               disabled={isVerifyingOtp || otpValue.length !== 6}
               onClick={() => {
-                // Explicitly set form value before submission
                 otpForm.setValue('otp', otpValue, { shouldValidate: true });
               }}
+              className="w-full h-11 text-base font-semibold"
             >
               {isVerifyingOtp ? (
                 <>
@@ -634,8 +690,8 @@ export default function Page() {
                 </>
               ) : (
                 <>
-                  <CheckCircle className="h-4 w-4" />
-                  Verify OTP
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Verify & Continue
                 </>
               )}
             </Button>
@@ -651,8 +707,9 @@ export default function Page() {
                 otpForm.reset({ otp: '' });
                 setError(null);
               }}
+              className="w-full h-11"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Email
             </Button>
           </div>
@@ -661,7 +718,7 @@ export default function Page() {
     )}
 
     {/* Login Method Toggle */}
-    <div className="flex items-center justify-center gap-2 mt-4">
+    <div className="flex items-center justify-center gap-2 mt-6 pt-4 border-t border-border/50">
       <button
         type="button"
         onClick={() => {
@@ -674,7 +731,7 @@ export default function Page() {
           setOtpEmail('');
           resetOtpState();
         }}
-        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium"
       >
         {loginMethod === 'password'
           ? 'Sign in with OTP instead'
