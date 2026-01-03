@@ -1,0 +1,10 @@
+/* Entry Callout Component Styles */
+
+.entry-callout-bg {
+  background-image: url('/media/images/2600x1600/2.png');
+}
+
+.dark .entry-callout-bg {
+  background-image: url('/media/images/2600x1600/2-dark.png');
+}
+
