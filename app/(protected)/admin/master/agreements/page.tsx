@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
-import { FileText } from 'lucide-react';
+import { FileText, Pencil, Trash2 } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -180,12 +180,14 @@ export default function AgreementsPage() {
   const actions: TableAction<Agreement>[] = [
     {
       label: 'Edit',
+      icon: Pencil,
       onClick: (row: Agreement) => {
         handleEditAgreement(row);
       },
     },
     {
       label: 'Delete',
+      icon: Trash2,
       onClick: (row: Agreement) => {
         setAgreementToDelete(row);
         setDeleteDialogOpen(true);
@@ -218,10 +220,11 @@ export default function AgreementsPage() {
     <Fragment>
       <Container>
         <Toolbar>
-          <ToolbarHeading
-            title="Agreements"
-            description="Manage and view all agreements"
-          />
+            <ToolbarHeading
+              title="Agreements"
+              description="Create, edit, and manage legal agreements and contract templates for merchant onboarding and compliance"
+              icon={FileText}
+            />
           <ToolbarActions>
             {/* Create button can be added here in future */}
           </ToolbarActions>

@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { X, Plus } from 'lucide-react';
 
 // Form schema
 const createIndustrySchema = z.object({
@@ -144,9 +145,11 @@ export function CreateIndustryDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
               >
+                <X className="h-4 w-4" />
                 Cancel
               </Button>
               <Button type="submit" variant="primary" disabled={isSubmitting}>
+                <Plus className="h-4 w-4" />
                 {isSubmitting ? 'Creating...' : 'Create Industry'}
               </Button>
             </DialogFooter>

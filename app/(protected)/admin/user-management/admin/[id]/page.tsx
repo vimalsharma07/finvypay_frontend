@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Edit } from 'lucide-react';
+import { ArrowLeft, Edit, Shield } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -94,7 +94,8 @@ export default function ViewUserPage() {
           <Toolbar>
             <ToolbarHeading
               title="User Details"
-              description="View user information"
+              description="View complete admin user account information including profile details, assigned roles, permissions, and access history"
+              icon={Shield}
             />
           </Toolbar>
         </Container>

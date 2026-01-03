@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { X, File } from 'lucide-react';
+import { X, File, Plus } from 'lucide-react';
 
 // Form schema
 const createTicketSchema = z.object({
@@ -293,9 +293,11 @@ export function CreateTicketDialog({
                   onClick={() => handleClose(false)}
                   disabled={isSubmitting}
                 >
+                  <X className="h-4 w-4" />
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary" disabled={isSubmitting}>
+                  <Plus className="h-4 w-4" />
                   {isSubmitting ? 'Creating...' : 'Create Ticket'}
                 </Button>
               </DialogFooter>

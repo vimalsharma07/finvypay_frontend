@@ -4,7 +4,7 @@ import { Suspense, useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, Check, Eye, EyeOff, Mail } from 'lucide-react';
+import { AlertCircle, Check, Eye, EyeOff, Mail, UserPlus, CheckCircle, ArrowLeft } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { register, verifyRegistrationOtp } from '@/lib/services/auth';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
@@ -327,7 +327,9 @@ export default function Page() {
               >
                 {isProcessing ? (
                   <LoaderCircleIcon className="size-4 animate-spin" />
-                ) : null}
+                ) : (
+                  <CheckCircle className="h-4 w-4" />
+                )}
                 Verify OTP
               </Button>
               <Button
@@ -339,6 +341,7 @@ export default function Page() {
                   setSuccess(null);
                 }}
               >
+                <ArrowLeft className="h-4 w-4" />
                 Back to Registration
               </Button>
             </div>
@@ -526,7 +529,9 @@ export default function Page() {
             <Button type="submit" disabled={isProcessing}>
               {isProcessing ? (
                 <LoaderCircleIcon className="size-4 animate-spin" />
-              ) : null}
+              ) : (
+                <UserPlus className="h-4 w-4" />
+              )}
               Create Account
             </Button>
           </div>

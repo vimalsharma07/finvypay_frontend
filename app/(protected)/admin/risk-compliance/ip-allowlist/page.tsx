@@ -42,7 +42,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Search, X, Pencil, Trash2, CheckCircle2 } from 'lucide-react';
+import { Search, X, Pencil, Trash2, CheckCircle2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
@@ -427,10 +427,12 @@ export default function AdminIpWhitelistPage() {
         <Toolbar>
           <ToolbarHeading
             title="IP Whitelist"
-            description="Manage and view all IP whitelist entries"
+            description="Add, edit, and manage IP address whitelist entries for secure access control and fraud prevention"
+            icon={Network}
           />
           <ToolbarActions>
             <Button variant="primary" onClick={() => setAddDialogOpen(true)}>
+              <Plus className="h-4 w-4 me-2" />
               Add IP
             </Button>
           </ToolbarActions>
@@ -517,12 +519,16 @@ export default function AdminIpWhitelistPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>
+              <X className="h-4 w-4" />
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteIp}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
+              <Trash2 className="h-4 w-4" />
               {deleting ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>

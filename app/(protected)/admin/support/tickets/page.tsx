@@ -377,10 +377,11 @@ export default function SupportTicketsPage() {
     <Fragment>
       <Container>
         <Toolbar>
-          <ToolbarHeading
-            title="Support Tickets"
-            description="Manage and view all support tickets"
-          />
+            <ToolbarHeading
+              title="Support Tickets"
+              description="View, respond to, and manage customer support tickets with status tracking and resolution management"
+              icon={LifeBuoy}
+            />
         </Toolbar>
       </Container>
 

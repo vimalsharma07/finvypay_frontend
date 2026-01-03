@@ -188,7 +188,8 @@ export default function SandboxTransactionsPage() {
         <Toolbar>
           <ToolbarHeading
             title="Sandbox Transactions"
-            description="View all your sandbox transactions"
+            description="View and test all your sandbox transactions for development, integration testing, and payment flow validation"
+            icon={CreditCard}
           />
         </Toolbar>
       </Container>

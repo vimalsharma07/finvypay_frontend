@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
-import { Users } from 'lucide-react';
+import { Users, Plus, Pencil, Eye, Trash2 } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -225,12 +225,12 @@ export default function AffiliateUsersPage() {
       const response = await deleteUser(userId);
       handleApiResponse(response, {
         onSuccess: () => {
-          toast.success('User deleted successfully!');
+          toast.success('Affiliate deleted successfully!');
           // Immediately refetch users list to update the table
           fetchUsers(page, limit, sortBy, sortOrder, filters);
         },
         onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to delete user');
+          toast.error(errorMessage || 'Failed to delete affiliate');
         },
         onUnauthorized: () => {
           toast.error('Unauthorized. Please check your authentication.');
@@ -238,7 +238,7 @@ export default function AffiliateUsersPage() {
       });
     } catch (error) {
       toast.error('An unexpected error occurred');
-      console.error('Delete user error:', error);
+        console.error('Delete affiliate error:', error);
     }
   };
 
@@ -246,14 +246,17 @@ export default function AffiliateUsersPage() {
   const actions: TableAction<User>[] = [
     {
       label: 'Edit',
+      icon: Pencil,
       route: (row: User) => `/admin/user-management/affiliate/${row.id}/edit`,
     },
     {
       label: 'View',
+      icon: Eye,
       route: (row: User) => `/admin/user-management/affiliate/${row.id}`,
     },
     {
       label: 'Delete',
+      icon: Trash2,
       onClick: (row: User) => {
         setUserToDelete(row);
         setDeleteDialogOpen(true);
@@ -286,10 +289,11 @@ export default function AffiliateUsersPage() {
     <Fragment>
       <Container>
         <Toolbar>
-          <ToolbarHeading
-            title="Affiliates"
-            description="Manage and view all affiliate users"
-          />
+            <ToolbarHeading
+              title="Affiliates"
+              description="Create, edit, and manage affiliate accounts with commission structures, referral tracking, and performance analytics"
+              icon={Users}
+            />
           <ToolbarActions>
             <AdvancedFilter
               fields={filterFields}
@@ -297,7 +301,8 @@ export default function AffiliateUsersPage() {
               onReset={handleResetFilters}
             />
             <Button variant="primary" onClick={handleCreateUser}>
-              Create User
+              <Plus className="h-4 w-4 me-1" />
+              Create Affiliate
             </Button>
           </ToolbarActions>
         </Toolbar>
@@ -309,7 +314,7 @@ export default function AffiliateUsersPage() {
           renderCell={renderCell}
           actions={actions}
           enableCheckbox={false}
-          searchPlaceholder="Search users..."
+          searchPlaceholder="Search affiliates..."
           searchKeys={['name', 'email', 'role']}
           getRowId={(row: User) => row.id}
           pagination={{
@@ -332,8 +337,8 @@ export default function AffiliateUsersPage() {
       <ConfirmComp
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete User"
-        message={`Are you sure you want to delete user "${userToDelete?.name}"? This action cannot be undone.`}
+        title="Delete Affiliate"
+        message={`Are you sure you want to delete affiliate "${userToDelete?.name}"? This action cannot be undone.`}
         confirmLabel="Yes, Delete"
         cancelLabel="Cancel"
         variant="destructive"

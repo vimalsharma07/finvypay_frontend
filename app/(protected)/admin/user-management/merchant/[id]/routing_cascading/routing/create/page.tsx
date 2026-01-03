@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Route } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -371,7 +372,8 @@ export default function RoutingCreatePage() {
       <Toolbar>
         <ToolbarHeading
           title="Create Routing Rule"
-          description="Define routing conditions and connector"
+          description="Create a new payment routing rule with conditions, priorities, and connector assignments to optimize transaction processing"
+          icon={Route}
         />
         <ToolbarActions>
           <Button variant="outline" onClick={() => router.push(backUrl)}>

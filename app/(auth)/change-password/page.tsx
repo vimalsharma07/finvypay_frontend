@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, Check, Eye, EyeOff } from 'lucide-react';
+import { AlertCircle, Check, Eye, EyeOff, KeyRound } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { changePassword } from '@/lib/services/auth';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
@@ -215,7 +215,11 @@ export default function Page() {
             />
 
             <Button type="submit" disabled={isProcessing} className="w-full">
-              {isProcessing && <LoaderCircleIcon className="size-4 animate-spin" />}
+              {isProcessing ? (
+                <LoaderCircleIcon className="size-4 animate-spin" />
+              ) : (
+                <KeyRound className="h-4 w-4" />
+              )}
               Reset Password
             </Button>
           </>

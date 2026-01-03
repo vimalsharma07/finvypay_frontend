@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Edit } from 'lucide-react';
+import { ArrowLeft, Edit, Users } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -94,7 +94,8 @@ export default function ViewAffiliateUserPage() {
           <Toolbar>
             <ToolbarHeading
               title="Affiliate User Details"
-              description="View affiliate user information"
+              description="View complete affiliate account information including profile details, commission structures, referral tracking, and performance metrics"
+              icon={Users}
             />
           </Toolbar>
         </Container>

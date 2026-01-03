@@ -4,7 +4,7 @@ import { Fragment, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Shield, X, Plus } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -62,7 +62,7 @@ export default function CreateUserPage() {
 
       handleApiResponse<User>(response, {
         onSuccess: () => {
-          toast.success('User created successfully!');
+          toast.success('Admin created successfully!');
           router.push('/admin/user-management/admin');
         },
         onValidationError: (errors, messages) => {
@@ -84,7 +84,7 @@ export default function CreateUserPage() {
           toast.error(errorMessage);
         },
         onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to create user');
+          toast.error(errorMessage || 'Failed to create admin');
         },
         onUnauthorized: () => {
           toast.error('Unauthorized. Please check your authentication.');
@@ -103,8 +103,9 @@ export default function CreateUserPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Create User"
-            description="Add a new user to the system"
+            title="Create Admin"
+            description="Create a new admin user account with profile information, role assignment, and access permissions"
+            icon={Shield}
           />
         </Toolbar>
       </Container>
@@ -117,7 +118,7 @@ export default function CreateUserPage() {
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
               </Link>
-              <CardTitle>User Information</CardTitle>
+              <CardTitle>Admin Information</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
@@ -184,10 +185,12 @@ export default function CreateUserPage() {
                     onClick={() => router.back()}
                     disabled={isSubmitting}
                   >
+                    <X className="h-4 w-4 me-1" />
                     Cancel
                   </Button>
                   <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'Creating...' : 'Create User'}
+                    <Plus className="h-4 w-4 me-1" />
+                    {isSubmitting ? 'Creating...' : 'Create Admin'}
                   </Button>
                 </div>
               </form>

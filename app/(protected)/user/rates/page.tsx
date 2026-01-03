@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
+import { Percent } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -61,7 +62,8 @@ export default function UserRatesPage() {
         <Toolbar>
           <ToolbarHeading
             title="My Rates"
-            description="View your merchant rate details"
+            description="View your assigned merchant processing rates, fee structures, and pricing details for payment transactions"
+            icon={Percent}
           />
         </Toolbar>
       </Container>

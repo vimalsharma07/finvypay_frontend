@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Route } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -130,7 +131,8 @@ export default function RoutingViewPage() {
       <Toolbar>
         <ToolbarHeading
           title={routeDetail.name || 'Routing Detail'}
-          description="Review routing rule configuration and connector details"
+          description={`Review complete routing rule configuration including conditions, priorities, connector assignments, and status for ${routeDetail.name || 'this rule'}`}
+          icon={Route}
         />
         <ToolbarActions>
           <Link href={`${backUrl}/${routingId}/edit`}>

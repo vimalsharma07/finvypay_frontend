@@ -4,7 +4,7 @@ import { Fragment, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Store, X, Plus } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -132,7 +132,7 @@ export default function CreateMerchantUserPage() {
       });
     } catch (error) {
       toast.error('An unexpected error occurred');
-      console.error('Create user error:', error);
+      console.error('Create merchant error:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -144,7 +144,8 @@ export default function CreateMerchantUserPage() {
         <Toolbar>
           <ToolbarHeading
             title="Create Merchant"
-            description="Add a new merchant to the system"
+            description="Create a new merchant account with profile information, payment settings, and initial configuration"
+            icon={Store}
           />
         </Toolbar>
       </Container>
@@ -236,10 +237,12 @@ export default function CreateMerchantUserPage() {
                     onClick={() => router.back()}
                     disabled={isSubmitting}
                   >
+                    <X className="h-4 w-4 me-1" />
                     Cancel
                   </Button>
                   <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'Creating...' : 'Create User'}
+                    <Plus className="h-4 w-4 me-1" />
+                    {isSubmitting ? 'Creating...' : 'Create Merchant'}
                   </Button>
                 </div>
               </form>

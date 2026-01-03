@@ -4,7 +4,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Users, X, Save } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -64,7 +64,7 @@ export default function EditAffiliateUserPage() {
 
         handleApiResponse<User>(response, {
           onSuccess: (userData) => {
-            console.log('User data received:', userData);
+            console.log('Affiliate data received:', userData);
             setUser(userData);
             
             // Reset form with user data (roleId will be set in separate effect when roles are loaded)
@@ -77,7 +77,7 @@ export default function EditAffiliateUserPage() {
             });
           },
           onError: (errorMessage) => {
-            toast.error(errorMessage || 'Failed to load user');
+            toast.error(errorMessage || 'Failed to load affiliate');
             router.push('/admin/user-management/affiliate');
           },
           onUnauthorized: () => {
@@ -87,7 +87,7 @@ export default function EditAffiliateUserPage() {
         });
       } catch (error) {
         toast.error('An unexpected error occurred');
-        console.error('Fetch user error:', error);
+        console.error('Fetch affiliate error:', error);
         router.push('/admin/user-management/affiliate');
       } finally {
         setLoading(false);
@@ -142,7 +142,7 @@ export default function EditAffiliateUserPage() {
 
       handleApiResponse<User>(response, {
         onSuccess: (userData) => {
-          toast.success('User updated successfully!');
+          toast.success('Affiliate updated successfully!');
           router.push('/admin/user-management/affiliate');
         },
         onValidationError: (errors, messages) => {
@@ -165,7 +165,7 @@ export default function EditAffiliateUserPage() {
           toast.error(errorMessage);
         },
         onError: (errorMessage, status) => {
-          toast.error(errorMessage || 'Failed to update user');
+          toast.error(errorMessage || 'Failed to update affiliate');
         },
         onUnauthorized: () => {
           toast.error('Unauthorized. Please check your authentication.');
@@ -173,7 +173,7 @@ export default function EditAffiliateUserPage() {
       });
     } catch (error) {
       toast.error('An unexpected error occurred');
-      console.error('Update user error:', error);
+      console.error('Update affiliate error:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -185,8 +185,9 @@ export default function EditAffiliateUserPage() {
         <Container>
           <Toolbar>
             <ToolbarHeading
-              title="Edit Affiliate User"
-              description="Update affiliate user information"
+              title="Edit Affiliate"
+              description="Update affiliate account details including profile information, commission structure, and referral settings"
+              icon={Users}
             />
           </Toolbar>
         </Container>
@@ -206,8 +207,8 @@ export default function EditAffiliateUserPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Edit Affiliate User"
-            description="Update affiliate user information"
+            title="Edit Affiliate"
+            description="Update affiliate information"
           />
         </Toolbar>
       </Container>
@@ -220,7 +221,7 @@ export default function EditAffiliateUserPage() {
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
               </Link>
-              <CardTitle>User Information</CardTitle>
+              <CardTitle>Affiliate Information</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
@@ -238,7 +239,7 @@ export default function EditAffiliateUserPage() {
                         <FormLabel>Name *</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Enter user name"
+                            placeholder="Enter affiliate name"
                             {...field}
                             disabled={isSubmitting}
                           />
@@ -282,7 +283,7 @@ export default function EditAffiliateUserPage() {
                         <div className="space-y-0.5">
                           <FormLabel className="text-base">Blocked Status</FormLabel>
                           <div className="text-sm text-muted-foreground">
-                            Block or unblock this user
+                            Block or unblock this affiliate
                           </div>
                         </div>
                         <FormControl>
@@ -304,7 +305,7 @@ export default function EditAffiliateUserPage() {
                         <div className="space-y-0.5">
                           <FormLabel className="text-base">Deleted Status</FormLabel>
                           <div className="text-sm text-muted-foreground">
-                            Mark user as deleted
+                            Mark affiliate as deleted
                           </div>
                         </div>
                         <FormControl>
@@ -326,10 +327,12 @@ export default function EditAffiliateUserPage() {
                     onClick={() => router.back()}
                     disabled={isSubmitting}
                   >
+                    <X className="h-4 w-4 me-1" />
                     Cancel
                   </Button>
                   <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'Updating...' : 'Update User'}
+                    <Save className="h-4 w-4 me-1" />
+                    {isSubmitting ? 'Updating...' : 'Update Affiliate'}
                   </Button>
                 </div>
               </form>

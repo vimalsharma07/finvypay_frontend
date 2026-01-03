@@ -32,6 +32,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { SupportTicket } from '@/lib/services/user/support-ticket';
+import { X, Save } from 'lucide-react';
 
 // Form schema
 const editTicketSchema = z.object({
@@ -185,9 +186,11 @@ export function EditTicketDialog({
                   onClick={() => handleClose(false)}
                   disabled={isSubmitting}
                 >
+                  <X className="h-4 w-4" />
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary" disabled={isSubmitting}>
+                  <Save className="h-4 w-4" />
                   {isSubmitting ? 'Updating...' : 'Update'}
                 </Button>
               </DialogFooter>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { FileText } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -151,7 +152,8 @@ export default function CreateAcquirerRequestPage() {
       <Toolbar>
         <ToolbarHeading
           title="Apply for Acquirer"
-          description="Submit a request to add a new acquirer account"
+          description="Submit a request to add a new payment gateway acquirer account with required documentation and configuration details"
+          icon={FileText}
         />
         <ToolbarActions />
       </Toolbar>

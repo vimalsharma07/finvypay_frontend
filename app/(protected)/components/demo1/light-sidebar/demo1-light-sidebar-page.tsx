@@ -5,7 +5,7 @@ import {
   ToolbarHeading,
 } from '@/layouts/demo1/components/toolbar';
 import { addDays, format } from 'date-fns';
-import { CalendarDays } from 'lucide-react';
+import { CalendarDays, LayoutGrid } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -44,7 +44,8 @@ export function Demo1LightSidebarPage() {
         <Toolbar>
           <ToolbarHeading
             title="Dashboard"
-            description="Central Hub for Personal Customization"
+            description="Overview of system statistics, transaction analytics, user activity, and key performance metrics for administrative monitoring"
+            icon={LayoutGrid}
           />
           <ToolbarActions>
             <Popover open={isOpen} onOpenChange={setIsOpen}>

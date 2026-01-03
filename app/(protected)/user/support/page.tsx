@@ -414,7 +414,8 @@ export default function SupportPage() {
         <Toolbar>
           <ToolbarHeading
             title="Support"
-            description="Manage and view your support tickets"
+            description="Create, view, and manage your support tickets with status tracking and communication history"
+            icon={LifeBuoy}
           />
           <ToolbarActions>
             <Button variant="primary" onClick={() => setCreateDialogOpen(true)}>

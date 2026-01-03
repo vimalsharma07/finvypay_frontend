@@ -39,7 +39,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Search, X, Pencil, Trash2 } from 'lucide-react';
+import { Search, X, Pencil, Trash2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TableActionMenu, TableActionMenuItem } from '@/app/(protected)/components/table-action-menu';
 import { cn } from '@/lib/utils';
@@ -265,12 +265,14 @@ export default function AdminRolesPage() {
     <Fragment>
       <Container>
         <Toolbar>
-          <ToolbarHeading
-            title="Roles"
-            description="Manage and view all roles"
-          />
+            <ToolbarHeading
+              title="Roles"
+              description="Create, edit, and manage user roles with assigned permissions for access control and security management"
+              icon={ShieldUser}
+            />
           <ToolbarActions>
             <Button variant="primary" onClick={() => router.push('/admin/roles-permissions/roles/create')}>
+              <Plus className="h-4 w-4" />
               Create Role
             </Button>
           </ToolbarActions>
@@ -359,12 +361,16 @@ export default function AdminRolesPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>
+              <X className="h-4 w-4" />
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteRole}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
+              <Trash2 className="h-4 w-4" />
               {deleting ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>

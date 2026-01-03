@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { Link2 } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -308,7 +309,8 @@ export default function CascadingEditPage() {
       <Toolbar>
         <ToolbarHeading
           title="Edit Cascading Rule"
-          description="Update cascading chain and settings"
+          description="Update cascading payment rule acquirer chain sequence, priorities, and fallback settings"
+          icon={Link2}
         />
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => router.push(backUrl)}>

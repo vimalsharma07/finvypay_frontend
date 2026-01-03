@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Industry } from '@/lib/services/admin/industries';
+import { X, Save } from 'lucide-react';
 
 // Form schema
 const editIndustrySchema = z.object({
@@ -152,9 +153,11 @@ export function EditIndustryDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
               >
+                <X className="h-4 w-4" />
                 Cancel
               </Button>
               <Button type="submit" variant="primary" disabled={isSubmitting}>
+                <Save className="h-4 w-4" />
                 {isSubmitting ? 'Updating...' : 'Update Industry'}
               </Button>
             </DialogFooter>

@@ -4,7 +4,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Store, X, Save } from 'lucide-react';
 import Link from 'next/link';
 import {
   Toolbar,
@@ -61,7 +61,7 @@ export default function EditMerchantUserPage() {
 
         handleApiResponse<User>(response, {
           onSuccess: (userData) => {
-            console.log('User data received:', userData);
+            console.log('Merchant data received:', userData);
             setUser(userData);
             
             // Reset form with user data
@@ -85,7 +85,7 @@ export default function EditMerchantUserPage() {
         });
       } catch (error) {
         toast.error('An unexpected error occurred');
-        console.error('Fetch user error:', error);
+        console.error('Fetch merchant error:', error);
         router.push('/admin/user-management/merchant');
       } finally {
         setLoading(false);
@@ -152,7 +152,7 @@ export default function EditMerchantUserPage() {
       });
     } catch (error) {
       toast.error('An unexpected error occurred');
-      console.error('Update user error:', error);
+      console.error('Update merchant error:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -165,7 +165,8 @@ export default function EditMerchantUserPage() {
           <Toolbar>
             <ToolbarHeading
               title="Edit Merchant"
-              description="Update merchant information"
+              description="Update merchant account details including profile information, payment settings, and configuration"
+              icon={Store}
             />
           </Toolbar>
         </Container>
@@ -185,8 +186,8 @@ export default function EditMerchantUserPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Edit Merchant User"
-            description="Update merchant user information"
+            title="Edit Merchant"
+            description="Update merchant information"
           />
         </Toolbar>
       </Container>
@@ -199,7 +200,7 @@ export default function EditMerchantUserPage() {
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
               </Link>
-              <CardTitle>User Information</CardTitle>
+              <CardTitle>Merchant Information</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
@@ -217,7 +218,7 @@ export default function EditMerchantUserPage() {
                         <FormLabel>Name *</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Enter user name"
+                            placeholder="Enter merchant name"
                             {...field}
                             disabled={isSubmitting}
                           />
@@ -281,7 +282,7 @@ export default function EditMerchantUserPage() {
                         <div className="space-y-0.5">
                           <FormLabel className="text-base">Blocked Status</FormLabel>
                           <div className="text-sm text-muted-foreground">
-                            Block or unblock this user
+                            Block or unblock this merchant
                           </div>
                         </div>
                         <FormControl>
@@ -303,7 +304,7 @@ export default function EditMerchantUserPage() {
                         <div className="space-y-0.5">
                           <FormLabel className="text-base">Deleted Status</FormLabel>
                           <div className="text-sm text-muted-foreground">
-                            Mark user as deleted
+                            Mark merchant as deleted
                           </div>
                         </div>
                         <FormControl>
@@ -325,10 +326,12 @@ export default function EditMerchantUserPage() {
                     onClick={() => router.back()}
                     disabled={isSubmitting}
                   >
+                    <X className="h-4 w-4 me-1" />
                     Cancel
                   </Button>
                   <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'Updating...' : 'Update User'}
+                    <Save className="h-4 w-4 me-1" />
+                    {isSubmitting ? 'Updating...' : 'Update Merchant'}
                   </Button>
                 </div>
               </form>

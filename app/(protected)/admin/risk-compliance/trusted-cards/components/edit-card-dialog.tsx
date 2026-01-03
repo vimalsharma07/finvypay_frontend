@@ -24,6 +24,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { CardWhitelist } from '@/lib/services/admin/card-whitelist';
+import { X, Save } from 'lucide-react';
 
 // Card number validation (basic validation - accepts digits only, 13-19 digits)
 const cardNumberRegex = /^\d{13,19}$/;
@@ -142,9 +143,11 @@ export function EditCardDialog({
                   onClick={() => handleClose(false)}
                   disabled={isSubmitting}
                 >
+                  <X className="h-4 w-4" />
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary" disabled={isSubmitting}>
+                  <Save className="h-4 w-4" />
                   {isSubmitting ? 'Updating...' : 'Update'}
                 </Button>
               </DialogFooter>

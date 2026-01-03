@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { Link2, Eye, Pencil, Trash2 } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -236,16 +237,19 @@ export default function CascadingPage() {
   const actions: TableAction<CascadingRule>[] = [
     {
       label: 'View',
+      icon: Eye,
       route: (row: CascadingRule) =>
         `/admin/user-management/merchant/${userId}/routing_cascading/cascading/${row.id}`,
     },
     {
       label: 'Edit',
+      icon: Pencil,
       route: (row: CascadingRule) =>
         `/admin/user-management/merchant/${userId}/routing_cascading/cascading/${row.id}/edit`,
     },
     {
       label: 'Delete',
+      icon: Trash2,
       onClick: (row: CascadingRule) => {
         setCascadeToDelete(row);
         setDeleteDialogOpen(true);
@@ -279,7 +283,8 @@ export default function CascadingPage() {
         <Toolbar>
           <ToolbarHeading
             title="Cascading Rules"
-            description="Manage cascading configurations for payment processing"
+            description="Create, edit, and manage cascading payment rules that automatically route transactions through multiple acquirers in sequence"
+            icon={Link2}
           />
           <ToolbarActions>
             <Button

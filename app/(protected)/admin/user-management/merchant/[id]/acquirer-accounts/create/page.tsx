@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
+import { Cpu } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -59,7 +60,8 @@ export default function CreateAcquirerAccountPage() {
         <Toolbar>
           <ToolbarHeading
             title="Add Acquirer Account"
-            description="Create a new acquirer account for this merchant user"
+            description="Create a new payment gateway acquirer account with connection settings and credentials for this merchant user"
+            icon={Cpu}
           />
           <ToolbarActions>
             <Button

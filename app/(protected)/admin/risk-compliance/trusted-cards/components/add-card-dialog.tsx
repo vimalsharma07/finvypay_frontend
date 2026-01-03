@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { getUsers, User } from '@/lib/services/admin/users';
+import { X, Plus } from 'lucide-react';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 
@@ -203,9 +204,11 @@ export function AddCardDialog({
                   onClick={() => handleClose(false)}
                   disabled={isSubmitting}
                 >
+                  <X className="h-4 w-4" />
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary" disabled={isSubmitting || loadingUsers}>
+                  <Plus className="h-4 w-4" />
                   {isSubmitting ? 'Creating...' : 'Create'}
                 </Button>
               </DialogFooter>

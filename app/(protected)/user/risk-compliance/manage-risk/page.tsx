@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, Plus, X, Trash2, LoaderCircleIcon } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -346,10 +346,12 @@ export default function ManageRiskPage() {
         <Toolbar>
           <ToolbarHeading
             title="Manage Risk"
-            description="Manage and view all risk management entries"
+            description="Configure and manage risk management rules, fraud detection settings, and transaction security thresholds"
+            icon={ShieldCheck}
           />
           <ToolbarActions>
             <Button variant="primary" onClick={() => setAddDialogOpen(true)}>
+              <Plus className="h-4 w-4 me-1" />
               Create Risk
             </Button>
           </ToolbarActions>
@@ -410,13 +412,26 @@ export default function ManageRiskPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>
+              <X className="h-4 w-4 me-1" />
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteRisk}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleting ? 'Deleting...' : 'Delete'}
+              {deleting ? (
+                <>
+                  <LoaderCircleIcon className="h-4 w-4 animate-spin me-1" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 me-1" />
+                  Delete
+                </>
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -168,6 +168,7 @@ export function AddIpDialog({
             onClick={() => handleClose(false)}
             disabled={isSubmitting}
           >
+            <X className="h-4 w-4" />
             Cancel
           </Button>
           <Button
@@ -176,6 +177,7 @@ export function AddIpDialog({
             onClick={form.handleSubmit(handleSubmit)}
             disabled={isSubmitting}
           >
+            <Plus className="h-4 w-4" />
             {isSubmitting ? 'Adding...' : 'Add IP Addresses'}
           </Button>
         </DialogFooter>

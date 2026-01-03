@@ -24,6 +24,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { IpWhitelist } from '@/lib/services/admin/ip-whitelist';
+import { X, Save } from 'lucide-react';
 
 // Form schema
 const editIpSchema = z.object({
@@ -131,9 +132,11 @@ export function EditIpDialog({
                   onClick={() => handleClose(false)}
                   disabled={isSubmitting}
                 >
+                  <X className="h-4 w-4" />
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary" disabled={isSubmitting}>
+                  <Save className="h-4 w-4" />
                   {isSubmitting ? 'Updating...' : 'Update IP'}
                 </Button>
               </DialogFooter>

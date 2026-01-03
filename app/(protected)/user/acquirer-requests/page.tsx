@@ -1,7 +1,7 @@
 'use client';
 
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
-import { FileText } from 'lucide-react';
+import { FileText, Plus, X, Eye, DollarSign } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -73,7 +73,10 @@ function RatesDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => onOpenChange(false)}>Close</AlertDialogCancel>
+          <AlertDialogCancel onClick={() => onOpenChange(false)}>
+            <X className="h-4 w-4 me-1" />
+            Close
+          </AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
@@ -201,10 +204,12 @@ export default function UserAcquirerRequestsPage() {
   const actions: TableAction<UserAcquirerRequest>[] = [
     {
       label: 'View',
+      icon: Eye,
       route: (row: UserAcquirerRequest) => `/user/acquirer-requests/${row.id}`,
     },
     {
       label: 'View Rates',
+      icon: DollarSign,
       onClick: (row: UserAcquirerRequest) => {
         setSelectedRates(row.acquirerAccount?.rates);
         setSelectedName(row.acquirerAccount?.name || 'Acquirer Account');
@@ -227,7 +232,10 @@ export default function UserAcquirerRequestsPage() {
             />
           <ToolbarActions>
             <Button asChild variant="primary">
-              <Link href="/user/acquirer-requests/create">Apply New Acquirer</Link>
+              <Link href="/user/acquirer-requests/create">
+                <Plus className="h-4 w-4 me-1" />
+                Apply New Acquirer
+              </Link>
             </Button>
           </ToolbarActions>
         </Toolbar>

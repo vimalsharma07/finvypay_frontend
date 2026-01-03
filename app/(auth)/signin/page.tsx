@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { AlertCircle, Eye, EyeOff, LogIn, Mail, CheckCircle, ArrowLeft } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
@@ -414,7 +414,7 @@ export default function Page() {
 
         <div className="flex flex-col gap-2.5">
           <Button type="submit" disabled={isProcessing}>
-            {isProcessing ? <LoaderCircleIcon className="size-4 animate-spin" /> : null}
+            {isProcessing ? <LoaderCircleIcon className="size-4 animate-spin" /> : <LogIn className="h-4 w-4" />}
             Continue
           </Button>
         </div>
@@ -515,7 +515,10 @@ export default function Page() {
                   Sending OTP...
                 </>
               ) : (
-                'Send OTP'
+                <>
+                  <Mail className="h-4 w-4" />
+                  Send OTP
+                </>
               )}
             </Button>
           </div>
@@ -630,7 +633,10 @@ export default function Page() {
                   Verifying...
                 </>
               ) : (
-                'Verify OTP'
+                <>
+                  <CheckCircle className="h-4 w-4" />
+                  Verify OTP
+                </>
               )}
             </Button>
 
@@ -646,6 +652,7 @@ export default function Page() {
                 setError(null);
               }}
             >
+              <ArrowLeft className="h-4 w-4" />
               Back to Email
             </Button>
           </div>

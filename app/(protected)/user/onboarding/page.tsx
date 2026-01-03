@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState, useMemo } from 'react';
+import { UserCheck } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -249,7 +250,8 @@ export default function OnboardingPage() {
           <Toolbar>
             <ToolbarHeading
               title="Onboarding"
-              description="Complete your profile verification"
+              description="Complete your merchant profile verification with business information, documents, and compliance requirements"
+              icon={UserCheck}
             />
           </Toolbar>
         </Container>
@@ -266,7 +268,8 @@ export default function OnboardingPage() {
         <Toolbar>
           <ToolbarHeading
             title="Onboarding"
-            description="Complete your profile verification to get started"
+            description="Complete your merchant profile verification with business information, documents, and compliance requirements to get started"
+            icon={UserCheck}
           />
         </Toolbar>
       </Container>
