@@ -94,7 +94,7 @@ export default function CreateCascadingPage() {
               : (data.data?.data ?? []);
             setAcquirerAccounts(accounts);
 
-            const options = accounts.map((account) => ({
+            const options = accounts.map((account: UserAcquirerAccount) => ({
               value: account.id.toString(),
               label: `${account.name} (${account.acquirerAccount?.name || 'Unknown'} - ${account.currencyCode || 'N/A'})`,
             }));

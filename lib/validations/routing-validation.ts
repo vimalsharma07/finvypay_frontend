@@ -56,7 +56,7 @@ export const createCascadingSchema = z.object({
 
   cascadingFor: z.number().int().positive('Secondary acquirer account ID must be a positive integer'),
 
-  status: z.boolean().default(true)
+  status: z.boolean()
 }).refine((data) => data.merchantAcquirerAccountId !== data.cascadingFor, {
   message: 'Primary and secondary accounts must be different',
   path: ['cascadingFor']
