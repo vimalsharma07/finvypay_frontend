@@ -290,6 +290,13 @@ export default function UserRoutingPage() {
               icon={Route}
             />
           <ToolbarActions>
+            <Button
+              variant="primary"
+              onClick={() => router.push(`/user/routing/create?profileId=${selectedProfileId}`)}
+              disabled={!selectedProfileId}
+            >
+              Create Routing
+            </Button>
             <Button variant="outline" onClick={() => router.push('/user/profile-selection')}>
               Change Profile
             </Button>
