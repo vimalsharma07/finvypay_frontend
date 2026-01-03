@@ -10,8 +10,26 @@ export interface UserCascadingRule {
   connectorId?: string;
   connector?: {
     id: string | number;
+    userId?: string | number;
+    merchantProfileId?: string | number;
+    acquirerId?: number;
+    acquirerAccountId?: number;
     name?: string;
     terminalId?: string;
+    description?: string;
+    status?: number;
+    adminRejectReason?: string;
+    merchantRejectReason?: string;
+    rates?: Record<string, string>;
+    ratesPdfUrl?: string;
+    currencyCode?: string;
+    ratesType?: string;
+    isActive?: boolean;
+    isPrimary?: boolean;
+    secretKey?: string;
+    isDeleted?: boolean;
+    createdAt?: string;
+    updatedAt?: string;
   };
   config: Array<{ merchantAcquirerAccountId?: string; merchantAcquirerAccountName?: string }>;
   name: string;
@@ -108,6 +126,67 @@ export async function createUserMerchantCascading(
 ): Promise<ApiResponse<{ success: boolean; message: string; data?: any }>> {
   try {
     const data = await http.post(getBaseUrl(), payload) as {
+      success: boolean;
+      message: string;
+      data?: any;
+    };
+    return {
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+      };
+    }
+    throw error;
+  }
+}
+
+export async function getUserMerchantCascadingById(
+  cascadingId: string
+): Promise<ApiResponse<{ success: boolean; data: UserCascadingRule; message?: string }>> {
+  try {
+    const data = await http.get(`${getBaseUrl()}/${cascadingId}`) as {
+      success: boolean;
+      data: UserCascadingRule;
+      message?: string;
+    };
+    return {
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+      };
+    }
+    throw error;
+  }
+}
+
+export async function updateUserMerchantCascading(
+  cascadingId: string,
+  payload: {
+    name: string;
+    merchantAcquirerAccountId: number;
+    type: string;
+    cascadingFor: number;
+    status: boolean;
+    config: Array<{
+      merchantAcquirerAccountId: string;
+      merchantAcquirerAccountName: string;
+    }>;
+  }
+): Promise<ApiResponse<{ success: boolean; message: string; data?: any }>> {
+  try {
+    const data = await http.put(`${getBaseUrl()}/${cascadingId}/update`, payload) as {
       success: boolean;
       message: string;
       data?: any;
