@@ -1,0 +1,189 @@
+/* Authentication Layout Styles */
+
+/* Animations */
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px); 
+  }
+  50% { 
+    transform: translateY(-20px); 
+  }
+}
+
+.float-animation {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% { 
+    background-position: 0% 50%; 
+  }
+  50% { 
+    background-position: 100% 50%; 
+  }
+}
+
+@keyframes wave {
+  0%, 100% { 
+    transform: translateX(0) translateY(0); 
+  }
+  50% { 
+    transform: translateX(-25%) translateY(-10px); 
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    opacity: 0.4; 
+  }
+  50% { 
+    opacity: 0.8; 
+  }
+}
+
+/* Gradient Stripes */
+.gradient-stripes {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary) / 0.15) 0%,
+    hsl(var(--primary) / 0.08) 25%,
+    hsl(var(--primary) / 0.12) 50%,
+    hsl(var(--primary) / 0.06) 75%,
+    hsl(var(--primary) / 0.15) 100%
+  );
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+.gradient-stripe-overlay {
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 3px,
+    hsl(var(--primary) / 0.15) 3px,
+    hsl(var(--primary) / 0.15) 6px
+  );
+}
+
+/* Wave Patterns */
+.wave-pattern {
+  position: absolute;
+  width: 200%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 8px,
+    hsl(var(--primary) / 0.08) 8px,
+    hsl(var(--primary) / 0.08) 16px
+  );
+  animation: wave 20s linear infinite;
+  border-radius: 50%;
+}
+
+.wave-pattern-2 {
+  position: absolute;
+  width: 150%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 12px,
+    hsl(var(--primary) / 0.06) 12px,
+    hsl(var(--primary) / 0.06) 24px
+  );
+  animation: wave 25s linear infinite reverse;
+  border-radius: 50%;
+}
+
+/* Form Container Styles */
+.form-container-bg {
+  background: radial-gradient(
+    ellipse at center,
+    hsl(var(--primary) / 0.08) 0%,
+    hsl(var(--primary) / 0.04) 40%,
+    transparent 70%
+  );
+}
+
+.form-container-pattern {
+  background-image: 
+    radial-gradient(circle at 2px 2px, hsl(var(--primary) / 0.15) 1px, transparent 0);
+  background-size: 40px 40px;
+}
+
+.form-container-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+
+/* Maze Pattern */
+.maze-pattern {
+  background-image: 
+    /* Vertical lines - maze walls */
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 18px,
+      hsl(var(--primary) / 0.12) 18px,
+      hsl(var(--primary) / 0.12) 20px,
+      transparent 20px,
+      transparent 38px,
+      hsl(var(--primary) / 0.12) 38px,
+      hsl(var(--primary) / 0.12) 40px
+    ),
+    /* Horizontal lines - maze walls */
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 18px,
+      hsl(var(--primary) / 0.12) 18px,
+      hsl(var(--primary) / 0.12) 20px,
+      transparent 20px,
+      transparent 38px,
+      hsl(var(--primary) / 0.12) 38px,
+      hsl(var(--primary) / 0.12) 40px
+    ),
+    /* Larger grid pattern */
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 38px,
+      hsl(var(--primary) / 0.08) 38px,
+      hsl(var(--primary) / 0.08) 40px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 38px,
+      hsl(var(--primary) / 0.08) 38px,
+      hsl(var(--primary) / 0.08) 40px
+    );
+  background-size: 
+    40px 40px,
+    40px 40px,
+    80px 80px,
+    80px 80px;
+  mask-image: radial-gradient(ellipse 150% 120% at center, black 50%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 150% 120% at center, black 50%, transparent 100%);
+}
+
+.maze-overlay {
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 38px,
+      hsl(var(--primary) / 0.1) 38px,
+      hsl(var(--primary) / 0.1) 40px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 38px,
+      hsl(var(--primary) / 0.1) 38px,
+      hsl(var(--primary) / 0.1) 40px
+    );
+  mask-image: radial-gradient(ellipse 150% 120% at center, black 60%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 150% 120% at center, black 60%, transparent 100%);
+}
+
