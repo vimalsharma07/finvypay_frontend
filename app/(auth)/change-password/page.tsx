@@ -89,39 +89,44 @@ export default function Page() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="block w-full space-y-4"
+        className="block w-full space-y-6"
       >
-        <div className="text-center space-y-1 pb-3">
-          <h1 className="text-2xl font-semibold tracking-tight">
+        <div className="space-y-2 pb-2">
+          <div className="flex justify-center mb-4">
+            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <KeyRound className="h-6 w-6 text-primary" />
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-center">
             Reset Password
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Enter your new password below.
+          <p className="text-sm text-muted-foreground text-center">
+            Enter your new password below
           </p>
         </div>
 
         {error && (
-          <div className="text-center space-y-6">
-            <Alert variant="destructive">
+          <div className="space-y-4">
+            <Alert variant="destructive" className="border-destructive/50">
               <AlertIcon>
-                <AlertCircle />
+                <AlertCircle className="h-4 w-4" />
               </AlertIcon>
-              <AlertTitle>{error}</AlertTitle>
+              <AlertTitle className="text-sm">{error}</AlertTitle>
             </Alert>
-            <Button asChild>
-              <Link href="/signin" className="text-primary">
-                Go back to Login
+            <Button asChild className="w-full h-11">
+              <Link href="/signin">
+                Go back to Sign In
               </Link>
             </Button>
           </div>
         )}
 
         {successMessage && (
-          <Alert>
+          <Alert className="bg-green-50 dark:bg-green-950/50 border-green-200 dark:border-green-800">
             <AlertIcon>
-              <Check />
+              <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
             </AlertIcon>
-            <AlertTitle>{successMessage}</AlertTitle>
+            <AlertTitle className="text-sm text-green-800 dark:text-green-200">{successMessage}</AlertTitle>
           </Alert>
         )}
 
@@ -130,23 +135,24 @@ export default function Page() {
             <AlertIcon>
               <LoaderCircleIcon className="size-4 animate-spin" />
             </AlertIcon>
-            <AlertTitle>Verifing...</AlertTitle>
+            <AlertTitle className="text-sm">Verifying token...</AlertTitle>
           </Alert>
         )}
 
         {isValidToken && !successMessage && !verifyingToken && (
-          <>
+          <div className="space-y-4">
             <FormField
               control={form.control}
               name="newPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>New Password</FormLabel>
+                  <FormLabel className="text-sm font-medium">New password</FormLabel>
                   <div className="relative">
                     <FormControl>
                       <Input
                         type={passwordVisible ? 'text' : 'password'}
                         placeholder="Enter new password"
+                        className="h-11 pr-10"
                         {...field}
                       />
                     </FormControl>
@@ -155,15 +161,15 @@ export default function Page() {
                       variant="ghost"
                       mode="icon"
                       onClick={() => setPasswordVisible(!passwordVisible)}
-                      className="absolute end-0 top-1/2 -translate-y-1/2 h-7 w-7 me-1.5 bg-transparent!"
+                      className="absolute end-0 top-1/2 -translate-y-1/2 h-8 w-8 me-1.5 bg-transparent! hover:bg-transparent"
                       aria-label={
                         passwordVisible ? 'Hide password' : 'Show password'
                       }
                     >
                       {passwordVisible ? (
-                        <EyeOff className="text-muted-foreground" />
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
                       ) : (
-                        <Eye className="text-muted-foreground" />
+                        <Eye className="h-4 w-4 text-muted-foreground" />
                       )}
                     </Button>
                   </div>
@@ -177,12 +183,13 @@ export default function Page() {
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Confirm New Password</FormLabel>
+                  <FormLabel className="text-sm font-medium">Confirm new password</FormLabel>
                   <div className="relative">
                     <FormControl>
                       <Input
                         type={passwordConfirmationVisible ? 'text' : 'password'}
                         placeholder="Confirm new password"
+                        className="h-11 pr-10"
                         {...field}
                       />
                     </FormControl>
@@ -195,7 +202,7 @@ export default function Page() {
                           !passwordConfirmationVisible,
                         )
                       }
-                      className="absolute end-0 top-1/2 -translate-y-1/2 h-7 w-7 me-1.5 bg-transparent!"
+                      className="absolute end-0 top-1/2 -translate-y-1/2 h-8 w-8 me-1.5 bg-transparent! hover:bg-transparent"
                       aria-label={
                         passwordConfirmationVisible
                           ? 'Hide password confirmation'
@@ -203,9 +210,9 @@ export default function Page() {
                       }
                     >
                       {passwordConfirmationVisible ? (
-                        <EyeOff className="text-muted-foreground" />
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
                       ) : (
-                        <Eye className="text-muted-foreground" />
+                        <Eye className="h-4 w-4 text-muted-foreground" />
                       )}
                     </Button>
                   </div>
@@ -214,15 +221,26 @@ export default function Page() {
               )}
             />
 
-            <Button type="submit" disabled={isProcessing} className="w-full">
-              {isProcessing ? (
-                <LoaderCircleIcon className="size-4 animate-spin" />
-              ) : (
-                <KeyRound className="h-4 w-4" />
-              )}
-              Reset Password
-            </Button>
-          </>
+            <div className="pt-2">
+              <Button 
+                type="submit" 
+                disabled={isProcessing} 
+                className="w-full h-11 text-base font-semibold"
+              >
+                {isProcessing ? (
+                  <>
+                    <LoaderCircleIcon className="size-4 animate-spin mr-2" />
+                    Resetting...
+                  </>
+                ) : (
+                  <>
+                    <KeyRound className="h-4 w-4 mr-2" />
+                    Reset Password
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
         )}
       </form>
     </Form>

@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import Link from 'next/dist/client/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, Mail } from 'lucide-react';
 import { verifyEmail } from '@/lib/services/auth';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
@@ -58,30 +58,49 @@ export default function Page() {
   return (
     <Suspense>
       <div className="w-full space-y-6">
-        <h1 className="text-2x font-semibold">Email Verification</h1>
+        <div className="space-y-2 pb-2">
+          <div className="flex justify-center mb-4">
+            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Mail className="h-6 w-6 text-primary" />
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-center">
+            Email Verification
+          </h1>
+          <p className="text-sm text-muted-foreground text-center">
+            Please wait while we verify your email address
+          </p>
+        </div>
+
         {error && (
-          <>
-            <Alert variant="destructive">
+          <div className="space-y-4">
+            <Alert variant="destructive" className="border-destructive/50">
               <AlertIcon>
-                <AlertCircle />
+                <AlertCircle className="h-4 w-4" />
               </AlertIcon>
-              <AlertTitle>{error}</AlertTitle>
+              <AlertTitle className="text-sm">{error}</AlertTitle>
             </Alert>
 
-            <Button asChild>
-              <Link href="/signin" className="text-primary">
-                Go back to Login
+            <Button asChild className="w-full h-11">
+              <Link href="/signin">
+                Go back to Sign In
               </Link>
             </Button>
-          </>
+          </div>
         )}
 
         {message && (
-          <Alert>
+          <Alert className={message.includes('success') ? 'bg-green-50 dark:bg-green-950/50 border-green-200 dark:border-green-800' : ''}>
             <AlertIcon>
-              <LoaderCircleIcon className="size-4 animate-spin stroke-muted-foreground" />
+              {message.includes('success') ? (
+                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+              ) : (
+                <LoaderCircleIcon className="size-4 animate-spin" />
+              )}
             </AlertIcon>
-            <AlertTitle>{message}</AlertTitle>
+            <AlertTitle className={`text-sm ${message.includes('success') ? 'text-green-800 dark:text-green-200' : ''}`}>
+              {message}
+            </AlertTitle>
           </Alert>
         )}
       </div>

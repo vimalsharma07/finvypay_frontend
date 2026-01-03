@@ -3,7 +3,7 @@
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, ArrowLeft, Check } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Check, Mail } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { forgotPassword } from '@/lib/services/auth';
@@ -78,31 +78,36 @@ export default function Page() {
   return (
     <Suspense>
       <Form {...form}>
-        <form onSubmit={handleSubmit} className="block w-full space-y-5">
-          <div className="text-center space-y-1 pb-3">
-            <h1 className="text-2xl font-semibold tracking-tight">
+        <form onSubmit={handleSubmit} className="block w-full space-y-6">
+          <div className="space-y-2 pb-2">
+            <div className="flex justify-center mb-4">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Mail className="h-6 w-6 text-primary" />
+              </div>
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight text-center">
               Reset Password
             </h1>
-            <p className="text-sm text-muted-foreground">
-              Enter your email to receive a password reset link.
+            <p className="text-sm text-muted-foreground text-center">
+              Enter your email to receive a password reset link
             </p>
           </div>
 
           {error && (
-            <Alert variant="destructive" onClose={() => setError(null)}>
+            <Alert variant="destructive" className="border-destructive/50" onClose={() => setError(null)}>
               <AlertIcon>
-                <AlertCircle />
+                <AlertCircle className="h-4 w-4" />
               </AlertIcon>
-              <AlertTitle>{error}</AlertTitle>
+              <AlertTitle className="text-sm">{error}</AlertTitle>
             </Alert>
           )}
 
           {success && (
-            <Alert onClose={() => setSuccess(null)}>
+            <Alert className="bg-green-50 dark:bg-green-950/50 border-green-200 dark:border-green-800" onClose={() => setSuccess(null)}>
               <AlertIcon>
-                <Check />
+                <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
               </AlertIcon>
-              <AlertTitle>{success}</AlertTitle>
+              <AlertTitle className="text-sm text-green-800 dark:text-green-200">{success}</AlertTitle>
             </Alert>
           )}
 
@@ -111,12 +116,13 @@ export default function Page() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel className="text-sm font-medium">Email address</FormLabel>
                 <FormControl>
                   <Input
                     type="email"
-                    placeholder="Enter your email address"
+                    placeholder="name@example.com"
                     disabled={!!success || isProcessing}
+                    className="h-11"
                     {...field}
                   />
                 </FormControl>
@@ -125,30 +131,40 @@ export default function Page() {
             )}
           />
 
-          <RecaptchaPopover
-            open={showRecaptcha}
-            onOpenChange={(open) => {
-              if (!open) {
-                setShowRecaptcha(false);
+          <div className="flex flex-col gap-3 pt-2">
+            <RecaptchaPopover
+              open={showRecaptcha}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setShowRecaptcha(false);
+                }
+              }}
+              onVerify={handleVerifiedSubmit}
+              trigger={
+                <Button
+                  type="submit"
+                  disabled={!!success || isProcessing}
+                  className="w-full h-11 text-base font-semibold"
+                >
+                  {isProcessing ? (
+                    <>
+                      <LoaderCircleIcon className="size-4 animate-spin mr-2" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="h-4 w-4 mr-2" />
+                      Send Reset Link
+                    </>
+                  )}
+                </Button>
               }
-            }}
-            onVerify={handleVerifiedSubmit}
-            trigger={
-              <Button
-                type="submit"
-                disabled={!!success || isProcessing}
-                className="w-full"
-              >
-                {isProcessing ? <LoaderCircleIcon className="animate-spin" /> : null}
-                Submit
-              </Button>
-            }
-          />
+            />
 
-          <div className="space-y-3">
-            <Button type="button" variant="outline" className="w-full" asChild>
+            <Button type="button" variant="outline" className="w-full h-11" asChild>
               <Link href="/signin">
-                <ArrowLeft className="size-3.5" /> Back
+                <ArrowLeft className="size-4 mr-2" />
+                Back to Sign In
               </Link>
             </Button>
           </div>

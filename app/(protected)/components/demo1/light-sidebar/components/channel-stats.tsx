@@ -1,6 +1,7 @@
 import { Fragment } from 'react';
 import { toAbsoluteUrl } from '@/lib/helpers';
 import { Card, CardContent } from '@/components/ui/card';
+import '@/css/components/channel-stats.css';
 
 interface IChannelStatsItem {
   logo: string;
@@ -69,17 +70,6 @@ const ChannelStats = () => {
 
   return (
     <Fragment>
-      <style>
-        {`
-          .channel-stats-bg {
-            background-image: url('${toAbsoluteUrl('/media/images/2600x1600/bg-3.png')}');
-          }
-          .dark .channel-stats-bg {
-            background-image: url('${toAbsoluteUrl('/media/images/2600x1600/bg-3-dark.png')}');
-          }
-        `}
-      </style>
-
       {items.map((item, index) => {
         return renderItem(item, index);
       })}
