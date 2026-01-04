@@ -27,7 +27,9 @@ import { ContentLoader } from '@/components/common/content-loader';
 import { toast } from 'sonner';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
-  createUserPaymentLink,
+  getUserPaymentLinkById,
+  updateUserPaymentLink,
+  PaymentLink,
 } from '@/lib/services/user/payment-links';
 import {
   getCurrencies,
@@ -35,7 +37,7 @@ import {
 } from '@/lib/services/admin/currency';
 import { z } from 'zod';
 
-const createPaymentLinkSchema = z.object({
+const updatePaymentLinkSchema = z.object({
   name: z.string()
     .min(1, 'Payment link name is required')
     .max(255, 'Payment link name must be less than 255 characters')
@@ -51,25 +53,35 @@ const createPaymentLinkSchema = z.object({
 
   expiryValidity: z.string()
     .min(1, 'Expiry validity is required')
-    .refine((val) => ['1hr', '6hr', '12hr', '24hr', '7d', '30d'].includes(val),
-      'Invalid expiry validity. Must be one of: 1hr, 6hr, 12hr, 24hr, 7d, 30d'),
+    .refine((val) => ['1hr', '6hr', '12hr', '24hr', '48hr', '7d', '30d'].includes(val),
+      'Invalid expiry validity. Must be one of: 1hr, 6hr, 12hr, 24hr, 48hr, 7d, 30d'),
 });
 
-type CreatePaymentLinkFormData = z.infer<typeof createPaymentLinkSchema>;
+type UpdatePaymentLinkFormData = z.infer<typeof updatePaymentLinkSchema>;
 
 const EXPIRY_OPTIONS = [
   { value: '1hr', label: '1 Hour' },
   { value: '6hr', label: '6 Hours' },
   { value: '12hr', label: '12 Hours' },
   { value: '24hr', label: '24 Hours' },
+  { value: '48hr', label: '48 Hours' },
   { value: '7d', label: '7 Days' },
   { value: '30d', label: '30 Days' },
 ];
 
-export default function CreatePaymentLinkPage() {
+interface EditPaymentLinkPageProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export default function EditPaymentLinkPage({ params }: EditPaymentLinkPageProps) {
   const router = useRouter();
+  const [resolvedParams, setResolvedParams] = useState<{ id: string } | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
+  const [paymentLink, setPaymentLink] = useState<PaymentLink | null>(null);
   const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [loadingCurrencies, setLoadingCurrencies] = useState(true);
 
@@ -80,8 +92,9 @@ export default function CreatePaymentLinkPage() {
     formState: { errors },
     setValue,
     watch,
-  } = useForm<CreatePaymentLinkFormData>({
-    resolver: zodResolver(createPaymentLinkSchema),
+    reset,
+  } = useForm<UpdatePaymentLinkFormData>({
+    resolver: zodResolver(updatePaymentLinkSchema),
     mode: 'onChange',
     defaultValues: {
       name: '',
@@ -91,22 +104,56 @@ export default function CreatePaymentLinkPage() {
     },
   });
 
-  // Fetch currencies
+  // Resolve params (Next.js 15 async params)
   useEffect(() => {
-    const fetchCurrencies = async () => {
+    params.then((p) => setResolvedParams(p));
+  }, [params]);
+
+  // Fetch payment link data and currencies
+  useEffect(() => {
+    if (!resolvedParams?.id) return;
+
+    const fetchData = async () => {
+      setLoadingData(true);
       setLoadingCurrencies(true);
+
       try {
-        const response = await getCurrencies({
+        // Fetch payment link data
+        const paymentLinkResponse = await getUserPaymentLinkById(resolvedParams.id);
+        handleApiResponse(paymentLinkResponse, {
+          onSuccess: (data) => {
+            if (data.success && data.data) {
+              const linkData = data.data;
+              setPaymentLink(linkData);
+
+              // Pre-populate form with existing data
+              reset({
+                name: linkData.name,
+                amount: parseFloat(linkData.amount),
+                currency: linkData.currency,
+                expiryValidity: linkData.expiryValidity || '24hr',
+              });
+            } else {
+              toast.error('Payment link not found');
+              router.push('/user/payment-links');
+            }
+          },
+          onError: (errorMessage) => {
+            toast.error(errorMessage || 'Failed to load payment link');
+            router.push('/user/payment-links');
+          },
+        });
+
+        // Fetch currencies
+        const currenciesResponse = await getCurrencies({
           page: 1,
           limit: 500,
           sortBy: 'code',
           sortOrder: 'ASC',
         });
-
-        handleApiResponse(response, {
+        handleApiResponse(currenciesResponse, {
           onSuccess: (data) => {
             if (data.success && data.data) {
-              // Handle both array format and nested data format
               const currenciesArray = Array.isArray(data.data) ? data.data : (data.data.data || []);
               setCurrencies(currenciesArray);
             }
@@ -116,29 +163,33 @@ export default function CreatePaymentLinkPage() {
           },
         });
       } catch (error) {
-        toast.error('An unexpected error occurred while loading currencies');
+        toast.error('An unexpected error occurred');
+        router.push('/user/payment-links');
       } finally {
+        setLoadingData(false);
         setLoadingCurrencies(false);
       }
     };
 
-    fetchCurrencies();
-  }, []);
+    fetchData();
+  }, [resolvedParams, reset, router]);
 
-  const onSubmit = async (data: CreatePaymentLinkFormData): Promise<void> => {
+  const onSubmit = async (data: UpdatePaymentLinkFormData): Promise<void> => {
+    if (!resolvedParams?.id) return;
+
     try {
       setIsLoading(true);
-      console.log('Creating payment link:', data); // Debug log
+      console.log('Updating payment link:', data);
 
-      const response = await createUserPaymentLink(data);
+      const response = await updateUserPaymentLink(resolvedParams.id, data);
 
       handleApiResponse(response, {
         onSuccess: () => {
-          toast.success('Payment link created successfully');
+          toast.success('Payment link updated successfully');
           router.push('/user/payment-links');
         },
         onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to create payment link');
+          toast.error(errorMessage || 'Failed to update payment link');
         },
       });
     } catch (error) {
@@ -153,13 +204,23 @@ export default function CreatePaymentLinkPage() {
     label: currency.code,
   }));
 
+  if (loadingData || !resolvedParams) {
+    return (
+      <Container>
+        <div className="flex items-center justify-center py-12">
+          <ContentLoader />
+        </div>
+      </Container>
+    );
+  }
+
   return (
     <>
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Create Payment Link"
-            description="Create a new payment link for customers to make secure payments"
+            title="Edit Payment Link"
+            description="Update payment link details for secure customer payments"
             icon={Link2}
           />
           <ToolbarActions>
@@ -285,9 +346,9 @@ export default function CreatePaymentLinkPage() {
                   <Button
                     type="submit"
                     variant="primary"
-                    disabled={isLoading || loadingCurrencies}
+                    disabled={isLoading || loadingCurrencies || loadingData}
                   >
-                    {isLoading ? 'Creating...' : 'Create Payment Link'}
+                    {isLoading ? 'Updating...' : 'Update Payment Link'}
                   </Button>
                 </div>
               </form>

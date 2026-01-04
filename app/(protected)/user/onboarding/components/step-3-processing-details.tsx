@@ -101,7 +101,7 @@ export function Step3ProcessingDetails({
         // Fetch currencies
         const currenciesResponse = await getCurrencies({
           page: 1,
-          limit: 100,
+          limit: 500,
           sortBy: 'code',
           sortOrder: 'ASC',
         });

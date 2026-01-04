@@ -138,3 +138,34 @@ export async function getUserPaymentLinkById(
   }
 }
 
+export async function updateUserPaymentLink(
+  paymentLinkId: string,
+  payload: {
+    name: string;
+    amount: number;
+    currency: string;
+    expiryValidity: string;
+  }
+): Promise<ApiResponse<{ success: boolean; message: string; data?: any }>> {
+  try {
+    const data = await http.put(`${getBaseUrl()}/${paymentLinkId}`, payload) as {
+      success: boolean;
+      message: string;
+      data?: any;
+    };
+    return {
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+      };
+    }
+    throw error;
+  }
+}
+

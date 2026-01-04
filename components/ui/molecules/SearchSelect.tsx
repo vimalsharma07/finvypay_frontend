@@ -27,6 +27,7 @@ interface SearchSelectProps {
   valueToSet?: 'label' | 'value';
   placeholder?: string;
   disabled?: boolean;
+  maxHeight?: string;
 }
 
 export function SearchSelect({
@@ -37,6 +38,7 @@ export function SearchSelect({
   valueToSet = 'value',
   placeholder = 'Select option...',
   disabled = false,
+  maxHeight = '300px',
 }: SearchSelectProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -68,7 +70,10 @@ export function SearchSelect({
       >
         <Command>
           <CommandInput placeholder="Search..." />
-          <CommandList>
+          <CommandList 
+            className="overflow-y-auto" 
+            style={{ maxHeight }}
+          >
             <CommandEmpty>No option found.</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
