@@ -5,7 +5,16 @@ export const metadata: Metadata = {
   title: 'Checkout',
 };
 
-export default function CheckoutPage() {
+interface CheckoutPageProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export default async function CheckoutPage({ params }: CheckoutPageProps) {
+  const { id } = await params;
+  const paymentLinkId = id;
+
   return (
     <main className="min-h-screen w-full bg-muted/30 flex flex-col items-center">
       <div className="w-full bg-gradient-to-r from-primary to-primary/80 text-white">
@@ -22,7 +31,7 @@ export default function CheckoutPage() {
 
       <div className="w-full flex justify-center -mt-16 px-4 pb-16">
         <div className="w-full max-w-2xl">
-          <CheckoutForm />
+          <CheckoutForm paymentLinkId={paymentLinkId} />
         </div>
       </div>
     </main>
