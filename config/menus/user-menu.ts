@@ -89,6 +89,13 @@ const BASE_USER_MENU: MenuConfig = [
     requirePermission: true,
   },
   {
+    title: 'Payment Links',
+    icon: Heart,
+    path: '/user/payment-links',
+    permissionModule: 'Payment Links',
+    requirePermission: false,
+  },
+  {
     title: 'Support',
     icon: Heart,
     path: '/user/support',

@@ -10,12 +10,19 @@ export default function CardPage() {
     <main className="min-h-screen w-full bg-muted/20 flex items-start justify-center px-4 py-12">
       <div className="w-full max-w-6xl">
         <div className="mb-6 text-center">
-          <p className="text-sm font-semibold text-primary/80 uppercase tracking-wide">
-            Card payment
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Enter your card details securely
-          </p>
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+              2
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-primary/80 uppercase tracking-wide">
+                Card payment
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Enter your card details securely
+              </p>
+            </div>
+          </div>
         </div>
         <CardForm />
       </div>

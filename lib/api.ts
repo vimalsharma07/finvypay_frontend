@@ -99,12 +99,21 @@ export function setAccessToken(token: string | null): void {
 const isAbsoluteUrl = (url: string) =>
   url.startsWith("http://") || url.startsWith("https://");
 
-const isInternalApi = (endpoint: string) => endpoint.startsWith("/api/");
+// Internal Next.js API routes are simple paths like /api/hello, /api/users
+// External backend APIs use versioned paths like /api/v1/..., /api/v2/...
+const isInternalApi = (endpoint: string) => {
+  if (!endpoint.startsWith("/api/")) return false;
+  // Versioned API paths (/api/v1/, /api/v2/, etc.) are external backend APIs
+  if (/^\/api\/v\d+\//.test(endpoint)) return false;
+  // All other /api/ paths are treated as internal Next.js API routes
+  return true;
+};
 
 const buildUrl = (endpoint: string): string => {
   if (isAbsoluteUrl(endpoint)) return endpoint;
 
-  // Internal Next.js API routes (only routes starting with /api/)
+  // Internal Next.js API routes (e.g., /api/hello, /api/users)
+  // Excludes versioned APIs like /api/v1/... which are external backend APIs
   if (isInternalApi(endpoint)) {
     return `${NEXT_BASE_PATH}${endpoint}`;
   }

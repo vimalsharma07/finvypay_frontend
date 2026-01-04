@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,6 +17,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { getUserPaymentLinkById } from '@/lib/services/user/payment-links';
+import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import { http } from '@/lib/api';
 
 const numericString = (min: number, max: number, message: string) =>
   z
@@ -90,6 +93,47 @@ export function CardForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const [paymentLinkData, setPaymentLinkData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState(false);
+
+  // Fetch payment link data
+  useEffect(() => {
+    const paymentLinkId = searchParams.get('paymentLinkId');
+    if (!paymentLinkId) {
+      toast.error('Payment link ID is required');
+      router.push('/');
+      return;
+    }
+
+    const fetchPaymentLink = async () => {
+      try {
+        const response = await getUserPaymentLinkById(paymentLinkId);
+        handleApiResponse(response, {
+          onSuccess: (data) => {
+            if (data.success && data.data) {
+              setPaymentLinkData(data.data);
+            } else {
+              toast.error('Payment link not found');
+              router.push('/');
+            }
+          },
+          onError: (errorMessage) => {
+            toast.error(errorMessage || 'Failed to load payment link');
+            router.push('/');
+          },
+        });
+      } catch (error) {
+        toast.error('An unexpected error occurred');
+        router.push('/');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPaymentLink();
+  }, [searchParams, router]);
+
   const initialValues = useMemo(() => getInitialValues(searchParams), [searchParams]);
 
   const form = useForm<CardFormValues>({
@@ -104,19 +148,64 @@ export function CardForm() {
     form.reset(initialValues);
   }, [form, initialValues]);
 
-  const onSubmit = (values: CardFormValues) => {
-    const parsed = parseExpiry(values.cardExpiry);
-    const normalizedPayload = {
-      cardNumber: values.cardNumber,
-      cardExpiryMonth: parsed?.month ?? null,
-      cardExpiryYear: parsed?.year ?? null,
-      cvv: values.cvv,
-    };
+  const onSubmit = async (values: CardFormValues) => {
+    if (!paymentLinkData) {
+      toast.error('Payment link data not available');
+      return;
+    }
 
-    toast.success('Card details captured', {
-      description: 'Ready to complete payment.',
-    });
-    console.log('Card submission payload', normalizedPayload);
+    setProcessing(true);
+
+    try {
+      const parsed = parseExpiry(values.cardExpiry);
+
+      // Get customer data from query params
+      const customerData = {
+        firstName: searchParams.get('firstName') || '',
+        lastName: searchParams.get('lastName') || '',
+        address: searchParams.get('address') || '',
+        city: searchParams.get('city') || '',
+        state: searchParams.get('state') || '',
+        country: 'US', // Default country
+        email: searchParams.get('email') || '',
+      };
+
+      const paymentPayload = {
+        orderId: searchParams.get('orderId') || `ORD_${Date.now()}`,
+        amount: parseFloat(paymentLinkData.amount),
+        currency: paymentLinkData.currency,
+        cardNumber: values.cardNumber,
+        cardExpiryMonth: parsed?.month || 0,
+        cardExpiryYear: parsed?.year || 0,
+        cvv: values.cvv,
+        cardholderName: `${customerData.firstName} ${customerData.lastName}`,
+        source: searchParams.get('source') || 'link', // Payment source (link, api, etc.)
+        ...customerData,
+      };
+
+      // Process payment via API
+      const response = await http.post('/api/v1/production/card', paymentPayload);
+
+      if (response.success) {
+        toast.success('Payment processed successfully!', {
+          description: 'Your payment has been completed.',
+        });
+
+        // Redirect to success page or home
+        router.push('/');
+      } else {
+        toast.error('Payment failed', {
+          description: response.message || 'Please check your card details and try again.',
+        });
+      }
+    } catch (error: any) {
+      console.error('Payment processing error:', error);
+      toast.error('Payment processing failed', {
+        description: error?.message || 'Please try again or contact support.',
+      });
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const formatPreviewNumber = (value: string) => {
@@ -133,8 +222,41 @@ export function CardForm() {
     return `${mm}/${yy}`;
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-sm text-muted-foreground">Loading payment details...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="relative grid gap-8 md:grid-cols-2 items-start">
+    <div className="space-y-6">
+      {/* Payment Summary */}
+      {paymentLinkData && (
+        <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Payment Amount</p>
+                <p className="text-2xl font-bold text-primary">
+                  {paymentLinkData.currency} {parseFloat(paymentLinkData.amount).toFixed(2)}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">{paymentLinkData.name}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-medium text-muted-foreground">Order ID</p>
+                <p className="text-sm font-mono">{searchParams.get('orderId') || 'N/A'}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="relative grid gap-8 md:grid-cols-2 items-start">
       <div className="relative z-10">
         <Card className="shadow-sm border border-muted">
           <CardHeader className="pb-2">
@@ -218,10 +340,12 @@ export function CardForm() {
                 </div>
 
                 <div className="flex justify-between gap-2 pt-2">
-                  <Button variant="outline" type="button" onClick={() => router.back()}>
+                  <Button variant="outline" type="button" onClick={() => router.back()} disabled={processing}>
                     Back
                   </Button>
-                  <Button type="submit">Complete payment</Button>
+                  <Button type="submit" disabled={processing}>
+                    {processing ? 'Processing...' : 'Complete payment'}
+                  </Button>
                 </div>
               </form>
             </Form>
@@ -277,6 +401,7 @@ export function CardForm() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -16,6 +16,9 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { getUserPaymentLinkById, PaymentLink } from '@/lib/services/user/payment-links';
+import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import { toast } from 'sonner';
 
 const checkoutSchema = z.object({
   firstName: z.string().trim().min(1, 'First name is required'),
@@ -43,15 +46,6 @@ const checkoutSchema = z.object({
     .trim()
     .min(1, 'Currency is required')
     .max(10, 'Currency is too long'),
-  merchantProfileId: z
-    .string()
-    .trim()
-    .min(1, 'Merchant profile ID is required'),
-  webhookUrl: z
-    .string()
-    .trim()
-    .min(1, 'Webhook URL is required')
-    .url('Enter a valid URL'),
 });
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
@@ -67,44 +61,94 @@ const fieldLabels: Record<keyof CheckoutFormValues, string> = {
   orderId: 'Order ID',
   amount: 'Amount',
   currency: 'Currency',
-  merchantProfileId: 'Merchant Profile ID',
-  webhookUrl: 'Webhook URL',
 };
 
+interface CheckoutFormProps {
+  paymentLinkId: string;
+}
+
 const getInitialValues = (
-  params: ReturnType<typeof useSearchParams>,
+  paymentLinkData?: PaymentLink | null,
 ): CheckoutFormValues => ({
-  firstName: params.get('firstName') ?? '',
-  lastName: params.get('lastName') ?? '',
-  address: params.get('address') ?? '',
-  city: params.get('city') ?? '',
-  state: params.get('state') ?? '',
-  zip: params.get('zip') ?? '',
-  email: params.get('email') ?? '',
-  orderId: params.get('orderId') ?? '',
-  amount: params.get('amount') ?? '',
-  currency: params.get('currency') ?? '',
-  merchantProfileId: params.get('merchantProfileId') ?? '',
-  webhookUrl: params.get('webhookUrl') ?? '',
+  firstName: '',
+  lastName: '',
+  address: '',
+  city: '',
+  state: '',
+  zip: '',
+  email: '',
+  orderId: `ORDER_${Date.now()}`,
+  amount: paymentLinkData?.amount?.toString() ?? '',
+  currency: paymentLinkData?.currency ?? '',
 });
 
-export function CheckoutForm() {
-  const searchParams = useSearchParams();
+export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
+  const router = useRouter();
+  const [paymentLinkData, setPaymentLinkData] = useState<PaymentLink | null>(null);
+  const [loading, setLoading] = useState(true);
+
+
+  // Fetch payment link data
+  useEffect(() => {
+    const fetchPaymentLink = async () => {
+      if (!paymentLinkId) {
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        console.log('🔄 Fetching payment link with ID:', paymentLinkId);
+        const response = await getUserPaymentLinkById(paymentLinkId);
+        console.log('📥 API response:', response);
+
+        if (response.status === 200 && response.data) {
+          console.log('Payment link API response data:', response.data);
+          if (response.data.success && response.data.data) {
+            console.log('✅ Pre-filling form with payment link data:', {
+              amount: response.data.data.amount,
+              currency: response.data.data.currency
+            });
+            setPaymentLinkData(response.data.data);
+            setLoading(false);
+          } else {
+            console.log('Payment link not found in API response');
+            toast.warning('Payment link data not found. Please fill the form manually.');
+            setLoading(false);
+          }
+        } else {
+          console.log('❌ API call failed with status:', response.status, 'Response:', response);
+          toast.warning('Unable to load payment link data. Please fill the form manually.');
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Exception during API call:', error);
+        toast.warning('Unable to load payment link data. Please fill the form manually.');
+        setLoading(false);
+      }
+    };
+
+    fetchPaymentLink();
+  }, [paymentLinkId]);
 
   const initialValues = useMemo(
-    () => getInitialValues(searchParams),
-    [searchParams],
+    () => getInitialValues(paymentLinkData),
+    [paymentLinkData],
   );
 
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
-    defaultValues: initialValues,
+    defaultValues: getInitialValues(null), // Start with empty values
     mode: 'onBlur',
   });
 
   useEffect(() => {
-    form.reset(initialValues);
-  }, [form, initialValues]);
+    if (paymentLinkData) {
+      console.log('🔄 Resetting form with payment link data:', initialValues);
+      form.reset(initialValues);
+    }
+  }, [form, paymentLinkData, initialValues]);
 
   const prefilledFields = useMemo(
     () =>
@@ -114,13 +158,41 @@ export function CheckoutForm() {
     [initialValues],
   );
 
+
   const handleSubmit = (values: CheckoutFormValues) => {
-    console.log('Checkout submission payload', {
-      ...values,
-      amount: Number(values.amount),
-      currency: values.currency.toUpperCase(),
+    // Redirect to card payment page with customer data
+    const queryParams = new URLSearchParams({
+      paymentLinkId,
+      firstName: values.firstName,
+      lastName: values.lastName,
+      address: values.address,
+      city: values.city,
+      state: values.state,
+      zip: values.zip,
+      email: values.email,
+      orderId: values.orderId,
+      amount: values.amount,
+      currency: values.currency,
+      source: 'link', // Indicate payment source is from payment link
     });
+
+    router.push(`/payment/card?${queryParams.toString()}`);
   };
+
+  if (loading) {
+    return (
+      <Card className="shadow-lg border-primary/10">
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-sm text-muted-foreground">Loading payment details...</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="shadow-lg border-primary/10">
@@ -285,6 +357,8 @@ export function CheckoutForm() {
                         {...field}
                         placeholder="ORD-2024-0001"
                         autoComplete="off"
+                        readOnly
+                        className="bg-muted"
                       />
                     </FormControl>
                     <FormMessage />
@@ -292,23 +366,6 @@ export function CheckoutForm() {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="merchantProfileId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Merchant profile ID</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="merchant_12345"
-                        autoComplete="off"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
@@ -326,6 +383,8 @@ export function CheckoutForm() {
                         min="0"
                         inputMode="decimal"
                         placeholder="99.99"
+                        readOnly={!!paymentLinkData?.amount}
+                        className={paymentLinkData?.amount ? 'bg-muted' : ''}
                       />
                     </FormControl>
                     <FormMessage />
@@ -344,6 +403,8 @@ export function CheckoutForm() {
                         {...field}
                         placeholder="USD"
                         autoComplete="off"
+                        readOnly={!!paymentLinkData?.currency}
+                        className={paymentLinkData?.currency ? 'bg-muted' : ''}
                         onChange={(event) =>
                           field.onChange(event.target.value.toUpperCase())
                         }
@@ -354,25 +415,6 @@ export function CheckoutForm() {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="webhookUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Webhook URL</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="url"
-                        placeholder="https://example.com/webhook"
-                        autoComplete="url"
-                        inputMode="url"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
             <div className="flex justify-end">
