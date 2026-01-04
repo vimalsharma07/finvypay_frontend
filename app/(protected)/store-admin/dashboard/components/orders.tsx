@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ApexOptions } from 'apexcharts';
-import ApexCharts from 'react-apexcharts';
+import { DynamicApexChart } from '@/components/charts/dynamic-apex-chart';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -285,7 +285,7 @@ export function Orders() {
           </Badge>
         </div>
 
-        <ApexCharts
+        <DynamicApexChart
           options={options}
           series={options.series}
           height={200}
