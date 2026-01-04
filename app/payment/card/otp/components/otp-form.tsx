@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -16,6 +17,7 @@ import {
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { http } from '@/lib/api';
 
 const otpSchema = z.object({
   otp: z
@@ -27,6 +29,10 @@ const otpSchema = z.object({
 type OtpValues = z.infer<typeof otpSchema>;
 
 export function OtpForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const transactionId = searchParams.get('transactionId');
+
   const form = useForm<OtpValues>({
     resolver: zodResolver(otpSchema),
     defaultValues: { otp: '' },
@@ -34,6 +40,7 @@ export function OtpForm() {
   });
 
   const [cooldown, setCooldown] = useState(0);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -41,9 +48,56 @@ export function OtpForm() {
     return () => clearInterval(id);
   }, [cooldown]);
 
-  const onSubmit = (values: OtpValues) => {
-    toast.success('OTP verified successfully');
-    console.log('OTP submission payload', values);
+  useEffect(() => {
+    if (!transactionId) {
+      toast.error('Transaction ID is missing');
+      router.push('/payment');
+    }
+  }, [transactionId, router]);
+
+  const onSubmit = async (values: OtpValues) => {
+    if (!transactionId) {
+      toast.error('Transaction ID is missing');
+      return;
+    }
+
+    setIsVerifying(true);
+
+    try {
+      const payload = {
+        transaction_id: transactionId,
+        otp: values.otp,
+      };
+
+      console.log('Verifying OTP with payload:', payload);
+      const response = await http.post('/api/v1/otp/verify', payload);
+
+      if (response.success) {
+        toast.success('OTP verified successfully', {
+          description: 'Your payment has been processed.',
+        });
+
+        // Redirect to payment page with success status
+        router.push('/payment?status=success');
+      } else {
+        toast.error('OTP verification failed', {
+          description: response.message || 'Please check your OTP and try again.',
+        });
+
+        // Redirect to payment page with failed status
+        router.push('/payment?status=failed');
+      }
+    } catch (error: any) {
+      console.error('OTP verification error:', error);
+      toast.error('OTP verification failed', {
+        description: error?.message || 'Please try again or contact support.',
+      });
+
+      // Redirect to payment page with failed status
+      router.push('/payment?status=failed');
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   const handleResend = () => {
@@ -101,14 +155,16 @@ export function OtpForm() {
                 <Button
                   type="button"
                   variant="ghost"
-                  disabled={cooldown > 0}
+                  disabled={cooldown > 0 || isVerifying}
                   onClick={handleResend}
                   className="text-sm"
                 >
                   {cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend code'}
                 </Button>
                 <div className="flex gap-2">
-                  <Button type="submit">Verify</Button>
+                  <Button type="submit" disabled={isVerifying}>
+                    {isVerifying ? 'Verifying...' : 'Verify'}
+                  </Button>
                 </div>
               </div>
             </form>
