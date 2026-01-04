@@ -44,8 +44,11 @@ import {
   MerchantAcquirerAccount,
   MerchantAcquirerAccountListResponse,
 } from '@/lib/services/admin/connectors';
-import { softDeleteMerchantAcquirerAccount, rejectMerchantAcquirerAccount, RejectMerchantAcquirerAccountPayload } from '@/lib/services/admin/acquirer-accounts';
+import { softDeleteMerchantAcquirerAccount, rejectMerchantAcquirerAccount, RejectMerchantAcquirerAccountPayload, togglePrimaryMerchantAcquirerAccount, toggleActiveMerchantAcquirerAccount } from '@/lib/services/admin/acquirer-accounts';
+import { getMerchantProfiles, MerchantProfile } from '@/lib/services/admin/merchant-acquirer-account';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import { SearchSelect } from '@/components/ui/molecules/SearchSelect';
+import type { Option } from '@/lib/types/common-types';
 import Link from 'next/link';
 
 export default function AcquirerAccountsPage() {
@@ -68,11 +71,18 @@ export default function AcquirerAccountsPage() {
   const [accountToReject, setAccountToReject] = useState<MerchantAcquirerAccount | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [rejecting, setRejecting] = useState(false);
+  const [profiles, setProfiles] = useState<MerchantProfile[]>([]);
+  const [profileOptions, setProfileOptions] = useState<Option[]>([]);
+  const [selectedProfileId, setSelectedProfileId] = useState<string>('');
+  const [loadingProfiles, setLoadingProfiles] = useState(false);
+  const [togglingPrimary, setTogglingPrimary] = useState<Record<string, boolean>>({});
+  const [togglingActive, setTogglingActive] = useState<Record<string, boolean>>({});
 
   // Fetch connectors
   const fetchConnectors = async (
     pageNum: number,
     pageLimit: number,
+    profileId?: string,
   ) => {
     setLoading(true);
     try {
@@ -81,6 +91,11 @@ export default function AcquirerAccountsPage() {
         limit: pageLimit,
         userId: userId,
       };
+
+      // Add merchantProfileId if provided
+      if (profileId) {
+        params.merchantProfileId = profileId;
+      }
 
       const response = await getUserConnectors(params);
 
@@ -104,11 +119,57 @@ export default function AcquirerAccountsPage() {
     }
   };
 
+  // Fetch merchant profiles
+  const fetchProfiles = async () => {
+    if (!userId) return;
+    
+    setLoadingProfiles(true);
+    try {
+      const response = await getMerchantProfiles(userId);
+      handleApiResponse(response, {
+        onSuccess: (data) => {
+          if (data?.success && data.data) {
+            const profilesList = Array.isArray(data.data) ? data.data : [];
+            setProfiles(profilesList);
+            
+            // Transform profiles to options: display industry.name, store profile id
+            const options: Option[] = profilesList.map((profile: MerchantProfile) => ({
+              value: profile.id,
+              label: profile.industry?.name || profile.merchantProfileName || `Profile ${profile.id}`,
+            }));
+            setProfileOptions(options);
+            
+            // Set first profile as default selected
+            // The useEffect will automatically fetch connectors when selectedProfileId is set
+            if (options.length > 0 && !selectedProfileId) {
+              setSelectedProfileId(String(options[0].value));
+            }
+          }
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to load merchant profiles');
+        },
+      });
+    } catch (error) {
+      console.error('Fetch profiles error:', error);
+      toast.error('An unexpected error occurred while loading profiles');
+    } finally {
+      setLoadingProfiles(false);
+    }
+  };
+
   useEffect(() => {
     if (userId) {
-      fetchConnectors(page, limit);
+      fetchProfiles();
     }
-  }, [userId, page, limit]);
+  }, [userId]);
+
+  // Fetch connectors when page, limit, or selectedProfileId changes
+  useEffect(() => {
+    if (userId && selectedProfileId) {
+      fetchConnectors(page, limit, selectedProfileId);
+    }
+  }, [userId, page, limit, selectedProfileId]);
 
   // Define table headers
   const headers: TableHeader<MerchantAcquirerAccount>[] = [
@@ -173,18 +234,105 @@ export default function AcquirerAccountsPage() {
         };
         return <Badge variant={status.variant}>{status.label}</Badge>;
       case 'isPrimary':
+        // Disable toggle if already primary (can't disable primary)
+        // Allow toggle if not primary (can activate, backend will handle deactivating previous primary)
+        const isDisabled = item.isPrimary || togglingPrimary[item.id] || !selectedProfileId;
+        
         return (
-          <Badge variant={item.isPrimary ? 'success' : 'secondary'}>
-            {item.isPrimary ? 'Yes' : 'No'}
-          </Badge>
+          <Switch
+            checked={item.isPrimary || false}
+            disabled={isDisabled}
+            onCheckedChange={async (checked) => {
+              if (!selectedProfileId) {
+                toast.error('Please select a merchant profile first');
+                return;
+              }
+              
+              // Can't disable primary (backend handles this, but prevent UI action)
+              if (item.isPrimary && !checked) {
+                toast.error('Cannot disable primary account. Activate another account to change primary status.');
+                return;
+              }
+
+              // Only allow activating (setting to primary)
+              if (!checked) {
+                return;
+              }
+
+              setTogglingPrimary((prev) => ({ ...prev, [item.id]: true }));
+              
+              try {
+                const response = await togglePrimaryMerchantAcquirerAccount(
+                  item.id,
+                  selectedProfileId
+                );
+                
+                handleApiResponse(response, {
+                  onSuccess: () => {
+                    toast.success('Acquirer account set as primary successfully');
+                    // Refetch data to get updated state (backend will have updated previous primary)
+                    fetchConnectors(page, limit, selectedProfileId);
+                  },
+                  onError: (errorMessage) => {
+                    toast.error(errorMessage || 'Failed to update primary status');
+                  },
+                  onUnauthorized: () => {
+                    toast.error('Unauthorized. Please check your authentication.');
+                  },
+                });
+              } catch (error) {
+                toast.error('An unexpected error occurred');
+                console.error('Toggle primary error:', error);
+              } finally {
+                setTogglingPrimary((prev) => {
+                  const updated = { ...prev };
+                  delete updated[item.id];
+                  return updated;
+                });
+              }
+            }}
+          />
         );
       case 'isActive':
         return (
           <Switch
             checked={item.isActive || false}
+            disabled={togglingActive[item.id]}
             onCheckedChange={async (checked) => {
-              // TODO: Implement toggle active status
-              toast.info('Toggle functionality coming soon');
+              setTogglingActive((prev) => ({ ...prev, [item.id]: true }));
+              
+              try {
+                const response = await toggleActiveMerchantAcquirerAccount(item.id);
+                
+                handleApiResponse(response, {
+                  onSuccess: () => {
+                    toast.success(
+                      checked 
+                        ? 'Acquirer account activated successfully' 
+                        : 'Acquirer account deactivated successfully'
+                    );
+                    // Refetch data to get updated state
+                    if (selectedProfileId) {
+                      fetchConnectors(page, limit, selectedProfileId);
+                    }
+                  },
+                  onError: (errorMessage) => {
+                    toast.error(errorMessage || 'Failed to update active status');
+                  },
+                  onUnauthorized: () => {
+                    toast.error('Unauthorized. Please check your authentication.');
+                  },
+                });
+              } catch (error) {
+                toast.error('An unexpected error occurred');
+                console.error('Toggle active error:', error);
+              } finally {
+                setTogglingActive((prev) => {
+                  const updated = { ...prev };
+                  delete updated[item.id];
+                  return updated;
+                });
+              }
             }}
           />
         );
@@ -274,7 +422,10 @@ export default function AcquirerAccountsPage() {
           setRejectDialogOpen(false);
           setAccountToReject(null);
           setRejectReason('');
-          fetchConnectors(page, limit);
+          // Refetch with current selected profile
+          if (selectedProfileId) {
+            fetchConnectors(page, limit, selectedProfileId);
+          }
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to reject acquirer account');
@@ -303,7 +454,10 @@ export default function AcquirerAccountsPage() {
           toast.success('Acquirer account deleted successfully!');
           setDeleteDialogOpen(false);
           setAccountToDelete(null);
-          fetchConnectors(page, limit);
+          // Refetch with current selected profile
+          if (selectedProfileId) {
+            fetchConnectors(page, limit, selectedProfileId);
+          }
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to delete acquirer account');
@@ -349,6 +503,24 @@ export default function AcquirerAccountsPage() {
         </Toolbar>
       </Container>
       <Container>
+        <div className="mb-6 flex justify-end">
+          <div className="space-y-2 w-full md:w-80 flex-shrink-0">
+            <Label htmlFor="profile-select">Merchant Profile</Label>
+            <div className="relative">
+              <SearchSelect
+                options={profileOptions}
+                value={selectedProfileId}
+                onChange={(value) => {
+                  setSelectedProfileId(value);
+                  // Reset to first page when profile changes
+                  setPage(1);
+                }}
+                placeholder={loadingProfiles ? 'Loading profiles...' : 'Select a profile'}
+                disabled={loadingProfiles || profileOptions.length === 0}
+              />
+            </div>
+          </div>
+        </div>
         <TableComp
           data={connectors}
           headers={headers}

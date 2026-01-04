@@ -51,6 +51,7 @@ export interface UpdateMerchantPayload {
   name?: string;
   email?: string;
   roleId?: number;
+  binEnabled?: boolean;
   // isBlocked?: boolean;
   // isDeleted?: boolean;
 }
