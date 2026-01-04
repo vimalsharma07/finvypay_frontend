@@ -44,23 +44,10 @@ import {
 const DEFAULT_ACQUIRER_ICON = '/media/app/pay4tech.png';
 
 // Helper function to get icon URL from publicId
-// If iconUrl is a full URL, return it; if it's a publicId (starts with "uploads/"), construct the URL
-const getIconUrl = (iconUrl?: string): string | null => {
-  if (!iconUrl) return null;
-  
-  // If it's already a full URL, return it
-  if (iconUrl.startsWith('http://') || iconUrl.startsWith('https://')) {
-    return iconUrl;
-  }
-  
-  // If it's a publicId (starts with "uploads/"), construct the URL
-  // Format: https://stagebucket4all.s3.amazonaws.com/{publicId}
-  if (iconUrl.startsWith('uploads/')) {
-    return `https://stagebucket4all.s3.amazonaws.com/${iconUrl}`;
-  }
-  
-  return iconUrl;
-};
+import { getIconUrl as getS3IconUrl } from '@/lib/s3-url';
+
+// Use the dynamic S3 URL utility
+const getIconUrl = getS3IconUrl;
 
 // Helper function to get provider icon/logo based on fileName or iconUrl
 const getProviderIcon = (fileName: string, iconUrl?: string): string | null => {

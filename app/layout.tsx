@@ -11,7 +11,12 @@ import { ModulesProvider } from '@/providers/modules-provider';
 import { QueryProvider } from '@/providers/query-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap', // Prevent invisible text during font load
+  preload: true,
+  variable: '--font-inter',
+});
 
 import '@/css/styles.css';
 import '@/components/keenicons/assets/styles.css';
@@ -29,11 +34,10 @@ export default async function RootLayout({
   children: ReactNode;
 }) {
   return (
-    <html className="h-full" suppressHydrationWarning>
+    <html className={cn('h-full', inter.variable, inter.className)} suppressHydrationWarning>
       <body
         className={cn(
           'antialiased flex h-full text-base text-foreground bg-background',
-          inter.className,
         )}
       >
         <QueryProvider>

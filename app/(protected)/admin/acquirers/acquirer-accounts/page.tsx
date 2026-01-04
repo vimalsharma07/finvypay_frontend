@@ -60,23 +60,10 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { getIconUrl as getS3IconUrl } from '@/lib/s3-url';
 
-// Helper function to get icon URL from publicId
-const getIconUrl = (iconUrl?: string): string | null => {
-  if (!iconUrl) return null;
-  
-  // If it's already a full URL, return it
-  if (iconUrl.startsWith('http://') || iconUrl.startsWith('https://')) {
-    return iconUrl;
-  }
-  
-  // If it's a publicId (starts with "uploads/"), construct the URL
-  if (iconUrl.startsWith('uploads/')) {
-    return `https://stagebucket4all.s3.amazonaws.com/${iconUrl}`;
-  }
-  
-  return iconUrl;
-};
+// Helper function to get icon URL from publicId (uses dynamic S3 URL)
+const getIconUrl = getS3IconUrl;
 
 export default function AdminAcquirerAccountsPage() {
   const router = useRouter();

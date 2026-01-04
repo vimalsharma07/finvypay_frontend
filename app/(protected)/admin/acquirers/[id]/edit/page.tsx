@@ -32,6 +32,7 @@ import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import { ImageInput, type ImageInputFiles } from '@/components/image-input';
 import { uploadFile, deleteFile, deleteFileByPublicId, findFileIdByPublicId } from '@/lib/services/file-upload';
+import { getS3FileUrl } from '@/lib/s3-url';
 
 // Form schema
 const updateAcquirerSchema = z.object({
@@ -215,28 +216,48 @@ export default function EditAcquirerPage() {
               
               // Set icon URL for display if iconUrl exists
               if (acquirerData.iconUrl) {
-                // If it's a publicId, construct URL; if it's already a URL, use it
-                if (acquirerData.iconUrl.startsWith('uploads/')) {
-                  setIconUrl(`https://stagebucket4all.s3.amazonaws.com/${acquirerData.iconUrl}`);
+                // If it's already a full URL, use it directly
+                if (acquirerData.iconUrl.startsWith('http://') || acquirerData.iconUrl.startsWith('https://')) {
+                  setIconUrl(acquirerData.iconUrl);
                   setIconPublicId(acquirerData.iconUrl);
-                  // Find and store the file ID for deletion
-                  findFileIdByPublicId(acquirerData.iconUrl).then(fileId => {
-                    if (fileId) {
-                      setIconFileId(fileId);
-                      setOriginalIconFileId(fileId);
+                } else {
+                  // It's a publicId - construct the full URL for display using dynamic S3 URL
+                  const publicId = acquirerData.iconUrl;
+                  const displayUrl = getS3FileUrl(publicId);
+                  
+                  // Log for debugging
+                  console.log('Constructing icon URL:', {
+                    publicId,
+                    displayUrl,
+                    envVars: {
+                      NEXT_PUBLIC_S3_BASE_URL: process.env.NEXT_PUBLIC_S3_BASE_URL,
+                      NEXT_PUBLIC_AWS_BASE_URL: process.env.NEXT_PUBLIC_AWS_BASE_URL,
+                      STORAGE_ENDPOINT: process.env.STORAGE_ENDPOINT,
                     }
                   });
-                } else if (acquirerData.iconUrl.startsWith('http://') || acquirerData.iconUrl.startsWith('https://')) {
-                  setIconUrl(acquirerData.iconUrl);
-                } else {
-                  // Assume it's a publicId
-                  setIconPublicId(acquirerData.iconUrl);
+                  
+                  // Ensure we have a valid URL (not just the publicId)
+                  if (displayUrl && displayUrl.startsWith('http')) {
+                    setIconUrl(displayUrl);
+                  } else {
+                    console.error('Failed to construct S3 URL. Check environment variables:', {
+                      publicId,
+                      displayUrl,
+                    });
+                    // Still set it, but it might not work
+                    setIconUrl(displayUrl || publicId);
+                  }
+                  
+                  setIconPublicId(publicId);
+                  
                   // Find and store the file ID for deletion
-                  findFileIdByPublicId(acquirerData.iconUrl).then(fileId => {
+                  findFileIdByPublicId(publicId).then(fileId => {
                     if (fileId) {
                       setIconFileId(fileId);
                       setOriginalIconFileId(fileId);
                     }
+                  }).catch(err => {
+                    console.warn('Could not find file ID for publicId:', publicId, err);
                   });
                 }
               }
@@ -475,7 +496,19 @@ export default function EditAcquirerPage() {
                                         className="h-full w-full object-cover"
                                         onError={(e) => {
                                           const target = e.target as HTMLImageElement;
+                                          console.warn('Failed to load image:', iconUrl);
+                                          // Try to construct URL from publicId if we have it
+                                          if (iconPublicId && !iconPublicId.startsWith('http')) {
+                                            const fallbackUrl = getS3FileUrl(iconPublicId);
+                                            if (target.src !== fallbackUrl) {
+                                              target.src = fallbackUrl;
+                                              return;
+                                            }
+                                          }
                                           target.src = '/media/app/pay4tech.png';
+                                        }}
+                                        onLoad={() => {
+                                          console.log('Image loaded successfully:', iconUrl);
                                         }}
                                       />
                                     ) : fileList[0]?.dataURL ? (
