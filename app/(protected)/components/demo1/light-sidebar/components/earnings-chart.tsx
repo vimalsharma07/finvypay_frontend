@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ApexOptions } from 'apexcharts';
-import ApexChart from 'react-apexcharts';
+import { DynamicApexChart } from '@/components/charts/dynamic-apex-chart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import {
@@ -205,12 +205,12 @@ const EarningsChart = () => {
         </div>
       </CardHeader>
       <CardContent className="flex flex-col justify-end items-stretch grow px-3 py-1">
-        <ApexChart
+        <DynamicApexChart
           id="earnings_chart"
           options={options}
           series={options.series}
           type="area"
-          max-width="694"
+          width="694"
           height="250"
         />
       </CardContent>

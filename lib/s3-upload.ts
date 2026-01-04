@@ -1,6 +1,7 @@
 import { DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { uid } from './helpers';
 import { getS3ClientInstance } from './s3-client';
+import { logger } from './utils/logger';
 
 // Get storage configuration
 function getConfig() {
@@ -39,7 +40,7 @@ export async function uploadToS3(
     const key = `${directory}/${filename}`;
 
     // Log upload attempt
-    console.log('Uploading file:', {
+    logger.log('Uploading file:', {
       filename: file.name,
       size: file.size,
       type: file.type,
@@ -62,10 +63,10 @@ export async function uploadToS3(
 
     // Generate URL
     const fileUrl = getFileUrl(key);
-    console.log('File uploaded successfully:', { key, fileUrl });
+    logger.log('File uploaded successfully:', { key, fileUrl });
     return fileUrl;
   } catch (error) {
-    console.error('Upload failed:', {
+    logger.error('Upload failed:', {
       error: error instanceof Error ? error.message : 'Unknown error',
       file: file?.name,
       directory,
@@ -96,9 +97,9 @@ export async function deleteFromS3(fileUrl: string): Promise<void> {
       }),
     );
 
-    console.log('File deleted successfully:', { key });
+    logger.log('File deleted successfully:', { key });
   } catch (error) {
-    console.error('Delete failed:', {
+    logger.error('Delete failed:', {
       error: error instanceof Error ? error.message : 'Unknown error',
       fileUrl,
     });

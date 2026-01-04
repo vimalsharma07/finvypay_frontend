@@ -1,4 +1,5 @@
 import { S3Client } from '@aws-sdk/client-s3';
+import { logger } from './utils/logger';
 
 // Create a function to get the S3 client
 function getS3Client() {
@@ -11,7 +12,7 @@ function getS3Client() {
   };
 
   // Log configuration (without sensitive data)
-  console.log('Initializing S3 client with:', {
+  logger.log('Initializing S3 client with:', {
     region: config.region,
     endpoint: config.endpoint,
     hasAccessKey: !!config.accessKeyId,
@@ -42,7 +43,7 @@ export function getS3ClientInstance(): S3Client {
     try {
       s3ClientInstance = getS3Client();
     } catch (error) {
-      console.error('Failed to initialize S3 client:', error);
+      logger.error('Failed to initialize S3 client:', error);
       throw error;
     }
   }
