@@ -3,19 +3,48 @@ import type { ApiResponse } from '../types';
 
 export interface UserRouteRule {
   id: string;
-  name: string;
-  viewRoute?: string;
+  userId?: string;
+  merchantProfileId?: string;
   connectorId?: string | number | null;
   merchantConnector?: {
     id: string;
+    userId?: string;
+    merchantProfileId?: string;
+    acquirerId?: number;
+    acquirerAccountId?: number;
     name: string;
+    terminalId?: string;
+    description?: string;
+    status?: number;
+    adminRejectReason?: string | null;
+    merchantRejectReason?: string | null;
+    rates?: any;
+    ratesPdfUrl?: string | null;
+    currencyCode?: string;
+    ratesType?: string;
+    isActive?: boolean;
+    isPrimary?: boolean;
+    secretKey?: string;
+    isDeleted?: boolean;
+    createdAt?: string;
+    updatedAt?: string;
   };
+  name: string;
+  viewRoute?: string;
+  priority?: number;
   status: boolean;
-  isCascade: boolean;
-  priority: number;
+  isCascade?: boolean;
   routingFor: string;
-  config: any;
+  config: Array<{
+    category: string;
+    operator: string;
+    value: string | number;
+  }>;
   splitEnable: boolean;
+  splitConfig?: any;
+  splitType?: string | null;
+  isSuccessTransaction?: boolean;
+  byAdmin?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -85,6 +114,28 @@ export async function deleteUserMerchantRouting(
   }
 }
 
+export async function getUserMerchantRoutingById(
+  routingId: string
+): Promise<ApiResponse<{ success: boolean; data: UserRouteRule; message?: string }>> {
+  try {
+    const data = await http.get(`${getBaseUrl()}/${routingId}`) as {
+      success: boolean;
+      data: UserRouteRule;
+      message?: string;
+    };
+    return { status: 200, data };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+      };
+    }
+    throw error;
+  }
+}
+
 export async function createUserMerchantRouting(
   payload: {
     name: string;
@@ -109,6 +160,39 @@ export async function createUserMerchantRouting(
       status: 200,
       data,
     };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+      };
+    }
+    throw error;
+  }
+}
+
+export async function updateUserMerchantRouting(
+  routingId: string,
+  payload: {
+    name: string;
+    routingFor: string;
+    merchantAcquirerAccountId: number;
+    config: Array<{
+      category: string;
+      operator: string;
+      value: string | number;
+    }>;
+    splitEnable: boolean;
+  }
+): Promise<ApiResponse<{ success: boolean; message: string; data?: any }>> {
+  try {
+    const data = await http.put(`${getBaseUrl()}/${routingId}/update`, payload) as {
+      success: boolean;
+      message: string;
+      data?: any;
+    };
+    return { status: 200, data };
   } catch (error) {
     if (error instanceof ApiError) {
       return {
