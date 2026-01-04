@@ -51,7 +51,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { TableActionMenu, TableActionMenuItem } from '@/app/(protected)/components/table-action-menu';
-import { DynamicAddIpDialog, DynamicEditIpDialog } from '@/components/dialogs';
+import { DynamicAddIpDialogAdmin, DynamicEditIpDialog } from '@/components/dialogs';
 
 export function IpAllowlistPageContent() {
   const [ipWhitelist, setIpWhitelist] = useState<IpWhitelist[]>([]);
@@ -441,7 +441,7 @@ export function IpAllowlistPageContent() {
         </DataGrid>
       </Container>
 
-      <DynamicAddIpDialog
+      <DynamicAddIpDialogAdmin
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
         onSubmit={handleAddIp}

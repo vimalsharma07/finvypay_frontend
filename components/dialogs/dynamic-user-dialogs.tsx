@@ -49,6 +49,21 @@ export const DynamicAddCardDialog = dynamic(
   }
 );
 
+export const DynamicAddCardDialogAdmin = dynamic(
+  () => import('@/app/(protected)/admin/risk-compliance/trusted-cards/components/add-card-dialog').then(
+    mod => ({ default: mod.AddCardDialog })
+  ),
+  {
+    loading: () => (
+      <div className="p-6 space-y-4">
+        <Skeleton className="h-6 w-48" />
+        <Skeleton className="h-48 w-full" />
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
 export const DynamicEditCardDialog = dynamic(
   () => import('@/app/(protected)/user/risk-compliance/trusted-cards/components/edit-card-dialog').then(
     mod => ({ default: mod.EditCardDialog })
@@ -66,6 +81,21 @@ export const DynamicEditCardDialog = dynamic(
 
 export const DynamicAddRiskDialog = dynamic(
   () => import('@/app/(protected)/user/risk-compliance/manage-risk/components/add-risk-dialog').then(
+    mod => ({ default: mod.AddRiskDialog })
+  ),
+  {
+    loading: () => (
+      <div className="p-6 space-y-4">
+        <Skeleton className="h-6 w-48" />
+        <Skeleton className="h-48 w-full" />
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
+export const DynamicAddRiskDialogAdmin = dynamic(
+  () => import('@/app/(protected)/admin/risk-compliance/manage-risk/components/add-risk-dialog').then(
     mod => ({ default: mod.AddRiskDialog })
   ),
   {
@@ -97,6 +127,36 @@ export const DynamicEditRiskDialog = dynamic(
 export const DynamicAddIpDialog = dynamic(
   () => import('@/app/(protected)/user/risk-compliance/ip-allowlist/components/add-ip-dialog').then(
     mod => ({ default: mod.AddIpDialog })
+  ),
+  {
+    loading: () => (
+      <div className="p-6 space-y-4">
+        <Skeleton className="h-6 w-48" />
+        <Skeleton className="h-48 w-full" />
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
+export const DynamicAddIpDialogAdmin = dynamic(
+  () => import('@/app/(protected)/admin/risk-compliance/ip-allowlist/components/add-ip-dialog').then(
+    mod => ({ default: mod.AddIpDialog })
+  ),
+  {
+    loading: () => (
+      <div className="p-6 space-y-4">
+        <Skeleton className="h-6 w-48" />
+        <Skeleton className="h-48 w-full" />
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
+export const DynamicEditIpDialog = dynamic(
+  () => import('@/app/(protected)/admin/risk-compliance/ip-allowlist/components/edit-ip-dialog').then(
+    mod => ({ default: mod.EditIpDialog })
   ),
   {
     loading: () => (

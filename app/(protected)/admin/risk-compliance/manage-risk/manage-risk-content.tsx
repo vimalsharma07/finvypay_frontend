@@ -47,7 +47,7 @@ import { Button } from '@/components/ui/button';
 import { TableActionButtons } from './components/table-action-buttons';
 import { SearchInput } from './components/search-input';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
-import { DynamicAddRiskDialog, DynamicEditRiskDialog } from '@/components/dialogs';
+import { DynamicAddRiskDialogAdmin, DynamicEditRiskDialog } from '@/components/dialogs';
 
 export function ManageRiskPageContent() {
   const [riskManagement, setRiskManagement] = useState<RiskManagement[]>([]);
@@ -340,7 +340,7 @@ export function ManageRiskPageContent() {
         </DataGrid>
       </Container>
 
-      <DynamicAddRiskDialog
+      <DynamicAddRiskDialogAdmin
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
         onSubmit={handleAddRisk}

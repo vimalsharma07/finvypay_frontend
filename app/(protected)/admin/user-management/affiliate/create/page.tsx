@@ -17,8 +17,6 @@ const CreateAffiliateContent = dynamic(
   }
 );
 
-export const dynamic = 'force-dynamic';
-
 export default function CreateAffiliateUserPage() {
   return (
     <Container>

@@ -47,7 +47,7 @@ import { Button } from '@/components/ui/button';
 import { TableActionButtons } from './components/table-action-buttons';
 import { SearchInput } from './components/search-input';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
-import { DynamicAddCardDialog, DynamicEditCardDialog } from '@/components/dialogs';
+import { DynamicAddCardDialogAdmin, DynamicEditCardDialog } from '@/components/dialogs';
 
 export function TrustedCardsPageContent() {
   const [cardWhitelist, setCardWhitelist] = useState<CardWhitelist[]>([]);
@@ -339,7 +339,7 @@ export function TrustedCardsPageContent() {
         </DataGrid>
       </Container>
 
-      <DynamicAddCardDialog
+      <DynamicAddCardDialogAdmin
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
         onSubmit={handleAddCard}
