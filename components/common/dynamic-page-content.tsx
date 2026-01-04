@@ -20,7 +20,7 @@ export function dynamicPageContent<T = any>(
   importFn: () => Promise<{ default: React.ComponentType<T> } | { [key: string]: React.ComponentType<T> }>,
   exportName?: string,
   options?: {
-    loading?: React.ComponentType;
+    loading?: () => React.ReactNode;
     ssr?: boolean;
   }
 ) {
@@ -30,16 +30,16 @@ export function dynamicPageContent<T = any>(
       
       // Handle both default and named exports
       if (exportName && !('default' in module)) {
-        return { default: module[exportName] };
+        return { default: module[exportName] } as { default: React.ComponentType<T> };
       }
       
-      return module;
+      return module as { default: React.ComponentType<T> };
     },
     {
       loading: options?.loading || (() => <PageSkeleton />),
       ssr: options?.ssr ?? false,
     }
-  );
+  ) as React.ComponentType<T>;
 }
 
 /**

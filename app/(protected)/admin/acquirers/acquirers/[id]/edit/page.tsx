@@ -11,7 +11,7 @@ import { FormSkeleton } from '@/components/ui/skeletons';
 import Link from 'next/link';
 
 const EditAcquirerContent = dynamic(
-  () => import('../../[id]/edit/edit-acquirer-content').then(mod => ({ default: mod.EditAcquirerContent })),
+  () => import('../../../[id]/edit/edit-acquirer-content').then(mod => ({ default: mod.EditAcquirerContent })),
   {
     loading: () => <FormSkeleton fields={10} />,
     ssr: false,

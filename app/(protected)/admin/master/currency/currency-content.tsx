@@ -7,7 +7,7 @@ import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
   TableComp,
   TableHeader,
-} from '../../../../components/table-comp';
+} from '@/app/(protected)/components/table-comp';
 import { Badge } from '@/components/ui/badge';
 
 export function CurrencyPageContent() {

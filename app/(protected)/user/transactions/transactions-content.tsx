@@ -32,7 +32,7 @@ import { SearchInput } from './shared/search-input';
 import { getTransactionColumns } from './shared/columns';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 import { filterTransactions } from './shared/utils';
-import { DynamicTransactionDetailsDialog } from '@/components/dialogs';
+import { DynamicTransactionDetailsDialogUser } from '@/components/dialogs';
 
 export function TransactionsPageContent() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -193,7 +193,7 @@ export function TransactionsPageContent() {
         </DataGrid>
       </Container>
 
-      <DynamicTransactionDetailsDialog
+      <DynamicTransactionDetailsDialogUser
         open={detailsDialogOpen}
         onOpenChange={setDetailsDialogOpen}
         transaction={selectedTransaction}

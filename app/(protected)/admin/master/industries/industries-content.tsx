@@ -16,10 +16,10 @@ import {
   TableComp,
   TableHeader,
   TableAction,
-} from '../../../../components/table-comp';
+} from '@/app/(protected)/components/table-comp';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ConfirmComp } from '../../../../components/confirm-comp';
+import { ConfirmComp } from '@/app/(protected)/components/confirm-comp';
 import { toast } from 'sonner';
 import { EditIndustryDialog } from './components/edit-industry-dialog';
 import { CreateIndustryDialog } from './components/create-industry-dialog';

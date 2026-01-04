@@ -33,7 +33,7 @@ import {
   LimitsSection,
   CountriesCardTypesSection,
   ConfigSection,
-} from '../../../[id]/edit/components/form-sections';
+} from '../../[id]/edit/components/form-sections';
 
 // Form schema
 const createAcquirerAccountSchema = z.object({

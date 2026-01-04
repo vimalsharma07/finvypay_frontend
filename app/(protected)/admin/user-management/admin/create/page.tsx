@@ -17,8 +17,6 @@ const CreateAdminContent = dynamic(
   }
 );
 
-export const dynamic = 'force-dynamic';
-
 export default function CreateUserPage() {
   return (
     <Container>

@@ -14,9 +14,9 @@ import {
   TableComp,
   TableHeader,
   TableAction,
-} from '../../../../components/table-comp';
+} from '@/app/(protected)/components/table-comp';
 import { Badge } from '@/components/ui/badge';
-import { ConfirmComp } from '../../../../components/confirm-comp';
+import { ConfirmComp } from '@/app/(protected)/components/confirm-comp';
 import { toast } from 'sonner';
 
 export function AgreementsPageContent() {
