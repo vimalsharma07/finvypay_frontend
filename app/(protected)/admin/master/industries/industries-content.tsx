@@ -1,38 +1,30 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-import { Building } from 'lucide-react';
-import {
-  Toolbar,
-  ToolbarHeading,
-} from '@/layouts/demo1/components/toolbar';
+import { Fragment, useEffect, useState } from 'react';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Container } from '@/components/common/container';
-import { PageSkeleton } from '@/components/ui/skeletons';
+import {
+  getIndustries,
+  IndustryListResponse,
+  Industry,
+  deleteIndustry,
+  updateIndustry,
+  createIndustry,
+} from '@/lib/services/admin/industries';
+import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import {
+  TableComp,
+  TableHeader,
+  TableAction,
+} from '../../../../components/table-comp';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ConfirmComp } from '../../../../components/confirm-comp';
+import { toast } from 'sonner';
+import { EditIndustryDialog } from './components/edit-industry-dialog';
+import { CreateIndustryDialog } from './components/create-industry-dialog';
 
-const IndustriesPageContent = dynamic(
-  () => import('./industries-content').then(mod => ({ default: mod.IndustriesPageContent })),
-  {
-    loading: () => <PageSkeleton />,
-    ssr: false,
-  }
-);
-
-export default function IndustriesPage() {
-  return (
-    <>
-      <Container>
-        <Toolbar>
-          <ToolbarHeading
-            title="Industries"
-            description="Create, edit, and manage industry categories for merchant classification and organization"
-            icon={Building}
-          />
-        </Toolbar>
-      </Container>
-      <IndustriesPageContent />
-    </>
-  );
-}
+export function IndustriesPageContent() {
   const [industries, setIndustries] = useState<Industry[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<IndustryListResponse['data']['meta'] | null>(null);
@@ -278,43 +270,15 @@ export default function IndustriesPage() {
     },
   ];
 
-  if (loading && industries.length === 0) {
-    return (
-      <Fragment>
-        <Container>
-          <Toolbar>
-            <ToolbarHeading
-              title="Industries"
-              description="Create, edit, and manage industry categories for merchant classification and organization"
-              icon={Building}
-            />
-          </Toolbar>
-        </Container>
-        <Container>
-          <div className="text-center py-8">Loading...</div>
-        </Container>
-      </Fragment>
-    );
-  }
-
   return (
     <Fragment>
       <Container>
-        <Toolbar>
-          <ToolbarHeading
-            title="Industries"
-            description="Create, edit, and manage industry categories for merchant classification and organization"
-            icon={Building}
-          />
-          <ToolbarActions>
-            <Button variant="primary" onClick={() => setCreateDialogOpen(true)}>
-              <Plus className="h-4 w-4" />
-              Create Industry
-            </Button>
-          </ToolbarActions>
-        </Toolbar>
-      </Container>
-      <Container>
+        <div className="flex items-center justify-between mb-4">
+          <Button variant="primary" onClick={() => setCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Create Industry
+          </Button>
+        </div>
         <TableComp
           data={industries}
           headers={headers}

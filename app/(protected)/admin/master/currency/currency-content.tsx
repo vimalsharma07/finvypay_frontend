@@ -1,38 +1,16 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-import { Coins } from 'lucide-react';
-import {
-  Toolbar,
-  ToolbarHeading,
-} from '@/layouts/demo1/components/toolbar';
+import { Fragment, useEffect, useState } from 'react';
 import { Container } from '@/components/common/container';
-import { PageSkeleton } from '@/components/ui/skeletons';
+import { getCurrencies, CurrencyListResponse, Currency } from '@/lib/services/admin/currency';
+import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import {
+  TableComp,
+  TableHeader,
+} from '../../../../components/table-comp';
+import { Badge } from '@/components/ui/badge';
 
-const CurrencyPageContent = dynamic(
-  () => import('./currency-content').then(mod => ({ default: mod.CurrencyPageContent })),
-  {
-    loading: () => <PageSkeleton />,
-    ssr: false,
-  }
-);
-
-export default function CurrencyPage() {
-  return (
-    <>
-      <Container>
-        <Toolbar>
-          <ToolbarHeading
-            title="Currency"
-            description="View and manage all currency codes, exchange rates, and their values for multi-currency transaction processing"
-            icon={Coins}
-          />
-        </Toolbar>
-      </Container>
-      <CurrencyPageContent />
-    </>
-  );
-}
+export function CurrencyPageContent() {
   const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<CurrencyListResponse['data']['meta'] | null>(null);
@@ -176,36 +154,8 @@ export default function CurrencyPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <Fragment>
-        <Container>
-          <Toolbar>
-            <ToolbarHeading
-              title="Currency"
-              description="View and manage all currency codes, exchange rates, and their values for multi-currency transaction processing"
-              icon={Coins}
-            />
-          </Toolbar>
-        </Container>
-        <Container>
-          <div className="text-center py-8">Loading...</div>
-        </Container>
-      </Fragment>
-    );
-  }
-
   return (
     <Fragment>
-      <Container>
-        <Toolbar>
-          <ToolbarHeading
-            title="Currency"
-            description="View and manage all currency codes, exchange rates, and their values for multi-currency transaction processing"
-            icon={Coins}
-          />
-        </Toolbar>
-      </Container>
       <Container>
         <TableComp
           data={currencies}
@@ -233,3 +183,4 @@ export default function CurrencyPage() {
     </Fragment>
   );
 }
+

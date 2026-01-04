@@ -1,38 +1,25 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-import { FileText } from 'lucide-react';
-import {
-  Toolbar,
-  ToolbarHeading,
-} from '@/layouts/demo1/components/toolbar';
+import { Fragment, useEffect, useState } from 'react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { Container } from '@/components/common/container';
-import { PageSkeleton } from '@/components/ui/skeletons';
+import {
+  getAgreements,
+  AgreementListResponse,
+  Agreement,
+  deleteAgreement,
+} from '@/lib/services/admin/agreements';
+import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import {
+  TableComp,
+  TableHeader,
+  TableAction,
+} from '../../../../components/table-comp';
+import { Badge } from '@/components/ui/badge';
+import { ConfirmComp } from '../../../../components/confirm-comp';
+import { toast } from 'sonner';
 
-const AgreementsPageContent = dynamic(
-  () => import('./agreements-content').then(mod => ({ default: mod.AgreementsPageContent })),
-  {
-    loading: () => <PageSkeleton />,
-    ssr: false,
-  }
-);
-
-export default function AgreementsPage() {
-  return (
-    <>
-      <Container>
-        <Toolbar>
-          <ToolbarHeading
-            title="Agreements"
-            description="Create, edit, and manage legal agreements and contract templates for merchant onboarding and compliance"
-            icon={FileText}
-          />
-        </Toolbar>
-      </Container>
-      <AgreementsPageContent />
-    </>
-  );
-}
+export function AgreementsPageContent() {
   const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<AgreementListResponse['data']['meta'] | null>(null);
@@ -205,40 +192,8 @@ export default function AgreementsPage() {
     },
   ];
 
-  if (loading && agreements.length === 0) {
-    return (
-      <Fragment>
-        <Container>
-          <Toolbar>
-            <ToolbarHeading
-              title="Agreements"
-              description="Create, edit, and manage legal agreements and contract templates for merchant onboarding and compliance"
-              icon={FileText}
-            />
-          </Toolbar>
-        </Container>
-        <Container>
-          <div className="text-center py-8">Loading...</div>
-        </Container>
-      </Fragment>
-    );
-  }
-
   return (
     <Fragment>
-      <Container>
-        <Toolbar>
-            <ToolbarHeading
-              title="Agreements"
-              description="Create, edit, and manage legal agreements and contract templates for merchant onboarding and compliance"
-              icon={FileText}
-            />
-          <ToolbarActions>
-            {/* Create button can be added here in future */}
-          </ToolbarActions>
-        </Toolbar>
-      </Container>
-
       <Container>
         <TableComp
           data={agreements}
