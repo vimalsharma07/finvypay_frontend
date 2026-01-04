@@ -31,7 +31,9 @@ const QueryProvider = ({ children }: { children: ReactNode }) => {
             retry: false, // Don't retry mutations
             onError: (error: any) => {
               // Global mutation error handling
-              const message = error?.response?.data?.message || 
+              // Handle ApiError format (from lib/api.ts) and standard error formats
+              const message = error?.data?.message || 
+                             error?.response?.data?.message || 
                              error?.message || 
                              'An error occurred. Please try again.';
               toast.error(message);
@@ -41,8 +43,12 @@ const QueryProvider = ({ children }: { children: ReactNode }) => {
         queryCache: new QueryCache({
           onError: (error: any) => {
             // Only show toast for non-401 errors (401 handled by auth)
-            if (error?.status !== 401) {
+            // Handle ApiError format (from lib/api.ts) which has status directly
+            const status = error?.status || error?.response?.status;
+            if (status !== 401) {
+              // Handle ApiError format (error.data.message) and standard error formats
               const message =
+                error?.data?.message ||
                 error?.response?.data?.message ||
                 error?.message ||
                 'Something went wrong. Please try again.';
