@@ -90,7 +90,7 @@ const BASE_USER_MENU: MenuConfig = [
   },
   {
     title: 'Payment Links',
-    icon: Heart,
+    icon: Link2,
     path: '/user/payment-links',
     permissionModule: 'Payment Links',
     requirePermission: false,

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link2, Eye, Pencil, Trash2 } from 'lucide-react';
+import { Link2, Pencil, Trash2 } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -141,11 +141,6 @@ export default function PaymentLinksPage() {
   };
 
   const actions: TableAction<PaymentLink>[] = [
-    {
-      label: 'View',
-      icon: Eye,
-      route: (row: PaymentLink) => `/user/payment-links/${row.id}`,
-    },
     {
       label: 'Edit',
       icon: Pencil,
