@@ -269,29 +269,78 @@ export function LimitsSection<T extends FieldValues = FieldValues>({
             key={fieldConfig.name}
             control={control}
             name={fieldConfig.name as any}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  {fieldConfig.label}
-                  {fieldConfig.required !== false && <span className="text-destructive">*</span>}
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type={fieldConfig.type === 'integer' ? 'number' : fieldConfig.type}
-                    step={fieldConfig.step}
-                    placeholder={`Enter ${fieldConfig.label.toLowerCase()}`}
-                    {...field}
-                    onChange={(e) =>
-                      fieldConfig.type === 'integer'
-                        ? field.onChange(Number(e.target.value))
-                        : field.onChange(e.target.value)
-                    }
-                    disabled={submitting}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              // For integer fields, show empty string instead of 0 when value is 0 (for better UX)
+              const displayValue = fieldConfig.type === 'integer' 
+                ? (field.value === 0 || field.value === '' || field.value === null || field.value === undefined ? '' : String(field.value))
+                : (field.value || '');
+
+              const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                const inputValue = e.target.value;
+                
+                if (fieldConfig.type === 'integer') {
+                  // Handle empty input
+                  if (inputValue === '' || inputValue === null || inputValue === undefined) {
+                    field.onChange(0);
+                    return;
+                  }
+                  
+                  // Remove leading zeros and parse as integer
+                  // Keep the raw value if it's just "0" or starts with "0" followed by non-digits
+                  let cleanedValue = inputValue.trim();
+                  
+                  // If it's a valid number string with leading zeros (like "023"), remove them
+                  if (/^0+[0-9]+$/.test(cleanedValue)) {
+                    cleanedValue = cleanedValue.replace(/^0+/, '');
+                  }
+                  
+                  // Convert to number
+                  const numValue = cleanedValue === '' ? 0 : Number(cleanedValue);
+                  
+                  // Update field if valid number
+                  if (!isNaN(numValue)) {
+                    field.onChange(numValue);
+                  }
+                } else if (fieldConfig.type === 'number') {
+                  // For decimal numbers, allow the string value
+                  field.onChange(inputValue);
+                } else {
+                  // For text fields
+                  field.onChange(inputValue);
+                }
+              };
+
+              const handleBlur = () => {
+                // On blur, if integer field is empty, ensure it's set to 0 internally
+                if (fieldConfig.type === 'integer') {
+                  if (field.value === '' || field.value === null || field.value === undefined) {
+                    field.onChange(0);
+                  }
+                }
+                field.onBlur();
+              };
+
+              return (
+                <FormItem>
+                  <FormLabel>
+                    {fieldConfig.label}
+                    {fieldConfig.required !== false && <span className="text-destructive">*</span>}
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type={fieldConfig.type === 'integer' ? 'number' : fieldConfig.type}
+                      step={fieldConfig.step}
+                      placeholder={`Enter ${fieldConfig.label.toLowerCase()}`}
+                      value={displayValue}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      disabled={submitting}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
         ))}
       </div>
