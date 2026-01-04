@@ -170,6 +170,8 @@ export function CardForm() {
         email: searchParams.get('email') || '',
       };
 
+      const paymentLinkId = searchParams.get('paymentLinkId');
+
       const paymentPayload = {
         orderId: searchParams.get('orderId') || `ORD_${Date.now()}`,
         amount: parseFloat(paymentLinkData.amount),
@@ -180,29 +182,58 @@ export function CardForm() {
         cvv: values.cvv,
         cardholderName: `${customerData.firstName} ${customerData.lastName}`,
         source: searchParams.get('source') || 'link', // Payment source (link, api, etc.)
+        token: paymentLinkId || '', // Payment link ID passed as token
         ...customerData,
       };
 
       // Process payment via API
       const response = await http.post('/api/v1/production/card', paymentPayload);
 
-      if (response.success) {
+      // Check if 3DS redirect is required
+      if (response.status === 'REDIRECT' && response.is3DS) {
+        toast.info('Redirecting for 3D Secure authentication...');
+        // Redirect to 3DS URL
+        window.location.href = response.is3DS;
+        return;
+      }
+
+      // Check if payment was successful
+      const isSuccess = response.success === true && response.status === 'SUCCESS';
+
+      if (isSuccess && response.data) {
+        // Extract payment data from response
+        const paymentData = response.data;
+        const amount = paymentData.amount || paymentLinkData?.amount || '';
+        const currency = paymentData.currency || paymentLinkData?.currency || '';
+
         toast.success('Payment processed successfully!', {
           description: 'Your payment has been completed.',
         });
 
-        // Redirect to success page or home
-        router.push('/');
+        // Redirect to payment page with success status and data
+        const queryParams = new URLSearchParams({
+          status: 'success',
+          ...(amount && { amount: String(amount) }),
+          ...(currency && { currency: String(currency) }),
+        });
+
+        router.push(`/payment?${queryParams.toString()}`);
       } else {
         toast.error('Payment failed', {
           description: response.message || 'Please check your card details and try again.',
         });
+
+        // Redirect to payment page with failed status
+        router.push('/payment?status=failed');
       }
     } catch (error: any) {
       console.error('Payment processing error:', error);
       toast.error('Payment processing failed', {
         description: error?.message || 'Please try again or contact support.',
       });
+
+      // Redirect to payment page with failed status
+      router.push('/payment?status=failed');
     } finally {
       setProcessing(false);
     }
