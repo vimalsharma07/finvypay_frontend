@@ -581,3 +581,76 @@ export async function rejectMerchantAcquirerAccount(
     };
   }
 }
+
+/**
+ * Toggle primary status for merchant acquirer account
+ */
+export interface TogglePrimaryMerchantAcquirerAccountResponse {
+  success: boolean;
+  message?: string;
+  data?: MerchantAcquirerAccountDetail;
+}
+
+export async function togglePrimaryMerchantAcquirerAccount(
+  id: string | number,
+  merchantProfileId: string | number
+): Promise<ApiResponse<TogglePrimaryMerchantAcquirerAccountResponse>> {
+  try {
+    const url = `${adminRoutes.acquirerAccounts.togglePrimary(id)}?merchantProfileId=${merchantProfileId}`;
+    const response = await http.put(url, {}) as TogglePrimaryMerchantAcquirerAccountResponse;
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Toggle active status for merchant acquirer account
+ */
+export interface ToggleActiveMerchantAcquirerAccountResponse {
+  success: boolean;
+  message?: string;
+  data?: MerchantAcquirerAccountDetail;
+}
+
+export async function toggleActiveMerchantAcquirerAccount(
+  id: string | number
+): Promise<ApiResponse<ToggleActiveMerchantAcquirerAccountResponse>> {
+  try {
+    const response = await http.put(
+      adminRoutes.acquirerAccounts.toggleActive(id),
+      {}
+    ) as ToggleActiveMerchantAcquirerAccountResponse;
+
+    return {
+      status: 200,
+      data: response,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}

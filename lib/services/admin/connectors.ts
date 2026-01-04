@@ -51,6 +51,7 @@ export interface MerchantAcquirerAccount {
     };
   };
   industryName?: string; // Top-level field from API response
+  binEnabled?: boolean; // User-level security setting
   createdAt: string;
   updatedAt: string;
 }
@@ -75,10 +76,7 @@ export interface MerchantAcquirerAccountListResponse {
   message?: string;
 }
 
-const getBaseUrl = (userId?: string) => {
-  if (userId) {
-    return `/user-management/${userId}/acquirer-accounts`;
-  }
+const getBaseUrl = () => {
   return `/admin/merchant-acquirer-account`;
 };
 
@@ -89,10 +87,9 @@ export async function getUserConnectors(
   params?: Record<string, any>
 ): Promise<ApiResponse<MerchantAcquirerAccountListResponse>> {
   try {
-    const userId = params?.userId as string;
-    const baseUrl = getBaseUrl(userId);
-    // Remove userId from query params if using user-specific endpoint
-    const queryParams = userId ? { ...params, userId: undefined } : params;
+    const baseUrl = getBaseUrl();
+    // Keep all params including userId and merchantProfileId as query parameters
+    const queryParams = params;
     
     const data = await http.get(baseUrl, {
       query: queryParams as Record<string, string | number | boolean | null | undefined>,

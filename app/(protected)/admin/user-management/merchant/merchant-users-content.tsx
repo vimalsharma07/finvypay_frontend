@@ -1,12 +1,13 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
-import { Pencil, Eye, Plug, Route, Trash2, Percent, Shield } from 'lucide-react';
+import { Pencil, Eye, Plug, Route, Trash2, Percent, Shield, Lock } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   getUsers,
   deleteUser,
   disableUser2Fa,
+  updateUser,
   User,
   UserListResponse,
 } from '@/lib/services/admin/users';
@@ -20,6 +21,17 @@ import { Badge } from '@/components/ui/badge';
 import { AdvancedFilter, FilterField } from '../../../components/advanced-filter';
 import { ConfirmComp } from '../../../components/confirm-comp';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { getUserConnectors, MerchantAcquirerAccount } from '@/lib/services/admin/connectors';
+import { getMerchantProfiles } from '@/lib/services/admin/merchant-acquirer-account';
 
 export function MerchantUsersPageContent() {
   const [users, setUsers] = useState<User[]>([]);
@@ -42,6 +54,13 @@ export function MerchantUsersPageContent() {
   const [reset2FaDialogOpen, setReset2FaDialogOpen] = useState(false);
   const [userToReset2Fa, setUserToReset2Fa] = useState<User | null>(null);
   const [resetting2Fa, setResetting2Fa] = useState(false);
+  
+  // Security dialog state
+  const [securityDialogOpen, setSecurityDialogOpen] = useState(false);
+  const [userForSecurity, setUserForSecurity] = useState<User | null>(null);
+  const [loadingSecurity, setLoadingSecurity] = useState(false);
+  const [updatingBinEnabled, setUpdatingBinEnabled] = useState(false);
+  const [binEnabled, setBinEnabled] = useState<boolean | null>(null);
   
   // Filter state
   const [filters, setFilters] = useState<Record<string, string>>({});
@@ -264,6 +283,128 @@ export function MerchantUsersPageContent() {
     }
   };
 
+  // Fetch security settings (BIN enabled status)
+  const fetchSecuritySettings = async (userId: string) => {
+    setLoadingSecurity(true);
+    setBinEnabled(null);
+    
+    try {
+      // First, get merchant profiles to get the first profile ID
+      const profilesResponse = await getMerchantProfiles(userId);
+      
+      handleApiResponse(profilesResponse, {
+        onSuccess: async (data) => {
+          if (data?.success && data.data && Array.isArray(data.data) && data.data.length > 0) {
+            const firstProfile = data.data[0];
+            const profileId = firstProfile.id;
+            
+            // Fetch acquirer accounts with the first profile
+            const params: any = {
+              page: 1,
+              limit: 20,
+              userId: userId,
+              merchantProfileId: profileId,
+            };
+            
+            try {
+              const connectorsResponse = await getUserConnectors(params);
+              
+              handleApiResponse(connectorsResponse, {
+                onSuccess: (connectorsData) => {
+                  if (connectorsData?.success && connectorsData.data) {
+                    const accounts = Array.isArray(connectorsData.data) 
+                      ? connectorsData.data 
+                      : connectorsData.data.data || [];
+                    
+                    // binEnabled is a user property, check if it's in the response
+                    // The API response might have user object with binEnabled
+                    // Or check the first account's user property
+                    if (accounts.length > 0) {
+                      const account = accounts[0] as any;
+                      // Check if binEnabled is directly on account, or in user object
+                      const enabled = account.binEnabled ?? account.user?.binEnabled ?? false;
+                      setBinEnabled(enabled);
+                    } else {
+                      // If no accounts, try to get from user directly
+                      // For now, set to false
+                      setBinEnabled(false);
+                    }
+                  } else {
+                    setBinEnabled(false);
+                  }
+                },
+                onError: (errorMessage) => {
+                  toast.error(errorMessage || 'Failed to load security settings');
+                  setBinEnabled(false);
+                },
+              });
+            } catch (error) {
+              console.error('Fetch connectors error:', error);
+              setBinEnabled(false);
+            }
+          } else {
+            setBinEnabled(false);
+          }
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to load merchant profiles');
+          setBinEnabled(false);
+        },
+      });
+    } catch (error) {
+      console.error('Fetch security settings error:', error);
+      toast.error('An unexpected error occurred while loading security settings');
+      setBinEnabled(false);
+    } finally {
+      setLoadingSecurity(false);
+    }
+  };
+
+  // Handle security dialog open
+  const handleSecurityClick = (user: User) => {
+    setUserForSecurity(user);
+    setSecurityDialogOpen(true);
+    fetchSecuritySettings(user.id);
+  };
+
+  // Handle BIN enabled toggle
+  const handleBinEnabledToggle = async (checked: boolean) => {
+    if (!userForSecurity) return;
+
+    setUpdatingBinEnabled(true);
+    try {
+      const response = await updateUser(userForSecurity.id, {
+        binEnabled: checked,
+      });
+
+      handleApiResponse<User>(response, {
+        onSuccess: (userData) => {
+          setBinEnabled(checked);
+          toast.success(
+            checked
+              ? 'Bin Check enabled successfully'
+              : 'Bin Check disabled successfully'
+          );
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to update Bin Check status');
+          // Revert the checkbox state on error
+          setBinEnabled(!checked);
+        },
+        onUnauthorized: () => {
+          toast.error('Unauthorized. Please check your authentication.');
+          setBinEnabled(!checked);
+        },
+      });
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+      console.error('Update binEnabled error:', error);
+      setBinEnabled(!checked);
+    } finally {
+      setUpdatingBinEnabled(false);
+    }
+  };
+
   // Define actions
   const actions: TableAction<User>[] = [
     {
@@ -292,6 +433,14 @@ export function MerchantUsersPageContent() {
       label: 'Assign Rate',
       icon: Percent,
       route: (row: User) => `/admin/user-management/merchant/assign-rates/${row.id}`,
+      separator: true,
+    },
+    {
+      label: 'Security',
+      icon: Lock,
+      onClick: (row: User) => {
+        handleSecurityClick(row);
+      },
       separator: true,
     },
     {
@@ -389,6 +538,40 @@ export function MerchantUsersPageContent() {
           }
         }}
       />
+
+      {/* Security Dialog */}
+      <Dialog open={securityDialogOpen} onOpenChange={setSecurityDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Security</DialogTitle>
+            <DialogDescription>
+              Security settings for {userForSecurity?.name || 'merchant'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {loadingSecurity ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-sm text-muted-foreground">Loading security settings...</div>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="bin-enabled"
+                  checked={binEnabled ?? false}
+                  disabled={updatingBinEnabled}
+                  onCheckedChange={handleBinEnabledToggle}
+                />
+                <Label
+                  htmlFor="bin-enabled"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Bin Check
+                </Label>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Fragment>
   );
 }
