@@ -231,19 +231,6 @@ export function UserCascadingPageContent() {
   return (
     <Fragment>
       <Container>
-        <Toolbar>
-          <ToolbarActions>
-            <Button
-              variant="primary"
-              onClick={() => router.push(`/user/cascading/create?profileId=${selectedProfileId}`)}
-              disabled={!selectedProfileId}
-            >
-              Create Cascading
-            </Button>
-          </ToolbarActions>
-        </Toolbar>
-      </Container>
-      <Container>
         <div className="flex flex-col gap-3 mb-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div className="flex flex-col gap-1">

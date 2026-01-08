@@ -2,13 +2,8 @@
 
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Route, UserCircle, Eye, Pencil, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { Container } from '@/components/common/container';
-import {
-  Toolbar,
-  ToolbarHeading,
-  ToolbarActions,
-} from '@/layouts/demo1/components/toolbar';
 import { Button } from '@/components/ui/button';
 import {
   TableComp,
@@ -285,23 +280,6 @@ export function UserRoutingPageContent() {
 
   return (
     <Fragment>
-      <Container>
-        <Toolbar>
-          <ToolbarActions>
-            <Button
-              variant="primary"
-              onClick={() => router.push(`/user/routing/create?profileId=${selectedProfileId}`)}
-              disabled={!selectedProfileId}
-            >
-              Create Routing
-            </Button>
-            <Button variant="secondary" onClick={() => router.push('/user/profile-selection')}>
-              <UserCircle className="h-4 w-4 me-1" />
-              Change Profile
-            </Button>
-          </ToolbarActions>
-        </Toolbar>
-      </Container>
       <Container>
         <div className="flex flex-col gap-3 mb-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
