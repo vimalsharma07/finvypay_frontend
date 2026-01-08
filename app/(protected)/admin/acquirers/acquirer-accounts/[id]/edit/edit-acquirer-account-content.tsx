@@ -5,12 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
-import {
-  Toolbar,
-  ToolbarHeading,
-} from '@/layouts/demo1/components/toolbar';
+import { X, Save } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
@@ -295,12 +290,6 @@ export function EditAcquirerAccountContent() {
     return (
       <Fragment>
         <Container>
-          <Toolbar>
-            <ToolbarHeading
-              title="Update Connector"
-              description="Update acquirer account details"
-            />
-          </Toolbar>
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <p className="text-muted-foreground">Acquirer account not found</p>
@@ -320,24 +309,6 @@ export function EditAcquirerAccountContent() {
 
   return (
     <Fragment>
-      <Container>
-        <Toolbar>
-          <ToolbarHeading
-            title="Update Connector"
-            description="Update acquirer account details"
-          />
-          <div className="flex items-center">
-            <Link
-              href="/admin/acquirers/acquirer-accounts"
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="size-4" />
-              Back
-            </Link>
-          </div>
-        </Toolbar>
-      </Container>
-
       <Container>
         <div className="space-y-6">
           <Form {...form}>
@@ -367,9 +338,11 @@ export function EditAcquirerAccountContent() {
                   onClick={() => router.push('/admin/acquirers/acquirer-accounts')}
                   disabled={submitting}
                 >
+                  <X className="h-4 w-4" />
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary" disabled={submitting}>
+                  <Save className="h-4 w-4" />
                   {submitting ? 'Updating...' : 'Update Connector'}
                 </Button>
               </div>

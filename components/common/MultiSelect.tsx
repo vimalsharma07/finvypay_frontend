@@ -70,7 +70,7 @@ export function MultiSelect({
                   >
                     <Checkbox
                       checked={selectedSet.has(String(option.value))}
-                      className="mr-2"
+                      className=""
                       aria-label={String(option.label)}
                     />
                     {option.label}

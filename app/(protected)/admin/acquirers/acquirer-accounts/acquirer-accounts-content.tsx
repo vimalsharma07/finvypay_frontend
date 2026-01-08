@@ -2,6 +2,7 @@
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { Container } from '@/components/common/container';
 import {
   getAcquirerAccounts,
   deleteAcquirerAccount,
@@ -421,13 +422,14 @@ export function AcquirerAccountsContent() {
 
   return (
     <Fragment>
-      <DataGrid
-        table={table}
-        recordCount={meta?.totalItems ?? filteredData.length}
-        isLoading={loading}
-        tableLayout={modernTableLayout}
-        tableClassNames={modernTableClassNames}
-      >
+      <Container>
+        <DataGrid
+          table={table}
+          recordCount={meta?.totalItems ?? filteredData.length}
+          isLoading={loading}
+          tableLayout={modernTableLayout}
+          tableClassNames={modernTableClassNames}
+        >
         <Card className={modernTableCardClasses.card}>
           <CardHeader className={modernTableCardClasses.header}>
             <CardHeading>
@@ -475,6 +477,7 @@ export function AcquirerAccountsContent() {
           </CardFooter>
         </Card>
       </DataGrid>
+      </Container>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
