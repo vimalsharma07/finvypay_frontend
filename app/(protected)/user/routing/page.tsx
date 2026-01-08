@@ -1,13 +1,17 @@
 'use client';
 
+import { Fragment, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { Route } from 'lucide-react';
+import { Route, Plus } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
+  ToolbarActions,
 } from '@/layouts/demo1/components/toolbar';
 import { Container } from '@/components/common/container';
 import { PageSkeleton } from '@/components/ui/skeletons';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 
 const UserRoutingPageContent = dynamic(
   () => import('./routing-content').then(mod => ({ default: mod.UserRoutingPageContent })),
@@ -18,17 +22,32 @@ const UserRoutingPageContent = dynamic(
 );
 
 export default function UserRoutingPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const profileId = searchParams.get('profileId');
+
   return (
-    <Container>
-      <Toolbar>
-        <ToolbarHeading
-          title="Routing Rules"
-          description="Create, edit, and manage payment routing rules to optimize transaction processing across multiple acquirers"
-          icon={Route}
-        />
-      </Toolbar>
+    <Fragment>
+      <Container>
+        <Toolbar>
+          <ToolbarHeading
+            title="Routing Rules"
+            description="Create, edit, and manage payment routing rules to optimize transaction processing across multiple acquirers"
+            icon={Route}
+          />
+          <ToolbarActions>
+            <Button
+              variant="primary"
+              onClick={() => router.push(`/user/routing/create${profileId ? `?profileId=${profileId}` : ''}`)}
+            >
+              <Plus className="h-4 w-4" />
+              Create Routing
+            </Button>
+          </ToolbarActions>
+        </Toolbar>
+      </Container>
       <UserRoutingPageContent />
-    </Container>
+    </Fragment>
   );
 }
 

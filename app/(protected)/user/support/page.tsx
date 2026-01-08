@@ -1,5 +1,6 @@
 'use client';
 
+import { Fragment } from 'react';
 import dynamic from 'next/dynamic';
 import { LifeBuoy } from 'lucide-react';
 import {
@@ -19,16 +20,18 @@ const SupportPageContent = dynamic(
 
 export default function SupportPage() {
   return (
-    <Container>
-      <Toolbar>
-        <ToolbarHeading
-          title="Support"
-          description="Create, view, and manage your support tickets with status tracking and communication history"
-          icon={LifeBuoy}
-        />
-      </Toolbar>
+    <Fragment>
+      <Container>
+        <Toolbar>
+          <ToolbarHeading
+            title="Support"
+            description="Create, view, and manage your support tickets with status tracking and communication history"
+            icon={LifeBuoy}
+          />
+        </Toolbar>
+      </Container>
       <SupportPageContent />
-    </Container>
+    </Fragment>
   );
 }
 

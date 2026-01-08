@@ -389,9 +389,6 @@ export function SupportPageContent() {
             Create Support Ticket
           </Button>
         </div>
-      </Container>
-
-      <Container>
         <DataGrid
           table={table}
           recordCount={meta?.totalItems || filteredData.length}
