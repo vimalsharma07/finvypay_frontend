@@ -1,5 +1,6 @@
 'use client';
 
+import { Fragment } from 'react';
 import dynamic from 'next/dynamic';
 import { CreditCard } from 'lucide-react';
 import {
@@ -19,16 +20,18 @@ const TransactionsPageContent = dynamic(
 
 export default function TransactionsPage() {
   return (
-    <Container>
-      <Toolbar>
-        <ToolbarHeading
-          title="Transactions"
-          description="View and monitor all your production payment transactions with detailed information, filtering, and transaction history"
-          icon={CreditCard}
-        />
-      </Toolbar>
+    <Fragment>
+      <Container>
+        <Toolbar>
+          <ToolbarHeading
+            title="Transactions"
+            description="View and monitor all your production payment transactions with detailed information, filtering, and transaction history"
+            icon={CreditCard}
+          />
+        </Toolbar>
+      </Container>
       <TransactionsPageContent />
-    </Container>
+    </Fragment>
   );
 }
 
