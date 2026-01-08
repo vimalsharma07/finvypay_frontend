@@ -38,6 +38,8 @@ import {
   CreateRoutingFormData,
 } from '@/lib/validations/routing-validation';
 import type { Option } from '@/lib/types/common-types';
+import { useAuth } from '@/hooks/use-auth';
+import { getUserProfileId } from '@/lib/services/user/merchant-profile';
 
 const ROUTING_TYPES = [
   { value: 'CARD', label: 'Card Payments' },
@@ -66,7 +68,13 @@ const CONFIG_CATEGORIES = [
 export function RoutingCreateContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const profileId = searchParams.get('profileId');
+  const { user } = useAuth();
+  const urlProfileId = searchParams.get('profileId');
+  
+  // Get profileId using the centralized utility function
+  const resolvedProfileId = getUserProfileId(urlProfileId, user);
+  const [profileId, setProfileId] = useState<string | null>(resolvedProfileId);
+  const [profileIdResolved, setProfileIdResolved] = useState(!!resolvedProfileId);
 
   const [isLoading, setIsLoading] = useState(false);
   const [acquirerAccounts, setAcquirerAccounts] = useState<UserAcquirerAccount[]>([]);
@@ -100,6 +108,30 @@ export function RoutingCreateContent() {
   });
 
   const watchedSplitEnable = watch('splitEnable');
+
+  // Resolve profileId when user data becomes available
+  useEffect(() => {
+    if (profileIdResolved) {
+      return;
+    }
+
+    // Get profileId using the utility function
+    const resolved = getUserProfileId(urlProfileId, user);
+    if (resolved) {
+      setProfileId(resolved);
+      setProfileIdResolved(true);
+    } else {
+      // If still no profileId after user data is available, mark as resolved
+      setProfileIdResolved(true);
+    }
+  }, [user, urlProfileId, profileIdResolved]);
+
+  // Update form when profileId changes
+  useEffect(() => {
+    if (profileId) {
+      setValue('merchantProfileId', parseInt(profileId));
+    }
+  }, [profileId, setValue]);
 
   // Fetch acquirer accounts
   useEffect(() => {
@@ -185,12 +217,25 @@ export function RoutingCreateContent() {
     }
   };
 
+  // Show loading state while determining profileId
+  if (!profileIdResolved) {
+    return (
+      <Container>
+        <div className="flex flex-col items-center justify-center py-12">
+          <ContentLoader />
+          <p className="text-muted-foreground mt-4">Loading profile information...</p>
+        </div>
+      </Container>
+    );
+  }
+
+  // Show error if no profileId found after checking
   if (!profileId) {
     return (
       <Container>
         <div className="flex flex-col items-center justify-center py-12">
-          <p className="text-muted-foreground mb-4">Profile ID is required</p>
-          <Button onClick={() => router.back()}>
+          <p className="text-muted-foreground mb-4">Profile ID is required. Please select a merchant profile first.</p>
+          <Button onClick={() => router.push('/user/routing')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Go Back
           </Button>

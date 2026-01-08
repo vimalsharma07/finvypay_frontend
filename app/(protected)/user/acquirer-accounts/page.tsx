@@ -2,7 +2,7 @@
 
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Cpu, Eye, DollarSign } from 'lucide-react';
+import { Cpu, DollarSign } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -188,11 +188,6 @@ export default function UserAcquirerAccountsPage() {
   };
 
   const actions: TableAction<UserAcquirerAccount>[] = [
-    {
-      label: 'View',
-      icon: Eye,
-      route: (row: UserAcquirerAccount) => `/user/acquirer-accounts/${row.id}`,
-    },
     {
       label: 'View Rates',
       icon: DollarSign,
