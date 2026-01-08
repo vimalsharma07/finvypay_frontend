@@ -308,8 +308,6 @@ export function ManageRiskPageContent() {
             Create Risk
           </Button>
         </div>
-      </Container>
-      <Container>
         <DataGrid
           table={table}
           recordCount={meta?.totalItems || filteredData.length}

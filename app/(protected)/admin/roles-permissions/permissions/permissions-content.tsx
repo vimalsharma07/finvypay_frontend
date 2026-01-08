@@ -226,8 +226,6 @@ export function PermissionsPageContent() {
             Create Permission
           </Button>
         </div>
-      </Container>
-      <Container>
         <DataGrid
           table={table}
           recordCount={filteredData.length}

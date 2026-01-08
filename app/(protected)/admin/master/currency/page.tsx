@@ -27,9 +27,7 @@ export default function CurrencyPage() {
           />
         </Toolbar>
       </Container>
-      <Container>
-        <CurrencyContent />
-      </Container>
+      <CurrencyContent />
     </Suspense>
   );
 }

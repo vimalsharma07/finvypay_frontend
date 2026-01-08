@@ -383,8 +383,6 @@ export function IpAllowlistPageContent() {
             Add IP
           </Button>
         </div>
-      </Container>
-      <Container>
         <DataGrid
           table={table}
           recordCount={meta?.totalItems || filteredData.length}

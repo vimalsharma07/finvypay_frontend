@@ -1,13 +1,8 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import { Plus, X, Trash2, LoaderCircleIcon } from 'lucide-react';
+import { X, Trash2, LoaderCircleIcon } from 'lucide-react';
 import { Container } from '@/components/common/container';
-import {
-  Toolbar,
-  ToolbarHeading,
-  ToolbarActions,
-} from '@/layouts/demo1/components/toolbar';
 import {
   getRiskManagement,
   deleteRiskManagement,
@@ -54,14 +49,18 @@ import { SearchInput } from './components/search-input';
 import { DynamicAddRiskDialog, DynamicEditRiskDialog } from '@/components/dialogs';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 
-export function UserManageRiskPageContent() {
+export function UserManageRiskPageContent({ addDialogOpen, onAddDialogOpenChange }: { addDialogOpen?: boolean; onAddDialogOpenChange?: (open: boolean) => void }) {
   const [riskManagement, setRiskManagement] = useState<RiskManagement[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<RiskManagementListResponse['data']['meta'] | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [riskToDelete, setRiskToDelete] = useState<RiskManagement | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [internalAddDialogOpen, setInternalAddDialogOpen] = useState(false);
+  
+  // Use prop if provided, otherwise use internal state
+  const addDialogOpenState = addDialogOpen !== undefined ? addDialogOpen : internalAddDialogOpen;
+  const setAddDialogOpen = onAddDialogOpenChange || setInternalAddDialogOpen;
   const [adding, setAdding] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [riskToEdit, setRiskToEdit] = useState<RiskManagement | null>(null);
@@ -323,16 +322,6 @@ export function UserManageRiskPageContent() {
   return (
     <Fragment>
       <Container>
-        <Toolbar>
-          <ToolbarActions>
-            <Button variant="primary" onClick={() => setAddDialogOpen(true)}>
-              <Plus className="h-4 w-4 me-1" />
-              Create Risk
-            </Button>
-          </ToolbarActions>
-        </Toolbar>
-      </Container>
-      <Container>
         <DataGrid
           table={table}
           recordCount={meta?.totalItems || filteredData.length}
@@ -364,7 +353,7 @@ export function UserManageRiskPageContent() {
       </Container>
 
       <DynamicAddRiskDialog
-        open={addDialogOpen}
+        open={addDialogOpenState}
         onOpenChange={setAddDialogOpen}
         onSubmit={handleAddRisk}
         isSubmitting={adding}

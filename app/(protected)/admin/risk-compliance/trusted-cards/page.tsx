@@ -19,16 +19,18 @@ const TrustedCardsPageContent = dynamic(
 
 export default function TrustedCardsPage() {
   return (
-    <Container>
-      <Toolbar>
-        <ToolbarHeading
-          title="Trusted Cards"
-          description="Manage trusted card whitelist entries to bypass fraud checks for verified and trusted payment cards"
-          icon={CreditCard}
-        />
-      </Toolbar>
+    <>
+      <Container>
+        <Toolbar>
+          <ToolbarHeading
+            title="Trusted Cards"
+            description="Manage trusted card whitelist entries to bypass fraud checks for verified and trusted payment cards"
+            icon={CreditCard}
+          />
+        </Toolbar>
+      </Container>
       <TrustedCardsPageContent />
-    </Container>
+    </>
   );
 }
 

@@ -5,13 +5,8 @@ import { useRouter, useParams } from 'next/navigation';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 import { Container } from '@/components/common/container';
-import {
-  Toolbar,
-  ToolbarHeading,
-} from '@/layouts/demo1/components/toolbar';
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import {
@@ -308,24 +303,6 @@ export function CreateAcquirerAccountContent() {
   return (
     <Fragment>
       <Container>
-        <Toolbar>
-          <ToolbarHeading
-            title="Create Acquirer Account"
-            description="Create a new acquirer account for the acquirer"
-          />
-          <div className="flex items-center">
-            <Link
-              href="/admin/acquirers"
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="size-4" />
-              Back
-            </Link>
-          </div>
-        </Toolbar>
-      </Container>
-
-      <Container>
         <div className="space-y-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -362,9 +339,11 @@ export function CreateAcquirerAccountContent() {
                   onClick={() => router.push('/admin/acquirers')}
                   disabled={submitting}
                 >
+                  <X className="h-4 w-4" />
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary" disabled={submitting}>
+                  <Plus className="h-4 w-4" />
                   {submitting ? 'Creating...' : 'Create Acquirer Account'}
                 </Button>
               </div>

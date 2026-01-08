@@ -1,13 +1,8 @@
 'use client';
 
 import { Fragment, useEffect, useMemo, useState } from 'react';
-import { Plus, X, Trash2, Save, LoaderCircleIcon, Pencil } from 'lucide-react';
+import { X, Trash2, Save, LoaderCircleIcon, Pencil } from 'lucide-react';
 import { Container } from '@/components/common/container';
-import {
-  Toolbar,
-  ToolbarHeading,
-  ToolbarActions,
-} from '@/layouts/demo1/components/toolbar';
 import {
   getUserIpWhitelist,
   deleteUserIpWhitelist,
@@ -64,7 +59,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { DynamicAddIpDialog } from '@/components/dialogs';
 
-export function UserIpAllowlistPageContent() {
+export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChange }: { addDialogOpen?: boolean; onAddDialogOpenChange?: (open: boolean) => void }) {
   const [ipWhitelist, setIpWhitelist] = useState<IpWhitelist[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<IpWhitelistListResponse['data']['meta'] | null>(null);
@@ -75,8 +70,12 @@ export function UserIpAllowlistPageContent() {
   const [ipToEdit, setIpToEdit] = useState<IpWhitelist | null>(null);
   const [updating, setUpdating] = useState(false);
   const [editIp, setEditIp] = useState('');
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [internalAddDialogOpen, setInternalAddDialogOpen] = useState(false);
   const [adding, setAdding] = useState(false);
+  
+  // Use prop if provided, otherwise use internal state
+  const addDialogOpenState = addDialogOpen !== undefined ? addDialogOpen : internalAddDialogOpen;
+  const setAddDialogOpen = onAddDialogOpenChange || setInternalAddDialogOpen;
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -384,16 +383,6 @@ export function UserIpAllowlistPageContent() {
   return (
     <Fragment>
       <Container>
-        <Toolbar>
-          <ToolbarActions>
-            <Button variant="primary" onClick={() => setAddDialogOpen(true)}>
-              <Plus className="h-4 w-4 me-1" />
-              Add IP Address
-            </Button>
-          </ToolbarActions>
-        </Toolbar>
-      </Container>
-      <Container>
         <DataGrid
           table={table}
           recordCount={meta?.totalItems || filteredData.length}
@@ -515,7 +504,7 @@ export function UserIpAllowlistPageContent() {
 
       {/* Add IP Dialog */}
       <DynamicAddIpDialog
-        open={addDialogOpen}
+        open={addDialogOpenState}
         onOpenChange={setAddDialogOpen}
         onSubmit={handleAddIp}
         isSubmitting={adding}

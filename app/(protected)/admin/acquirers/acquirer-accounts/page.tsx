@@ -107,9 +107,7 @@ export default function AdminAcquirerAccountsPage() {
           </ToolbarActions>
         </Toolbar>
       </Container>
-      <Container>
-        <AcquirerAccountsContent />
-      </Container>
+      <AcquirerAccountsContent />
     </Suspense>
   );
 }

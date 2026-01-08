@@ -19,16 +19,18 @@ const AcquirersPageContent = dynamic(
 
 export default function AdminAcquirersPage() {
   return (
-    <Container>
-      <Toolbar>
-        <ToolbarHeading
-          title="Acquirers"
-          description="Create, edit, and manage payment gateway acquirers with configuration settings and account management"
-          icon={Plug}
-        />
-      </Toolbar>
+    <>
+      <Container>
+        <Toolbar>
+          <ToolbarHeading
+            title="Acquirers"
+            description="Create, edit, and manage payment gateway acquirers with configuration settings and account management"
+            icon={Plug}
+          />
+        </Toolbar>
+      </Container>
       <AcquirersPageContent />
-    </Container>
+    </>
   );
 }
 

@@ -187,9 +187,6 @@ export function AcquirersPageContent() {
             Create Acquirer
           </Button>
         </div>
-      </Container>
-
-      <Container>
         {loading && acquirers.length === 0 ? (
           <div className="text-center py-8">Loading...</div>
         ) : filteredAcquirers.length === 0 ? (

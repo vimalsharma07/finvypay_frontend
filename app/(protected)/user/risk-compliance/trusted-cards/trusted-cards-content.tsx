@@ -1,13 +1,8 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import { Plus, X, Trash2, LoaderCircleIcon } from 'lucide-react';
+import { X, Trash2, LoaderCircleIcon } from 'lucide-react';
 import { Container } from '@/components/common/container';
-import {
-  Toolbar,
-  ToolbarHeading,
-  ToolbarActions,
-} from '@/layouts/demo1/components/toolbar';
 import {
   getCardWhitelist,
   deleteCardWhitelist,
@@ -54,15 +49,19 @@ import { SearchInput } from './components/search-input';
 import { DynamicAddCardDialog, DynamicEditCardDialog } from '@/components/dialogs';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 
-export function UserTrustedCardsPageContent() {
+export function UserTrustedCardsPageContent({ addDialogOpen, onAddDialogOpenChange }: { addDialogOpen?: boolean; onAddDialogOpenChange?: (open: boolean) => void }) {
   const [cardWhitelist, setCardWhitelist] = useState<CardWhitelist[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<CardWhitelistListResponse['data']['meta'] | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cardToDelete, setCardToDelete] = useState<CardWhitelist | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [internalAddDialogOpen, setInternalAddDialogOpen] = useState(false);
   const [adding, setAdding] = useState(false);
+  
+  // Use prop if provided, otherwise use internal state
+  const addDialogOpenState = addDialogOpen !== undefined ? addDialogOpen : internalAddDialogOpen;
+  const setAddDialogOpen = onAddDialogOpenChange || setInternalAddDialogOpen;
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [cardToEdit, setCardToEdit] = useState<CardWhitelist | null>(null);
   const [updating, setUpdating] = useState(false);
@@ -313,16 +312,6 @@ export function UserTrustedCardsPageContent() {
   return (
     <Fragment>
       <Container>
-        <Toolbar>
-          <ToolbarActions>
-            <Button variant="primary" onClick={() => setAddDialogOpen(true)}>
-              <Plus className="h-4 w-4 me-1" />
-              Create Trusted Card
-            </Button>
-          </ToolbarActions>
-        </Toolbar>
-      </Container>
-      <Container>
         <DataGrid
           table={table}
           recordCount={meta?.totalItems || filteredData.length}
@@ -354,7 +343,7 @@ export function UserTrustedCardsPageContent() {
       </Container>
 
       <DynamicAddCardDialog
-        open={addDialogOpen}
+        open={addDialogOpenState}
         onOpenChange={setAddDialogOpen}
         onSubmit={handleAddCard}
         isSubmitting={adding}

@@ -19,16 +19,18 @@ const ManageRiskPageContent = dynamic(
 
 export default function ManageRiskPage() {
   return (
-    <Container>
-      <Toolbar>
-        <ToolbarHeading
-          title="Manage Risk"
-          description="Configure and manage risk management rules, thresholds, and fraud detection settings for transaction security"
-          icon={ShieldCheck}
-        />
-      </Toolbar>
+    <>
+      <Container>
+        <Toolbar>
+          <ToolbarHeading
+            title="Manage Risk"
+            description="Configure and manage risk management rules, thresholds, and fraud detection settings for transaction security"
+            icon={ShieldCheck}
+          />
+        </Toolbar>
+      </Container>
       <ManageRiskPageContent />
-    </Container>
+    </>
   );
 }
 

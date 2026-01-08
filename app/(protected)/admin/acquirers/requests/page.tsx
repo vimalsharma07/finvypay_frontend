@@ -27,9 +27,7 @@ export default function AdminAcquirerRequestsPage() {
           />
         </Toolbar>
       </Container>
-      <Container>
-        <RequestsContent />
-      </Container>
+      <RequestsContent />
     </Suspense>
   );
 }

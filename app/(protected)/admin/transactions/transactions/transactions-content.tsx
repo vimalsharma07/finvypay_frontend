@@ -491,9 +491,6 @@ export function TransactionsPageContent() {
             Advanced Filter
           </Button>
         </div>
-      </Container>
-
-      <Container>
         <DataGrid
           table={table}
           recordCount={meta?.totalItems || filteredData.length}

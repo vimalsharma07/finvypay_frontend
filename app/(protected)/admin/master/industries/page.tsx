@@ -27,9 +27,7 @@ export default function IndustriesPage() {
           />
         </Toolbar>
       </Container>
-      <Container>
-        <IndustriesContent />
-      </Container>
+      <IndustriesContent />
     </Suspense>
   );
 }
