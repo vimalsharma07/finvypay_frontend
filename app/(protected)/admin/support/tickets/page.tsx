@@ -19,16 +19,18 @@ const SupportTicketsPageContent = dynamic(
 
 export default function SupportTicketsPage() {
   return (
-    <Container>
-      <Toolbar>
-        <ToolbarHeading
-          title="Support Tickets"
-          description="View, respond to, and manage customer support tickets with status tracking and resolution management"
-          icon={LifeBuoy}
-        />
-      </Toolbar>
+    <>
+      <Container>
+        <Toolbar>
+          <ToolbarHeading
+            title="Support Tickets"
+            description="View, respond to, and manage customer support tickets with status tracking and resolution management"
+            icon={LifeBuoy}
+          />
+        </Toolbar>
+      </Container>
       <SupportTicketsPageContent />
-    </Container>
+    </>
   );
 }
 

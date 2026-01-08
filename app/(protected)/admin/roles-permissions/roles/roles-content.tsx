@@ -206,8 +206,6 @@ export function RolesPageContent() {
             Create Role
           </Button>
         </div>
-      </Container>
-      <Container>
         <DataGrid
           table={table}
           recordCount={filteredData.length}

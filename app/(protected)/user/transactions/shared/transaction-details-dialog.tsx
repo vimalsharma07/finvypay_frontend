@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -26,7 +26,9 @@ import {
   XCircle,
   Loader2,
   AlertCircle,
-  RotateCcw
+  RotateCcw,
+  Copy,
+  Check
 } from 'lucide-react';
 
 interface TransactionDetailsDialogProps {
@@ -55,10 +57,23 @@ export function TransactionDetailsDialog({
   onOpenChange,
   transaction,
 }: TransactionDetailsDialogProps) {
+  const [copied, setCopied] = useState(false);
+  
   const statusInfo = useMemo(
     () => (transaction ? formatTransactionStatus(transaction.status) : null),
     [transaction]
   );
+
+  const handleCopyTransactionId = async () => {
+    if (!transaction?.transactionId) return;
+    try {
+      await navigator.clipboard.writeText(transaction.transactionId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy transaction ID:', error);
+    }
+  };
 
   const formattedDate = useMemo(() => {
     if (!transaction) return { date: '', time: '' };
@@ -88,8 +103,27 @@ export function TransactionDetailsDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-7xl max-h-[95vh] overflow-hidden flex flex-col p-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-background to-muted/20">
-          <DialogTitle className="text-2xl font-bold">Transaction Details</DialogTitle>
+        <DialogHeader className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-background to-muted/20 mb-0">
+          <div className="flex items-center gap-3 flex-wrap">
+            <DialogTitle className="text-2xl font-bold">Transaction Details</DialogTitle>
+            {transaction.transactionId && (
+              <div className="flex items-center gap-2">
+                <Hash className="size-4 text-muted-foreground" />
+                <span className="text-sm font-mono text-muted-foreground">{transaction.transactionId}</span>
+                <button
+                  onClick={handleCopyTransactionId}
+                  className="p-1 rounded-md hover:bg-muted transition-colors group"
+                  title="Copy Transaction ID"
+                >
+                  {copied ? (
+                    <Check className="size-3.5 text-primary" />
+                  ) : (
+                    <Copy className="size-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
         </DialogHeader>
 
         <DialogBody className="overflow-hidden flex-1 px-6 pb-6">

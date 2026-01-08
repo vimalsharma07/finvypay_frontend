@@ -19,16 +19,18 @@ const PermissionsPageContent = dynamic(
 
 export default function AdminPermissionsPage() {
   return (
-    <Container>
-      <Toolbar>
-        <ToolbarHeading
-          title="Permissions"
-          description="View and manage system permissions that can be assigned to roles for granular access control and security"
-          icon={Key}
-        />
-      </Toolbar>
+    <>
+      <Container>
+        <Toolbar>
+          <ToolbarHeading
+            title="Permissions"
+            description="View and manage system permissions that can be assigned to roles for granular access control and security"
+            icon={Key}
+          />
+        </Toolbar>
+      </Container>
       <PermissionsPageContent />
-    </Container>
+    </>
   );
 }
 

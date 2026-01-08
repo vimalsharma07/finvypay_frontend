@@ -307,8 +307,6 @@ export function TrustedCardsPageContent() {
             Add Card
           </Button>
         </div>
-      </Container>
-      <Container>
         <DataGrid
           table={table}
           recordCount={meta?.totalItems || filteredData.length}

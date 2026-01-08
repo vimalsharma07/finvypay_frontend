@@ -19,16 +19,18 @@ const IpAllowlistPageContent = dynamic(
 
 export default function AdminIpWhitelistPage() {
   return (
-    <Container>
-      <Toolbar>
-        <ToolbarHeading
-          title="IP Whitelist"
-          description="Add, edit, and manage IP address whitelist entries for secure access control and fraud prevention"
-          icon={Network}
-        />
-      </Toolbar>
+    <>
+      <Container>
+        <Toolbar>
+          <ToolbarHeading
+            title="IP Whitelist"
+            description="Add, edit, and manage IP address whitelist entries for secure access control and fraud prevention"
+            icon={Network}
+          />
+        </Toolbar>
+      </Container>
       <IpAllowlistPageContent />
-    </Container>
+    </>
   );
 }
 

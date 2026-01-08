@@ -19,16 +19,18 @@ const RolesPageContent = dynamic(
 
 export default function AdminRolesPage() {
   return (
-    <Container>
-      <Toolbar>
-        <ToolbarHeading
-          title="Roles"
-          description="Create, edit, and manage user roles with assigned permissions for access control and security management"
-          icon={ShieldUser}
-        />
-      </Toolbar>
+    <>
+      <Container>
+        <Toolbar>
+          <ToolbarHeading
+            title="Roles"
+            description="Create, edit, and manage user roles with assigned permissions for access control and security management"
+            icon={ShieldUser}
+          />
+        </Toolbar>
+      </Container>
       <RolesPageContent />
-    </Container>
+    </>
   );
 }
 

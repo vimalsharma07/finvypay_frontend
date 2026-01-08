@@ -19,16 +19,18 @@ const TransactionsPageContent = dynamic(
 
 export default function TransactionsPage() {
   return (
-    <Container>
-      <Toolbar>
-        <ToolbarHeading
-          title="Transactions"
-          description="View, monitor, and manage all production payment transactions with detailed analytics, filtering, and transaction actions"
-          icon={CreditCard}
-        />
-      </Toolbar>
+    <>
+      <Container>
+        <Toolbar>
+          <ToolbarHeading
+            title="Transactions"
+            description="View, monitor, and manage all production payment transactions with detailed analytics, filtering, and transaction actions"
+            icon={CreditCard}
+          />
+        </Toolbar>
+      </Container>
       <TransactionsPageContent />
-    </Container>
+    </>
   );
 }
 

@@ -30,9 +30,7 @@ export default function AgreementsPage() {
           />
         </Toolbar>
       </Container>
-      <Container>
-        <AgreementsContent />
-      </Container>
+      <AgreementsContent />
     </Suspense>
   );
 }
