@@ -85,7 +85,10 @@ export function Step6Agreement({ onboardingData, onNext, onUpdate }: Step6Agreem
 
   const handleSignatureComplete = (dataUrl: string) => {
     setSignatureDataUrl(dataUrl);
-    toast.success('Signature captured successfully');
+  };
+
+  const handleSignatureClear = () => {
+    setSignatureDataUrl(null);
   };
 
   const convertDataUrlToFile = (dataUrl: string, filename: string): File => {
@@ -112,38 +115,54 @@ export function Step6Agreement({ onboardingData, onNext, onUpdate }: Step6Agreem
       const signatureFile = convertDataUrlToFile(signatureDataUrl, 'signature.png');
       
       const response = await signAgreement(signatureFile);
-      handleApiResponse(response, {
-        onSuccess: (responseData) => {
-          if (responseData && responseData.success) {
-            toast.success('Agreement signed and uploaded successfully');
-            setHasUploaded(true);
-            refreshOnboardingData();
-            onUpdate?.();
-          }
-        },
-        onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to upload signed agreement');
-        },
-        onValidationError: (errors, messages) => {
-          const errorMsg = Array.isArray(messages) ? messages.join(', ') : messages;
-          toast.error(errorMsg || 'Validation error');
-        },
-      });
+      
+      // Check if upload was successful based on response status
+      if (response.status === 200) {
+        // Immediately set uploaded state to enable Next button
+        setHasUploaded(true);
+        setIsUploading(false); // Set uploading to false immediately
+        
+        toast.success('Agreement signed and uploaded successfully');
+        
+        // Refresh onboarding data in background (non-blocking)
+        refreshOnboardingData().catch((error) => {
+          console.error('Failed to refresh onboarding data:', error);
+        });
+        // Don't auto-redirect, let user click Next button manually
+      } else {
+        // Handle error response
+        handleApiResponse(response, {
+          onError: (errorMessage) => {
+            toast.error(errorMessage || 'Failed to upload signed agreement');
+          },
+          onValidationError: (errors, messages) => {
+            const errorMsg = Array.isArray(messages) ? messages.join(', ') : messages;
+            toast.error(errorMsg || 'Validation error');
+          },
+        });
+        setIsUploading(false);
+      }
     } catch (error) {
       toast.error('An unexpected error occurred');
       console.error('Upload signature error:', error);
-    } finally {
       setIsUploading(false);
     }
   };
 
   const handleFileUploadSuccess = async () => {
-    await refreshOnboardingData();
-    onUpdate?.();
+    setHasUploaded(true);
+    // Refresh onboarding data in background (non-blocking)
+    refreshOnboardingData().catch((error) => {
+      console.error('Failed to refresh onboarding data:', error);
+    });
+    // Don't auto-redirect, let user click Next button manually
   };
 
-  const handleContinue = () => {
-    if (!hasUploaded) {
+  // Check if signature is uploaded - use both local state and server data
+  const isSignatureUploaded = hasUploaded || !!onboardingData?.onboarding?.signedAgreement;
+
+  const handleNext = () => {
+    if (!isSignatureUploaded) {
       toast.error('Please sign and upload the agreement first');
       return;
     }
@@ -181,8 +200,22 @@ export function Step6Agreement({ onboardingData, onNext, onUpdate }: Step6Agreem
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {hasUploaded && onboardingData?.onboarding?.signedAgreement ? (
-          <div className="space-y-4">
+        <div className="space-y-6">
+          {/* Agreement Content */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              <h3 className="text-lg font-semibold">{agreement.name}</h3>
+            </div>
+            <ScrollArea className="h-[300px] w-full rounded-md border p-4">
+              <div className="text-sm text-muted-foreground whitespace-pre-wrap">
+                {agreement.desc}
+              </div>
+            </ScrollArea>
+          </div>
+
+          {/* Success Message */}
+          {isSignatureUploaded && (
             <div className="flex items-center gap-2 p-4 bg-success/10 border border-success/20 rounded-lg">
               <CheckCircle2 className="h-5 w-5 text-success" />
               <div>
@@ -192,73 +225,59 @@ export function Step6Agreement({ onboardingData, onNext, onUpdate }: Step6Agreem
                 </p>
               </div>
             </div>
-            <div className="flex justify-end">
-              <Button type="button" variant="primary" onClick={handleContinue}>
-                Continue
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {/* Agreement Content */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold">{agreement.name}</h3>
-              </div>
-              <ScrollArea className="h-[300px] w-full rounded-md border p-4">
-                <div className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {agreement.desc}
-                </div>
-              </ScrollArea>
-            </div>
+          )}
 
-            {/* Signature Pad */}
-            {canSign && (
-              <div className="space-y-4">
-                <h4 className="font-medium">Electronic Signature</h4>
-                <SignaturePad
-                  onSignatureComplete={handleSignatureComplete}
-                  disabled={isUploading || hasUploaded}
-                />
-                
-                {signatureDataUrl && (
-                  <div className="flex justify-end">
-                    <Button
-                      type="button"
-                      variant="primary"
-                      onClick={handleUploadSignature}
-                      disabled={isUploading || hasUploaded}
-                    >
-                      {isUploading ? 'Uploading...' : 'Upload Signed Agreement'}
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Alternative: File Upload */}
+          {/* Signature Pad */}
+          {canSign && (
             <div className="space-y-4">
-              <h4 className="font-medium">Or Upload Signed Agreement Document</h4>
-              <FileUploadCard
-                type="signed_agreement"
-                label="Signed Agreement Document"
-                description="Upload your signed agreement document (PDF, DOC, DOCX)"
-                required={!signatureDataUrl}
-                onUploadSuccess={handleFileUploadSuccess}
-                disabled={hasUploaded || isUploading}
+              <h4 className="font-medium">Electronic Signature</h4>
+              <SignaturePad
+                onSignatureComplete={handleSignatureComplete}
+                onSignatureClear={handleSignatureClear}
+                disabled={isUploading || isSignatureUploaded}
               />
+              
+              {/* Upload Signature Button - Show when signature is captured */}
+              {signatureDataUrl && !isSignatureUploaded && (
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={handleUploadSignature}
+                    disabled={isUploading || isSignatureUploaded}
+                  >
+                    {isUploading ? 'Uploading...' : 'Upload Signature'}
+                  </Button>
+                </div>
+              )}
             </div>
+          )}
 
-            {hasUploaded && (
-              <div className="flex justify-end pt-4">
-                <Button type="button" variant="primary" onClick={handleContinue}>
-                  Continue
-                </Button>
-              </div>
-            )}
+          {/* Alternative: File Upload */}
+          <div className="space-y-4">
+            <h4 className="font-medium">Or Upload Signed Agreement Document</h4>
+            <FileUploadCard
+              type="signed_agreement"
+              label="Signed Agreement Document"
+              description="Upload your signed agreement document (PDF, DOC, DOCX)"
+              required={!signatureDataUrl}
+              onUploadSuccess={handleFileUploadSuccess}
+              disabled={isSignatureUploaded || isUploading}
+            />
           </div>
-        )}
+
+          {/* Next Button - Always visible, enabled only after upload */}
+          <div className="flex justify-end pt-4 border-t">
+            <Button 
+              type="button" 
+              variant="primary" 
+              onClick={handleNext}
+              disabled={!isSignatureUploaded || isUploading}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

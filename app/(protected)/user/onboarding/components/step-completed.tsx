@@ -22,7 +22,7 @@ export function StepCompleted({ onboardingData, onRefresh }: StepCompletedProps)
     fetchStatus();
     // Refresh status every 30 seconds if waiting for approval
     const interval = setInterval(() => {
-      if (kycStatus === 'agreement_received') {
+      if (kycStatus === 'agreement_received' || kycStatus === 'pending_for_approval') {
         fetchStatus();
       }
     }, 30000); // 30 seconds
@@ -79,7 +79,7 @@ export function StepCompleted({ onboardingData, onRefresh }: StepCompletedProps)
   }
 
   // Check if waiting for admin approval
-  if (kycStatus === 'agreement_received') {
+  if (kycStatus === 'agreement_received' || kycStatus === 'pending_for_approval') {
     return (
       <Card>
         <CardHeader>

@@ -109,14 +109,23 @@ export default function OnboardingPage() {
             if (data && data.success && data.data) {
               setOnboardingData(data.data);
               const profileStep = data.data.user?.profileStep ?? 0;
+              const kycStatus = data.data.user?.kycStatus;
               
-              // Determine current step based on profileStep
-              if (profileStep === 0) {
-                setCurrentStep(1);
-              } else if (profileStep >= 1 && profileStep < 5) {
-                setCurrentStep(profileStep + 1);
+              // If status is pending_for_approval, show completed step
+              if (kycStatus === 'pending_for_approval') {
+                const kycType = data.data.kycType || data.data.onboarding?.kycType;
+                const needsDirectorsStep = kycType && kycType !== 'individual';
+                const finalStep = needsDirectorsStep ? 7 : 6;
+                setCurrentStep(finalStep);
               } else {
-                setCurrentStep(5);
+                // Determine current step based on profileStep
+                if (profileStep === 0) {
+                  setCurrentStep(1);
+                } else if (profileStep >= 1 && profileStep < 5) {
+                  setCurrentStep(profileStep + 1);
+                } else {
+                  setCurrentStep(5);
+                }
               }
 
               // Set kycType if available

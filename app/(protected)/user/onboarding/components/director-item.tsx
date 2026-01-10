@@ -15,14 +15,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Director } from '@/lib/services/user/onboarding';
+import { Director, FileUploadType } from '@/lib/services/user/onboarding';
 import { FileUploadCard } from './file-upload-card';
 
 interface DirectorItemProps {
   director: Director;
   onEdit: (director: Director) => void;
   onDelete: (directorId: string) => Promise<void>;
-  onDocumentUploadSuccess?: (directorId: string, filePath: string) => void;
+  onDocumentUploadSuccess?: (directorId: string, filePath: string, documentType?: FileUploadType) => void;
   isDeleting?: boolean;
 }
 
@@ -35,7 +35,10 @@ export function DirectorItem({
 }: DirectorItemProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const hasDocument = !!director.registerOfDirectorPath;
+  const hasIdentityProof = !!director.identityProofPath;
+  const hasProofOfAddress = !!director.proofOfAddressPath;
+  const hasRegisterOfDirector = !!director.registerOfDirectorPath;
+  const allDocumentsUploaded = hasIdentityProof && hasProofOfAddress && hasRegisterOfDirector;
 
   return (
     <>
@@ -47,10 +50,10 @@ export function DirectorItem({
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-2">
                   <h4 className="font-semibold">{director.name}</h4>
-                  {hasDocument && (
+                  {allDocumentsUploaded && (
                     <Badge variant="success" className="text-xs">
                       <CheckCircle2 className="h-3 w-3 mr-1" />
-                      Document Uploaded
+                      All Documents Uploaded
                     </Badge>
                   )}
                 </div>
@@ -82,18 +85,41 @@ export function DirectorItem({
               </div>
             </div>
 
-            {/* Document Upload */}
-            <div className="pt-4 border-t">
+            {/* Document Uploads */}
+            <div className="pt-4 border-t space-y-4">
+              <FileUploadCard
+                type="identity_proof"
+                label="Identity Proof"
+                description="Upload identity proof document for this director"
+                required
+                onUploadSuccess={(filePath, s3Id) => {
+                  onDocumentUploadSuccess?.(director.id, filePath, 'identity_proof');
+                }}
+                disabled={hasIdentityProof}
+                directorId={director.id}
+              />
+              
+              <FileUploadCard
+                type="proof_of_address"
+                label="Proof of Address"
+                description="Upload proof of address document for this director"
+                required
+                onUploadSuccess={(filePath, s3Id) => {
+                  onDocumentUploadSuccess?.(director.id, filePath, 'proof_of_address');
+                }}
+                disabled={hasProofOfAddress}
+                directorId={director.id}
+              />
+              
               <FileUploadCard
                 type="register_of_director"
                 label="Register of Director"
                 description="Upload register of director document for this director"
                 required
                 onUploadSuccess={(filePath, s3Id) => {
-                  // Pass directorId and filePath to parent so it can update state immediately
-                  onDocumentUploadSuccess?.(director.id, filePath);
+                  onDocumentUploadSuccess?.(director.id, filePath, 'register_of_director');
                 }}
-                disabled={hasDocument}
+                disabled={hasRegisterOfDirector}
                 directorId={director.id}
               />
             </div>

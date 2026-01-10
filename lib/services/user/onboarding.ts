@@ -143,6 +143,8 @@ export interface Director {
   countryCodeId: number;
   phoneNumber: string;
   address: string;
+  identityProofPath?: string | null;
+  proofOfAddressPath?: string | null;
   registerOfDirectorPath?: string | null;
   createdAt?: string;
   updatedAt?: string;

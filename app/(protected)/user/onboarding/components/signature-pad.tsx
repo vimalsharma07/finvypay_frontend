@@ -3,10 +3,11 @@
 import { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { RotateCcw, CheckCircle2 } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 
 interface SignaturePadProps {
   onSignatureComplete: (signatureDataUrl: string) => void;
+  onSignatureClear?: () => void;
   width?: number;
   height?: number;
   disabled?: boolean;
@@ -14,6 +15,7 @@ interface SignaturePadProps {
 
 export function SignaturePad({
   onSignatureComplete,
+  onSignatureClear,
   width = 600,
   height = 200,
   disabled = false,
@@ -93,7 +95,31 @@ export function SignaturePad({
   };
 
   const stopDrawing = () => {
+    if (!isDrawing) return;
     setIsDrawing(false);
+    
+    // Auto-capture signature when user finishes drawing
+    // Use a small delay to ensure the last stroke is rendered
+    setTimeout(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      // Check if canvas has any content (not just blank/transparent)
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const hasContent = imageData.data.some((byte, index) => {
+        // Check alpha channel (every 4th byte starting at index 3)
+        // If any pixel is non-transparent, there's content
+        return index % 4 === 3 && byte > 0;
+      });
+
+      if (hasContent) {
+        const dataUrl = canvas.toDataURL('image/png');
+        onSignatureComplete(dataUrl);
+      }
+    }, 100);
   };
 
   const clearSignature = () => {
@@ -105,14 +131,8 @@ export function SignaturePad({
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     setHasSignature(false);
-  };
-
-  const handleComplete = () => {
-    const canvas = canvasRef.current;
-    if (!canvas || !hasSignature) return;
-
-    const dataUrl = canvas.toDataURL('image/png');
-    onSignatureComplete(dataUrl);
+    // Notify parent that signature was cleared
+    onSignatureClear?.();
   };
 
   return (
@@ -138,7 +158,7 @@ export function SignaturePad({
             />
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-end">
             <Button
               type="button"
               variant="outline"
@@ -147,16 +167,6 @@ export function SignaturePad({
             >
               <RotateCcw className="h-4 w-4 mr-2" />
               Clear
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              onClick={handleComplete}
-              disabled={disabled || !hasSignature}
-              className="flex-1"
-            >
-              <CheckCircle2 className="h-4 w-4 mr-2" />
-              Complete Signature
             </Button>
           </div>
         </div>
