@@ -225,7 +225,7 @@ export function Step3ProcessingDetails({
   const currencyOptions = useMemo(() => {
     return currencies.map((currency) => ({
       value: currency.code,
-      label: `${currency.code} - ${currency.value}`,
+      label: currency.code,
     }));
   }, [currencies]);
 
@@ -329,6 +329,7 @@ export function Step3ProcessingDetails({
                       value={field.value}
                       onChange={field.onChange}
                       disabled={loadingData}
+                      showPhoneCode={false}
                     />
                   </FormControl>
                   <FormMessage />

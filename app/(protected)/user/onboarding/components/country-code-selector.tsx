@@ -10,12 +10,14 @@ interface CountryCodeSelectorProps {
   value?: number;
   onChange: (countryCodeId: number) => void;
   disabled?: boolean;
+  showPhoneCode?: boolean; // If false, only show country name
 }
 
 export function CountryCodeSelector({
   value,
   onChange,
   disabled = false,
+  showPhoneCode = true, // Default to showing phone code for backward compatibility
 }: CountryCodeSelectorProps) {
   const [countries, setCountries] = useState<Country[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,14 +55,17 @@ export function CountryCodeSelector({
   }, []);
 
   // Convert countries to SearchSelect options format
-  // Format: "PhoneCode (CountryName)" for better searchability
+  // Format: "PhoneCode (CountryName)" for better searchability if showPhoneCode is true
+  // Otherwise, just show country name
   // Users can search by phone code (e.g., "+1") or country name (e.g., "United States")
   const countryOptions: Option[] = useMemo(() => {
     return countries.map((country) => ({
       value: country.id,
-      label: `${country.phoneCode} (${country.countryName})`,
+      label: showPhoneCode 
+        ? `${country.phoneCode} (${country.countryName})`
+        : country.countryName,
     }));
-  }, [countries]);
+  }, [countries, showPhoneCode]);
 
   const handleChange = (selectedValue: string) => {
     onChange(Number(selectedValue));

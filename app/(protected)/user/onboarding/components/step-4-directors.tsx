@@ -16,6 +16,7 @@ import {
   UpdateDirectorPayload,
   Director,
   OnboardingData,
+  FileUploadType,
 } from '@/lib/services/user/onboarding';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
@@ -202,15 +203,25 @@ export function Step4Directors({ onboardingData, onNext, onUpdate }: Step4Direct
     }
   };
 
-  const handleDocumentUploadSuccess = async (directorId: string, filePath: string) => {
+  const handleDocumentUploadSuccess = async (directorId: string, filePath: string, documentType?: FileUploadType) => {
     // CRITICAL: Immediately update the director in state so UI updates instantly
     // This makes hasDocument = true immediately, which shows the badge and disables the upload card
     setDirectors((prevDirectors) =>
-      prevDirectors.map((director) =>
-        director.id === directorId
-          ? { ...director, registerOfDirectorPath: filePath }
-          : director
-      )
+      prevDirectors.map((director) => {
+        if (director.id === directorId) {
+          const updated = { ...director };
+          // Update the appropriate document path based on type
+          if (documentType === 'identity_proof') {
+            updated.identityProofPath = filePath;
+          } else if (documentType === 'proof_of_address') {
+            updated.proofOfAddressPath = filePath;
+          } else if (documentType === 'register_of_director') {
+            updated.registerOfDirectorPath = filePath;
+          }
+          return updated;
+        }
+        return director;
+      })
     );
     
     // Then refresh from API in background for consistency
@@ -218,9 +229,12 @@ export function Step4Directors({ onboardingData, onNext, onUpdate }: Step4Direct
     onUpdate?.();
   };
 
-  // Check if all directors have documents uploaded
+  // Check if all directors have all three documents uploaded
   const allDirectorsHaveDocuments = directors.length > 0 && directors.every(
-    (director) => !!director.registerOfDirectorPath
+    (director) => 
+      !!director.identityProofPath && 
+      !!director.proofOfAddressPath && 
+      !!director.registerOfDirectorPath
   );
 
   const handleContinue = () => {
@@ -230,7 +244,7 @@ export function Step4Directors({ onboardingData, onNext, onUpdate }: Step4Direct
     }
 
     if (!allDirectorsHaveDocuments) {
-      toast.error('Please upload register of director document for all directors');
+      toast.error('Please upload all required documents (Identity Proof, Proof of Address, and Register of Director) for all directors');
       return;
     }
 
@@ -307,7 +321,7 @@ export function Step4Directors({ onboardingData, onNext, onUpdate }: Step4Direct
 
           {directors.length > 0 && !allDirectorsHaveDocuments && (
             <p className="text-sm text-destructive text-right mt-2">
-              Please upload register of director document for all directors
+              Please upload all required documents (Identity Proof, Proof of Address, and Register of Director) for all directors
             </p>
           )}
         </CardContent>

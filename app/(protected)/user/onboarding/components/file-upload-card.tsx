@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Upload, X, File, CheckCircle2 } from 'lucide-react';
+import { Upload, X, CheckCircle2 } from 'lucide-react';
 import { FileUploadType, uploadFile } from '@/lib/services/user/onboarding';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
@@ -13,7 +13,7 @@ interface FileUploadCardProps {
   label: string;
   description?: string;
   required?: boolean;
-  onUploadSuccess?: (filePath: string, s3Id: string) => void;
+  onUploadSuccess?: (filePath: string, s3Id: string, documentType?: FileUploadType) => void;
   onRemove?: () => void;
   disabled?: boolean;
   directorId?: string; // For director document uploads
@@ -69,21 +69,18 @@ export function FileUploadCard({
     // Only handleRemove() should reset the uploaded state
   }, [disabled]);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      setUploaded(false);
-      setUploadedPath(null);
-    }
-  };
+    if (!file) return;
 
-  const handleUpload = async () => {
-    if (!selectedFile) return;
-
+    // Auto-upload immediately when file is selected
+    setSelectedFile(file);
+    setUploaded(false);
+    setUploadedPath(null);
     setUploading(true);
+
     try {
-      const response = await uploadFile(selectedFile, type, directorId);
+      const response = await uploadFile(file, type, directorId);
       handleApiResponse(response, {
         onSuccess: (data) => {
           // handleApiResponse calls onSuccess with response.data
@@ -106,22 +103,34 @@ export function FileUploadCard({
           
           toast.success(`${fileTypeLabels[type]} uploaded successfully`);
           
-          // Pass filePath and s3Id to parent callback
+          // Pass filePath, s3Id, and document type to parent callback
           const pathToPass = data?.data?.filePath || data?.filePath || '';
           const s3IdToPass = data?.data?.s3Id || data?.s3Id || '';
-          onUploadSuccess?.(pathToPass, s3IdToPass);
+          onUploadSuccess?.(pathToPass, s3IdToPass, type);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || `Failed to upload ${fileTypeLabels[type]}`);
+          // Reset state on error
+          setSelectedFile(null);
+          setUploaded(false);
+          setUploadedPath(null);
         },
         onValidationError: (errors, messages) => {
           const errorMsg = Array.isArray(messages) ? messages.join(', ') : messages;
           toast.error(errorMsg || 'Validation error');
+          // Reset state on validation error
+          setSelectedFile(null);
+          setUploaded(false);
+          setUploadedPath(null);
         },
       });
     } catch (error) {
       toast.error('An unexpected error occurred');
       console.error('File upload error:', error);
+      // Reset state on exception
+      setSelectedFile(null);
+      setUploaded(false);
+      setUploadedPath(null);
     } finally {
       setUploading(false);
     }
@@ -135,14 +144,6 @@ export function FileUploadCard({
       fileInputRef.current.value = '';
     }
     onRemove?.();
-  };
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
   };
 
   return (
@@ -181,44 +182,18 @@ export function FileUploadCard({
                   >
                     <span>
                       <Upload className="h-4 w-4 mr-2" />
-                      {selectedFile ? 'Change File' : 'Select File'}
+                      {uploading ? 'Uploading...' : 'Select & Upload File'}
                     </span>
                   </Button>
                 </label>
 
-                {selectedFile && (
-                  <div className="flex-1 flex items-center gap-2 text-sm">
-                    <File className="h-4 w-4 text-muted-foreground" />
-                    <span className="truncate">{selectedFile.name}</span>
-                    <span className="text-muted-foreground">
-                      ({formatFileSize(selectedFile.size)})
-                    </span>
+                {uploading && (
+                  <div className="flex-1 flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                    <span>Uploading file...</span>
                   </div>
                 )}
               </div>
-
-              {selectedFile && (
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="primary"
-                    size="sm"
-                    onClick={handleUpload}
-                    disabled={disabled || uploading}
-                  >
-                    {uploading ? 'Uploading...' : 'Upload'}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleRemove}
-                    disabled={disabled || uploading}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
             </div>
           ) : (
             <div className="flex items-center justify-between p-3 bg-success/10 border border-success/20 rounded-lg">

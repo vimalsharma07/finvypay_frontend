@@ -39,7 +39,7 @@ export function OnboardingCard({ onboardingData, loading = false }: OnboardingCa
   }
 
   // Show pending approval status
-  if (kycStatus === 'agreement_received') {
+  if (kycStatus === 'agreement_received' || kycStatus === 'pending_for_approval') {
     return (
       <Card className="border-warning/30 bg-gradient-to-r from-warning/10 via-warning/5 to-warning/10 shadow-sm">
         <CardContent className="p-6">
