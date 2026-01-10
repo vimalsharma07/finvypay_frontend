@@ -64,7 +64,7 @@ export function DropdownMenuUser({ trigger }: { trigger: ReactNode }) {
             />
             <div className="flex flex-col">
               <Link
-                href="/user/profile"
+                href="/profile"
                 className="text-sm text-mono hover:text-primary font-semibold"
               >
                 {user?.name || ''}

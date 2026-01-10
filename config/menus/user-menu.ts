@@ -21,7 +21,7 @@ const BASE_USER_MENU: MenuConfig = [
   {
     title: 'Dashboard',
     icon: Home,
-    path: '/user/dashboard',
+    path: '/dashboard',
     requirePermission: false, // Dashboard always visible
   },
   {
@@ -30,15 +30,15 @@ const BASE_USER_MENU: MenuConfig = [
     permissionModule: 'Acquirer Accounts',
     requirePermission: false,
     children: [
-      { title: ' Aquirer Accounts', path: '/user/acquirer-accounts', submodule: 'aquirer accounts' },
-      { title: 'Aquire Requests', path: '/user/acquirer-requests', submodule: 'Aquire Requests' },
+      { title: ' Aquirer Accounts', path: '/acquirer-accounts', submodule: 'aquirer accounts' },
+      { title: 'Aquire Requests', path: '/acquirer-requests', submodule: 'Aquire Requests' },
      
     ],
   },
   {
     title: 'Wallet',
     icon: Wallet,
-    path: '/user/wallet',
+    path: '/wallet',
     permissionModule: 'Wallet Management',
     requirePermission: true,
   },
@@ -48,8 +48,8 @@ const BASE_USER_MENU: MenuConfig = [
     permissionModule: 'Transactions',
     requirePermission: false,
     children: [
-      { title: ' Transactions', path: '/user/transactions', submodule: 'Transactions' },
-      { title: 'Sandbox Transactions', path: '/user/transactions/sandbox-transactions', submodule: ' Sandbox Transactions' },
+      { title: ' Transactions', path: '/transactions', submodule: 'Transactions' },
+      { title: 'Sandbox Transactions', path: '/transactions/sandbox-transactions', submodule: ' Sandbox Transactions' },
      
     ],
   },
@@ -59,9 +59,9 @@ const BASE_USER_MENU: MenuConfig = [
     permissionModule: 'Risk Management',
     requirePermission: false,
     children: [
-      { title: 'Manage Risk', path: '/user/risk-compliance/manage-risk' },
-      { title: 'IP Allowlist', path: '/user/risk-compliance/ip-allowlist', submodule: 'IP Whitelist' },
-      { title: 'Trusted Cards', path: '/user/risk-compliance/trusted-cards' },
+      { title: 'Manage Risk', path: '/risk-compliance/manage-risk' },
+      { title: 'IP Allowlist', path: '/risk-compliance/ip-allowlist', submodule: 'IP Whitelist' },
+      { title: 'Trusted Cards', path: '/risk-compliance/trusted-cards' },
     ],
   },
   {
@@ -70,35 +70,35 @@ const BASE_USER_MENU: MenuConfig = [
     permissionModule: 'Routing Management',
     requirePermission: false,
     children: [
-      { title: 'Routing', path: '/user/routing', submodule: 'Routing' },
-      { title: 'Cascading', path: '/user/cascading', submodule: 'Cascading' },
+      { title: 'Routing', path: '/routing', submodule: 'Routing' },
+      { title: 'Cascading', path: '/cascading', submodule: 'Cascading' },
     ],
   },
   {
     title: 'Payment Links',
     icon: Link2,
-    path: '/user/payment-links',
+    path: '/payment-links',
     permissionModule: 'Payment Links',
     requirePermission: true,
   },
   {
     title: 'Cascading',
     icon: BarChart3,
-    path: '/user/cascading',
+    path: '/cascading',
     permissionModule: 'Cascading Management',
     requirePermission: true,
   },
   {
     title: 'Payment Links',
     icon: Link2,
-    path: '/user/payment-links',
+    path: '/payment-links',
     permissionModule: 'Payment Links',
     requirePermission: false,
   },
   {
     title: 'Support',
     icon: Heart,
-    path: '/user/support',
+    path: '/support',
     permissionModule: 'Support',
     requirePermission: false,
   },
@@ -108,8 +108,8 @@ const BASE_USER_MENU: MenuConfig = [
     permissionModule: 'Reports',
     requirePermission: true,
     children: [
-      { title: 'Daily Report', path: '/user/reports/daily', submodule: 'Reports' },
-      { title: 'Monthly Report', path: '/user/reports/monthly', submodule: 'Reports' },
+      { title: 'Daily Report', path: '/reports/daily', submodule: 'Reports' },
+      { title: 'Monthly Report', path: '/reports/monthly', submodule: 'Reports' },
     ],
   },
   {
@@ -118,17 +118,17 @@ const BASE_USER_MENU: MenuConfig = [
     permissionModule: 'Payout Reports',
     requirePermission: true,
     children: [
-      { title: 'All Payouts', path: '/user/payouts/all', submodule: 'Payout Reports' },
-      { title: 'Pending Payouts', path: '/user/payouts/pending', submodule: 'Payout Reports' },
+      { title: 'All Payouts', path: '/payouts/all', submodule: 'Payout Reports' },
+      { title: 'Pending Payouts', path: '/payouts/pending', submodule: 'Payout Reports' },
     ],
   },
   {
     title: 'Settings',
     icon: Settings,
-    path: '/user/settings',
+    path: '/settings',
     requirePermission: false, 
     children: [
-      { title: ' Global rate', path: '/user/rates', submodule: 'Rates' },     
+      { title: ' Global rate', path: '/rates', submodule: 'Rates' },     
     ],
   },
   {

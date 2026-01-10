@@ -200,7 +200,7 @@ export function Header() {
                 }
               />
               {merchantLabel && (
-                <Link href="/user/profile-selection" className="hidden sm:inline-flex">
+                <Link href="/profile-selection" className="hidden sm:inline-flex">
                   <Badge
                     variant="outline"
                     className="px-3 py-1 text-xs font-medium whitespace-nowrap bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 transition-colors"

@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 // Dynamically import user dialogs with loading states
 export const DynamicCreateTicketDialog = dynamic(
-  () => import('@/app/(protected)/user/support/components/create-ticket-dialog').then(
+  () => import('@/app/(protected)/(merchant)/support/components/create-ticket-dialog').then(
     mod => ({ default: mod.CreateTicketDialog })
   ),
   {
@@ -20,7 +20,7 @@ export const DynamicCreateTicketDialog = dynamic(
 );
 
 export const DynamicEditTicketDialog = dynamic(
-  () => import('@/app/(protected)/user/support/components/edit-ticket-dialog').then(
+  () => import('@/app/(protected)/(merchant)/support/components/edit-ticket-dialog').then(
     mod => ({ default: mod.EditTicketDialog })
   ),
   {
@@ -35,7 +35,7 @@ export const DynamicEditTicketDialog = dynamic(
 );
 
 export const DynamicAddCardDialog = dynamic(
-  () => import('@/app/(protected)/user/risk-compliance/trusted-cards/components/add-card-dialog').then(
+  () => import('@/app/(protected)/(merchant)/risk-compliance/trusted-cards/components/add-card-dialog').then(
     mod => ({ default: mod.AddCardDialog })
   ),
   {
@@ -65,7 +65,7 @@ export const DynamicAddCardDialogAdmin = dynamic(
 );
 
 export const DynamicEditCardDialog = dynamic(
-  () => import('@/app/(protected)/user/risk-compliance/trusted-cards/components/edit-card-dialog').then(
+  () => import('@/app/(protected)/(merchant)/risk-compliance/trusted-cards/components/edit-card-dialog').then(
     mod => ({ default: mod.EditCardDialog })
   ),
   {
@@ -80,7 +80,7 @@ export const DynamicEditCardDialog = dynamic(
 );
 
 export const DynamicAddRiskDialog = dynamic(
-  () => import('@/app/(protected)/user/risk-compliance/manage-risk/components/add-risk-dialog').then(
+  () => import('@/app/(protected)/(merchant)/risk-compliance/manage-risk/components/add-risk-dialog').then(
     mod => ({ default: mod.AddRiskDialog })
   ),
   {
@@ -110,7 +110,7 @@ export const DynamicAddRiskDialogAdmin = dynamic(
 );
 
 export const DynamicEditRiskDialog = dynamic(
-  () => import('@/app/(protected)/user/risk-compliance/manage-risk/components/edit-risk-dialog').then(
+  () => import('@/app/(protected)/(merchant)/risk-compliance/manage-risk/components/edit-risk-dialog').then(
     mod => ({ default: mod.EditRiskDialog })
   ),
   {
@@ -125,7 +125,7 @@ export const DynamicEditRiskDialog = dynamic(
 );
 
 export const DynamicAddIpDialog = dynamic(
-  () => import('@/app/(protected)/user/risk-compliance/ip-allowlist/components/add-ip-dialog').then(
+  () => import('@/app/(protected)/(merchant)/risk-compliance/ip-allowlist/components/add-ip-dialog').then(
     mod => ({ default: mod.AddIpDialog })
   ),
   {
