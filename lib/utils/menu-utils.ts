@@ -114,12 +114,30 @@ export function getUserRole(pathname?: string): UserRole | null {
     
     // If role not found in user data, try to infer from URL path
     if (!role && pathname) {
-      if (pathname.startsWith('/user/')) {
-        role = 'MERCHANT'; // Use MERCHANT instead of USER
-      } else if (pathname.startsWith('/admin/')) {
+      if (pathname.startsWith('/admin/')) {
         role = 'ADMIN';
       } else if (pathname.startsWith('/affiliate/')) {
         role = 'AFFILIATE';
+      } else if (
+        // Merchant routes don't have /merchant/ prefix (handled by rewrites)
+        pathname.startsWith('/dashboard') ||
+        pathname.startsWith('/acquirer-accounts') ||
+        pathname.startsWith('/acquirer-requests') ||
+        pathname.startsWith('/transactions') ||
+        pathname.startsWith('/risk-compliance') ||
+        pathname.startsWith('/routing') ||
+        pathname.startsWith('/cascading') ||
+        pathname.startsWith('/support') ||
+        pathname.startsWith('/payment-links') ||
+        pathname.startsWith('/onboarding') ||
+        pathname.startsWith('/profile') ||
+        pathname.startsWith('/rates') ||
+        pathname.startsWith('/wallet') ||
+        pathname.startsWith('/settings') ||
+        pathname.startsWith('/reports') ||
+        pathname.startsWith('/payouts')
+      ) {
+        role = 'MERCHANT';
       }
     }
     
@@ -162,14 +180,7 @@ export function getMenuByRole(role?: UserRole | null, pathname?: string): MenuCo
 
   // If still no role, try to infer from pathname
   if (!userRole && pathname) {
-    if (pathname.startsWith('/user/')) {
-      try {
-        const { getUserMenu } = require('@/config/menus/user-menu');
-        return getUserMenu();
-      } catch {
-        return USER_MENU;
-      }
-    } else if (pathname.startsWith('/admin/')) {
+    if (pathname.startsWith('/admin/')) {
       try {
         const { getAdminMenu } = require('@/config/menus/admin-menu');
         return getAdminMenu();
@@ -178,6 +189,31 @@ export function getMenuByRole(role?: UserRole | null, pathname?: string): MenuCo
       }
     } else if (pathname.startsWith('/affiliate/')) {
       return AFFILIATE_MENU;
+    } else if (
+      // Merchant routes don't have /merchant/ prefix (handled by rewrites)
+      pathname.startsWith('/dashboard') ||
+      pathname.startsWith('/acquirer-accounts') ||
+      pathname.startsWith('/acquirer-requests') ||
+      pathname.startsWith('/transactions') ||
+      pathname.startsWith('/risk-compliance') ||
+      pathname.startsWith('/routing') ||
+      pathname.startsWith('/cascading') ||
+      pathname.startsWith('/support') ||
+      pathname.startsWith('/payment-links') ||
+      pathname.startsWith('/onboarding') ||
+      pathname.startsWith('/profile') ||
+      pathname.startsWith('/rates') ||
+      pathname.startsWith('/wallet') ||
+      pathname.startsWith('/settings') ||
+      pathname.startsWith('/reports') ||
+      pathname.startsWith('/payouts')
+    ) {
+      try {
+        const { getUserMenu } = require('@/config/menus/user-menu');
+        return getUserMenu();
+      } catch {
+        return USER_MENU;
+      }
     }
   }
 
@@ -263,7 +299,7 @@ export function getRedirectPathByRole(role?: UserRole | null): string {
     case 'ADMIN':
       return '/admin/dashboard';
     case 'MERCHANT':
-      return '/user/dashboard';
+      return '/dashboard'; // No /merchant/ prefix due to rewrites
     case 'AFFILIATE':
       return '/affiliate/dashboard';
     default:

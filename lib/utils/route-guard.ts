@@ -23,11 +23,14 @@ const PERMISSION_BASED_ROUTES: Record<string, string[]> = {
  * Maps route prefixes to allowed roles
  * 
  * For User Management: Only ADMIN, MERCHANT, AFFILIATE are supported
+ * Note: Merchant routes don't have /merchant/ prefix in URL due to rewrites,
+ * but files are organized in merchant folder
  */
 const ROUTE_ACCESS_RULES: Record<string, UserRole[]> = {
   '/admin': ['ADMIN', 'SUPER_ADMIN'],
-  '/user': ['MERCHANT'], // Use MERCHANT instead of USER for user management
-  '/affiliate': ['AFFILIATE'], // Remove AFFILIATE_PARTNER
+  '/affiliate': ['AFFILIATE'],
+  // Merchant routes are accessed without prefix (e.g., /dashboard, /transactions)
+  // These routes are handled separately in hasRouteAccess function
 };
 
 /**
@@ -69,14 +72,40 @@ export function getRequiredRoleForRoute(pathname: string): UserRole[] | null {
     return null;
   }
 
-  // Check route access rules
+  // Check route access rules for admin and affiliate
   for (const [routePrefix, allowedRoles] of Object.entries(ROUTE_ACCESS_RULES)) {
     if (pathname.startsWith(routePrefix)) {
       return allowedRoles;
     }
   }
 
-  // If no specific rule matches, allow access (for other protected routes)
+  // Check for merchant routes (without /merchant/ prefix due to rewrites)
+  const merchantRoutes = [
+    '/dashboard',
+    '/acquirer-accounts',
+    '/acquirer-requests',
+    '/transactions',
+    '/risk-compliance',
+    '/routing',
+    '/cascading',
+    '/support',
+    '/payment-links',
+    '/onboarding',
+    '/profile',
+    '/profile-selection',
+    '/rates',
+    '/wallet',
+    '/settings',
+    '/reports',
+    '/payouts',
+  ];
+  
+  const isMerchantRoute = merchantRoutes.some(route => pathname.startsWith(route));
+  if (isMerchantRoute) {
+    return ['MERCHANT'];
+  }
+
+  // If no specific rule matches, deny access by default
   return null;
 }
 
@@ -101,16 +130,41 @@ export function hasRouteAccess(userRole: UserRole | null, pathname: string): boo
     return normalizedRole === "ADMIN" || normalizedRole === "SUPER_ADMIN";
   }
 
-  if (pathname.startsWith("/user")) {
-    return normalizedRole === "MERCHANT"; // Use MERCHANT instead of USER
-  }
-
   if (pathname.startsWith("/affiliate")) {
-    return normalizedRole === "AFFILIATE"; // Remove AFFILIATE_PARTNER
+    return normalizedRole === "AFFILIATE";
   }
 
-  // If route does not match any category → allow or deny?
-  // You should decide, but usually DENY by default:
+  // Merchant routes don't have /merchant/ prefix (handled by rewrites)
+  // Check for merchant routes: /dashboard, /transactions, /routing, etc.
+  // Exclude admin, affiliate, and public routes which are already handled
+  if (normalizedRole === "MERCHANT") {
+    // List of merchant route paths (without /merchant/ prefix)
+    const merchantRoutes = [
+      '/dashboard',
+      '/acquirer-accounts',
+      '/acquirer-requests',
+      '/transactions',
+      '/risk-compliance',
+      '/routing',
+      '/cascading',
+      '/support',
+      '/payment-links',
+      '/onboarding',
+      '/profile',
+      '/profile-selection',
+      '/rates',
+      '/wallet',
+      '/settings',
+      '/reports',
+      '/payouts',
+    ];
+    
+    // Check if pathname starts with any merchant route
+    const isMerchantRoute = merchantRoutes.some(route => pathname.startsWith(route));
+    return isMerchantRoute;
+  }
+
+  // If route does not match any category → deny by default
   return false;
 }
 

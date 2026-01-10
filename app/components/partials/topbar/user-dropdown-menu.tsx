@@ -35,7 +35,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
             </div>
             <div className="flex flex-col">
               <Link
-                href="/user/profile"
+                href="/profile"
                 className="text-sm text-mono hover:text-primary font-semibold"
               >
                 {user?.name || ''}
@@ -58,7 +58,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
         {/* Simplified Menu */}
         <DropdownMenuItem asChild>
           <Link
-            href="/user/profile"
+            href="/profile"
             className="flex items-center gap-2"
           >
             Profile

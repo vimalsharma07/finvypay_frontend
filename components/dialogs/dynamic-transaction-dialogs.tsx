@@ -20,7 +20,7 @@ export const DynamicTransactionDetailsDialog = dynamic(
 );
 
 export const DynamicTransactionDetailsDialogUser = dynamic(
-  () => import('@/app/(protected)/user/transactions/shared/transaction-details-dialog').then(
+  () => import('@/app/(protected)/(merchant)/transactions/shared/transaction-details-dialog').then(
     mod => ({ default: mod.TransactionDetailsDialog })
   ),
   {
