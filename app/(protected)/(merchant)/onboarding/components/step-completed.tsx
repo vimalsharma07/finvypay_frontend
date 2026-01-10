@@ -83,7 +83,7 @@ export function StepCompleted({ onboardingData, onRefresh }: StepCompletedProps)
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Waiting for Approval</CardTitle>
+          <CardTitle>Application Completed</CardTitle>
           <CardDescription>
             Your onboarding application is under review
           </CardDescription>
@@ -93,7 +93,7 @@ export function StepCompleted({ onboardingData, onRefresh }: StepCompletedProps)
             <div className="flex items-start gap-4 p-6 bg-info/10 border border-info/20 rounded-lg">
               <Clock className="h-6 w-6 text-info mt-0.5 flex-shrink-0" />
               <div className="flex-1 space-y-2">
-                <h3 className="font-semibold text-lg">Application Submitted</h3>
+                <h3 className="font-semibold text-lg">Pending for Approval</h3>
                 <p className="text-sm text-muted-foreground">
                   Your onboarding application has been successfully submitted and is currently 
                   under review by our admin team. We will notify you once the review is complete.
