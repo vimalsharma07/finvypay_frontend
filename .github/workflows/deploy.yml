@@ -1,0 +1,55 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Frontend
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            
+            # Navigate to project directory
+            cd /root/finvypay
+            
+            # Pull latest changes
+            echo "🔄 Pulling latest changes from master..."
+            git pull origin master
+            
+            # Navigate to deployment directory
+            cd /root/finvypay/deployment
+            
+            # Deploy Frontend
+            echo "🚀 Building frontend..."
+            docker-compose -f docker-compose.prod.yml build frontend
+            
+            echo "🚀 Starting frontend..."
+            docker-compose -f docker-compose.prod.yml up -d frontend
+            
+            echo "🔄 Restarting nginx..."
+            docker-compose -f docker-compose.prod.yml restart nginx
+            
+            # Wait a moment for frontend to be ready
+            sleep 5
+            
+            # Test frontend
+            echo "🧪 Testing frontend..."
+            if curl -f -s https://app.finvypay.com > /dev/null; then
+              echo "✅ Frontend is responding"
+            else
+              echo "⚠️  Frontend health check failed"
+            fi
+            
+            echo "✅ Frontend deployment complete!"
+            
+            # Show service status
+            echo "📊 Service status:"
+            docker-compose -f docker-compose.prod.yml ps
