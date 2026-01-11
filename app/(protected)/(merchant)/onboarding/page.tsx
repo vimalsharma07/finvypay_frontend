@@ -110,12 +110,17 @@ export default function OnboardingPage() {
               setOnboardingData(data.data);
               const profileStep = data.data.user?.profileStep ?? 0;
               const kycStatus = data.data.user?.kycStatus;
-              const signedAgreement = data.data.onboarding?.signedAgreement;
-              const kycType = data.data.kycType || data.data.onboarding?.kycType;
+              const onboarding = data.data.onboarding;
+              const signedAgreement = onboarding?.signedAgreement;
+              const kycType = data.data.kycType || onboarding?.kycType;
               const needsDirectorsStep = kycType && kycType !== 'individual';
               
-              // Check if signedAgreement is null - redirect to agreement step
-              if (signedAgreement === null || signedAgreement === undefined) {
+              // If onboarding doesn't exist, start from step 1
+              if (!onboarding) {
+                setCurrentStep(1);
+              }
+              // Check if signedAgreement is null - redirect to agreement step (only if onboarding exists)
+              else if (signedAgreement === null || signedAgreement === undefined) {
                 // Determine agreement step number based on whether directors step is shown
                 const agreementStep = needsDirectorsStep ? 6 : 5;
                 setCurrentStep(agreementStep);
