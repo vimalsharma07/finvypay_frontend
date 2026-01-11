@@ -1,8 +1,10 @@
 import {
+  BarChart3,
   Bolt,
   ClipboardList,
   Codepen,
   CreditCard,
+  Database,
   FileText,
   LayoutGrid,
   LifeBuoy,
@@ -82,8 +84,20 @@ const BASE_ADMIN_MENU: MenuConfig = [
     requirePermission: false,
   },
   {
+    title: 'Settlement Reports',
+    icon: BarChart3,
+    permissionModule: 'Settlement Reports', // Explicit permission module mapping
+    requirePermission: false,
+    children: [
+      {title: 'Settlement Summary', path: '/admin/settlement/summary', submodule: 'Settlement Summary' },
+      { title: 'All Settlements', path: '/admin/settlement/all', submodule: 'All Settlements' },
+      { title: 'Merchant Balances', path: '/admin/settlement/merchant-balances', submodule: 'Merchant Balances' },
+      {title: 'Settlement Calculations', path: '/admin/settlement/calculations', submodule: 'Settlement Calculations' },
+    ],
+  },
+  {
     title: 'Master',
-    icon: FileText,
+    icon: Database,
     permissionModule: 'Master Module', // Explicit permission module mapping
     requirePermission: true,
     children: [
