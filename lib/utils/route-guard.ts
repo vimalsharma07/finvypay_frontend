@@ -98,6 +98,7 @@ export function getRequiredRoleForRoute(pathname: string): UserRole[] | null {
     '/settings',
     '/reports',
     '/payouts',
+    '/settlement',
   ];
   
   const isMerchantRoute = merchantRoutes.some(route => pathname.startsWith(route));
@@ -157,6 +158,7 @@ export function hasRouteAccess(userRole: UserRole | null, pathname: string): boo
       '/settings',
       '/reports',
       '/payouts',
+      '/settlement',
     ];
     
     // Check if pathname starts with any merchant route

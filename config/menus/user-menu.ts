@@ -96,6 +96,17 @@ const BASE_USER_MENU: MenuConfig = [
     requirePermission: false,
   },
   {
+    title: 'Settlement Reports',
+    icon: BarChart3,
+    permissionModule: 'Settlement Reports', // Explicit permission module mapping
+    requirePermission: false,
+    children: [
+      {title: 'Settlement Summary', path: '/settlement/summary', submodule: 'Settlement Summary' },
+      { title: 'All Settlements', path: '/settlement/all', submodule: 'All Settlements' },
+      { title: 'Balances History', path: '/settlement/balances', submodule: 'Balances History' },
+    ],
+  },
+  {
     title: 'Support',
     icon: Heart,
     path: '/support',
