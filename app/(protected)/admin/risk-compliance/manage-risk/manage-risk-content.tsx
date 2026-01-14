@@ -78,9 +78,12 @@ export function ManageRiskPageContent() {
         const response = await getRiskManagement(params);
         handleApiResponse<RiskManagementListResponse>(response, {
           onSuccess: (data) => {
+            // API format: { success: true, data: { items: [...], meta: {...} } }
             if (data && data.success && data.data) {
-              setRiskManagement(Array.isArray(data.data) ? data.data : []);
-              setMeta(data.meta);
+              const items = data.data.items || [];
+              const metaData = data.data.meta;
+              setRiskManagement(Array.isArray(items) ? items : []);
+              setMeta(metaData);
             } else {
               toast.error('Failed to fetch risk management - invalid response structure');
             }

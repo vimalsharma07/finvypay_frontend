@@ -85,10 +85,12 @@ export function UserTrustedCardsPageContent({ addDialogOpen, onAddDialogOpenChan
         const response = await getCardWhitelist(params);
         handleApiResponse<CardWhitelistListResponse>(response, {
           onSuccess: (data) => {
-            // New format: { success: true, data: [...], meta: {...} }
+            // API format: { success: true, data: { items: [...], meta: {...} } }
             if (data && data.success && data.data) {
-              setCardWhitelist(Array.isArray(data.data) ? data.data : []);
-              setMeta(data.meta);
+              const items = data.data.items || [];
+              const metaData = data.data.meta;
+              setCardWhitelist(Array.isArray(items) ? items : []);
+              setMeta(metaData);
             } else {
               toast.error('Failed to fetch card whitelist - invalid response structure');
             }
