@@ -8,6 +8,7 @@ import { merchantMasterRoutes } from './master-routes';
 import { merchantReportRoutes } from './report-routes';
 import { merchantTransactionRoutes } from './transaction-routes';
 import { merchantRatesRoutes } from './merchant-rates-routes';
+import { merchantNotificationRoutes } from './notification-routes';
 
 export const merchantModuleRoutes = {
   users: merchantUserRoutes,
@@ -15,4 +16,5 @@ export const merchantModuleRoutes = {
   reports: merchantReportRoutes,
   transactions: merchantTransactionRoutes,
   rates: merchantRatesRoutes,
+  notifications: merchantNotificationRoutes,
 } as const;

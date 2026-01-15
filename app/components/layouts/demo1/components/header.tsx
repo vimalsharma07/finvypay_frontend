@@ -6,8 +6,10 @@ import { usePathname } from 'next/navigation';
 import { SearchDialog } from '@/partials/dialogs/search/search-dialog';
 import { NotificationsSheet } from '@/partials/topbar/notifications-sheet';
 import { AdminNotificationsSheet } from '@/partials/topbar/admin-notifications-sheet';
+import { MerchantNotificationsSheet } from '@/partials/topbar/merchant-notifications-sheet';
 import { UserDropdownMenu } from '@/partials/topbar/user-dropdown-menu';
 import { useAdminNotifications } from '@/hooks/use-admin-notifications';
+import { useMerchantNotifications } from '@/hooks/use-merchant-notifications';
 import {
   Bell,
   Menu,
@@ -70,6 +72,9 @@ export function Header() {
 
   // Fetch admin notification count if on admin path
   const { unreadCount: adminUnreadCount, refresh: refreshAdminNotifications } = useAdminNotifications();
+  
+  // Fetch merchant notification count if on merchant route
+  const { unreadCount: merchantUnreadCount, refresh: refreshMerchantNotifications } = useMerchantNotifications();
 
   const scrollPosition = useScrollPosition();
   const headerSticky: boolean = scrollPosition > 0;
@@ -249,6 +254,38 @@ export function Header() {
                 }
                 unreadCount={adminUnreadCount}
                 onNotificationUpdate={refreshAdminNotifications}
+              />
+              <UserDropdownMenu
+                trigger={
+                  <div className="size-9 rounded-full border-2 border-primary/60 bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold uppercase cursor-pointer">
+                    {user?.email?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                }
+              />
+            </>
+          ) : isMerchantRoute ? (
+            <>
+              <MerchantNotificationsSheet
+                trigger={
+                  <Button
+                    variant="ghost"
+                    mode="icon"
+                    shape="circle"
+                    className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary relative"
+                  >
+                    <Bell className="size-4.5!" />
+                    {merchantUnreadCount > 0 && (
+                      <Badge
+                        variant="destructive"
+                        className="absolute -top-1 -right-1 size-5 flex items-center justify-center p-0 text-[10px] font-bold"
+                      >
+                        {merchantUnreadCount > 99 ? '99+' : merchantUnreadCount}
+                      </Badge>
+                    )}
+                  </Button>
+                }
+                unreadCount={merchantUnreadCount}
+                onNotificationUpdate={refreshMerchantNotifications}
               />
               <UserDropdownMenu
                 trigger={
