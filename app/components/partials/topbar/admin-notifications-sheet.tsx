@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   XCircle,
+  Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -24,10 +25,21 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { 
   getAdminNotifications, 
   markNotificationAsRead, 
   markAllNotificationsAsRead,
+  deleteNotification,
   type Notification,
   type NotificationListMeta,
 } from '@/lib/services/admin/notifications';
@@ -51,7 +63,10 @@ export function AdminNotificationsSheet({
   const [loading, setLoading] = useState(true);
   const [markingAsRead, setMarkingAsRead] = useState<string | null>(null);
   const [markingAllAsRead, setMarkingAllAsRead] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [notificationToDelete, setNotificationToDelete] = useState<Notification | null>(null);
 
   const fetchNotifications = useCallback(async () => {
     setLoading(true);
@@ -157,6 +172,47 @@ export function AdminNotificationsSheet({
     }
   };
 
+  const handleDeleteClick = (notification: Notification) => {
+    setNotificationToDelete(notification);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!notificationToDelete) return;
+
+    const notificationId = notificationToDelete.id;
+    setDeletingId(notificationId);
+    try {
+      const response = await deleteNotification(notificationId);
+      handleApiResponse(response, {
+        onSuccess: () => {
+          setNotifications((prev) => prev.filter((notif) => notif.id !== notificationId));
+          if (meta) {
+            setMeta((prev) => ({
+              ...prev!,
+              totalItems: Math.max(0, (prev?.totalItems || 0) - 1),
+              unreadCount: prev?.unreadCount 
+                ? Math.max(0, prev.unreadCount - (notificationToDelete.isRead ? 0 : 1))
+                : 0,
+            }));
+          }
+          toast.success('Notification deleted');
+          onNotificationUpdate?.();
+          setDeleteDialogOpen(false);
+          setNotificationToDelete(null);
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to delete notification');
+        },
+      });
+    } catch (error) {
+      console.error('Delete notification error:', error);
+      toast.error('Unexpected error while deleting notification');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const getNotificationIcon = (type: string, severity: string) => {
     const iconClass = 'size-4';
     if (severity === 'error' || type === 'error') {
@@ -209,22 +265,43 @@ export function AdminNotificationsSheet({
                 {notifications.map((notification, index) => (
                   <div key={notification.id}>
                     <div
-                      className={`flex gap-3 px-5 py-4 hover:bg-muted/50 transition-colors cursor-pointer ${
+                      className={`flex gap-3 px-5 py-4 hover:bg-muted/50 transition-colors ${
                         !notification.isRead ? 'bg-primary/5' : ''
                       }`}
-                      onClick={() => !notification.isRead && handleMarkAsRead(notification.id)}
                     >
                       <div className="flex-shrink-0 mt-0.5">
                         {getNotificationIcon(notification.type, notification.severity)}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2 mb-1">
-                          <h4 className={`text-sm font-semibold ${!notification.isRead ? 'text-foreground' : 'text-muted-foreground'}`}>
+                          <h4 
+                            className={`text-sm font-semibold ${!notification.isRead ? 'text-foreground' : 'text-muted-foreground'} cursor-pointer`}
+                            onClick={() => !notification.isRead && handleMarkAsRead(notification.id)}
+                          >
                             {notification.title}
                           </h4>
-                          {!notification.isRead && (
-                            <div className="size-2 rounded-full bg-primary flex-shrink-0 mt-1.5" />
-                          )}
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {!notification.isRead && (
+                              <div className="size-2 rounded-full bg-primary" />
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              mode="icon"
+                              className="size-6"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteClick(notification);
+                              }}
+                              disabled={deletingId === notification.id}
+                            >
+                              {deletingId === notification.id ? (
+                                <Loader2 className="size-3 animate-spin" />
+                              ) : (
+                                <Trash2 className="size-3" />
+                              )}
+                            </Button>
+                          </div>
                         </div>
                         <p className="text-sm text-secondary-foreground mb-2 line-clamp-2">
                           {notification.message}
@@ -248,12 +325,27 @@ export function AdminNotificationsSheet({
                             </Link>
                           </div>
                         )}
+                        {!notification.isRead && (
+                          <div className="mt-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-xs"
+                              onClick={() => handleMarkAsRead(notification.id)}
+                              disabled={markingAsRead === notification.id}
+                            >
+                              {markingAsRead === notification.id ? (
+                                <>
+                                  <Loader2 className="size-3 animate-spin mr-1" />
+                                  Marking...
+                                </>
+                              ) : (
+                                'Mark as read'
+                              )}
+                            </Button>
+                          </div>
+                        )}
                       </div>
-                      {markingAsRead === notification.id && (
-                        <div className="flex-shrink-0">
-                          <Loader2 className="size-4 animate-spin text-muted-foreground" />
-                        </div>
-                      )}
                     </div>
                     {index < notifications.length - 1 && (
                       <div className="border-b border-border mx-5" />
@@ -287,6 +379,47 @@ export function AdminNotificationsSheet({
           </Button>
         </SheetFooter>
       </SheetContent>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="sm:max-w-[425px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Notification</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{notificationToDelete?.title || 'this notification'}&quot;? 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => {
+                setDeleteDialogOpen(false);
+                setNotificationToDelete(null);
+              }}
+              disabled={!!deletingId}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={!!deletingId}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletingId ? (
+                <>
+                  <Loader2 className="size-4 animate-spin mr-2" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="size-4 mr-2" />
+                  Delete
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Sheet>
   );
 }

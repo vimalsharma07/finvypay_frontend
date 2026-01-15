@@ -71,6 +71,14 @@ export interface NotificationListResponse {
   message?: string;
 }
 
+export interface UnreadCountResponse {
+  success: boolean;
+  data: {
+    unreadCount: number;
+  };
+  message?: string;
+}
+
 /**
  * Get all notifications for admin
  * 
@@ -94,6 +102,29 @@ export async function getAdminNotifications(
     const endpoint = adminRoutes.notifications.list + (queryParams.toString() ? `?${queryParams.toString()}` : '');
     const data = await http.get(endpoint) as NotificationListResponse;
 
+    return {
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status || 500,
+        error: error.message,
+      };
+    }
+    throw error;
+  }
+}
+
+/**
+ * Get unread notification count for admin
+ * 
+ * @returns Promise with unread count response
+ */
+export async function getAdminUnreadCount(): Promise<ApiResponse<UnreadCountResponse>> {
+  try {
+    const data = await http.get(adminRoutes.notifications.unreadCount) as UnreadCountResponse;
     return {
       status: 200,
       data,

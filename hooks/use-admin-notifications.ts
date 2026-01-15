@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
-import { getAdminNotifications } from '@/lib/services/admin/notifications';
+import { getAdminUnreadCount } from '@/lib/services/admin/notifications';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 
 export function useAdminNotifications() {
@@ -21,18 +21,12 @@ export function useAdminNotifications() {
     }
 
     try {
-      const response = await getAdminNotifications({
-        page: 1,
-        limit: 1,
-        includeDeleted: false,
-        sortBy: 'createdAt',
-        sortOrder: 'DESC',
-      });
+      const response = await getAdminUnreadCount();
 
       handleApiResponse(response, {
         onSuccess: (data) => {
-          if (data?.success && data.meta) {
-            setUnreadCount(data.meta.unreadCount || 0);
+          if (data?.success && data.data) {
+            setUnreadCount(data.data.unreadCount || 0);
           }
         },
         onError: (errorMessage) => {
