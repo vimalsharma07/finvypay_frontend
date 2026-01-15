@@ -23,4 +23,5 @@ export * from './support-ticket';
 export * from './merchant-rates';
 export * from './applications';
 export * from './notifications';
+export * from './reports';
 

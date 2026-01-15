@@ -96,6 +96,16 @@ const BASE_ADMIN_MENU: MenuConfig = [
     ],
   },
   {
+    title: 'Reports',
+    icon: BarChart3,
+    permissionModule: 'Reports', // Explicit permission module mapping
+    requirePermission: false,
+    children: [
+      {title: 'OverAll Reports', path: '/admin/reports/overall', submodule: 'overall reports' },
+      { title: 'All Settlements', path: '/admin/settlement/all', submodule: 'All Settlements' },
+    ],
+  },
+  {
     title: 'Master',
     icon: Database,
     permissionModule: 'Master Module', // Explicit permission module mapping
