@@ -5,7 +5,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { SearchDialog } from '@/partials/dialogs/search/search-dialog';
 import { NotificationsSheet } from '@/partials/topbar/notifications-sheet';
+import { AdminNotificationsSheet } from '@/partials/topbar/admin-notifications-sheet';
+import { MerchantNotificationsSheet } from '@/partials/topbar/merchant-notifications-sheet';
 import { UserDropdownMenu } from '@/partials/topbar/user-dropdown-menu';
+import { useAdminNotifications } from '@/hooks/use-admin-notifications';
+import { useMerchantNotifications } from '@/hooks/use-merchant-notifications';
 import {
   Bell,
   Menu,
@@ -40,6 +44,37 @@ export function Header() {
   const mobileMode = useIsMobile();
   const { user } = useAuth();
   const isUserPath = pathname.startsWith('/user');
+  const isAdminPath = pathname.startsWith('/admin');
+  
+  // Check if current path is a merchant route (dashboard, transactions, etc.)
+  const isMerchantRoute = useMemo(() => {
+    const merchantRoutes = [
+      '/dashboard',
+      '/acquirer-accounts',
+      '/acquirer-requests',
+      '/transactions',
+      '/risk-compliance',
+      '/routing',
+      '/cascading',
+      '/support',
+      '/payment-links',
+      '/profile',
+      '/profile-selection',
+      '/rates',
+      '/wallet',
+      '/settings',
+      '/reports',
+      '/payouts',
+      '/settlement',
+    ];
+    return merchantRoutes.some(route => pathname.startsWith(route));
+  }, [pathname]);
+
+  // Fetch admin notification count if on admin path
+  const { unreadCount: adminUnreadCount, refresh: refreshAdminNotifications } = useAdminNotifications();
+  
+  // Fetch merchant notification count if on merchant route
+  const { unreadCount: merchantUnreadCount, refresh: refreshMerchantNotifications } = useMerchantNotifications();
 
   const scrollPosition = useScrollPosition();
   const headerSticky: boolean = scrollPosition > 0;
@@ -185,7 +220,82 @@ export function Header() {
               }
             />
           )}
-          {isUserPath ? (
+          {/* Show profile/industry name badge for merchant routes */}
+          {isMerchantRoute && merchantLabel && (
+            <Link href="/profile-selection" className="hidden sm:inline-flex">
+              <Badge
+                variant="outline"
+                className="px-3 py-1 text-xs font-medium whitespace-nowrap bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 transition-colors"
+              >
+                {merchantLabel}
+              </Badge>
+            </Link>
+          )}
+          {isAdminPath ? (
+            <>
+              <AdminNotificationsSheet
+                trigger={
+                  <Button
+                    variant="ghost"
+                    mode="icon"
+                    shape="circle"
+                    className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary relative"
+                  >
+                    <Bell className="size-4.5!" />
+                    {adminUnreadCount > 0 && (
+                      <Badge
+                        variant="destructive"
+                        className="absolute -top-1 -right-1 size-5 flex items-center justify-center p-0 text-[10px] font-bold"
+                      >
+                        {adminUnreadCount > 99 ? '99+' : adminUnreadCount}
+                      </Badge>
+                    )}
+                  </Button>
+                }
+                unreadCount={adminUnreadCount}
+                onNotificationUpdate={refreshAdminNotifications}
+              />
+              <UserDropdownMenu
+                trigger={
+                  <div className="size-9 rounded-full border-2 border-primary/60 bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold uppercase cursor-pointer">
+                    {user?.email?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                }
+              />
+            </>
+          ) : isMerchantRoute ? (
+            <>
+              <MerchantNotificationsSheet
+                trigger={
+                  <Button
+                    variant="ghost"
+                    mode="icon"
+                    shape="circle"
+                    className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary relative"
+                  >
+                    <Bell className="size-4.5!" />
+                    {merchantUnreadCount > 0 && (
+                      <Badge
+                        variant="destructive"
+                        className="absolute -top-1 -right-1 size-5 flex items-center justify-center p-0 text-[10px] font-bold"
+                      >
+                        {merchantUnreadCount > 99 ? '99+' : merchantUnreadCount}
+                      </Badge>
+                    )}
+                  </Button>
+                }
+                unreadCount={merchantUnreadCount}
+                onNotificationUpdate={refreshMerchantNotifications}
+              />
+              <UserDropdownMenu
+                trigger={
+                  <div className="size-9 rounded-full border-2 border-primary/60 bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold uppercase cursor-pointer">
+                    {user?.email?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                }
+              />
+            </>
+          ) : isUserPath ? (
             <>
               <NotificationsSheet
                 trigger={
@@ -199,16 +309,6 @@ export function Header() {
                   </Button>
                 }
               />
-              {merchantLabel && (
-                <Link href="/profile-selection" className="hidden sm:inline-flex">
-                  <Badge
-                    variant="outline"
-                    className="px-3 py-1 text-xs font-medium whitespace-nowrap bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 transition-colors"
-                  >
-                    {merchantLabel}
-                  </Badge>
-                </Link>
-              )}
               <UserDropdownMenu
                 trigger={
                   <div className="size-9 rounded-full border-2 border-primary/60 bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold uppercase cursor-pointer">
