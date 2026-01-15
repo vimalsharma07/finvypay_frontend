@@ -40,6 +40,30 @@ export function Header() {
   const mobileMode = useIsMobile();
   const { user } = useAuth();
   const isUserPath = pathname.startsWith('/user');
+  
+  // Check if current path is a merchant route (dashboard, transactions, etc.)
+  const isMerchantRoute = useMemo(() => {
+    const merchantRoutes = [
+      '/dashboard',
+      '/acquirer-accounts',
+      '/acquirer-requests',
+      '/transactions',
+      '/risk-compliance',
+      '/routing',
+      '/cascading',
+      '/support',
+      '/payment-links',
+      '/profile',
+      '/profile-selection',
+      '/rates',
+      '/wallet',
+      '/settings',
+      '/reports',
+      '/payouts',
+      '/settlement',
+    ];
+    return merchantRoutes.some(route => pathname.startsWith(route));
+  }, [pathname]);
 
   const scrollPosition = useScrollPosition();
   const headerSticky: boolean = scrollPosition > 0;
@@ -185,6 +209,17 @@ export function Header() {
               }
             />
           )}
+          {/* Show profile/industry name badge for merchant routes */}
+          {isMerchantRoute && merchantLabel && (
+            <Link href="/profile-selection" className="hidden sm:inline-flex">
+              <Badge
+                variant="outline"
+                className="px-3 py-1 text-xs font-medium whitespace-nowrap bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 transition-colors"
+              >
+                {merchantLabel}
+              </Badge>
+            </Link>
+          )}
           {isUserPath ? (
             <>
               <NotificationsSheet
@@ -199,16 +234,6 @@ export function Header() {
                   </Button>
                 }
               />
-              {merchantLabel && (
-                <Link href="/profile-selection" className="hidden sm:inline-flex">
-                  <Badge
-                    variant="outline"
-                    className="px-3 py-1 text-xs font-medium whitespace-nowrap bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 transition-colors"
-                  >
-                    {merchantLabel}
-                  </Badge>
-                </Link>
-              )}
               <UserDropdownMenu
                 trigger={
                   <div className="size-9 rounded-full border-2 border-primary/60 bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold uppercase cursor-pointer">
