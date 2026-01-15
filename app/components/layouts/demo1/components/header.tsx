@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { SearchDialog } from '@/partials/dialogs/search/search-dialog';
 import { NotificationsSheet } from '@/partials/topbar/notifications-sheet';
+import { AdminNotificationsSheet } from '@/partials/topbar/admin-notifications-sheet';
 import { UserDropdownMenu } from '@/partials/topbar/user-dropdown-menu';
+import { useAdminNotifications } from '@/hooks/use-admin-notifications';
 import {
   Bell,
   Menu,
@@ -40,6 +42,7 @@ export function Header() {
   const mobileMode = useIsMobile();
   const { user } = useAuth();
   const isUserPath = pathname.startsWith('/user');
+  const isAdminPath = pathname.startsWith('/admin');
   
   // Check if current path is a merchant route (dashboard, transactions, etc.)
   const isMerchantRoute = useMemo(() => {
@@ -64,6 +67,9 @@ export function Header() {
     ];
     return merchantRoutes.some(route => pathname.startsWith(route));
   }, [pathname]);
+
+  // Fetch admin notification count if on admin path
+  const { unreadCount: adminUnreadCount, refresh: refreshAdminNotifications } = useAdminNotifications();
 
   const scrollPosition = useScrollPosition();
   const headerSticky: boolean = scrollPosition > 0;
@@ -220,7 +226,39 @@ export function Header() {
               </Badge>
             </Link>
           )}
-          {isUserPath ? (
+          {isAdminPath ? (
+            <>
+              <AdminNotificationsSheet
+                trigger={
+                  <Button
+                    variant="ghost"
+                    mode="icon"
+                    shape="circle"
+                    className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary relative"
+                  >
+                    <Bell className="size-4.5!" />
+                    {adminUnreadCount > 0 && (
+                      <Badge
+                        variant="destructive"
+                        className="absolute -top-1 -right-1 size-5 flex items-center justify-center p-0 text-[10px] font-bold"
+                      >
+                        {adminUnreadCount > 99 ? '99+' : adminUnreadCount}
+                      </Badge>
+                    )}
+                  </Button>
+                }
+                unreadCount={adminUnreadCount}
+                onNotificationUpdate={refreshAdminNotifications}
+              />
+              <UserDropdownMenu
+                trigger={
+                  <div className="size-9 rounded-full border-2 border-primary/60 bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold uppercase cursor-pointer">
+                    {user?.email?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                }
+              />
+            </>
+          ) : isUserPath ? (
             <>
               <NotificationsSheet
                 trigger={
