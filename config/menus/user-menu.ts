@@ -107,22 +107,22 @@ const BASE_USER_MENU: MenuConfig = [
     ],
   },
   {
+    title: 'Reports',
+    icon: FileText,
+    permissionModule: 'Reports',
+    requirePermission: false,
+    children: [
+      { title: 'Overall Reports', path: '/reports/', submodule: 'Reports' },
+    ],
+  },
+  {
     title: 'Support',
     icon: Heart,
     path: '/support',
     permissionModule: 'Support',
     requirePermission: false,
   },
-  {
-    title: 'Report',
-    icon: FileText,
-    permissionModule: 'Reports',
-    requirePermission: true,
-    children: [
-      { title: 'Daily Report', path: '/reports/daily', submodule: 'Reports' },
-      { title: 'Monthly Report', path: '/reports/monthly', submodule: 'Reports' },
-    ],
-  },
+ 
   {
     title: 'Payout Reports',
     icon: Receipt,
