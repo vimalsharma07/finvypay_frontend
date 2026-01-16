@@ -207,6 +207,20 @@ export default function AdminApplicationDetailPage() {
                 <Button size="sm" variant="ghost" onClick={fetchDetail}>Refresh</Button>
               </CardHeader>
               <CardContent className="grid md:grid-cols-2 gap-3 text-sm">
+                {/* Individual KYC documents */}
+                {data.kycType === 'individual' && (
+                  <>
+                    <div className="flex justify-between gap-4">
+                      <span className="text-muted-foreground">Identity Proof</span>
+                      <FileLink path={data.onboarding.identityProofPath} label="View" />
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <span className="text-muted-foreground">Proof of Address</span>
+                      <FileLink path={data.onboarding.proofOfAddressPath} label="View" />
+                    </div>
+                  </>
+                )}
+                {/* Company/Business documents */}
                 <div className="flex justify-between gap-4">
                   <span className="text-muted-foreground">Certificate of Incorporation</span>
                   <FileLink path={data.onboarding.certificateOfIncorporationPath} label="View" />
@@ -223,6 +237,7 @@ export default function AdminApplicationDetailPage() {
                   <span className="text-muted-foreground">Domain Ownership</span>
                   <FileLink path={data.onboarding.domainOwnershipPath} label="View" />
                 </div>
+                {/* Common documents */}
                 <div className="flex justify-between gap-4">
                   <span className="text-muted-foreground">Signed Agreement</span>
                   <FileLink path={data.onboarding.signedAgreement} label="View" />
