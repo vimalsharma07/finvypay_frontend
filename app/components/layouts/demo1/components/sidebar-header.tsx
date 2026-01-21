@@ -22,7 +22,7 @@ export function SidebarHeader() {
       <Link href="/">
         <div className="dark:hidden">
           <img
-            src={toAbsoluteUrl('/media/app/pay4tech.png')}
+            src={toAbsoluteUrl('/media/app/finvypay.png')}
             className="default-logo h-[182px] max-w-none"
             alt="Default Logo"
           />
@@ -34,7 +34,7 @@ export function SidebarHeader() {
         </div>
         <div className="hidden dark:block">
           <img
-            src={toAbsoluteUrl('/media/app/pay4tech.png')}
+            src={toAbsoluteUrl('/media/app/finvypay.png')}
             className="default-logo h-[86px] max-w-none"
             alt="Default Dark Logo"
           />

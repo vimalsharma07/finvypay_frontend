@@ -34,7 +34,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-const DEFAULT_ACQUIRER_ICON = '/media/app/pay4tech.png';
+const DEFAULT_ACQUIRER_ICON = '/media/app/finvypay.png';
 import { getIconUrl as getS3IconUrl } from '@/lib/s3-url';
 const getIconUrl = getS3IconUrl;
 

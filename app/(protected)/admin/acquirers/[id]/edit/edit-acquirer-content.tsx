@@ -433,7 +433,7 @@ export function EditAcquirerContent() {
                                             return;
                                           }
                                         }
-                                        target.src = '/media/app/pay4tech.png';
+                                        target.src = '/media/app/finvypay.png';
                                       }}
                                       onLoad={() => {
                                         console.log('Image loaded successfully:', iconUrl);
@@ -447,7 +447,7 @@ export function EditAcquirerContent() {
                                     />
                                   ) : (
                                     <img
-                                      src="/media/app/pay4tech.png"
+                                      src="/media/app/finvypay.png"
                                       alt="Default acquirer icon"
                                       className="h-full w-full object-cover opacity-50"
                                     />
