@@ -230,7 +230,7 @@ export function RolesPageContent() {
             edgeCell: '',
           }}
         >
-          <Card className="rounded-2xl border-border/50 bg-card shadow-sm">
+          <Card className="rounded-md border-border/50 bg-card shadow-sm">
             <CardHeader className="border-b border-border/50 bg-muted/20">
               <CardHeading>
                 <div className="relative w-full max-w-lg my-2 group">
