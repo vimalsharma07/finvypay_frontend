@@ -22,6 +22,7 @@ import { adminApplicationRoutes } from './application-routes';
 import { adminSettlementRoutes } from './settlement-routes';
 import { adminNotificationRoutes } from './notification-routes';
 import { adminDashboardRoutes } from './dashboard-routes';
+import { adminLogRoutes } from './log-routes';
 
 // Re-export individual route sets for direct imports
 export { merchantRatesRoutes };
@@ -46,4 +47,5 @@ export const adminModuleRoutes = {
   settlements: adminSettlementRoutes,
   notifications: adminNotificationRoutes,
   dashboard: adminDashboardRoutes,
+  logs: adminLogRoutes,
 } as const;

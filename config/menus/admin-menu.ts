@@ -102,7 +102,6 @@ const BASE_ADMIN_MENU: MenuConfig = [
     requirePermission: false,
     children: [
       {title: 'OverAll Reports', path: '/admin/reports/overall', submodule: 'overall reports' },
-      { title: 'All Settlements', path: '/admin/settlement/all', submodule: 'All Settlements' },
     ],
   },
   {
@@ -118,17 +117,7 @@ const BASE_ADMIN_MENU: MenuConfig = [
 
     ],
   },
-  {
-    title: 'Dev Logs',
-    icon: ScrollText,
-    permissionModule: 'Logs', // Explicit permission module mapping
-    requirePermission: true,
-    children: [
-      { title: 'Transaction Logs', path: '/admin/dev-logs/transaction-logs', submodule: 'Transaction Logs' },
-      { title: 'Webhook Logs', path: '/admin/dev-logs/webhook-logs', submodule: 'Webhook Logs' },
-      { title: 'Api Logs', path: '/admin/dev-logs/api-logs', submodule: 'Api Logs' },
-    ],
-  },
+ 
   {
     title: 'Support',
     icon: LifeBuoy,
@@ -137,6 +126,22 @@ const BASE_ADMIN_MENU: MenuConfig = [
     children: [
       { title: 'Tickets', path: '/admin/support/tickets', submodule: 'Tickets' },
       { title: 'Help Center', path: '/admin/support/help-center', submodule: 'Help Center' },
+    ],
+  },
+  {
+    title: 'Logs',
+    icon: ScrollText,
+    permissionModule: 'Logs', // Explicit permission module mapping
+    requirePermission: false,
+    children: [
+      { title: 'Transaction Logs', path: '/admin/logs/txn_logs', submodule: 'Transaction Logs' },
+      { title: 'Webhook Logs', path: '/admin/logs/webhook_logs', submodule: 'Webhook Logs' },
+      { title: 'API Logs', path: '/admin/logs/api_logs', submodule: 'API Logs' },
+      { title: 'Dispute Logs', path: '/admin/logs/dispute_logs', submodule: 'Dispute Logs' },
+      { title: 'App Error Logs', path: '/admin/logs/app_error_logs', submodule: 'App Error Logs' },
+      { title: 'Job Error Logs', path: '/admin/logs/job_error_logs', submodule: 'Job Error Logs' },
+      { title: 'Cron Error Logs', path: '/admin/logs/cron_error_logs', submodule: 'Cron Error Logs' },
+      { title: 'Admin Audit Logs', path: '/admin/logs/admin_audit_logs', submodule: 'Admin Audit Logs' },
     ],
   },
   {
