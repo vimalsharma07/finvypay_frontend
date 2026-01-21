@@ -1,13 +1,16 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { ShieldUser } from 'lucide-react';
+import { ShieldUser, Plus } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
+  ToolbarActions,
 } from '@/layouts/demo1/components/toolbar';
 import { Container } from '@/components/common/container';
+import { Button } from '@/components/ui/button';
 import { PageSkeleton } from '@/components/ui/skeletons';
+import { useRouter } from 'next/navigation';
 
 const RolesPageContent = dynamic(
   () => import('./roles-content').then(mod => ({ default: mod.RolesPageContent })),
@@ -18,6 +21,12 @@ const RolesPageContent = dynamic(
 );
 
 export default function AdminRolesPage() {
+  const router = useRouter();
+
+  const handleCreateRole = () => {
+    router.push('/admin/roles-permissions/roles/create');
+  };
+
   return (
     <>
       <Container>
@@ -27,6 +36,12 @@ export default function AdminRolesPage() {
             description="Create, edit, and manage user roles with assigned permissions for access control and security management"
             icon={ShieldUser}
           />
+          <ToolbarActions>
+            <Button variant="primary" onClick={handleCreateRole}>
+              <Plus className="h-4 w-4" />
+              Create Role
+            </Button>
+          </ToolbarActions>
         </Toolbar>
       </Container>
       <RolesPageContent />

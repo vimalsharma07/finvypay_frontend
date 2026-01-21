@@ -11,8 +11,6 @@ import {
 } from '../../components/table-comp';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { SearchSelect } from '@/components/ui/molecules/SearchSelect';
-import { ContentLoader } from '@/components/common/content-loader';
 import { ConfirmComp } from '../../components/confirm-comp';
 import { toast } from 'sonner';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
@@ -46,7 +44,6 @@ export function UserRoutingPageContent() {
   const [sortBy, setSortBy] = useState<string>('priority');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('ASC');
 
-  const [profileOptions, setProfileOptions] = useState<Option[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState<string>('');
   const [profilesLoading, setProfilesLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -132,13 +129,7 @@ export function UserRoutingPageContent() {
 
   useEffect(() => {
     setProfilesLoading(true);
-    const options = profileList.map((p) => ({
-      value: p.id.toString(),
-      label: p.merchantProfileName || p.industry?.name || `Profile ${p.id}`,
-    }));
-    setProfileOptions(options);
-
-    if (!selectedProfileId && options.length > 0) {
+    if (!selectedProfileId && profileList.length > 0) {
       const primary = profileList.find((p) => p.isPrimary);
       const nextProfileId = (primary?.id ?? profileList[0]?.id)?.toString() || '';
       if (nextProfileId) {
@@ -281,35 +272,6 @@ export function UserRoutingPageContent() {
   return (
     <Fragment>
       <Container>
-        <div className="flex flex-col gap-3 mb-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div className="flex flex-col gap-1">
-              <p className="text-sm font-semibold text-foreground">Merchant Profile</p>
-              <p className="text-xs text-muted-foreground">
-                Select a profile to load routing rules.
-              </p>
-            </div>
-            <div className="w-full md:w-80">
-              {profilesLoading ? (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <ContentLoader />
-                  <span>Loading profiles...</span>
-                </div>
-              ) : (
-                <SearchSelect
-                  options={profileOptions}
-                  value={selectedProfileId}
-                  onChange={(val) => {
-                    setSelectedProfileId(val);
-                    setPage(1);
-                  }}
-                  placeholder="Select profile"
-                />
-              )}
-            </div>
-          </div>
-        </div>
-
         <TableComp
           data={routes}
           headers={headers}

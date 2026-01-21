@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   getIndustries,
@@ -24,7 +24,12 @@ import { toast } from 'sonner';
 import { EditIndustryDialog } from './components/edit-industry-dialog';
 import { CreateIndustryDialog } from './components/create-industry-dialog';
 
-export function IndustriesPageContent() {
+interface IndustriesPageContentProps {
+  createDialogOpen?: boolean;
+  setCreateDialogOpen?: (open: boolean) => void;
+}
+
+export function IndustriesPageContent({ createDialogOpen: externalCreateDialogOpen, setCreateDialogOpen: externalSetCreateDialogOpen }: IndustriesPageContentProps = {}) {
   const [industries, setIndustries] = useState<Industry[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<IndustryListResponse['data']['meta'] | null>(null);
@@ -38,8 +43,12 @@ export function IndustriesPageContent() {
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('ASC');
 
   // Create dialog state
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [internalCreateDialogOpen, setInternalCreateDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
+  
+  // Use external dialog state if provided, otherwise use internal
+  const createDialogOpen = externalCreateDialogOpen !== undefined ? externalCreateDialogOpen : internalCreateDialogOpen;
+  const setCreateDialogOpen = externalSetCreateDialogOpen || setInternalCreateDialogOpen;
 
   // Edit dialog state
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -273,12 +282,6 @@ export function IndustriesPageContent() {
   return (
     <Fragment>
       <Container>
-        <div className="flex items-center justify-between mb-4">
-          <Button variant="primary" onClick={() => setCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4" />
-            Create Industry
-          </Button>
-        </div>
         <TableComp
           data={industries}
           headers={headers}

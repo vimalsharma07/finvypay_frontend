@@ -2,7 +2,7 @@
 
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Link2, Eye, Pencil, Trash2 } from 'lucide-react';
+import { Link2, Eye, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -16,8 +16,6 @@ import {
   TableAction,
 } from '../../components/table-comp';
 import { Badge } from '@/components/ui/badge';
-import { SearchSelect } from '@/components/ui/molecules/SearchSelect';
-import { ContentLoader } from '@/components/common/content-loader';
 import { ConfirmComp } from '../../components/confirm-comp';
 import { toast } from 'sonner';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
@@ -47,7 +45,6 @@ export function UserCascadingPageContent() {
   const [limit, setLimit] = useState(10);
   const [sortBy, setSortBy] = useState<string>('priority');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('ASC');
-  const [profileOptions, setProfileOptions] = useState<Option[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState<string>('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cascadeToDelete, setCascadeToDelete] = useState<UserCascadingRule | null>(null);
@@ -128,13 +125,7 @@ export function UserCascadingPageContent() {
 
   useEffect(() => {
     setProfilesLoading(true);
-    const options = profileList.map((p) => ({
-      value: p.id.toString(),
-      label: p.industry?.name || p.merchantProfileName || `Profile ${p.id}`,
-    }));
-    setProfileOptions(options);
-
-    if (!selectedProfileId && options.length > 0) {
+    if (!selectedProfileId && profileList.length > 0) {
       const primary = profileList.find((p) => p.isPrimary);
       const nextProfileId = (primary?.id ?? profileList[0]?.id)?.toString() || '';
       if (nextProfileId) {
@@ -221,7 +212,7 @@ export function UserCascadingPageContent() {
     return (
       <Container>
         <div className="flex items-center gap-2 py-10 text-sm text-muted-foreground">
-          <ContentLoader />
+          <Loader2 className="h-4 w-4 animate-spin" />
           <span>Loading cascading rules...</span>
         </div>
       </Container>
@@ -231,33 +222,6 @@ export function UserCascadingPageContent() {
   return (
     <Fragment>
       <Container>
-        <div className="flex flex-col gap-3 mb-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div className="flex flex-col gap-1">
-              <p className="text-sm font-semibold text-foreground">Merchant Profile</p>
-              <p className="text-xs text-muted-foreground">Select a profile to load cascading rules.</p>
-            </div>
-            <div className="w-full md:w-80">
-              {profilesLoading ? (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <ContentLoader />
-                  <span>Loading profiles...</span>
-                </div>
-              ) : (
-                <SearchSelect
-                  options={profileOptions}
-                  value={selectedProfileId}
-                  onChange={(val) => {
-                    setSelectedProfileId(val);
-                    setPage(1);
-                  }}
-                  placeholder="Select profile"
-                />
-              )}
-            </div>
-          </div>
-        </div>
-
         <TableComp
           data={cascades}
           headers={headers}

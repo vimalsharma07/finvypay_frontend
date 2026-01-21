@@ -53,11 +53,14 @@ import { getUserConnectors } from '@/lib/services/admin/connectors';
 import { getCurrencies } from '@/lib/services/admin/currency';
 import { getCountries } from '@/lib/services/admin/countries';
 import { getTimeZones } from '@/i18n/timezones';
-import { Button } from '@/components/ui/button';
-import { Filter as FilterIcon } from 'lucide-react';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 
-export function TransactionsPageContent() {
+interface TransactionsPageContentProps {
+  filterOpen?: boolean;
+  setFilterOpen?: (open: boolean) => void;
+}
+
+export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFilterOpen: externalSetFilterOpen }: TransactionsPageContentProps = {}) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<TransactionListResponse['data']['meta'] | null>(null);
@@ -71,7 +74,11 @@ export function TransactionsPageContent() {
   const [processingRefund, setProcessingRefund] = useState(false);
   const [processingSuspicious, setProcessingSuspicious] = useState(false);
   const [filters, setFilters] = useState<FilterFields>({});
-  const [filterOpen, setFilterOpen] = useState(false);
+  const [internalFilterOpen, setInternalFilterOpen] = useState(false);
+  
+  // Use external filter state if provided, otherwise use internal
+  const filterOpen = externalFilterOpen !== undefined ? externalFilterOpen : internalFilterOpen;
+  const setFilterOpen = externalSetFilterOpen || setInternalFilterOpen;
 
   // Dropdown options
   const [userOptions, setUserOptions] = useState<Option[]>([]);
@@ -480,17 +487,6 @@ export function TransactionsPageContent() {
   return (
     <Fragment>
       <Container>
-        <div className="flex items-center justify-end mb-4">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={() => setFilterOpen(true)}
-          >
-            <FilterIcon className="h-4 w-4" />
-            Advanced Filter
-          </Button>
-        </div>
         <DataGrid
           table={table}
           recordCount={meta?.totalItems || filteredData.length}

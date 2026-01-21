@@ -42,14 +42,21 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 import { TicketActionMenu } from './components/ticket-action-menu';
 import { SearchInput } from './components/search-input';
 import { DynamicCreateTicketDialog, DynamicEditTicketDialog } from '@/components/dialogs';
 
-export function SupportPageContent() {
+interface SupportPageContentProps {
+  createDialogOpen: boolean;
+  setCreateDialogOpen: (open: boolean) => void;
+}
+
+export function SupportPageContent({
+  createDialogOpen,
+  setCreateDialogOpen,
+}: SupportPageContentProps) {
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<SupportTicketListResponse['data']['meta'] | null>(null);
@@ -59,7 +66,6 @@ export function SupportPageContent() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [ticketToEdit, setTicketToEdit] = useState<SupportTicket | null>(null);
   const [updating, setUpdating] = useState(false);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
 
   // Pagination state
@@ -384,11 +390,6 @@ export function SupportPageContent() {
   return (
     <Fragment>
       <Container>
-        <div className="flex items-center justify-end mb-4">
-          <Button variant="primary" onClick={() => setCreateDialogOpen(true)}>
-            Create Support Ticket
-          </Button>
-        </div>
         <DataGrid
           table={table}
           recordCount={meta?.totalItems || filteredData.length}

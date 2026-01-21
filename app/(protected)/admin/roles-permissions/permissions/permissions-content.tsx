@@ -33,8 +33,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Search, X, Pencil, Trash2, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Search, X, Pencil, Trash2 } from 'lucide-react';
 import { TableActionMenu, TableActionMenuItem } from '@/app/(protected)/components/table-action-menu';
 import { cn } from '@/lib/utils';
 import {
@@ -47,11 +46,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 export function PermissionsPageContent() {
-  const router = useRouter();
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -220,12 +217,6 @@ export function PermissionsPageContent() {
   return (
     <Fragment>
       <Container>
-        <div className="flex items-center justify-end mb-4">
-          <Button variant="primary" onClick={() => router.push('/admin/roles-permissions/permissions/create')}>
-            <Plus className="h-4 w-4" />
-            Create Permission
-          </Button>
-        </div>
         <DataGrid
           table={table}
           recordCount={filteredData.length}

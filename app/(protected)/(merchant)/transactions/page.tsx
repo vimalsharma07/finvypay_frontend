@@ -1,13 +1,15 @@
 'use client';
 
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { CreditCard } from 'lucide-react';
+import { CreditCard, Filter } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
+  ToolbarActions,
 } from '@/layouts/demo1/components/toolbar';
 import { Container } from '@/components/common/container';
+import { Button } from '@/components/ui/button';
 import { PageSkeleton } from '@/components/ui/skeletons';
 
 const TransactionsPageContent = dynamic(
@@ -19,6 +21,8 @@ const TransactionsPageContent = dynamic(
 );
 
 export default function TransactionsPage() {
+  const [filterOpen, setFilterOpen] = useState(false);
+
   return (
     <Fragment>
       <Container>
@@ -28,9 +32,20 @@ export default function TransactionsPage() {
             description="View and monitor all your production payment transactions with detailed information, filtering, and transaction history"
             icon={CreditCard}
           />
+          <ToolbarActions>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => setFilterOpen(true)}
+            >
+              <Filter className="h-4 w-4" />
+              Advanced Filter
+            </Button>
+          </ToolbarActions>
         </Toolbar>
       </Container>
-      <TransactionsPageContent />
+      <TransactionsPageContent filterOpen={filterOpen} setFilterOpen={setFilterOpen} />
     </Fragment>
   );
 }

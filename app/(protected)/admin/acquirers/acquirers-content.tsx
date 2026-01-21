@@ -23,9 +23,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch, SwitchWrapper } from '@/components/ui/switch';
-import { Search, X, Pencil, Trash2, Plus, MoreVertical, ChevronLeft, ChevronRight, Plug } from 'lucide-react';
+import { Search, X, Pencil, Trash2, MoreVertical, ChevronLeft, ChevronRight, Plug } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
@@ -52,7 +51,6 @@ const getProviderDescription = (fileName: string, acquirerName: string): string 
 };
 
 export function AcquirersPageContent() {
-  const router = useRouter();
   const [acquirers, setAcquirers] = useState<Acquirer[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -182,10 +180,6 @@ export function AcquirersPageContent() {
               </Button>
             )}
           </div>
-          <Button variant="primary" onClick={() => router.push('/admin/acquirers/create')}>
-            <Plus className="size-4 mr-2" />
-            Create Acquirer
-          </Button>
         </div>
         {loading && acquirers.length === 0 ? (
           <div className="text-center py-8">Loading...</div>

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link2, ArrowLeft } from 'lucide-react';
+import { Link2, ArrowLeft, Plus, X } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -280,6 +280,7 @@ export default function CreatePaymentLinkPage() {
                     onClick={() => router.push('/payment-links')}
                     disabled={isLoading}
                   >
+                    <X className="h-4 w-4 mr-2" />
                     Cancel
                   </Button>
                   <Button
@@ -287,6 +288,7 @@ export default function CreatePaymentLinkPage() {
                     variant="primary"
                     disabled={isLoading || loadingCurrencies}
                   >
+                    <Plus className="h-4 w-4 mr-2" />
                     {isLoading ? 'Creating...' : 'Create Payment Link'}
                   </Button>
                 </div>

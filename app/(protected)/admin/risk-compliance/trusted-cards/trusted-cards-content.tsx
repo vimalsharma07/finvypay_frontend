@@ -49,15 +49,24 @@ import { SearchInput } from './components/search-input';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 import { DynamicAddCardDialogAdmin, DynamicEditCardDialog } from '@/components/dialogs';
 
-export function TrustedCardsPageContent() {
+interface TrustedCardsPageContentProps {
+  addDialogOpen?: boolean;
+  setAddDialogOpen?: (open: boolean) => void;
+}
+
+export function TrustedCardsPageContent({ addDialogOpen: externalAddDialogOpen, setAddDialogOpen: externalSetAddDialogOpen }: TrustedCardsPageContentProps = {}) {
   const [cardWhitelist, setCardWhitelist] = useState<CardWhitelist[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<CardWhitelistListResponse['data']['meta'] | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cardToDelete, setCardToDelete] = useState<CardWhitelist | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [internalAddDialogOpen, setInternalAddDialogOpen] = useState(false);
   const [adding, setAdding] = useState(false);
+  
+  // Use external dialog state if provided, otherwise use internal
+  const addDialogOpen = externalAddDialogOpen !== undefined ? externalAddDialogOpen : internalAddDialogOpen;
+  const setAddDialogOpen = externalSetAddDialogOpen || setInternalAddDialogOpen;
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [cardToEdit, setCardToEdit] = useState<CardWhitelist | null>(null);
   const [updating, setUpdating] = useState(false);
@@ -304,12 +313,6 @@ export function TrustedCardsPageContent() {
   return (
     <Fragment>
       <Container>
-        <div className="flex items-center justify-end mb-4">
-          <Button variant="primary" onClick={() => setAddDialogOpen(true)}>
-            <Plus className="h-4 w-4 me-2" />
-            Add Card
-          </Button>
-        </div>
         <DataGrid
           table={table}
           recordCount={meta?.totalItems || filteredData.length}

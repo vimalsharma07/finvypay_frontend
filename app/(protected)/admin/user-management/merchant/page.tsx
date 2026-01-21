@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Store, Plus } from 'lucide-react';
 import {
@@ -12,6 +12,7 @@ import { Container } from '@/components/common/container';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { PageSkeleton } from '@/components/ui/skeletons';
+import { AdvancedFilter, FilterField } from '@/app/(protected)/components/advanced-filter';
 
 // Dynamically import the heavy content
 const MerchantUsersPageContent = dynamic(
@@ -24,10 +25,41 @@ const MerchantUsersPageContent = dynamic(
 
 export default function MerchantUsersPage() {
   const router = useRouter();
+  const [filters, setFilters] = useState<Record<string, string>>({});
 
   // Handle create user
   const handleCreateUser = () => {
     router.push('/admin/user-management/merchant/create');
+  };
+
+  // Define filter fields
+  const filterFields: FilterField[] = [
+    {
+      key: 'name',
+      label: 'Name',
+      type: 'text-search',
+      placeholder: 'Search by name',
+    },
+    {
+      key: 'email',
+      label: 'Email',
+      type: 'select-search',
+      placeholder: 'Select email...',
+      options: [
+        { label: 'user1@example.com', value: 'user1@example.com' },
+        { label: 'user2@example.com', value: 'user2@example.com' },
+      ],
+    },
+  ];
+
+  // Handle filter apply
+  const handleApplyFilters = (appliedFilters: Record<string, string>) => {
+    setFilters(appliedFilters);
+  };
+
+  // Handle filter reset
+  const handleResetFilters = () => {
+    setFilters({});
   };
 
   return (
@@ -40,6 +72,11 @@ export default function MerchantUsersPage() {
             icon={Store}
           />
           <ToolbarActions>
+            <AdvancedFilter
+              fields={filterFields}
+              onApply={handleApplyFilters}
+              onReset={handleResetFilters}
+            />
             <Button variant="primary" onClick={handleCreateUser}>
               <Plus className="h-4 w-4" />
               Create Merchant
@@ -47,7 +84,7 @@ export default function MerchantUsersPage() {
           </ToolbarActions>
         </Toolbar>
       </Container>
-      <MerchantUsersPageContent />
+      <MerchantUsersPageContent filters={filters} />
     </Fragment>
   );
 }

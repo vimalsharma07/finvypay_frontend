@@ -33,13 +33,42 @@ import { getTransactionColumns } from './shared/columns';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 import { filterTransactions } from './shared/utils';
 import { DynamicTransactionDetailsDialogUser } from '@/components/dialogs';
+import { Filter as FilterComponent } from '@/components/common/Filter';
+import {
+  FieldTypes,
+  FilterFields,
+  FiltersSchema,
+  Option,
+} from '@/lib/types/common-types';
+import { generateFilterQuery } from '@/lib/helpers';
+import { getUserConnectors } from '@/lib/services/admin/connectors';
+import { getCurrencies } from '@/lib/services/admin/currency';
+import { getCountries } from '@/lib/services/admin/countries';
+import { getTimeZones } from '@/i18n/timezones';
 
-export function TransactionsPageContent() {
+interface TransactionsPageContentProps {
+  filterOpen?: boolean;
+  setFilterOpen?: (open: boolean) => void;
+}
+
+export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFilterOpen: externalSetFilterOpen }: TransactionsPageContentProps = {}) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<TransactionListResponse['data']['meta'] | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [filters, setFilters] = useState<FilterFields>({});
+  const [internalFilterOpen, setInternalFilterOpen] = useState(false);
+  
+  // Dropdown options
+  const [connectorOptions, setConnectorOptions] = useState<Option[]>([]);
+  const [currencyOptions, setCurrencyOptions] = useState<Option[]>([]);
+  const [countryOptions, setCountryOptions] = useState<Option[]>([]);
+  const [timeZoneOptions, setTimeZoneOptions] = useState<Option[]>([]);
+  
+  // Use external filter state if provided, otherwise use internal
+  const filterOpen = externalFilterOpen !== undefined ? externalFilterOpen : internalFilterOpen;
+  const setFilterOpen = externalSetFilterOpen || setInternalFilterOpen;
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -58,7 +87,7 @@ export function TransactionsPageContent() {
   });
 
   const fetchTransactions = useCallback(
-    async (pageNum: number, pageLimit: number) => {
+    async (pageNum: number, pageLimit: number, activeFilters: FilterFields = {}) => {
       setLoading(true);
       try {
         const params: {
@@ -67,6 +96,7 @@ export function TransactionsPageContent() {
         } = {
           page: pageNum,
           limit: pageLimit,
+          ...generateFilterQuery(activeFilters),
         };
 
         const response = await getProductionTransactions(params);
@@ -94,8 +124,54 @@ export function TransactionsPageContent() {
   );
 
   useEffect(() => {
-    fetchTransactions(page, limit);
-  }, [fetchTransactions, page, limit]);
+    fetchTransactions(page, limit, filters);
+  }, [fetchTransactions, page, limit, filters]);
+
+  // Fetch filter options
+  useEffect(() => {
+    const loadOptions = async () => {
+      try {
+        const [connectorsRes, currenciesRes, countriesRes] = await Promise.all([
+          getUserConnectors(),
+          getCurrencies({ page: 1, limit: 1000 }),
+          getCountries({ page: 1, limit: 1000 }),
+        ]);
+
+        if (connectorsRes.data?.data?.data) {
+          setConnectorOptions(
+            connectorsRes.data.data.data.map((c) => ({
+              label: c.name,
+              value: String(c.id),
+            }))
+          );
+        }
+
+        if (currenciesRes.data?.data?.data) {
+          setCurrencyOptions(
+            currenciesRes.data.data.data.map((c) => ({
+              label: c.code,
+              value: c.code,
+            }))
+          );
+        }
+
+        if (countriesRes.data?.data?.data) {
+          setCountryOptions(
+            countriesRes.data.data.data.map((c) => ({
+              label: c.countryName,
+              value: c.isoTwo,
+            }))
+          );
+        }
+
+        setTimeZoneOptions(getTimeZones().map((z) => ({ label: z.label, value: z.value })));
+      } catch (error) {
+        console.error('Failed to load filter options', error);
+      }
+    };
+
+    loadOptions();
+  }, []);
 
   // Client-side filtering
   const filteredData = useMemo(
@@ -128,6 +204,79 @@ export function TransactionsPageContent() {
     setSelectedTransaction(transaction);
     setDetailsDialogOpen(true);
   }, []);
+
+  const handleApplyFilters = useCallback(
+    (appliedFilters: FilterFields) => {
+      setFilters(appliedFilters);
+      setPage(1);
+    },
+    []
+  );
+
+  const filterSchema: FiltersSchema[] = useMemo(
+    () => [
+      { field: 'transaction_id', label: 'Transaction ID', type: FieldTypes.input },
+      { field: 'order_id', label: 'Order ID', type: FieldTypes.input },
+      { field: 'gateway_id', label: 'Gateway ID', type: FieldTypes.input },
+      { field: 'email', label: 'Email', type: FieldTypes.input },
+      { field: 'phone_number', label: 'Phone Number', type: FieldTypes.input },
+      { field: 'card_number', label: 'Card Number', type: FieldTypes.input },
+      { field: 'card_bin', label: 'Card Bin', type: FieldTypes.input },
+      {
+        field: 'connector',
+        label: 'Connector',
+        type: FieldTypes.searchSelect,
+        options: connectorOptions,
+      },
+      {
+        field: 'currency',
+        label: 'Currency',
+        type: FieldTypes.searchSelect,
+        options: currencyOptions,
+      },
+      { field: 'amount_greater_than', label: 'Amount greater than', type: FieldTypes.input },
+      { field: 'amount_less_than', label: 'Amount less than', type: FieldTypes.input },
+      {
+        field: 'status',
+        label: 'Status',
+        type: FieldTypes.multiSelect,
+        options: [
+          'Success',
+          'Failed',
+          'Initialized',
+          'Pending',
+          'Redirect',
+          'Blocked',
+          'Abandoned',
+        ].map((label) => ({ label, value: label.toLowerCase() })),
+      },
+      {
+        field: 'card_type',
+        label: 'Card Type',
+        type: FieldTypes.select,
+        options: ['VISA', 'MASTER', 'DINNER CLUB', 'JCB'].map((label) => ({
+          label,
+          value: label,
+        })),
+      },
+      {
+        field: 'country',
+        label: 'Country',
+        type: FieldTypes.searchSelect,
+        options: countryOptions,
+      },
+      { field: 'created_at', label: 'Created At', type: FieldTypes.dateRange },
+      { field: 'transaction_date', label: 'Transaction Date', type: FieldTypes.dateRange },
+      { field: 'message', label: 'Message', type: FieldTypes.input },
+      {
+        field: 'time_zone',
+        label: 'Time Zone',
+        type: FieldTypes.searchSelect,
+        options: timeZoneOptions,
+      },
+    ],
+    [connectorOptions, currencyOptions, countryOptions, timeZoneOptions]
+  );
 
   const columns = useMemo<ColumnDef<Transaction>[]>(
     () => getTransactionColumns(handleViewDetails),
@@ -197,6 +346,15 @@ export function TransactionsPageContent() {
         open={detailsDialogOpen}
         onOpenChange={setDetailsDialogOpen}
         transaction={selectedTransaction}
+      />
+
+      <FilterComponent
+        filtersSchema={filterSchema}
+        onApplyFilters={handleApplyFilters}
+        currentFilters={filters}
+        open={filterOpen}
+        setOpen={setFilterOpen}
+        baseUrl="/transactions"
       />
     </Fragment>
   );

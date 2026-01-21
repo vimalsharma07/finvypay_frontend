@@ -10,7 +10,7 @@ import {
 } from '@/layouts/demo1/components/toolbar';
 import { Container } from '@/components/common/container';
 import { PageSkeleton } from '@/components/ui/skeletons';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 
 const UserRoutingPageContent = dynamic(
@@ -23,8 +23,6 @@ const UserRoutingPageContent = dynamic(
 
 export default function UserRoutingPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const profileId = searchParams.get('profileId');
 
   return (
     <Fragment>
@@ -38,7 +36,7 @@ export default function UserRoutingPage() {
           <ToolbarActions>
             <Button
               variant="primary"
-              onClick={() => router.push(`/routing/create${profileId ? `?profileId=${profileId}` : ''}`)}
+              onClick={() => router.push('/routing/create')}
             >
               <Plus className="h-4 w-4" />
               Create Routing
