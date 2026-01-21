@@ -39,7 +39,7 @@ export default function RoutingCascadingLayout({
           <ToolbarActions>
             <Link href={`/admin/user-management/merchant/${userId}`}>
               <Button variant="outline">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <ArrowLeft className="h-4 w-4 mr-1" />
                 Back to User
               </Button>
             </Link>
@@ -50,7 +50,7 @@ export default function RoutingCascadingLayout({
         <div className="flex gap-4 border-b border-border">
           <Link
             href={`${basePath}/routing`}
-            className={`flex items-center gap-2 px-4 py-2 border-b-2 transition-colors ${
+            className={`flex items-center gap-1 px-4 py-2 border-b-2 transition-colors ${
               isRouting
                 ? 'border-primary text-primary font-medium'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -61,7 +61,7 @@ export default function RoutingCascadingLayout({
           </Link>
           <Link
             href={`${basePath}/cascading`}
-            className={`flex items-center gap-2 px-4 py-2 border-b-2 transition-colors ${
+            className={`flex items-center gap-1 px-4 py-2 border-b-2 transition-colors ${
               isCascading
                 ? 'border-primary text-primary font-medium'
                 : 'border-transparent text-muted-foreground hover:text-foreground'

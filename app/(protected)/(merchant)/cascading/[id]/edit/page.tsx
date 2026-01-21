@@ -216,7 +216,7 @@ export default function EditCascadingPage() {
   if (loadingData) {
     return (
       <Container>
-        <div className="flex items-center gap-2 py-10 text-sm text-muted-foreground">
+        <div className="flex items-center gap-1 py-10 text-sm text-muted-foreground">
           <ContentLoader />
           <span>Loading cascading rule data...</span>
         </div>
@@ -230,7 +230,7 @@ export default function EditCascadingPage() {
         <div className="flex flex-col items-center justify-center py-12">
           <p className="text-muted-foreground mb-4">Cascading rule not found</p>
           <Button onClick={() => router.push('/cascading')}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-4 w-4 mr-1" />
             Back to Cascading Rules
           </Button>
         </div>
@@ -253,7 +253,7 @@ export default function EditCascadingPage() {
               onClick={() => router.push(`/cascading/${cascadingId}`)}
               disabled={isLoading}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="h-4 w-4 mr-1" />
               Back
             </Button>
           </ToolbarActions>
@@ -317,7 +317,7 @@ export default function EditCascadingPage() {
                     Primary Account <span className="text-red-500">*</span>
                   </Label>
                   {loadingAcquirers ? (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <ContentLoader />
                       <span>Loading acquirer accounts...</span>
                     </div>
@@ -343,7 +343,7 @@ export default function EditCascadingPage() {
                     Fallback Account <span className="text-red-500">*</span>
                   </Label>
                   {loadingAcquirers ? (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <ContentLoader />
                       <span>Loading acquirer accounts...</span>
                     </div>

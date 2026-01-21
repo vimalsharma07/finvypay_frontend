@@ -45,7 +45,7 @@ export default function Item15() {
         </div>
 
         <Card className="shadow-none flex items-center justify-between flex-row gap-1.5 p-2.5 rounded-lg bg-muted/70">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <img
               src={toAbsoluteUrl('/media/file-types/xls.svg')}
               className="h-6"

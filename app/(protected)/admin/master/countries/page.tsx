@@ -197,7 +197,7 @@ export default function CountriesPage() {
         );
       case 'currencyCode':
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Badge variant="secondary" className="font-mono">
               {item.currencyCode}
             </Badge>

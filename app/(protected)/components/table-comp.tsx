@@ -158,7 +158,7 @@ function DefaultActionsCell<T>({
                   asChild
                   {...(action.variant && { variant: action.variant })}
                 >
-                  <Link href={action.route(row.original)} className="flex items-center gap-2">
+                  <Link href={action.route(row.original)} className="flex items-center gap-1">
                     {IconComponent && <IconComponent className="h-4 w-4" />}
                     {action.label}
                   </Link>
@@ -173,7 +173,7 @@ function DefaultActionsCell<T>({
               <DropdownMenuItem
                 {...(action.variant && { variant: action.variant })}
                 onClick={() => action.onClick?.(row.original)}
-                className="flex items-center gap-2"
+                className="flex items-center gap-1"
               >
                 {IconComponent && <IconComponent className="h-4 w-4" />}
                 {action.label}

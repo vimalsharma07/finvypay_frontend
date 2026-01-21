@@ -31,7 +31,7 @@ const CardNotification = ({
           fill="fill-muted/30"
         />
         <div className="flex flex-col gap-0.5">
-          <span className="flex items-center gap-1.5 leading-none font-medium text-sm text-mono">
+          <span className="flex items-center gap-1 leading-none font-medium text-sm text-mono">
             {title}
           </span>
           <span className="text-sm text-secondary-foreground">

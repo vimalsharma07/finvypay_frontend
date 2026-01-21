@@ -130,7 +130,7 @@ const EarningsChart = () => {
         return `
           <div class="flex flex-col gap-2 p-3.5">
             <div class="font-medium text-sm text-secondary-foreground">${monthName}, 2024 Sales</div>
-            <div class="flex items-center gap-1.5">
+            <div class="flex items-center gap-1">
               <div class="font-semibold text-base text-mono">${formattedNumber}</div>
               <span class="rounded-full border border-green-200 font-medium dark:border-green-850 text-success-700 bg-green-100 dark:bg-green-950/30 text-[11px] leading-none px-1.25 py-1">+24%</span>
             </div>
@@ -185,7 +185,7 @@ const EarningsChart = () => {
       <CardHeader>
         <CardTitle>Earnings</CardTitle>
         <div className="flex gap-5">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Label htmlFor="auto-update" className="text-sm">
               Referrals only
             </Label>

@@ -163,7 +163,7 @@ export default function UserProfilePage() {
             </div>
             <div>
               <CardTitle className="text-xl">{user?.name || 'User'}</CardTitle>
-              <CardDescription className="flex items-center gap-2 mt-1">
+              <CardDescription className="flex items-center gap-1 mt-1">
                 <Mail className="h-4 w-4" />
                 {user?.email || 'Email not available'}
               </CardDescription>
@@ -233,7 +233,7 @@ export default function UserProfilePage() {
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 {isTwoFaEnabled ? (
                   <CheckCircle2 className="h-4 w-4 text-success" />
                 ) : (
@@ -241,23 +241,23 @@ export default function UserProfilePage() {
                 )}
                 <span>Two-Factor Authentication: {isTwoFaEnabled ? 'Enabled' : 'Disabled'}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <CheckCircle2 className="h-4 w-4 text-success" />
                 <span>IP Whitelist: {(user as any)?.ipEnabled ? 'Enabled' : 'Disabled'}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <CheckCircle2 className="h-4 w-4 text-success" />
                 <span>BIN Check: {(user as any)?.binEnabled ? 'Enabled' : 'Disabled'}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <CheckCircle2 className="h-4 w-4 text-success" />
                 <span>Card WL: {(user as any)?.cardWlEnabled ? 'Enabled' : 'Disabled'}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <Clock className="h-4 w-4 text-warning" />
                 <span>KYC Status: {(user as any)?.kycStatus || 'Unknown'}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <AlertCircle className="h-4 w-4 text-info" />
                 <span>Profile Step: {(user as any)?.profileStep ?? '-'}</span>
               </div>

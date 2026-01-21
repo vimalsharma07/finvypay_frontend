@@ -211,7 +211,7 @@ export function CascadingCreateContent() {
         <div className="flex flex-col items-center justify-center py-12">
           <p className="text-muted-foreground mb-4">Profile ID is required. Please select a merchant profile first.</p>
           <Button onClick={() => router.push('/cascading')}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-4 w-4 mr-1" />
             Go Back
           </Button>
         </div>
@@ -229,7 +229,7 @@ export function CascadingCreateContent() {
               onClick={() => router.back()}
               disabled={isLoading}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="h-4 w-4 mr-1" />
               Back
             </Button>
           </ToolbarActions>
@@ -293,7 +293,7 @@ export function CascadingCreateContent() {
                     Primary Account <span className="text-red-500">*</span>
                   </Label>
                   {loadingAcquirers ? (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <ContentLoader />
                       <span>Loading acquirer accounts...</span>
                     </div>
@@ -319,7 +319,7 @@ export function CascadingCreateContent() {
                     Fallback Account <span className="text-red-500">*</span>
                   </Label>
                   {loadingAcquirers ? (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <ContentLoader />
                       <span>Loading acquirer accounts...</span>
                     </div>

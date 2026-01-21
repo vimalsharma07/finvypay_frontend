@@ -37,7 +37,7 @@ export default function SupportPage() {
               variant="primary"
               onClick={() => setCreateDialogOpen(true)}
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 mr-1" />
               Create Support Ticket
             </Button>
           </ToolbarActions>

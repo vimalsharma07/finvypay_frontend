@@ -211,7 +211,7 @@ export function UserCascadingPageContent() {
   if (!isClient) {
     return (
       <Container>
-        <div className="flex items-center gap-2 py-10 text-sm text-muted-foreground">
+        <div className="flex items-center gap-1 py-10 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
           <span>Loading cascading rules...</span>
         </div>

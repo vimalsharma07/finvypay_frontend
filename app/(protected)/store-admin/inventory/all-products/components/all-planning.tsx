@@ -571,7 +571,7 @@ export function AllPlanning() {
         ),
         cell: ({ row }) => (
           <div className="flex flex-col gap-1">
-            <span className="flex items-center gap-2 text-sm text-mono font-medium">
+            <span className="flex items-center gap-1 text-sm text-mono font-medium">
               <span className="flex items-center gap-1">
                 <Database size={16} className="text-sm text-muted-foreground" />
                 {row.original.stock.value1}
@@ -649,7 +649,7 @@ export function AllPlanning() {
           <DataGridColumnHeader title="Supplier" column={column} />
         ),
         cell: ({ row }) => (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <img
               src={toAbsoluteUrl(
                 `/media/brand-logos/${row.original.supplier.logo}`,

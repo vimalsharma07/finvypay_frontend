@@ -120,7 +120,7 @@ export function AddIpDialog({
                           )}
                         </FormLabel>
                         <FormControl>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
                             <Input
                               placeholder="e.g., 192.168.1.1"
                               className="font-mono"
@@ -155,7 +155,7 @@ export function AddIpDialog({
                 disabled={isSubmitting}
                 className="w-full"
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 mr-1" />
                 Add Another IP
               </Button>
             </form>

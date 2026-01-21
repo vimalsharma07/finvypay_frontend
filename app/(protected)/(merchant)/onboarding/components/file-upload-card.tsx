@@ -181,14 +181,14 @@ export function FileUploadCard({
                     asChild
                   >
                     <span>
-                      <Upload className="h-4 w-4 mr-2" />
+                      <Upload className="h-4 w-4 mr-1" />
                       {uploading ? 'Uploading...' : 'Select & Upload File'}
                     </span>
                   </Button>
                 </label>
 
                 {uploading && (
-                  <div className="flex-1 flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="flex-1 flex items-center gap-1 text-sm text-muted-foreground">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
                     <span>Uploading file...</span>
                   </div>
@@ -197,7 +197,7 @@ export function FileUploadCard({
             </div>
           ) : (
             <div className="flex items-center justify-between p-3 bg-success/10 border border-success/20 rounded-lg">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <CheckCircle2 className="h-5 w-5 text-success" />
                 <div>
                   <p className="text-sm font-medium">File uploaded successfully</p>

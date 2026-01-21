@@ -35,14 +35,14 @@ export function AcquirerRequestActionMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent side="bottom" align="end">
         <DropdownMenuItem onClick={() => onView(request)}>
-          <Eye className="mr-2 size-4" />
+          <Eye className="mr-1 size-4" />
           View Details
         </DropdownMenuItem>
         {isPending && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => onApprove(request)}>
-              <CheckCircle className="mr-2 size-4 text-green-600" />
+              <CheckCircle className="mr-1 size-4 text-green-600" />
               Approve Request
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -50,7 +50,7 @@ export function AcquirerRequestActionMenu({
               variant="destructive"
               onClick={() => onReject(request)}
             >
-              <X className="mr-2 size-4" />
+              <X className="mr-1 size-4" />
               Reject Request
             </DropdownMenuItem>
           </>

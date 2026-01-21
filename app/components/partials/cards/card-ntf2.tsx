@@ -61,7 +61,7 @@ const CardNFT2 = ({
           backgroundImage: `url(${toAbsoluteUrl(`/media/images/2600x1200/${bgImage}`)})`,
         }}
       >
-        <div className="mt-2.5 me-2.5">
+        <div className="mt-2.5 me-1.5">
           <DropdownMenu4
             trigger={
               <Button variant="ghost" mode="icon" size="md">

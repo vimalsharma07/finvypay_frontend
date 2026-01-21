@@ -122,7 +122,7 @@ export function TwoFaManage({ isEnabled, onStatusChange }: TwoFaManageProps) {
               onClick={() => setShowTokenInput(true)}
               className="w-full"
             >
-              <Unlock className="mr-2 h-4 w-4" />
+              <Unlock className="mr-1 h-4 w-4" />
               Disable 2FA
             </Button>
           </CardContent>
@@ -158,7 +158,7 @@ export function TwoFaManage({ isEnabled, onStatusChange }: TwoFaManageProps) {
               onClick={() => setShowTokenInput(true)}
               className="w-full"
             >
-              <Lock className="mr-2 h-4 w-4" />
+              <Lock className="mr-1 h-4 w-4" />
               Re-enable 2FA
             </Button>
           </CardContent>
@@ -239,19 +239,19 @@ export function TwoFaManage({ isEnabled, onStatusChange }: TwoFaManageProps) {
             >
               {processing ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-1 h-4 w-4 animate-spin" />
                   {isEnabled ? 'Disabling...' : 'Enabling...'}
                 </>
               ) : (
                 <>
                   {isEnabled ? (
                     <>
-                      <Unlock className="mr-2 h-4 w-4" />
+                      <Unlock className="mr-1 h-4 w-4" />
                       Disable 2FA
                     </>
                   ) : (
                     <>
-                      <Lock className="mr-2 h-4 w-4" />
+                      <Lock className="mr-1 h-4 w-4" />
                       Re-enable 2FA
                     </>
                   )}

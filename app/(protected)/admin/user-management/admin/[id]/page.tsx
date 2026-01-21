@@ -121,13 +121,13 @@ export default function ViewUserPage() {
           <ToolbarActions>
             <Link href="/admin/user-management/admin">
               <Button variant="outline">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <ArrowLeft className="h-4 w-4 mr-1" />
                 Back
               </Button>
             </Link>
             <Link href={`/admin/user-management/admin/${userId}/edit`}>
               <Button>
-                <Edit className="h-4 w-4 mr-2" />
+                <Edit className="h-4 w-4 mr-1" />
                 Edit User
               </Button>
             </Link>

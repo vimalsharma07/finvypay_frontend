@@ -168,7 +168,7 @@ export default function CreatePaymentLinkPage() {
               onClick={() => router.push('/payment-links')}
               disabled={isLoading}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="h-4 w-4 mr-1" />
               Back
             </Button>
           </ToolbarActions>
@@ -224,7 +224,7 @@ export default function CreatePaymentLinkPage() {
                     Currency <span className="text-red-500">*</span>
                   </Label>
                   {loadingCurrencies ? (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <ContentLoader />
                       <span>Loading currencies...</span>
                     </div>
@@ -280,7 +280,7 @@ export default function CreatePaymentLinkPage() {
                     onClick={() => router.push('/payment-links')}
                     disabled={isLoading}
                   >
-                    <X className="h-4 w-4 mr-2" />
+                    <X className="h-4 w-4 mr-1" />
                     Cancel
                   </Button>
                   <Button
@@ -288,7 +288,7 @@ export default function CreatePaymentLinkPage() {
                     variant="primary"
                     disabled={isLoading || loadingCurrencies}
                   >
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="h-4 w-4 mr-1" />
                     {isLoading ? 'Creating...' : 'Create Payment Link'}
                   </Button>
                 </div>

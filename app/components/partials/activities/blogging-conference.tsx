@@ -45,7 +45,7 @@ const ActivitiesBloggingConference = ({
                   Axio new release
                 </Link>
               </Button>
-              <span className="text-sm text-secondary-foreground me-2">
+              <span className="text-sm text-secondary-foreground me-1">
                 email campaign
               </span>
               <Badge size="md" variant="success" appearance="light">

@@ -190,11 +190,11 @@ export function EditSettlementDialog({
                   onClick={() => handleClose(false)}
                   disabled={isSubmitting}
                 >
-                  <X className="h-4 w-4 mr-2" />
+                  <X className="h-4 w-4 mr-1" />
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary" disabled={isSubmitting}>
-                  <Save className="h-4 w-4 mr-2" />
+                  <Save className="h-4 w-4 mr-1" />
                   {isSubmitting ? 'Updating...' : 'Update Settlement'}
                 </Button>
               </DialogFooter>

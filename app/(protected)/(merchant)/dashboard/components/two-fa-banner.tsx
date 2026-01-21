@@ -42,7 +42,7 @@ export function TwoFaBanner({ show = true }: TwoFaBannerProps) {
               asChild
             >
               <Link href="/profile">
-                <ShieldCheck className="h-4 w-4 me-2" />
+                <ShieldCheck className="h-4 w-4 me-1" />
                 Enable 2FA
               </Link>
             </Button>

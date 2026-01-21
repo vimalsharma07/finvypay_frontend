@@ -31,7 +31,7 @@ export default function EditAcquirerPage() {
           <div className="flex items-center">
             <Link
               href="/admin/acquirers"
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="size-4" />
               Back

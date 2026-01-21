@@ -41,7 +41,7 @@ const CardWork = ({
           <div className="flex items-center grow">
             <img
               src={toAbsoluteUrl(`/media/avatars/${authorAvatar}`)}
-              className="rounded-full size-7 me-2"
+              className="rounded-full size-7 me-1"
               alt="image"
             />
             <Link

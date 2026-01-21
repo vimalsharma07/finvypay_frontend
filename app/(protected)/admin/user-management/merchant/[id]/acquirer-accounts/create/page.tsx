@@ -68,7 +68,7 @@ export default function CreateAcquirerAccountPage() {
               variant="outline"
               onClick={() => router.push(returnUrl)}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="h-4 w-4 mr-1" />
               Back
             </Button>
           </ToolbarActions>

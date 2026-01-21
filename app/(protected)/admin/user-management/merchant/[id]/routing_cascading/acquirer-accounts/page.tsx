@@ -238,7 +238,7 @@ export default function ConnectorsPage() {
                 window.location.href = `/admin/user-management/merchant/${userId}/routing_cascading/acquirer-accounts/create?returnUrl=${returnUrl}`;
               }}
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 mr-1" />
               Add Payment Channel
             </Button>
           </ToolbarActions>

@@ -19,7 +19,7 @@ export function Footer() {
               <a
                 href={generalSettings.docsLink}
                 target="_blank"
-                className="hover:text-primary flex items-center gap-1.5"
+                className="hover:text-primary flex items-center gap-1"
               >
                 <ExternalLink className="shrink-0 size-3.5" />
                 Docs

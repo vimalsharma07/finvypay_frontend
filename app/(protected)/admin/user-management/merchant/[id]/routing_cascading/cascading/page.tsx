@@ -294,7 +294,7 @@ export default function CascadingPage() {
                 window.location.href = `/admin/user-management/merchant/${userId}/routing_cascading/cascading/create`;
               }}
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 mr-1" />
               Create Cascading Rule
             </Button>
           </ToolbarActions>
@@ -311,7 +311,7 @@ export default function CascadingPage() {
             </div>
             <div className="w-full md:w-80">
               {profilesLoading ? (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <ContentLoader />
                   <span>Loading profiles...</span>
                 </div>

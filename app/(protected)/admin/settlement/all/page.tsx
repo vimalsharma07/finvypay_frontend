@@ -280,14 +280,14 @@ export default function AdminSettlementsPage() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem asChild>
-                <Link href={`/admin/settlement/${row.original.id}`} className="flex items-center gap-2">
+                <Link href={`/admin/settlement/${row.original.id}`} className="flex items-center gap-1">
                   <Eye className="h-4 w-4" />
                   View
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleEditSettlement(row.original)}
-                className="flex items-center gap-2"
+                className="flex items-center gap-1"
               >
                 <Pencil className="h-4 w-4" />
                 Edit
@@ -296,14 +296,14 @@ export default function AdminSettlementsPage() {
                 <>
                   <DropdownMenuItem
                     onClick={() => handleViewPdf(row.original.pdfUrl)}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-1"
                   >
                     <Download className="h-4 w-4" />
                     Download PDF
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => handleViewPdf(row.original.pdfUrl)}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-1"
                   >
                     <ExternalLink className="h-4 w-4" />
                     View PDF

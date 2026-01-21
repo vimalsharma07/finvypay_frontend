@@ -194,7 +194,7 @@ export default function PaymentLinksPage() {
               variant="primary"
               onClick={() => window.location.href = '/payment-links/create'}
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 mr-1" />
               Create Payment Link
             </Button>
           </ToolbarActions>

@@ -31,7 +31,7 @@ const TeamMeeting = () => {
         </p>
         <div className="flex rounded-lg bg-accent/50 gap-10 p-5">
           <div className="flex flex-col gap-5">
-            <div className="flex items-center gap-1.5 text-sm font-normal text-foreground">
+            <div className="flex items-center gap-1 text-sm font-normal text-foreground">
               <MapPin size={16} className="text-base text-muted-foreground" />
               Location
             </div>
@@ -40,7 +40,7 @@ const TeamMeeting = () => {
             </div>
           </div>
           <div className="flex flex-col gap-5">
-            <div className="flex items-center gap-1.5 text-sm font-normal text-foreground">
+            <div className="flex items-center gap-1 text-sm font-normal text-foreground">
               <Users size={16} className="text-base text-muted-foreground" />
               Team
             </div>

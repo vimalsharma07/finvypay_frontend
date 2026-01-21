@@ -88,7 +88,7 @@ export default function CascadingDetailPage() {
   if (loading) {
     return (
       <Container>
-        <div className="flex items-center gap-2 py-10 text-sm text-muted-foreground">
+        <div className="flex items-center gap-1 py-10 text-sm text-muted-foreground">
           <ContentLoader />
           <span>Loading cascading rule details...</span>
         </div>
@@ -102,7 +102,7 @@ export default function CascadingDetailPage() {
         <div className="flex flex-col items-center justify-center py-12">
           <p className="text-muted-foreground mb-4">Cascading rule not found</p>
           <Button onClick={() => router.push('/cascading')}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-4 w-4 mr-1" />
             Back to Cascading Rules
           </Button>
         </div>
@@ -131,21 +131,21 @@ export default function CascadingDetailPage() {
               variant="outline"
               onClick={() => router.push('/cascading')}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="h-4 w-4 mr-1" />
               Back
             </Button>
             <Button
               variant="secondary"
               onClick={() => router.push(`/cascading/${cascading.id}/edit`)}
             >
-              <Edit className="h-4 w-4 mr-2" />
+              <Edit className="h-4 w-4 mr-1" />
               Edit
             </Button>
             <Button
               variant="destructive"
               onClick={() => setDeleteDialogOpen(true)}
             >
-              <Trash2 className="h-4 w-4 mr-2" />
+              <Trash2 className="h-4 w-4 mr-1" />
               Delete
             </Button>
           </ToolbarActions>
@@ -157,7 +157,7 @@ export default function CascadingDetailPage() {
           {/* Basic Information */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-1">
                 <User className="h-5 w-5" />
                 Basic Information
               </CardTitle>

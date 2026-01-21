@@ -32,7 +32,7 @@ const MegaMenuSubNetwork = ({ items }: { items: MenuConfig }) => {
             {networkItemOthers.children?.map((item: MenuItem, index) => {
               return (
                 <div key={`network-${index}`} className="flex flex-col gap-5">
-                  <h3 className="flex items-center gap-1.5 text-sm text-foreground font-semibold leading-none ps-2.5 h-3.5">
+                  <h3 className="flex items-center gap-1 text-sm text-foreground font-semibold leading-none ps-2.5 h-3.5">
                     {item.title}
                     {item.badge && (
                       <Badge variant="primary" size="sm" appearance="light">

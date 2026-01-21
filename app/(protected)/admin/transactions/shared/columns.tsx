@@ -42,7 +42,7 @@ function TransactionIdCell({
     <button
       onClick={onViewDetails}
       onDoubleClick={handleCopy}
-      className="group flex items-center gap-2 font-mono text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+      className="group flex items-center gap-1 font-mono text-sm font-medium text-primary hover:text-primary/80 transition-colors"
     >
       <span>{transactionId}</span>
       <Copy className={cn("h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity", copied && "hidden")} />
@@ -129,7 +129,7 @@ export function getTransactionColumns(
           return String.fromCodePoint(...codePoints);
         };
         return (
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-2 py-0.5">
+          <div className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/50 px-2 py-0.5">
             <span className="text-sm leading-none">{getFlagEmoji(row.original.country)}</span>
             <span className="text-xs font-medium text-foreground tabular-nums">{row.original.country}</span>
           </div>
@@ -212,7 +212,7 @@ export function getTransactionColumns(
           <Badge
             variant="outline"
             size="sm"
-            className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-medium', config.className)}
+            className={cn('inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-medium', config.className)}
           >
             <Icon className="h-3 w-3" />
             <span>{config.label}</span>

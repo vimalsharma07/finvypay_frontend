@@ -50,7 +50,7 @@ export function OnboardingCard({ onboardingData, loading = false }: OnboardingCa
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-1 mb-2">
                 <h3 className="text-lg font-semibold text-foreground">
                   Pending for Admin Approval
                 </h3>
@@ -97,7 +97,7 @@ export function OnboardingCard({ onboardingData, loading = false }: OnboardingCa
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-1 mb-2">
                 <h3 className="text-lg font-semibold text-foreground">
                   Application Requires Attention
                 </h3>

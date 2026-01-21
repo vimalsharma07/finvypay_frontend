@@ -198,7 +198,7 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
     <Card className="shadow-lg border-primary/10">
       <CardHeader className="pb-4">
         <div className="flex w-full flex-wrap items-center gap-4 justify-center md:justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
               1
             </div>
@@ -208,7 +208,7 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
             </div>
           </div>
           <div className="hidden h-px flex-1 bg-muted md:block" />
-          <div className="flex items-center gap-2 text-muted-foreground">
+          <div className="flex items-center gap-1 text-muted-foreground">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-sm font-semibold">
               2
             </div>

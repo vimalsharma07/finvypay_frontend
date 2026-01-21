@@ -77,7 +77,7 @@ export function BrandedLayout({ children }: { children: ReactNode }) {
           <div className="absolute inset-0 gradient-stripe-overlay opacity-50 rounded-2xl"></div>
           
           <div className="flex flex-col p-8 lg:p-12 xl:p-16 relative z-10 min-h-full">
-            <Link href="/" className="inline-flex items-center gap-2 group mb-8 lg:mb-12">
+            <Link href="/" className="inline-flex items-center gap-1 group mb-8 lg:mb-12">
               <img
                 src={toAbsoluteUrl('/media/app/mini-logo.svg')}
                 className="h-8 max-w-none transition-transform group-hover:scale-105"
@@ -115,15 +115,15 @@ export function BrandedLayout({ children }: { children: ReactNode }) {
 
               {/* Feature highlights */}
               <div className="flex flex-wrap justify-center gap-4 pt-2">
-                <div className="flex items-center gap-2 text-sm text-foreground/70">
+                <div className="flex items-center gap-1 text-sm text-foreground/70">
                   <div className="h-2 w-2 rounded-full bg-teal-500"></div>
                   <span>Secure</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-foreground/70">
+                <div className="flex items-center gap-1 text-sm text-foreground/70">
                   <div className="h-2 w-2 rounded-full bg-teal-500"></div>
                   <span>Fast</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-foreground/70">
+                <div className="flex items-center gap-1 text-sm text-foreground/70">
                   <div className="h-2 w-2 rounded-full bg-teal-500"></div>
                   <span>Reliable</span>
                 </div>

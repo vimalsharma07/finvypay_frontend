@@ -88,7 +88,7 @@ export default function RoutingDetailPage() {
   if (loading) {
     return (
       <Container>
-        <div className="flex items-center gap-2 py-10 text-sm text-muted-foreground">
+        <div className="flex items-center gap-1 py-10 text-sm text-muted-foreground">
           <ContentLoader />
           <span>Loading routing rule details...</span>
         </div>
@@ -102,7 +102,7 @@ export default function RoutingDetailPage() {
         <div className="flex flex-col items-center justify-center py-12">
           <p className="text-muted-foreground mb-4">Routing rule not found</p>
           <Button onClick={() => router.push('/routing')}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-4 w-4 mr-1" />
             Back to Routing Rules
           </Button>
         </div>
@@ -157,21 +157,21 @@ export default function RoutingDetailPage() {
               variant="outline"
               onClick={() => router.push('/routing')}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="h-4 w-4 mr-1" />
               Back
             </Button>
             <Button
               variant="secondary"
               onClick={() => router.push(`/routing/${routing.id}/edit`)}
             >
-              <Edit className="h-4 w-4 mr-2" />
+              <Edit className="h-4 w-4 mr-1" />
               Edit
             </Button>
             <Button
               variant="destructive"
               onClick={() => setDeleteDialogOpen(true)}
             >
-              <Trash2 className="h-4 w-4 mr-2" />
+              <Trash2 className="h-4 w-4 mr-1" />
               Delete
             </Button>
           </ToolbarActions>
@@ -183,7 +183,7 @@ export default function RoutingDetailPage() {
           {/* Basic Information */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-1">
                 <Route className="h-5 w-5" />
                 Basic Information
               </CardTitle>
@@ -337,7 +337,7 @@ export default function RoutingDetailPage() {
           {routing.merchantConnector && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-1">
                   <Settings className="h-5 w-5" />
                   Acquirer Account Information
                 </CardTitle>
@@ -473,7 +473,7 @@ export default function RoutingDetailPage() {
                       key={index}
                       className="border border-gray-200 rounded-lg p-4 bg-gray-50"
                     >
-                      <div className="flex items-center gap-2 mb-3">
+                      <div className="flex items-center gap-1 mb-3">
                         <span className="font-medium text-sm">Rule #{index + 1}</span>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

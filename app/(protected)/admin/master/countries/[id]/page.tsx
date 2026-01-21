@@ -110,13 +110,13 @@ export default function ViewCountryPage() {
           <ToolbarActions>
             <Link href="/admin/master/countries">
               <Button variant="outline">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <ArrowLeft className="h-4 w-4 mr-1" />
                 Back
               </Button>
             </Link>
             <Link href={`/admin/master/countries/${countryId}/edit`}>
               <Button>
-                <Edit className="h-4 w-4 mr-2" />
+                <Edit className="h-4 w-4 mr-1" />
                 Edit Country
               </Button>
             </Link>

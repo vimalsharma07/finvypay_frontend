@@ -505,7 +505,7 @@ export function EditRoleContent() {
                         <div className="flex items-center justify-between">
                           <h3 className="text-lg font-semibold">{module}</h3>
                           {activeTabPermissions.length > 0 && (
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
                               <Checkbox
                                 checked={
                                   activeTabPermissions
@@ -537,7 +537,7 @@ export function EditRoleContent() {
                                   {group.subModule}
                                 </h4>
                                 {group.permissions.length > 0 && (
-                                  <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-1">
                                     <Checkbox
                                       checked={group.permissions.every((p) =>
                                         selectedPermissionIds.has(Number(p.id))
@@ -561,7 +561,7 @@ export function EditRoleContent() {
                                 {group.permissions.map((permission) => (
                                   <div
                                     key={permission.id}
-                                    className="flex items-center gap-2"
+                                    className="flex items-center gap-1"
                                   >
                                     <Checkbox
                                       checked={selectedPermissionIds.has(Number(permission.id))}

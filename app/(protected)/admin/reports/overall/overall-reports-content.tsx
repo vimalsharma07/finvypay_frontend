@@ -156,7 +156,7 @@ export function OverallReportsContent() {
             <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
               <PopoverTrigger asChild>
                 <Button variant="outline" className="w-[280px] justify-start text-left font-normal">
-                  <CalendarDays className="mr-2 h-4 w-4" />
+                  <CalendarDays className="mr-1 h-4 w-4" />
                   {dateRange?.from ? (
                     dateRange.to ? (
                       <>

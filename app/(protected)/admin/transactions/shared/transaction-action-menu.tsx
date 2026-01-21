@@ -50,30 +50,30 @@ export function TransactionActionMenu({
             {showActionOptions ? (
               <>
                 <DropdownMenuItem onClick={() => onRefund?.(transaction)}>
-                  <DollarSign className="mr-2 size-4" />
+                  <DollarSign className="mr-1 size-4" />
                   Refund
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onChargeback?.(transaction)}>
-                  <Ban className="mr-2 size-4" />
+                  <Ban className="mr-1 size-4" />
                   Chargeback
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onSuspicious?.(transaction)}>
-                  <ArrowLeftRight className="mr-2 size-4" />
+                  <ArrowLeftRight className="mr-1 size-4" />
                   Suspicious
                 </DropdownMenuItem>
               </>
             ) : (
               <>
                 <DropdownMenuItem disabled className="cursor-not-allowed opacity-50">
-                  <DollarSign className="mr-2 size-4" />
+                  <DollarSign className="mr-1 size-4" />
                   Refund
                 </DropdownMenuItem>
                 <DropdownMenuItem disabled className="cursor-not-allowed opacity-50">
-                  <Ban className="mr-2 size-4" />
+                  <Ban className="mr-1 size-4" />
                   Chargeback
                 </DropdownMenuItem>
                 <DropdownMenuItem disabled className="cursor-not-allowed opacity-50">
-                  <ArrowLeftRight className="mr-2 size-4" />
+                  <ArrowLeftRight className="mr-1 size-4" />
                   Suspicious
                 </DropdownMenuItem>
               </>
@@ -87,21 +87,21 @@ export function TransactionActionMenu({
           onClick={() => onWebhookLogs?.(transaction)}
           className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950"
         >
-          <Eye className="mr-2 size-4 text-green-600" />
+          <Eye className="mr-1 size-4 text-green-600" />
           Webhook Logs
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => onProviderLogs?.(transaction)}
           className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-950"
         >
-          <Eye className="mr-2 size-4 text-orange-600" />
+          <Eye className="mr-1 size-4 text-orange-600" />
           Provider Logs
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => onTransactionLogs?.(transaction)}
           className="text-pink-600 hover:text-pink-700 hover:bg-pink-50 dark:hover:bg-pink-950"
         >
-          <Eye className="mr-2 size-4 text-pink-600" />
+          <Eye className="mr-1 size-4 text-pink-600" />
           Transaction Logs
         </DropdownMenuItem>
       </DropdownMenuContent>

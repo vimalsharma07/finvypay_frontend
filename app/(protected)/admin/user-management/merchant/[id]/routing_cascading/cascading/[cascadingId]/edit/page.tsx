@@ -312,7 +312,7 @@ export default function CascadingEditPage() {
           description="Update cascading payment rule acquirer chain sequence, priorities, and fallback settings"
           icon={Link2}
         />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Button variant="outline" onClick={() => router.push(backUrl)}>
             Cancel
           </Button>
@@ -409,7 +409,7 @@ export default function CascadingEditPage() {
               <div className="flex flex-col gap-2">
                 <Label>Primary Connector</Label>
                 {connectorsLoading ? (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
                     <ContentLoader />
                     <span>Loading connectors...</span>
                   </div>

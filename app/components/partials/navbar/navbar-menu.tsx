@@ -28,7 +28,7 @@ const NavbarMenu = ({ items }: { items: MenuConfig }) => {
           <MenubarMenu key={index}>
             <MenubarTrigger
               className={cn(
-                'flex items-center gap-1.5 px-3 py-3.5 text-sm text-secondary-foreground',
+                'flex items-center gap-1 px-3 py-3.5 text-sm text-secondary-foreground',
                 'rounded-none border-b-2 border-transparent bg-transparent!',
                 'hover:text-primary hover:bg-transparent',
                 'focus:text-primary focus:bg-transparent',

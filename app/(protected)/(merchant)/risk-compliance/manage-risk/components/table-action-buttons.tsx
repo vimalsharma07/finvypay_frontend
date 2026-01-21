@@ -12,7 +12,7 @@ interface TableActionButtonsProps {
 
 export function TableActionButtons({ row, onEdit, onDelete }: TableActionButtonsProps) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1">
       <Button
         className="size-7"
         mode="icon"

@@ -234,7 +234,7 @@ export function AcquirersPageContent() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem asChild>
-                              <Link href={`/admin/acquirers/${acquirer.id}/edit`} className="flex items-center gap-2">
+                              <Link href={`/admin/acquirers/${acquirer.id}/edit`} className="flex items-center gap-1">
                                 <Pencil className="size-4" />
                                 Edit
                               </Link>
@@ -246,7 +246,7 @@ export function AcquirersPageContent() {
                               }}
                               className="text-destructive"
                             >
-                              <Trash2 className="size-4 mr-2" />
+                              <Trash2 className="size-4 mr-1" />
                               Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -265,7 +265,7 @@ export function AcquirersPageContent() {
                       </div>
                     </div>
                     <div className="flex px-5 min-h-14 border-t border-border justify-between items-center py-3.5">
-                      <Button variant="outline" size="sm" className="h-8.5 text-[0.8125rem] gap-1.5" asChild>
+                      <Button variant="outline" size="sm" className="h-8.5 text-[0.8125rem] gap-1" asChild>
                         <Link href={`/admin/acquirers/acquirer-accounts?acquirerId=${acquirer.id}`}>
                           <Plug className="size-4" />
                           Accounts
@@ -291,7 +291,7 @@ export function AcquirersPageContent() {
                 <div className="text-sm text-muted-foreground">
                   Showing {((currentPage - 1) * limit) + 1} to {Math.min(currentPage * limit, meta?.totalItems || 0)} of {meta?.totalItems || 0} acquirers
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   <Button
                     variant="outline"
                     size="sm"

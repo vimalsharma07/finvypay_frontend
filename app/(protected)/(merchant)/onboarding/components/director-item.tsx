@@ -48,7 +48,7 @@ export function DirectorItem({
             {/* Director Info */}
             <div className="flex items-start justify-between">
               <div className="flex-1 space-y-2">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   <h4 className="font-semibold">{director.name}</h4>
                   {allDocumentsUploaded && (
                     <Badge variant="success" className="text-xs">
@@ -63,7 +63,7 @@ export function DirectorItem({
                   <p>Address: {director.address}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <Button
                   type="button"
                   variant="outline"

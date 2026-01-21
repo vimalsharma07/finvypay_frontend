@@ -38,7 +38,7 @@ export default function AdminAcquirersPage() {
           />
           <ToolbarActions>
             <Button variant="primary" onClick={handleCreateAcquirer}>
-              <Plus className="size-4 mr-2" />
+              <Plus className="size-4 mr-1" />
               Create Acquirer
             </Button>
           </ToolbarActions>

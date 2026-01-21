@@ -48,7 +48,7 @@ const CardAuthorRow = ({ avatar, name, location, works }: IAuthorProps) => {
             badgeClass={avatar?.badgeClass}
           />
           <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <Link
                 href="#"
                 className="hover:text-primary-active text-base leading-5 font-medium text-mono"

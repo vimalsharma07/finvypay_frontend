@@ -39,7 +39,7 @@ const CardWorkRow = ({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-5 lg:gap-7.5">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <img
               src={toAbsoluteUrl(`/media/avatars/${authorAvatar}`)}
               className="rounded-full h-7"

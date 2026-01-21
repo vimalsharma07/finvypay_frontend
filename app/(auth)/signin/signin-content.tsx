@@ -312,9 +312,9 @@ export function SigninContent() {
             className="w-full h-11 border-2 hover:bg-muted/50 transition-all"
           >
             {isGoogleProcessing ? (
-              <LoaderCircleIcon className="size-4 animate-spin mr-2" />
+              <LoaderCircleIcon className="size-4 animate-spin mr-1" />
             ) : (
-              <Icons.googleColorful className="size-5! opacity-100! mr-2" />
+              <Icons.googleColorful className="size-5! opacity-100! mr-1" />
             )}
             {isGoogleProcessing ? 'Signing in...' : 'Sign in with Google'}
           </Button>
@@ -434,12 +434,12 @@ export function SigninContent() {
           >
             {isProcessing ? (
               <>
-                <LoaderCircleIcon className="size-4 animate-spin mr-2" />
+                <LoaderCircleIcon className="size-4 animate-spin mr-1" />
                 Signing in...
               </>
             ) : (
               <>
-                <LogIn className="h-4 w-4 mr-2" />
+                <LogIn className="h-4 w-4 mr-1" />
                 Sign in
               </>
             )}
@@ -491,9 +491,9 @@ export function SigninContent() {
               className="w-full h-11 border-2 hover:bg-muted/50 transition-all"
             >
               {isGoogleProcessing ? (
-                <LoaderCircleIcon className="size-4 animate-spin mr-2" />
+                <LoaderCircleIcon className="size-4 animate-spin mr-1" />
               ) : (
-                <Icons.googleColorful className="size-5! opacity-100! mr-2" />
+                <Icons.googleColorful className="size-5! opacity-100! mr-1" />
               )}
               {isGoogleProcessing ? 'Signing in...' : 'Sign in with Google'}
             </Button>
@@ -555,12 +555,12 @@ export function SigninContent() {
             >
               {isSendingOtp ? (
                 <>
-                  <LoaderCircleIcon className="size-4 animate-spin mr-2" />
+                  <LoaderCircleIcon className="size-4 animate-spin mr-1" />
                   Sending OTP...
                 </>
               ) : (
                 <>
-                  <Mail className="h-4 w-4 mr-2" />
+                  <Mail className="h-4 w-4 mr-1" />
                   Send OTP
                 </>
               )}
@@ -685,12 +685,12 @@ export function SigninContent() {
             >
               {isVerifyingOtp ? (
                 <>
-                  <LoaderCircleIcon className="size-4 animate-spin mr-2" />
+                  <LoaderCircleIcon className="size-4 animate-spin mr-1" />
                   Verifying...
                 </>
               ) : (
                 <>
-                  <CheckCircle className="h-4 w-4 mr-2" />
+                  <CheckCircle className="h-4 w-4 mr-1" />
                   Verify & Continue
                 </>
               )}
@@ -709,7 +709,7 @@ export function SigninContent() {
               }}
               className="w-full h-11"
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="h-4 w-4 mr-1" />
               Back to Email
             </Button>
           </div>

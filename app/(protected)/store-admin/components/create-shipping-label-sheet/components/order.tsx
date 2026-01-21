@@ -16,7 +16,7 @@ export const Order = () => {
             {locations.map((location, index) => (
               <div
                 key={index}
-                className="flex items-center gap-2 relative z-10"
+                className="flex items-center gap-1 relative z-10"
               >
                 {index !== locations.length - 1 && (
                   <div className="absolute left-[2.2px] top-[15px] w-[2px] h-full bg-input rounded-full z-0"></div>

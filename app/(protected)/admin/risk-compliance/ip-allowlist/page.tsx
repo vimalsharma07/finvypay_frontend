@@ -34,7 +34,7 @@ export default function AdminIpWhitelistPage() {
           />
           <ToolbarActions>
             <Button variant="primary" onClick={() => setAddDialogOpen(true)}>
-              <Plus className="h-4 w-4 me-2" />
+              <Plus className="h-4 w-4 me-1" />
               Add IP
             </Button>
           </ToolbarActions>

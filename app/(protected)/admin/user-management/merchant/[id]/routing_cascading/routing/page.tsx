@@ -332,7 +332,7 @@ export default function RoutingPage() {
                 window.location.href = `/admin/user-management/merchant/${userId}/routing_cascading/routing/create`;
               }}
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 mr-1" />
               Create Routing Rule
             </Button>
           </ToolbarActions>
@@ -349,7 +349,7 @@ export default function RoutingPage() {
             </div>
             <div className="w-full md:w-80">
               {profilesLoading ? (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <ContentLoader />
                   <span>Loading profiles...</span>
                 </div>

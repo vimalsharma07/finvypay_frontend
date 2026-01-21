@@ -29,7 +29,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
       <DropdownMenuContent className="w-64" side="bottom" align="end">
         {/* Header */}
         <div className="flex items-center justify-between p-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <div className="w-9 h-9 rounded-full border border-border bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold uppercase">
               {(user?.email?.[0] || 'U').toUpperCase()}
             </div>
@@ -59,7 +59,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
         <DropdownMenuItem asChild>
           <Link
             href="/profile"
-            className="flex items-center gap-2"
+            className="flex items-center gap-1"
           >
             Profile
           </Link>
@@ -69,11 +69,11 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
 
         {/* Footer */}
         <DropdownMenuItem
-          className="flex items-center gap-2"
+          className="flex items-center gap-1"
           onSelect={(event) => event.preventDefault()}
         >
           <Moon />
-          <div className="flex items-center gap-2 justify-between grow">
+          <div className="flex items-center gap-1 justify-between grow">
             Dark Mode
             <Switch
               size="sm"
