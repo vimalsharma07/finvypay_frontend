@@ -187,7 +187,7 @@ export function EditCountryContent() {
   }
 
   return (
-    <Card>
+    <Card className="rounded-md">
         <CardHeader>
           <CardTitle>Country Information</CardTitle>
         </CardHeader>

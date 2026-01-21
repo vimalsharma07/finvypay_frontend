@@ -101,7 +101,7 @@ export function CreatePermissionContent() {
   };
 
   return (
-    <Card>
+    <Card className="rounded-md">
       <CardHeader>
         <CardTitle>Permission Information</CardTitle>
       </CardHeader>

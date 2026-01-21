@@ -120,7 +120,7 @@ export function CreateCountryContent() {
   };
 
   return (
-    <Card>
+    <Card className="rounded-md">
         <CardHeader>
           <CardTitle>Country Information</CardTitle>
         </CardHeader>

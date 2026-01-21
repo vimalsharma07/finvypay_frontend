@@ -191,7 +191,7 @@ export function EditPermissionContent() {
   }
 
   return (
-    <Card>
+    <Card className="rounded-md">
       <CardHeader>
         <CardTitle>Permission Information</CardTitle>
       </CardHeader>

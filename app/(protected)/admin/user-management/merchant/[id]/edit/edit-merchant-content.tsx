@@ -161,7 +161,7 @@ export function EditMerchantContent() {
   }
 
   return (
-    <Card>
+    <Card className="rounded-md">
         <CardHeader>
           <CardTitle>Merchant Information</CardTitle>
         </CardHeader>

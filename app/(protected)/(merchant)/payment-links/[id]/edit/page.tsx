@@ -4,12 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link2, ArrowLeft, X, Save } from 'lucide-react';
+import { Fragment } from 'react';
+import { Link2, X, Save } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
   ToolbarHeading,
-  ToolbarActions,
 } from '@/layouts/main/components/toolbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -215,7 +215,7 @@ export default function EditPaymentLinkPage({ params }: EditPaymentLinkPageProps
   }
 
   return (
-    <>
+    <Fragment>
       <Container>
         <Toolbar>
           <ToolbarHeading
@@ -223,26 +223,14 @@ export default function EditPaymentLinkPage({ params }: EditPaymentLinkPageProps
             description="Update payment link details for secure customer payments"
             icon={Link2}
           />
-          <ToolbarActions>
-            <Button
-              variant="outline"
-              onClick={() => router.push('/payment-links')}
-              disabled={isLoading}
-            >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Back
-            </Button>
-          </ToolbarActions>
         </Toolbar>
       </Container>
-
       <Container>
-        <div className="max-w-2xl mx-auto">
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment Link Details</CardTitle>
-            </CardHeader>
-            <CardContent>
+        <Card className="rounded-md">
+          <CardHeader>
+            <CardTitle>Payment Link Information</CardTitle>
+          </CardHeader>
+          <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 {/* Payment Link Name */}
                 <div className="space-y-2">
@@ -333,31 +321,30 @@ export default function EditPaymentLinkPage({ params }: EditPaymentLinkPageProps
                   )}
                 </div>
 
-                {/* Submit Actions */}
-                <div className="flex justify-end gap-3 pt-6 border-t">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => router.push('/payment-links')}
-                    disabled={isLoading}
-                  >
-                    <X className="h-4 w-4 mr-1" />
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    disabled={isLoading || loadingCurrencies || loadingData}
-                  >
-                    <Save className="h-4 w-4 mr-1" />
-                    {isLoading ? 'Updating...' : 'Update Payment Link'}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      </Container>
-    </>
+            {/* Submit Actions */}
+            <div className="flex justify-end gap-4 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push('/payment-links')}
+                disabled={isLoading}
+              >
+                <X className="h-4 w-4 me-1" />
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={isLoading || loadingCurrencies || loadingData}
+              >
+                <Save className="h-4 w-4 me-1" />
+                {isLoading ? 'Updating...' : 'Update Payment Link'}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </Container>
+    </Fragment>
   );
 }

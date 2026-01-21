@@ -184,7 +184,7 @@ export function EditAdminContent() {
   }
 
   return (
-    <Card>
+    <Card className="rounded-md">
         <CardHeader>
           <CardTitle>Admin Information</CardTitle>
         </CardHeader>

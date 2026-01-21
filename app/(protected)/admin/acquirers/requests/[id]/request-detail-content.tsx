@@ -160,7 +160,7 @@ export function RequestDetailContent() {
 
   if (!request) {
     return (
-      <Card>
+      <Card className="rounded-md">
         <CardContent className="text-center py-8">
           <p className="text-muted-foreground">Request not found or has been deleted.</p>
           <Button
@@ -191,7 +191,7 @@ export function RequestDetailContent() {
         </Button>
 
         {/* Status and Actions */}
-        <Card>
+        <Card className="rounded-md">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
@@ -231,7 +231,7 @@ export function RequestDetailContent() {
 
         <div className="grid gap-6 md:grid-cols-2">
           {/* Merchant Information */}
-          <Card>
+          <Card className="rounded-md">
             <CardHeader>
               <CardTitle className="flex items-center gap-1">
                 <User className="size-5" />
@@ -261,7 +261,7 @@ export function RequestDetailContent() {
           </Card>
 
           {/* Acquirer Account Information */}
-          <Card>
+          <Card className="rounded-md">
             <CardHeader>
               <CardTitle className="flex items-center gap-1">
                 <Building2 className="size-5" />
@@ -291,7 +291,7 @@ export function RequestDetailContent() {
           </Card>
 
           {/* Payment Methods & Currencies */}
-          <Card>
+          <Card className="rounded-md">
             <CardHeader>
               <CardTitle className="flex items-center gap-1">
                 <CreditCard className="size-5" />
@@ -323,7 +323,7 @@ export function RequestDetailContent() {
           </Card>
 
           {/* Rates Information */}
-          <Card>
+          <Card className="rounded-md">
             <CardHeader>
               <CardTitle className="flex items-center gap-1">
                 <DollarSign className="size-5" />
@@ -354,7 +354,7 @@ export function RequestDetailContent() {
         </div>
 
         {/* Request Description */}
-        <Card>
+        <Card className="rounded-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-1">
               <Calendar className="size-5" />

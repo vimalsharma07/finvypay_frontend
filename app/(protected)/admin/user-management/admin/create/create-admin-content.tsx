@@ -91,7 +91,7 @@ export function CreateAdminContent() {
   };
 
   return (
-    <Card>
+    <Card className="rounded-md">
         <CardHeader>
           <CardTitle>Admin Information</CardTitle>
         </CardHeader>

@@ -184,7 +184,7 @@ export function EditAffiliateContent() {
   }
 
   return (
-    <Card>
+    <Card className="rounded-md">
         <CardHeader>
           <CardTitle>Affiliate Information</CardTitle>
         </CardHeader>
@@ -303,7 +303,6 @@ export function EditAffiliateContent() {
           </Form>
         </CardContent>
       </Card>
-    </Container>
   );
 }
 

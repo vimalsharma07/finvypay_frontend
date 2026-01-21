@@ -91,7 +91,7 @@ export function CreateAffiliateContent() {
   };
 
   return (
-    <Card>
+    <Card className="rounded-md">
       <CardHeader>
         <CardTitle>Affiliate Information</CardTitle>
       </CardHeader>

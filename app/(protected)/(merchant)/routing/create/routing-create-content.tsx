@@ -4,14 +4,10 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Trash2, ArrowLeft } from 'lucide-react';
+import { Plus, Trash2, X } from 'lucide-react';
 import { Container } from '@/components/common/container';
-import {
-  Toolbar,
-  ToolbarHeading,
-  ToolbarActions,
-} from '@/layouts/main/components/toolbar';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -236,7 +232,7 @@ export function RoutingCreateContent() {
         <div className="flex flex-col items-center justify-center py-12">
           <p className="text-muted-foreground mb-4">Profile ID is required. Please select a merchant profile first.</p>
           <Button onClick={() => router.push('/routing')}>
-            <ArrowLeft className="h-4 w-4 mr-1" />
+            <X className="h-4 w-4 me-1" />
             Go Back
           </Button>
         </div>
@@ -245,28 +241,16 @@ export function RoutingCreateContent() {
   }
 
   return (
-    <>
-      <Container>
-        <Toolbar>
-          <ToolbarActions>
-            <Button
-              variant="outline"
-              onClick={() => router.back()}
-              disabled={isLoading}
-            >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Back
-            </Button>
-          </ToolbarActions>
-        </Toolbar>
-      </Container>
-
-      <Container>
-        <div className="max-w-4xl mx-auto">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <Container>
+      <Card className="rounded-md">
+        <CardHeader>
+          <CardTitle>Routing Rule Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Basic Information */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Basic Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm font-medium">
@@ -310,8 +294,8 @@ export function RoutingCreateContent() {
             </div>
 
             {/* Acquirer Account Selection */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Acquirer Account</h3>
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Acquirer Account</h3>
               <div className="space-y-2">
                 <Label className="text-sm font-medium">
                   Select Acquirer Account <span className="text-red-500">*</span>
@@ -340,8 +324,8 @@ export function RoutingCreateContent() {
             </div>
 
             {/* Configuration Rules */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="flex justify-between items-center mb-4">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Configuration Rules</h3>
                 <Button
                   type="button"
@@ -349,7 +333,7 @@ export function RoutingCreateContent() {
                   size="sm"
                   onClick={addConfigRule}
                 >
-                  <Plus className="h-4 w-4 mr-1" />
+                  <Plus className="h-4 w-4 me-1" />
                   Add Rule
                 </Button>
               </div>
@@ -463,29 +447,28 @@ export function RoutingCreateContent() {
             </div>
 
             {/* Split Enable Toggle */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold">Split Payments</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Enable split payment processing across multiple acquirers
-                  </p>
-                </div>
-                <Switch
-                  checked={watchedSplitEnable}
-                  onCheckedChange={(checked) => setValue('splitEnable', checked)}
-                />
+            <div className="flex items-center justify-between rounded-lg border p-4">
+              <div>
+                <h3 className="text-lg font-semibold">Split Payments</h3>
+                <p className="text-sm text-muted-foreground">
+                  Enable split payment processing across multiple acquirers
+                </p>
               </div>
+              <Switch
+                checked={watchedSplitEnable}
+                onCheckedChange={(checked) => setValue('splitEnable', checked)}
+              />
             </div>
 
             {/* Submit Actions */}
-            <div className="flex justify-end gap-3 pt-6 border-t">
+            <div className="flex justify-end gap-4 pt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => router.back()}
                 disabled={isLoading}
               >
+                <X className="h-4 w-4 me-1" />
                 Cancel
               </Button>
               <Button
@@ -493,13 +476,14 @@ export function RoutingCreateContent() {
                 variant="primary"
                 disabled={isLoading || loadingAcquirers}
               >
+                <Plus className="h-4 w-4 me-1" />
                 {isLoading ? 'Creating...' : 'Create Routing Rule'}
               </Button>
             </div>
           </form>
-        </div>
-      </Container>
-    </>
+        </CardContent>
+      </Card>
+    </Container>
   );
 }
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { Fragment } from 'react';
 import dynamic from 'next/dynamic';
 import { Plus } from 'lucide-react';
 import {
@@ -19,15 +20,17 @@ const CascadingCreateContent = dynamic(
 
 export default function CreateCascadingPage() {
   return (
-    <Container>
-      <Toolbar>
-        <ToolbarHeading
-          title="Create Cascading Rule"
-          description="Configure cascading rules to automatically route transactions through multiple acquirers in sequence"
-          icon={Plus}
-        />
-      </Toolbar>
+    <Fragment>
+      <Container>
+        <Toolbar>
+          <ToolbarHeading
+            title="Create Cascading Rule"
+            description="Configure cascading rules to automatically route transactions through multiple acquirers in sequence"
+            icon={Plus}
+          />
+        </Toolbar>
+      </Container>
       <CascadingCreateContent />
-    </Container>
+    </Fragment>
   );
 }

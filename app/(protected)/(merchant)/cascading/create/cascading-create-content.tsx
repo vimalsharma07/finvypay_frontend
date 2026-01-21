@@ -4,14 +4,10 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 import { Container } from '@/components/common/container';
-import {
-  Toolbar,
-  ToolbarHeading,
-  ToolbarActions,
-} from '@/layouts/main/components/toolbar';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -211,7 +207,7 @@ export function CascadingCreateContent() {
         <div className="flex flex-col items-center justify-center py-12">
           <p className="text-muted-foreground mb-4">Profile ID is required. Please select a merchant profile first.</p>
           <Button onClick={() => router.push('/cascading')}>
-            <ArrowLeft className="h-4 w-4 mr-1" />
+            <X className="h-4 w-4 me-1" />
             Go Back
           </Button>
         </div>
@@ -220,28 +216,16 @@ export function CascadingCreateContent() {
   }
 
   return (
-    <>
-      <Container>
-        <Toolbar>
-          <ToolbarActions>
-            <Button
-              variant="outline"
-              onClick={() => router.back()}
-              disabled={isLoading}
-            >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Back
-            </Button>
-          </ToolbarActions>
-        </Toolbar>
-      </Container>
-
-      <Container>
-        <div className="max-w-4xl mx-auto">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <Container>
+      <Card className="rounded-md">
+        <CardHeader>
+          <CardTitle>Cascading Rule Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Basic Information */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Basic Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm font-medium">
@@ -285,8 +269,8 @@ export function CascadingCreateContent() {
             </div>
 
             {/* Account Selection */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Account Selection</h3>
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Account Selection</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">
@@ -343,29 +327,28 @@ export function CascadingCreateContent() {
             </div>
 
             {/* Status Toggle */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold">Active Status</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Enable or disable this cascading rule
-                  </p>
-                </div>
-                <Switch
-                  checked={watch('status')}
-                  onCheckedChange={(checked) => setValue('status', checked)}
-                />
+            <div className="flex items-center justify-between rounded-lg border p-4">
+              <div>
+                <h3 className="text-lg font-semibold">Active Status</h3>
+                <p className="text-sm text-muted-foreground">
+                  Enable or disable this cascading rule
+                </p>
               </div>
+              <Switch
+                checked={watch('status')}
+                onCheckedChange={(checked) => setValue('status', checked)}
+              />
             </div>
 
             {/* Submit Actions */}
-            <div className="flex justify-end gap-3 pt-6 border-t">
+            <div className="flex justify-end gap-4 pt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => router.back()}
                 disabled={isLoading}
               >
+                <X className="h-4 w-4 me-1" />
                 Cancel
               </Button>
               <Button
@@ -373,13 +356,14 @@ export function CascadingCreateContent() {
                 variant="primary"
                 disabled={isLoading || loadingAcquirers}
               >
+                <Plus className="h-4 w-4 me-1" />
                 {isLoading ? 'Creating...' : 'Create Cascading Rule'}
               </Button>
             </div>
           </form>
-        </div>
-      </Container>
-    </>
+        </CardContent>
+      </Card>
+    </Container>
   );
 }
 

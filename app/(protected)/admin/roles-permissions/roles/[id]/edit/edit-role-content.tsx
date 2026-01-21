@@ -414,7 +414,7 @@ export function EditRoleContent() {
   }
 
   return (
-    <Card>
+    <Card className="rounded-md">
       <CardHeader>
         <CardTitle>Role Information</CardTitle>
       </CardHeader>
