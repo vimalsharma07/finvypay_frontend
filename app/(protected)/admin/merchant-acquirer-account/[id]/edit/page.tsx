@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { Toolbar, ToolbarHeading } from '@/layouts/demo1/components/toolbar';
+import { Toolbar, ToolbarHeading } from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { FormSkeleton } from '@/components/ui/skeletons';
 

@@ -5,7 +5,7 @@ import { FileText } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
-} from '@/layouts/demo1/components/toolbar';
+} from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { PageSkeleton } from '@/components/ui/skeletons';
 import { Suspense } from 'react';

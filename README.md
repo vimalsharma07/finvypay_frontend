@@ -49,7 +49,7 @@ npm run dev
 
 ### Setting Up the Layout
 
-The application uses `Demo1Layout` as the main layout. You can modify the layout in `app/(protected)/layout.tsx`.
+The application uses `MainLayout` as the main layout. You can modify the layout in `app/(protected)/layout.tsx`.
 
 ### Reporting Issues
 

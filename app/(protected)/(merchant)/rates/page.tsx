@@ -6,7 +6,7 @@ import { Container } from '@/components/common/container';
 import {
   Toolbar,
   ToolbarHeading,
-} from '@/layouts/demo1/components/toolbar';
+} from '@/layouts/main/components/toolbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';

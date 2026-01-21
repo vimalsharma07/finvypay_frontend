@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Percent } from 'lucide-react';
 import { Container } from '@/components/common/container';
-import { Toolbar, ToolbarHeading, ToolbarActions } from '@/layouts/demo1/components/toolbar';
+import { Toolbar, ToolbarHeading, ToolbarActions } from '@/layouts/main/components/toolbar';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { getMerchantRates, upsertMerchantRates, type MerchantRates } from '@/lib/services/admin/merchant-rates';
 import { toast } from 'sonner';

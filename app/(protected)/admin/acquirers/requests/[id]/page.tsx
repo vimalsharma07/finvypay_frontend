@@ -5,7 +5,7 @@ import { PageSkeleton } from '@/components/ui/skeletons';
 import { Suspense, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Container } from '@/components/common/container';
-import { Toolbar, ToolbarHeading } from '@/layouts/demo1/components/toolbar';
+import { Toolbar, ToolbarHeading } from '@/layouts/main/components/toolbar';
 import {
   getMerchantAcquirerRequest,
   MerchantAcquirerRequest,

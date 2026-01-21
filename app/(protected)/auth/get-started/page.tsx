@@ -18,7 +18,7 @@ export default function AccountGetStartedPage() {
 
   return (
     <Fragment>
-      {settings?.layout === 'demo1' && (
+      {settings?.layout === 'main' && (
         <Container>
           <Toolbar>
             <ToolbarHeading>

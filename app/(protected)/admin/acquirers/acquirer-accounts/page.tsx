@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { Cpu } from 'lucide-react';
-import { Toolbar, ToolbarHeading, ToolbarActions } from '@/layouts/demo1/components/toolbar';
+import { Toolbar, ToolbarHeading, ToolbarActions } from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { PageSkeleton } from '@/components/ui/skeletons';
 import { Suspense, useEffect, useState } from 'react';

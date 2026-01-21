@@ -1,6 +1,6 @@
 'use client';
 
-import { Demo1Layout } from '../components/layouts/demo1/layout';
+import { MainLayout } from '../components/layouts/main/layout';
 import { useAuthLogoutListener } from '@/hooks/use-auth-logout-listener';
 import { useRouteGuard } from '@/hooks/use-route-guard';
 
@@ -15,5 +15,5 @@ export default function ProtectedLayout({
   // Protect routes based on user role
   useRouteGuard();
 
-  return <Demo1Layout>{children}</Demo1Layout>;
+  return <MainLayout>{children}</MainLayout>;
 }

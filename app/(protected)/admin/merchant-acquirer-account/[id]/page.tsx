@@ -36,7 +36,7 @@ import {
 } from '@/lib/services/admin/acquirer-accounts';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
-import { Toolbar, ToolbarHeading } from '@/layouts/demo1/components/toolbar';
+import { Toolbar, ToolbarHeading } from '@/layouts/main/components/toolbar';
 
 export default function AdminMerchantAcquirerAccountDetailPage() {
   const params = useParams();

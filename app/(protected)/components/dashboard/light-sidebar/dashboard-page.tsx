@@ -3,9 +3,9 @@ import {
   Toolbar,
   ToolbarActions,
   ToolbarHeading,
-} from '@/layouts/demo1/components/toolbar';
+} from '@/layouts/main/components/toolbar';
 import { addDays, format } from 'date-fns';
-import { CalendarDays } from 'lucide-react';
+import { CalendarDays, LayoutGrid } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -15,13 +15,28 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Container } from '@/components/common/container';
-import { Demo1LightSidebarContent } from '../light-sidebar';
+import { DashboardContent } from './';
 
-const Demo1DarkSidebarPage = () => {
+export function DashboardPage() {
+  const [isOpen, setIsOpen] = useState(false);
   const [date, setDate] = useState<DateRange | undefined>({
     from: new Date(2025, 0, 20),
     to: addDays(new Date(2025, 0, 20), 20),
   });
+  const [tempDateRange, setTempDateRange] = useState<DateRange | undefined>(
+    date,
+  );
+
+  const handleDateRangeApply = () => {
+    setDate(tempDateRange); // Save the temporary date range to the main state
+    setIsOpen(false); // Close the popover
+  };
+
+  const handleDateRangeReset = () => {
+    setTempDateRange(undefined); // Reset the temporary date range
+  };
+
+  const defaultStartDate = new Date(); // Default start date fallback
 
   return (
     <Fragment>
@@ -29,12 +44,13 @@ const Demo1DarkSidebarPage = () => {
         <Toolbar>
           <ToolbarHeading
             title="Dashboard"
-            description="Central Hub for Personal Customization"
+            description="Overview of system statistics, transaction analytics, user activity, and key performance metrics for administrative monitoring"
+            icon={LayoutGrid}
           />
           <ToolbarActions>
-            <Popover>
+            <Popover open={isOpen} onOpenChange={setIsOpen}>
               <PopoverTrigger asChild>
-                <Button id="date" variant="outline" size="sm">
+                <Button id="date" variant="outline">
                   <CalendarDays size={16} className="me-0.5" />
                   {date?.from ? (
                     date.to ? (
@@ -54,21 +70,25 @@ const Demo1DarkSidebarPage = () => {
                 <Calendar
                   initialFocus
                   mode="range"
-                  defaultMonth={date?.from}
-                  selected={date}
-                  onSelect={setDate}
+                  defaultMonth={tempDateRange?.from || defaultStartDate}
+                  selected={tempDateRange}
+                  onSelect={setTempDateRange}
                   numberOfMonths={2}
                 />
+                <div className="flex items-center justify-end gap-1.5 border-t border-border p-3">
+                  <Button variant="outline" onClick={handleDateRangeReset}>
+                    Reset
+                  </Button>
+                  <Button onClick={handleDateRangeApply}>Apply</Button>
+                </div>
               </PopoverContent>
             </Popover>
           </ToolbarActions>
         </Toolbar>
       </Container>
       <Container>
-        <Demo1LightSidebarContent />
+        <DashboardContent />
       </Container>
     </Fragment>
   );
-};
-
-export { Demo1DarkSidebarPage };
+}

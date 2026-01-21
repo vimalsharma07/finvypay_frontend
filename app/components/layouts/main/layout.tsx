@@ -7,14 +7,14 @@ import { Footer } from './components/footer';
 import { Header } from './components/header';
 import { Sidebar } from './components/sidebar';
 
-export function Demo1Layout({ children }: { children: ReactNode }) {
+export function MainLayout({ children }: { children: ReactNode }) {
   const isMobile = useIsMobile();
   const { settings, setOption } = useSettings();
 
   useEffect(() => {
     const bodyClass = document.body.classList;
 
-    if (settings.layouts.demo1.sidebarCollapse) {
+    if (settings.layouts.main.sidebarCollapse) {
       bodyClass.add('sidebar-collapse');
     } else {
       bodyClass.remove('sidebar-collapse');
@@ -23,14 +23,14 @@ export function Demo1Layout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Set current layout
-    setOption('layout', 'demo1');
+    setOption('layout', 'main');
   }, [setOption]);
 
   useEffect(() => {
     const bodyClass = document.body.classList;
 
     // Add a class to the body element
-    bodyClass.add('demo1');
+    bodyClass.add('main');
     bodyClass.add('sidebar-fixed');
     bodyClass.add('header-fixed');
 
@@ -40,7 +40,7 @@ export function Demo1Layout({ children }: { children: ReactNode }) {
 
     // Remove the class when the component is unmounted
     return () => {
-      bodyClass.remove('demo1');
+      bodyClass.remove('main');
       bodyClass.remove('sidebar-fixed');
       bodyClass.remove('sidebar-collapse');
       bodyClass.remove('header-fixed');
@@ -66,4 +66,4 @@ export function Demo1Layout({ children }: { children: ReactNode }) {
   );
 }
 
-export default Demo1Layout;
+export default MainLayout;
