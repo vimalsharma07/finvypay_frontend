@@ -1,26 +1,45 @@
 'use client';
 
+import { Fragment } from 'react';
 import dynamicImport from 'next/dynamic';
+import { LayoutGrid } from 'lucide-react';
+import {
+  Toolbar,
+  ToolbarHeading,
+} from '@/layouts/main/components/toolbar';
+import { Container } from '@/components/common/container';
 import { PageSkeleton } from '@/components/ui/skeletons';
 
 // Dynamically import to avoid SSR issues with client-only code
-const DashboardPage = dynamicImport(
-  () => import('@/app/(protected)/components/dashboard').then(mod => ({ default: mod.DashboardPage })),
-  { 
-    ssr: false,
+const AdminDashboardContent = dynamicImport(
+  () => import('./admin-dashboard-content').then(mod => ({ default: mod.AdminDashboardContent })),
+  {
     loading: () => <PageSkeleton />,
+    ssr: false,
   }
 );
-
-// Force dynamic rendering to prevent SSR issues
-export const dynamic = 'force-dynamic';
 
 /**
  * Admin Dashboard Page
  * 
- * Uses the original dashboard content - only the sidebar menu changes based on role
+ * Displays admin-specific dashboard with user counters, transaction statistics, and connector summaries
  */
 export default function AdminDashboardPage() {
-  return <DashboardPage />;
+  return (
+    <Fragment>
+      <Container>
+        <Toolbar>
+          <ToolbarHeading
+            title="Dashboard"
+            description="Overview of system statistics, transaction analytics, user activity, and key performance metrics for administrative monitoring"
+            icon={LayoutGrid}
+          />
+        </Toolbar>
+      </Container>
+      <Container>
+        <AdminDashboardContent />
+      </Container>
+    </Fragment>
+  );
 }
 
