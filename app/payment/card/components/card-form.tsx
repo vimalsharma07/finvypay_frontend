@@ -396,7 +396,7 @@ export function CardForm() {
                   P4
                 </div>
                 <div className="text-xs">
-                  <p className="font-semibold">Pay4Tech</p>
+                  <p className="font-semibold">FinvyPay</p>
                   <p className="text-white/80">Checkout</p>
                 </div>
               </div>
@@ -413,7 +413,7 @@ export function CardForm() {
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
                 <p className="text-white/80 text-[10px] uppercase tracking-wide">Name</p>
-                <p className="font-semibold">Pay4Tech User</p>
+                <p className="font-semibold">FinvyPay User</p>
               </div>
               <div className="text-right">
                 <p className="text-white/80 text-[10px] uppercase tracking-wide">Expiry</p>

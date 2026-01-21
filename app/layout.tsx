@@ -23,8 +23,8 @@ import '@/components/keenicons/assets/styles.css';
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Pay4Tech',
-    default: 'Pay4Tech', // a default is required when creating a template
+    template: '%s | FinvyPay',
+    default: 'FinvyPay', // a default is required when creating a template
   }
 };
 

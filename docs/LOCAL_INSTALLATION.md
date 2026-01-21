@@ -1,4 +1,4 @@
-# Pay4Tech Frontend - Installation Guide
+# FinvyPay Frontend - Installation Guide
 
 ## Prerequisites
 
@@ -9,8 +9,8 @@
 
 1. **Clone the repository**
    ```bash
-   git clone git@github.com:Keyur19041991/pay4tech_frontend.git
-   cd pay4tech_frontend
+   git clone git@github.com:Keyur19041991/finvypay_frontend.git
+   cd finvypay_frontend
    ```
 
 2. **Install dependencies**

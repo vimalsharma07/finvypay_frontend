@@ -75,7 +75,7 @@ export const modernTableClassNames: DataGridProps<any>['tableClassNames'] = {
  * Shared Card class names for modern table containers
  */
 export const modernTableCardClasses = {
-  card: 'rounded-2xl border-border/50 bg-card shadow-sm',
+  card: 'rounded-md border-border/50 bg-card shadow-sm',
   header: 'border-b border-border/50 bg-muted/20',
   table: 'overflow-hidden',
   footer: 'border-t border-border/50 bg-muted/10',

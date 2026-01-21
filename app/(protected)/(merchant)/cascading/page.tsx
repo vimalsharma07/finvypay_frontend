@@ -10,7 +10,7 @@ import {
 } from '@/layouts/demo1/components/toolbar';
 import { Container } from '@/components/common/container';
 import { PageSkeleton } from '@/components/ui/skeletons';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 
 const UserCascadingPageContent = dynamic(
@@ -23,8 +23,6 @@ const UserCascadingPageContent = dynamic(
 
 export default function UserCascadingPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const profileId = searchParams.get('profileId');
 
   return (
     <Fragment>
@@ -38,7 +36,7 @@ export default function UserCascadingPage() {
           <ToolbarActions>
             <Button
               variant="primary"
-              onClick={() => router.push(`/cascading/create${profileId ? `?profileId=${profileId}` : ''}`)}
+              onClick={() => router.push('/cascading/create')}
             >
               <Plus className="h-4 w-4" />
               Create Cascading

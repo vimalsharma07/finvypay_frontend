@@ -53,7 +53,12 @@ import { toast } from 'sonner';
 import { TableActionMenu, TableActionMenuItem } from '@/app/(protected)/components/table-action-menu';
 import { DynamicAddIpDialogAdmin, DynamicEditIpDialog } from '@/components/dialogs';
 
-export function IpAllowlistPageContent() {
+interface IpAllowlistPageContentProps {
+  addDialogOpen?: boolean;
+  setAddDialogOpen?: (open: boolean) => void;
+}
+
+export function IpAllowlistPageContent({ addDialogOpen: externalAddDialogOpen, setAddDialogOpen: externalSetAddDialogOpen }: IpAllowlistPageContentProps = {}) {
   const [ipWhitelist, setIpWhitelist] = useState<IpWhitelist[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<IpWhitelistListResponse['data']['meta'] | null>(null);
@@ -64,8 +69,12 @@ export function IpAllowlistPageContent() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [ipToEdit, setIpToEdit] = useState<IpWhitelist | null>(null);
   const [updating, setUpdating] = useState(false);
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [internalAddDialogOpen, setInternalAddDialogOpen] = useState(false);
   const [adding, setAdding] = useState(false);
+  
+  // Use external dialog state if provided, otherwise use internal
+  const addDialogOpen = externalAddDialogOpen !== undefined ? externalAddDialogOpen : internalAddDialogOpen;
+  const setAddDialogOpen = externalSetAddDialogOpen || setInternalAddDialogOpen;
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [sortBy, setSortBy] = useState<string>('createdAt');
@@ -377,12 +386,6 @@ export function IpAllowlistPageContent() {
   return (
     <Fragment>
       <Container>
-        <div className="flex items-center justify-end mb-4">
-          <Button variant="primary" onClick={() => setAddDialogOpen(true)}>
-            <Plus className="h-4 w-4 me-2" />
-            Add IP
-          </Button>
-        </div>
         <DataGrid
           table={table}
           recordCount={meta?.totalItems || filteredData.length}

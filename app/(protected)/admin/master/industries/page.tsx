@@ -1,11 +1,12 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { Building } from 'lucide-react';
-import { Toolbar, ToolbarHeading } from '@/layouts/demo1/components/toolbar';
+import { Building, Plus } from 'lucide-react';
+import { Toolbar, ToolbarHeading, ToolbarActions } from '@/layouts/demo1/components/toolbar';
 import { Container } from '@/components/common/container';
+import { Button } from '@/components/ui/button';
 import { PageSkeleton } from '@/components/ui/skeletons';
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 
 const IndustriesContent = dynamic(
   () => import('./industries-content').then(mod => ({ default: mod.IndustriesPageContent })),
@@ -16,6 +17,8 @@ const IndustriesContent = dynamic(
 );
 
 export default function IndustriesPage() {
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+
   return (
     <Suspense>
       <Container>
@@ -25,9 +28,15 @@ export default function IndustriesPage() {
             description="Create, edit, and manage industry categories for merchant classification and organization"
             icon={Building}
           />
+          <ToolbarActions>
+            <Button variant="primary" onClick={() => setCreateDialogOpen(true)}>
+              <Plus className="h-4 w-4" />
+              Create Industry
+            </Button>
+          </ToolbarActions>
         </Toolbar>
       </Container>
-      <IndustriesContent />
+      <IndustriesContent createDialogOpen={createDialogOpen} setCreateDialogOpen={setCreateDialogOpen} />
     </Suspense>
   );
 }

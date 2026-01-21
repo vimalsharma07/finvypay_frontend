@@ -33,8 +33,8 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Search, X, Pencil, Trash2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Search, X, Pencil, Trash2 } from 'lucide-react';
 import { TableActionMenu, TableActionMenuItem } from '@/app/(protected)/components/table-action-menu';
 import { cn } from '@/lib/utils';
 import {
@@ -47,11 +47,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 export function RolesPageContent() {
-  const router = useRouter();
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -200,12 +198,6 @@ export function RolesPageContent() {
   return (
     <Fragment>
       <Container>
-        <div className="flex items-center justify-end mb-4">
-          <Button variant="primary" onClick={() => router.push('/admin/roles-permissions/roles/create')}>
-            <Plus className="h-4 w-4" />
-            Create Role
-          </Button>
-        </div>
         <DataGrid
           table={table}
           recordCount={filteredData.length}
@@ -230,7 +222,7 @@ export function RolesPageContent() {
             edgeCell: '',
           }}
         >
-          <Card className="rounded-2xl border-border/50 bg-card shadow-sm">
+          <Card className="rounded-md border-border/50 bg-card shadow-sm">
             <CardHeader className="border-b border-border/50 bg-muted/20">
               <CardHeading>
                 <div className="relative w-full max-w-lg my-2 group">

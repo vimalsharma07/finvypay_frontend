@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link2, Pencil, Trash2 } from 'lucide-react';
+import { Link2, Pencil, Trash2, Plus } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -194,6 +194,7 @@ export default function PaymentLinksPage() {
               variant="primary"
               onClick={() => window.location.href = '/payment-links/create'}
             >
+              <Plus className="h-4 w-4 mr-2" />
               Create Payment Link
             </Button>
           </ToolbarActions>

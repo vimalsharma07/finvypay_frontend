@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { type MenuConfig } from '../types';
 import { filterMenuByPermissions } from '@/lib/utils/permission-menu-matcher';
+import { generalSettings } from '../general.config';
 
 // Base user menu configuration (before permission filtering)
 const BASE_USER_MENU: MenuConfig = [
@@ -145,7 +146,7 @@ const BASE_USER_MENU: MenuConfig = [
   {
     title: 'Docs',
     icon: BookOpen,
-    path: '/docs',
+    path: generalSettings.docsLink,
     requirePermission: false,
   },
 ];

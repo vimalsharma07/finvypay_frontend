@@ -1,12 +1,14 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import { CreditCard } from 'lucide-react';
+import { CreditCard, Filter } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
+  ToolbarActions,
 } from '@/layouts/demo1/components/toolbar';
 import { Container } from '@/components/common/container';
+import { Button } from '@/components/ui/button';
 import {
   getSandboxTransactions,
   Transaction,
@@ -38,6 +40,19 @@ import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from
 import { getTransactionColumns } from '../shared/columns';
 import { filterTransactions } from '../shared/utils';
 import { TransactionDetailsDialog } from '../shared/transaction-details-dialog';
+import { Filter as FilterComponent } from '@/components/common/Filter';
+import {
+  FieldTypes,
+  FilterFields,
+  FiltersSchema,
+  Option,
+} from '@/lib/types/common-types';
+import { generateFilterQuery } from '@/lib/helpers';
+import { getMerchants } from '@/lib/services/admin/users';
+import { getUserConnectors } from '@/lib/services/admin/connectors';
+import { getCurrencies } from '@/lib/services/admin/currency';
+import { getCountries } from '@/lib/services/admin/countries';
+import { getTimeZones } from '@/i18n/timezones';
 
 export default function SandboxTransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -45,6 +60,16 @@ export default function SandboxTransactionsPage() {
   const [meta, setMeta] = useState<TransactionListResponse['data']['meta'] | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [filters, setFilters] = useState<FilterFields>({});
+  const [filterOpen, setFilterOpen] = useState(false);
+
+  // Dropdown options
+  const [userOptions, setUserOptions] = useState<Option[]>([]);
+  const [companyOptions, setCompanyOptions] = useState<Option[]>([]);
+  const [connectorOptions, setConnectorOptions] = useState<Option[]>([]);
+  const [currencyOptions, setCurrencyOptions] = useState<Option[]>([]);
+  const [countryOptions, setCountryOptions] = useState<Option[]>([]);
+  const [timeZoneOptions, setTimeZoneOptions] = useState<Option[]>([]);
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -63,12 +88,13 @@ export default function SandboxTransactionsPage() {
   });
 
   const fetchTransactions = useCallback(
-    async (pageNum: number, pageLimit: number) => {
+    async (pageNum: number, pageLimit: number, activeFilters: FilterFields = {}) => {
       setLoading(true);
       try {
         const params = {
           page: pageNum,
           limit: pageLimit,
+          ...generateFilterQuery(activeFilters),
         };
 
         const response = await getSandboxTransactions(params);
@@ -97,8 +123,71 @@ export default function SandboxTransactionsPage() {
   );
 
   useEffect(() => {
-    fetchTransactions(page, limit);
-  }, [fetchTransactions, page, limit]);
+    fetchTransactions(page, limit, filters);
+  }, [fetchTransactions, page, limit, filters]);
+
+  // Fetch filter options
+  useEffect(() => {
+    const loadOptions = async () => {
+      try {
+        const [usersRes, connectorsRes, currenciesRes, countriesRes] = await Promise.all([
+          getMerchants({ page: 1, limit: 1000 }),
+          getUserConnectors(),
+          getCurrencies({ page: 1, limit: 1000 }),
+          getCountries({ page: 1, limit: 1000 }),
+        ]);
+
+        if (usersRes.data && Array.isArray(usersRes.data.data)) {
+          const mappedUsers = usersRes.data.data.map((user) => ({
+            label: user.name || user.email || user.id,
+            value: String(user.id),
+          }));
+          setUserOptions(mappedUsers);
+          setCompanyOptions(
+            usersRes.data.data
+              .filter((u) => u.name)
+              .map((u) => ({
+                label: u.name,
+                value: u.name,
+              }))
+          );
+        }
+
+        if (connectorsRes.data?.data?.data) {
+          setConnectorOptions(
+            connectorsRes.data.data.data.map((c) => ({
+              label: c.name,
+              value: String(c.id),
+            }))
+          );
+        }
+
+        if (currenciesRes.data?.data?.data) {
+          setCurrencyOptions(
+            currenciesRes.data.data.data.map((c) => ({
+              label: c.code,
+              value: c.code,
+            }))
+          );
+        }
+
+        if (countriesRes.data?.data?.data) {
+          setCountryOptions(
+            countriesRes.data.data.data.map((c) => ({
+              label: c.countryName,
+              value: c.isoTwo,
+            }))
+          );
+        }
+
+        setTimeZoneOptions(getTimeZones().map((z) => ({ label: z.label, value: z.value })));
+      } catch (error) {
+        console.error('Failed to load filter options', error);
+      }
+    };
+
+    loadOptions();
+  }, []);
 
   // Client-side filtering
   const filteredData = useMemo(
@@ -148,6 +237,98 @@ export default function SandboxTransactionsPage() {
     setDetailsDialogOpen(true);
   }, []);
 
+  const handleApplyFilters = useCallback(
+    (appliedFilters: FilterFields) => {
+      setFilters(appliedFilters);
+      setPage(1);
+    },
+    []
+  );
+
+  const filterSchema: FiltersSchema[] = useMemo(
+    () => [
+      { field: 'user_id', label: 'Merchant', type: FieldTypes.multiSelect, options: userOptions },
+      {
+        field: 'company_name',
+        label: 'Company',
+        type: FieldTypes.multiSelect,
+        options: companyOptions,
+      },
+      { field: 'transaction_id', label: 'Transaction ID', type: FieldTypes.input },
+      { field: 'order_id', label: 'Order ID', type: FieldTypes.input },
+      { field: 'gateway_id', label: 'Gateway ID', type: FieldTypes.input },
+      { field: 'email', label: 'Email', type: FieldTypes.input },
+      { field: 'phone_number', label: 'Phone Number', type: FieldTypes.input },
+      { field: 'card_number', label: 'Card Number', type: FieldTypes.input },
+      { field: 'card_bin', label: 'Card Bin', type: FieldTypes.input },
+      {
+        field: 'connector',
+        label: 'Connector',
+        type: FieldTypes.searchSelect,
+        options: connectorOptions,
+      },
+      {
+        field: 'currency',
+        label: 'Currency',
+        type: FieldTypes.searchSelect,
+        options: currencyOptions,
+      },
+      { field: 'amount_greater_than', label: 'Amount greater than', type: FieldTypes.input },
+      { field: 'amount_less_than', label: 'Amount less than', type: FieldTypes.input },
+      {
+        field: 'status',
+        label: 'Status',
+        type: FieldTypes.multiSelect,
+        options: [
+          'Success',
+          'Failed',
+          'Initialized',
+          'Pending',
+          'Redirect',
+          'Blocked',
+          'Abandoned',
+        ].map((label) => ({ label, value: label.toLowerCase() })),
+      },
+      {
+        field: 'card_type',
+        label: 'Card Type',
+        type: FieldTypes.select,
+        options: ['VISA', 'MASTER', 'DINNER CLUB', 'JCB'].map((label) => ({
+          label,
+          value: label,
+        })),
+      },
+      {
+        field: 'is_card_wl',
+        label: 'Card FT/WTL',
+        type: FieldTypes.select,
+        options: [
+          { label: 'FT', value: 'FT' },
+          { label: 'WTL', value: 'WTL' },
+        ],
+      },
+      {
+        field: 'country',
+        label: 'Country',
+        type: FieldTypes.searchSelect,
+        options: countryOptions,
+      },
+      { field: 'created_at', label: 'Created At', type: FieldTypes.dateRange },
+      { field: 'transaction_date', label: 'Transaction Date', type: FieldTypes.dateRange },
+      { field: 'refund_date', label: 'Refund Date', type: FieldTypes.dateRange },
+      { field: 'chargeback_date', label: 'ChargeBack Date', type: FieldTypes.dateRange },
+      { field: 'suspicious_date', label: 'Suspicious Date', type: FieldTypes.dateRange },
+      { field: 'message', label: 'Message', type: FieldTypes.input },
+      {
+        field: 'time_zone',
+        label: 'Time Zone',
+        type: FieldTypes.searchSelect,
+        options: timeZoneOptions,
+      },
+    ],
+    [userOptions, companyOptions, connectorOptions, currencyOptions, countryOptions, timeZoneOptions]
+  );
+
   const columns = useMemo<ColumnDef<Transaction>[]>(
     () =>
       getTransactionColumns(
@@ -196,6 +377,17 @@ export default function SandboxTransactionsPage() {
               description="View and manage all sandbox test transactions for development, testing, and integration validation"
               icon={CreditCard}
             />
+            <ToolbarActions>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => setFilterOpen(true)}
+              >
+                <Filter className="h-4 w-4" />
+                Advanced Filter
+              </Button>
+            </ToolbarActions>
           </Toolbar>
         </Container>
         <Container>
@@ -214,6 +406,17 @@ export default function SandboxTransactionsPage() {
             description="View and manage all sandbox test transactions for development, testing, and integration validation"
             icon={CreditCard}
           />
+          <ToolbarActions>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => setFilterOpen(true)}
+            >
+              <Filter className="h-4 w-4" />
+              Advanced Filter
+            </Button>
+          </ToolbarActions>
         </Toolbar>
       </Container>
 
@@ -252,6 +455,15 @@ export default function SandboxTransactionsPage() {
         open={detailsDialogOpen}
         onOpenChange={setDetailsDialogOpen}
         transaction={selectedTransaction}
+      />
+
+      <FilterComponent
+        filtersSchema={filterSchema}
+        onApplyFilters={handleApplyFilters}
+        currentFilters={filters}
+        open={filterOpen}
+        setOpen={setFilterOpen}
+        baseUrl="/admin/transactions/sandbox-transactions"
       />
     </Fragment>
   );

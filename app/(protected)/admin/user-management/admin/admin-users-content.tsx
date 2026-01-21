@@ -11,11 +11,14 @@ import {
   TableAction,
 } from '../../../components/table-comp';
 import { Badge } from '@/components/ui/badge';
-import { AdvancedFilter, FilterField } from '../../../components/advanced-filter';
 import { ConfirmComp } from '../../../components/confirm-comp';
 import { toast } from 'sonner';
 
-export function AdminUsersPageContent() {
+interface AdminUsersPageContentProps {
+  filters?: Record<string, string>;
+}
+
+export function AdminUsersPageContent({ filters: externalFilters = {} }: AdminUsersPageContentProps) {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<UserListResponse['meta'] | null>(null);
@@ -32,8 +35,8 @@ export function AdminUsersPageContent() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   
-  // Filter state
-  const [filters, setFilters] = useState<Record<string, string>>({});
+  // Use external filters prop
+  const filters = externalFilters;
 
   // Fetch users function
   const fetchUsers = async (
@@ -95,11 +98,17 @@ export function AdminUsersPageContent() {
     }
   };
 
+  // Reset to first page when filters change
+  useEffect(() => {
+    setPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalFilters]);
+
   // Fetch when pagination, sorting, limit, or filters change
   useEffect(() => {
     fetchUsers(page, limit, sortBy, sortOrder, filters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, limit, sortBy, sortOrder, filters]);
+  }, [page, limit, sortBy, sortOrder, externalFilters]);
 
   // Handle page change
   const handlePageChange = (pageIndex: number) => {
@@ -117,40 +126,6 @@ export function AdminUsersPageContent() {
     setSortBy(newSortBy);
     setSortOrder(newSortOrder);
     setPage(1); // Reset to first page when sorting changes
-  };
-
-  // Define filter fields
-  const filterFields: FilterField[] = [
-    {
-      key: 'name',
-      label: 'Name',
-      type: 'text-search',
-      placeholder: 'Search by name',
-    },
-    {
-      key: 'email',
-      label: 'Email',
-      type: 'select-search',
-      placeholder: 'Select email...',
-      options: [
-        { label: 'user1@example.com', value: 'user1@example.com' },
-        { label: 'user2@example.com', value: 'user2@example.com' },
-      ],
-    },
-  ];
-
-  // Handle filter apply
-  const handleApplyFilters = (appliedFilters: Record<string, string>) => {
-    setFilters(appliedFilters);
-    setPage(1); // Reset to first page when filters change
-    // Filters will be applied via useEffect when filters state changes
-  };
-
-  // Handle filter reset
-  const handleResetFilters = () => {
-    setFilters({});
-    setPage(1);
-    // Filters will be reset via useEffect when filters state changes
   };
 
   // Define table headers
@@ -251,13 +226,6 @@ export function AdminUsersPageContent() {
   return (
     <Fragment>
       <Container>
-        <div className="flex justify-end mb-4">
-          <AdvancedFilter
-            fields={filterFields}
-            onApply={handleApplyFilters}
-            onReset={handleResetFilters}
-          />
-        </div>
         <TableComp
           data={users}
           headers={headers}
