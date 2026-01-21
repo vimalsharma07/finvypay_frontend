@@ -3,6 +3,7 @@
 import { JSX, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ExternalLink } from 'lucide-react';
 import { useRoleBasedMenu } from '@/hooks/use-role-based-menu';
 import { MenuConfig, MenuItem } from '@/config/types';
 import { cn } from '@/lib/utils';
@@ -17,6 +18,11 @@ import {
   AccordionMenuSubTrigger,
 } from '@/components/ui/accordion-menu';
 import { Badge } from '@/components/ui/badge';
+
+// Helper function to check if a URL is external
+const isExternalUrl = (url: string): boolean => {
+  return url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//');
+};
 
 export function SidebarMenu() {
   const pathname = usePathname();
@@ -77,19 +83,45 @@ export function SidebarMenu() {
         </AccordionMenuSub>
       );
     } else {
+      const path = item.path || '#';
+      const isExternal = isExternalUrl(path);
+      
       return (
         <AccordionMenuItem
           key={index}
-          value={item.path || ''}
+          value={path}
           className="text-sm font-medium"
+          onClick={isExternal ? (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            window.open(path, '_blank', 'noopener,noreferrer');
+          } : undefined}
         >
-          <Link
-            href={item.path || '#'}
-            className="flex items-center gap-2"
-          >
-            {item.icon && <item.icon data-slot="accordion-menu-icon" className="shrink-0" />}
-            <span data-slot="accordion-menu-title" className="flex-1 text-left">{item.title}</span>
-          </Link>
+          {isExternal ? (
+            <a
+              href={path}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.open(path, '_blank', 'noopener,noreferrer');
+              }}
+            >
+              {item.icon && <item.icon data-slot="accordion-menu-icon" className="shrink-0" />}
+              <span data-slot="accordion-menu-title" className="flex-1 text-left">{item.title}</span>
+              <ExternalLink className="shrink-0 size-3.5 text-muted-foreground" />
+            </a>
+          ) : (
+            <Link
+              href={path}
+              className="flex items-center gap-2"
+            >
+              {item.icon && <item.icon data-slot="accordion-menu-icon" className="shrink-0" />}
+              <span data-slot="accordion-menu-title" className="flex-1 text-left">{item.title}</span>
+            </Link>
+          )}
         </AccordionMenuItem>
       );
     }
@@ -174,13 +206,38 @@ export function SidebarMenu() {
         </AccordionMenuSub>
       );
     } else {
+      const path = item.path || '#';
+      const isExternal = isExternalUrl(path);
+      
       return (
         <AccordionMenuItem
           key={index}
-          value={item.path || ''}
+          value={path}
           className="text-[13px]"
+          onClick={isExternal ? (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            window.open(path, '_blank', 'noopener,noreferrer');
+          } : undefined}
         >
-          <Link href={item.path || '#'}>{item.title}</Link>
+          {isExternal ? (
+            <a
+              href={path}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.open(path, '_blank', 'noopener,noreferrer');
+              }}
+            >
+              <span>{item.title}</span>
+              <ExternalLink className="shrink-0 size-3 text-muted-foreground" />
+            </a>
+          ) : (
+            <Link href={path}>{item.title}</Link>
+          )}
         </AccordionMenuItem>
       );
     }

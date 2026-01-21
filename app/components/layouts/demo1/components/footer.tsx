@@ -1,5 +1,6 @@
 'use client';
 
+import { ExternalLink } from 'lucide-react';
 import { generalSettings } from '@/config/general.config';
 import { Container } from '@/components/common/container';
 
@@ -24,8 +25,9 @@ export function Footer() {
             <a
               href={generalSettings.docsLink}
               target="_blank"
-              className="hover:text-primary"
+              className="hover:text-primary flex items-center gap-1.5"
             >
+              <ExternalLink className="shrink-0 size-3.5" />
               Docs
             </a>
             <a

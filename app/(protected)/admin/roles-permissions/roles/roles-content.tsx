@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
 import { Search, X, Pencil, Trash2 } from 'lucide-react';
 import { TableActionMenu, TableActionMenuItem } from '@/app/(protected)/components/table-action-menu';
 import { cn } from '@/lib/utils';
