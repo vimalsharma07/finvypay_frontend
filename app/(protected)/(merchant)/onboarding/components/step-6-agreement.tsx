@@ -203,7 +203,7 @@ export function Step6Agreement({ onboardingData, onNext, onUpdate }: Step6Agreem
         <div className="space-y-6">
           {/* Agreement Content */}
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <FileText className="h-5 w-5 text-primary" />
               <h3 className="text-lg font-semibold">{agreement.name}</h3>
             </div>
@@ -216,7 +216,7 @@ export function Step6Agreement({ onboardingData, onNext, onUpdate }: Step6Agreem
 
           {/* Success Message */}
           {isSignatureUploaded && (
-            <div className="flex items-center gap-2 p-4 bg-success/10 border border-success/20 rounded-lg">
+            <div className="flex items-center gap-1 p-4 bg-success/10 border border-success/20 rounded-lg">
               <CheckCircle2 className="h-5 w-5 text-success" />
               <div>
                 <p className="font-medium text-success">Agreement Signed</p>

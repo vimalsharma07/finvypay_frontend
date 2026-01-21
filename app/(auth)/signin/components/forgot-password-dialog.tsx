@@ -214,17 +214,17 @@ export function ForgotPasswordDialog({
               >
                 {isProcessing ? (
                   <>
-                    <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />
+                    <LoaderCircleIcon className="mr-1 h-4 w-4 animate-spin" />
                     Sending...
                   </>
                 ) : displaySuccess ? (
                   <>
-                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                    <CheckCircle2 className="mr-1 h-4 w-4" />
                     Reset Link Sent
                   </>
                 ) : (
                   <>
-                    <Mail className="mr-2 h-4 w-4" />
+                    <Mail className="mr-1 h-4 w-4" />
                     Send Reset Link
                   </>
                 )}

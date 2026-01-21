@@ -208,7 +208,7 @@ export function VideoRecorder({
 
             {/* Recording Indicator */}
             {isRecording && (
-              <div className="absolute top-4 left-4 flex items-center gap-2 bg-red-600 text-white px-3 py-1.5 rounded-lg">
+              <div className="absolute top-4 left-4 flex items-center gap-1 bg-red-600 text-white px-3 py-1.5 rounded-lg">
                 <div className="h-2 w-2 bg-white rounded-full animate-pulse" />
                 <span className="text-sm font-medium">Recording...</span>
               </div>
@@ -228,12 +228,12 @@ export function VideoRecorder({
               >
                 {isRecording ? (
                   <>
-                    <VideoOff className="h-4 w-4 mr-2" />
+                    <VideoOff className="h-4 w-4 mr-1" />
                     Stop Recording
                   </>
                 ) : (
                   <>
-                    <Video className="h-4 w-4 mr-2" />
+                    <Video className="h-4 w-4 mr-1" />
                     Start Recording ({maxDuration}s)
                   </>
                 )}
@@ -248,7 +248,7 @@ export function VideoRecorder({
                   disabled={isUploading || hasUploaded}
                   className="flex-1"
                 >
-                  <RotateCcw className="h-4 w-4 mr-2" />
+                  <RotateCcw className="h-4 w-4 mr-1" />
                   Record Again
                 </Button>
                 <Button
@@ -260,12 +260,12 @@ export function VideoRecorder({
                 >
                   {hasUploaded ? (
                     <>
-                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                      <CheckCircle2 className="h-4 w-4 mr-1" />
                       Uploaded
                     </>
                   ) : (
                     <>
-                      <Upload className="h-4 w-4 mr-2" />
+                      <Upload className="h-4 w-4 mr-1" />
                       {isUploading ? 'Uploading...' : 'Upload Video'}
                     </>
                   )}

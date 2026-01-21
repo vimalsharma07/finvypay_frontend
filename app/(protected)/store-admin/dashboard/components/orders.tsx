@@ -194,7 +194,7 @@ export function Orders() {
         return `
           <div class="flex flex-col gap-2 p-3.5">
             <div class="font-medium text-2sm text-secondary-foreground">${monthName}, 2024 Sales</div>
-            <div class="flex items-center gap-1.5">
+            <div class="flex items-center gap-1">
               <div class="font-semibold text-md text-mono">${formattedNumber}</div>
               <span class="kt-badge kt-badge-outline kt-badge-success kt-badge-xs">+24%</span>
             </div>

@@ -66,7 +66,7 @@ export function SidebarMenu() {
     if (item.children) {
       return (
         <AccordionMenuSub key={index} value={item.path || `root-${index}`}>
-          <AccordionMenuSubTrigger className="text-sm font-medium flex items-center gap-2">
+          <AccordionMenuSubTrigger className="text-sm font-medium flex items-center gap-1">
             {item.icon && <item.icon data-slot="accordion-menu-icon" className="shrink-0" />}
             <span data-slot="accordion-menu-title" className="flex-1 text-left">{item.title}</span>
           </AccordionMenuSubTrigger>
@@ -102,7 +102,7 @@ export function SidebarMenu() {
               href={path}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2"
+              className="flex items-center gap-1"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -116,7 +116,7 @@ export function SidebarMenu() {
           ) : (
             <Link
               href={path}
-              className="flex items-center gap-2"
+              className="flex items-center gap-1"
             >
               {item.icon && <item.icon data-slot="accordion-menu-icon" className="shrink-0" />}
               <span data-slot="accordion-menu-title" className="flex-1 text-left">{item.title}</span>
@@ -225,7 +225,7 @@ export function SidebarMenu() {
               href={path}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5"
+              className="flex items-center gap-1"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();

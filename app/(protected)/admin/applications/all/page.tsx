@@ -6,7 +6,7 @@ import {
   Toolbar,
   ToolbarHeading,
   ToolbarActions,
-} from '@/layouts/demo1/components/toolbar';
+} from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
@@ -196,7 +196,7 @@ export default function AdminApplicationListPage() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
             <DropdownMenuItem asChild>
-              <Link href={`/admin/applications/${row.original.id}`} className="flex items-center gap-2">
+              <Link href={`/admin/applications/${row.original.id}`} className="flex items-center gap-1">
                 <Eye className="h-4 w-4" />
                 View
               </Link>
@@ -204,7 +204,7 @@ export default function AdminApplicationListPage() {
             <DropdownMenuItem
               disabled={actioningId === row.original.id}
               onClick={() => handleChangeStatus(row.original.id, 'approved')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-1"
             >
               <CheckCircle2 className="h-4 w-4" />
               <span className={cn('text-success', actioningId === row.original.id && 'opacity-70')}>
@@ -214,7 +214,7 @@ export default function AdminApplicationListPage() {
             <DropdownMenuItem
               disabled={actioningId === row.original.id}
               onClick={() => handleChangeStatus(row.original.id, 'rejected')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-1"
             >
               <XCircle className="h-4 w-4" />
               <span className={cn('text-destructive', actioningId === row.original.id && 'opacity-70')}>

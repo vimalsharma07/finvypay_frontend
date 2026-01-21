@@ -7,7 +7,7 @@ import {
   Toolbar,
   ToolbarHeading,
   ToolbarActions,
-} from '@/layouts/demo1/components/toolbar';
+} from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { Button } from '@/components/ui/button';
 import { PageSkeleton } from '@/components/ui/skeletons';
@@ -37,7 +37,7 @@ export default function SupportPage() {
               variant="primary"
               onClick={() => setCreateDialogOpen(true)}
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 mr-1" />
               Create Support Ticket
             </Button>
           </ToolbarActions>

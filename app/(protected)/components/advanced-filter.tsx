@@ -111,7 +111,7 @@ export function AdvancedFilter({
   // Default trigger button
   const defaultTrigger = (
     <Button variant="outline">
-      <Filter className="size-4 mr-2" />
+      <Filter className="size-4 mr-1" />
       Advanced Filter
     </Button>
   );
@@ -215,7 +215,7 @@ export function AdvancedFilter({
                               >
                                 <Check
                                   className={cn(
-                                    'mr-2 h-4 w-4',
+                                    'mr-1 h-4 w-4',
                                     filterValues[field.key] === option.value
                                       ? 'opacity-100'
                                       : 'opacity-0'

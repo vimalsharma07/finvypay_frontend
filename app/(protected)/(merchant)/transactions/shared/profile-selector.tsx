@@ -68,7 +68,7 @@ export function ProfileSelector({ value, onChange, className }: ProfileSelectorP
 
   if (loading) {
     return (
-      <div className={`flex items-center gap-2 ${className}`}>
+      <div className={`flex items-center gap-1 ${className}`}>
         <Loader2 className="h-4 w-4 animate-spin" />
         <span className="text-sm text-muted-foreground">Loading profiles...</span>
       </div>
@@ -94,7 +94,7 @@ export function ProfileSelector({ value, onChange, className }: ProfileSelectorP
       <SelectContent>
         {profiles.map((profile) => (
           <SelectItem key={profile.id} value={String(profile.id)}>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <span>{profile.merchantProfileName}</span>
               {profile.isPrimary && (
                 <Badge variant="secondary" className="text-xs">

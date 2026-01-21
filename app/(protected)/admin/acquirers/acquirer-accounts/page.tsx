@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { Cpu } from 'lucide-react';
-import { Toolbar, ToolbarHeading, ToolbarActions } from '@/layouts/demo1/components/toolbar';
+import { Toolbar, ToolbarHeading, ToolbarActions } from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { PageSkeleton } from '@/components/ui/skeletons';
 import { Suspense, useEffect, useState } from 'react';
@@ -63,9 +63,9 @@ export default function AdminAcquirerAccountsPage() {
             description={
               acquirerIdFromUrl && acquirer
                 ? (
-                    <span className="flex items-center gap-2 flex-wrap">
+                    <span className="flex items-center gap-1 flex-wrap">
                       <span className="text-muted-foreground">View and manage payment gateway acquirer accounts with configuration settings for</span>
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary font-semibold border border-primary/20">
+                      <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 text-primary font-semibold border border-primary/20">
                         {acquirer.iconUrl && (() => {
                           const iconUrl = getIconUrl(acquirer.iconUrl);
                           return iconUrl ? (
@@ -101,7 +101,7 @@ export default function AdminAcquirerAccountsPage() {
                 }
               }}
             >
-              <Plus className="size-4 mr-2" />
+              <Plus className="size-4 mr-1" />
               Add Account
             </Button>
           </ToolbarActions>

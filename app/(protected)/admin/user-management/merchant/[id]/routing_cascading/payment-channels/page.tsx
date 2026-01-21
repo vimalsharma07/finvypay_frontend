@@ -8,7 +8,7 @@ import {
   Toolbar,
   ToolbarHeading,
   ToolbarActions,
-} from '@/layouts/demo1/components/toolbar';
+} from '@/layouts/main/components/toolbar';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import {
@@ -238,7 +238,7 @@ export default function ConnectorsPage() {
                 window.location.href = `/admin/user-management/merchant/${userId}/routing_cascading/acquirer-accounts/create?returnUrl=${returnUrl}`;
               }}
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 mr-1" />
               Add Acquirer Account
             </Button>
           </ToolbarActions>

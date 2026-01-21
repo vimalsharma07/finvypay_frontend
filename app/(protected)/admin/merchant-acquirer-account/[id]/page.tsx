@@ -36,7 +36,7 @@ import {
 } from '@/lib/services/admin/acquirer-accounts';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
-import { Toolbar, ToolbarHeading } from '@/layouts/demo1/components/toolbar';
+import { Toolbar, ToolbarHeading } from '@/layouts/main/components/toolbar';
 
 export default function AdminMerchantAcquirerAccountDetailPage() {
   const params = useParams();
@@ -183,14 +183,14 @@ export default function AdminMerchantAcquirerAccountDetailPage() {
             variant="outline"
             className="mb-4"
           >
-            <ArrowLeft className="mr-2 size-4" />
+            <ArrowLeft className="mr-1 size-4" />
             Back to Accounts
           </Button>
 
           {/* Status Overview */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-1">
                 <Settings className="size-5" />
                 Account Overview
               </CardTitle>
@@ -235,7 +235,7 @@ export default function AdminMerchantAcquirerAccountDetailPage() {
             {/* Merchant Information */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-1">
                   <User className="size-5" />
                   Merchant Information
                 </CardTitle>
@@ -271,7 +271,7 @@ export default function AdminMerchantAcquirerAccountDetailPage() {
             {/* Acquirer Information */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-1">
                   <Building2 className="size-5" />
                   Acquirer Information
                 </CardTitle>
@@ -297,7 +297,7 @@ export default function AdminMerchantAcquirerAccountDetailPage() {
             {/* Acquirer Account Details */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-1">
                   <CreditCard className="size-5" />
                   Acquirer Account Details
                 </CardTitle>
@@ -335,7 +335,7 @@ export default function AdminMerchantAcquirerAccountDetailPage() {
             {/* Rate Structure */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-1">
                   <DollarSign className="size-5" />
                   Rate Structure
                 </CardTitle>
@@ -380,7 +380,7 @@ export default function AdminMerchantAcquirerAccountDetailPage() {
           {/* Transaction Limits */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-1">
                 <Shield className="size-5" />
                 Transaction Limits & Restrictions
               </CardTitle>
@@ -444,7 +444,7 @@ export default function AdminMerchantAcquirerAccountDetailPage() {
               {/* Country Restrictions */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+                  <h4 className="font-medium text-sm mb-3 flex items-center gap-1">
                     <Globe className="size-4" />
                     Allowed Countries
                   </h4>
@@ -462,7 +462,7 @@ export default function AdminMerchantAcquirerAccountDetailPage() {
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+                  <h4 className="font-medium text-sm mb-3 flex items-center gap-1">
                     <AlertTriangle className="size-4" />
                     Blocked Countries
                   </h4>
@@ -499,7 +499,7 @@ export default function AdminMerchantAcquirerAccountDetailPage() {
           {/* Account Settings */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-1">
                 <Key className="size-5" />
                 Account Settings & Security
               </CardTitle>
@@ -537,7 +537,7 @@ export default function AdminMerchantAcquirerAccountDetailPage() {
               {/* Secret Key (masked) */}
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Secret Key</label>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-1 mt-1">
                   <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
                     {account.secretKey.substring(0, 8)}...{account.secretKey.substring(account.secretKey.length - 4)}
                   </code>
@@ -550,7 +550,7 @@ export default function AdminMerchantAcquirerAccountDetailPage() {
           {/* Timestamps */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-1">
                 <Calendar className="size-5" />
                 Account Timeline
               </CardTitle>

@@ -277,7 +277,7 @@ export function Step4Directors({ onboardingData, onNext, onUpdate }: Step4Direct
               variant="primary"
               onClick={() => setAddDialogOpen(true)}
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 mr-1" />
               Add Director
             </Button>
           </div>

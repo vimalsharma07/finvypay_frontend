@@ -36,7 +36,7 @@ const CardNFT2Row = ({ avatar, name, email, info, statistics }: INFT2Props) => {
             badgeClass={avatar?.badgeClass}
           />
           <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-1.5 mb-px">
+            <div className="flex items-center gap-1 mb-px">
               <Link
                 href="#"
                 className="hover:text-primary-active text-base leading-5 font-medium text-mono"

@@ -107,7 +107,7 @@ export function TransactionDetailsDialog({
           <div className="flex items-center gap-3 flex-wrap">
             <DialogTitle className="text-2xl font-bold">Transaction Details</DialogTitle>
             {transaction.transactionId && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <Hash className="size-4 text-muted-foreground" />
                 <span className="text-sm font-mono text-muted-foreground">{transaction.transactionId}</span>
                 <button
@@ -150,7 +150,7 @@ export function TransactionDetailsDialog({
               </Badge>
               <div className="flex flex-col gap-1">
                 <div className="text-base font-semibold">{statusInfo?.label || 'Unknown'}</div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Calendar className="size-3" />
                   <span>{formattedDate.date}</span>
                   <Clock className="size-3 ml-2" />

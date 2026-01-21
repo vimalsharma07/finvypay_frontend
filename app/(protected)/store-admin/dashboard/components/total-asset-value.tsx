@@ -26,7 +26,7 @@ export function TotalAssetValue() {
   ];
 
   const renderItem = (item: ITotalAssetValueItem, index: number) => (
-    <div key={index} className="flex items-center gap-1.5">
+    <div key={index} className="flex items-center gap-1">
       <Badge variant={item.badgeColor} className="size-1.5"></Badge>
       <div className="flex items-center gap-1">
         <span className="text-xs font-normal text-foreground">

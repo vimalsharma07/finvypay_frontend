@@ -1,6 +1,6 @@
 @layer components {
   /* Variables */
-  .demo1 {
+  .main {
     --sidebar-transition-duration: 0.3s;
     --sidebar-transition-timing: ease;
     --sidebar-width: 280px;
@@ -10,87 +10,87 @@
   }
 
   @media (max-width: theme(--breakpoint-lg)) {
-    .demo1 {
+    .main {
       --sidebar-width: 280px;
       --header-height: 60px;
     }
   }
 
   /* Base */
-  .demo1 .header {
+  .main .header {
     height: var(--header-height);
   }
 
-  .demo1 .sidebar {
+  .main .sidebar {
     width: var(--sidebar-width);
   }
 
-  .demo1.header-fixed .wrapper {
+  .main.header-fixed .wrapper {
     padding-top: var(--header-height);
   }
 
   /* Desktop mode */
   @media (min-width: theme(--breakpoint-lg)) {
-    .demo1 .sidebar {
+    .main .sidebar {
       width: var(--sidebar-width);
       transition: width var(--sidebar-transition-duration)
         var(--sidebar-transition-timing);
     }
 
-    .demo1 .sidebar .sidebar-header {
+    .main .sidebar .sidebar-header {
       height: var(--header-height);
     }
 
-    .demo1 .sidebar .sidebar-wrapper {
+    .main .sidebar .sidebar-wrapper {
       width: var(--sidebar-default-width);
     }
 
-    .demo1 .sidebar .sidebar-logo {
+    .main .sidebar .sidebar-logo {
       width: var(--sidebar-default-width);
     }
 
-    .demo1 .sidebar .small-logo {
+    .main .sidebar .small-logo {
       display: none;
     }
 
-    .demo1.sidebar-fixed .wrapper {
+    .main.sidebar-fixed .wrapper {
       padding-inline-start: var(--sidebar-width) !important;
     }
 
-    .demo1.sidebar-fixed.header-fixed .header {
+    .main.sidebar-fixed.header-fixed .header {
       inset-inline-start: var(--sidebar-width) !important;
     }
 
-    .demo1.sidebar-fixed.header-fixed .wrapper {
+    .main.sidebar-fixed.header-fixed .wrapper {
       padding-top: var(--header-height);
     }
 
-    .demo1.sidebar-collapse {
+    .main.sidebar-collapse {
       --sidebar-width: var(--sidebar-width-collapse);
     }
 
-    .demo1.sidebar-collapse .sidebar {
+    .main.sidebar-collapse .sidebar {
       transition: width var(--sidebar-transition-duration)
         var(--sidebar-transition-timing);
     }
 
-    .demo1.sidebar-collapse .sidebar:hover {
+    .main.sidebar-collapse .sidebar:hover {
       width: var(--sidebar-default-width);
     }
 
-    .demo1.sidebar-collapse .sidebar:not(:hover) .default-logo {
+    .main.sidebar-collapse .sidebar:not(:hover) .default-logo {
       display: none;
     }
 
-    .demo1.sidebar-collapse .sidebar:not(:hover) .small-logo {
+    .main.sidebar-collapse .sidebar:not(:hover) .small-logo {
       display: flex;
     }
 
-    .demo1.sidebar-collapse
+    .main.sidebar-collapse
       .sidebar:not(:hover)
       [data-slot='accordion-menu-title'],
-    .demo1.sidebar-collapse .sidebar:not(:hover) [data-slot='badge'],
-    .demo1.sidebar-collapse
+    .main.sidebar-collapse .sidebar:not(:hover) [data-slot='badge'],
+    .main.sidebar-collapse
       .sidebar:not(:hover)
       [data-slot='accordion-menu-sub-indicator'] {
       display: none !important;
@@ -98,7 +98,7 @@
       animation: none !important;
     }
 
-    .demo1.sidebar-collapse
+    .main.sidebar-collapse
       .sidebar:not(:hover)
       [data-slot='accordion-menu-sub-content'] {
       visibility: hidden;
@@ -107,14 +107,14 @@
       width: 0;
     }
 
-    .demo1.sidebar-collapse
+    .main.sidebar-collapse
       .sidebar:not(:hover)
       [data-slot='accordion-menu-label'] {
       visibility: hidden;
       position: relative;
     }
 
-    .demo1.sidebar-collapse
+    .main.sidebar-collapse
       .sidebar:not(:hover)
       [data-slot='accordion-menu-label']::before {
       content: '...';
@@ -131,12 +131,12 @@
     }
   }
 
-  .demo1.layout-initialized .wrapper {
+  .main.layout-initialized .wrapper {
     transition: padding-inline-start var(--sidebar-transition-duration)
       var(--sidebar-transition-timing);
   }
 
-  .demo1.layout-initialized .header {
+  .main.layout-initialized .header {
     transition: inset-inline-start var(--sidebar-transition-duration)
       var(--sidebar-transition-timing);
   }

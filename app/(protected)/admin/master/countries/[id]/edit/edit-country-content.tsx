@@ -5,7 +5,6 @@ import { useRouter, useParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { X, Save } from 'lucide-react';
-import { Container } from '@/components/common/container';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -179,9 +178,7 @@ export function EditCountryContent() {
 
   if (loading) {
     return (
-      <Container>
-        <div className="text-center py-8">Loading...</div>
-      </Container>
+      <div className="text-center py-8">Loading...</div>
     );
   }
 
@@ -190,8 +187,7 @@ export function EditCountryContent() {
   }
 
   return (
-    <Container>
-      <Card>
+    <Card className="rounded-md">
         <CardHeader>
           <CardTitle>Country Information</CardTitle>
         </CardHeader>
@@ -448,7 +444,6 @@ export function EditCountryContent() {
           </Form>
         </CardContent>
       </Card>
-    </Container>
   );
 }
 

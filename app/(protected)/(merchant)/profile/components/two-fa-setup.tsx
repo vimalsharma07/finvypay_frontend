@@ -241,7 +241,7 @@ export function TwoFaSetup() {
                       disabled={verifying || loading}
                       className="w-full border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50"
                     >
-                      <RefreshCw className="mr-2 h-4 w-4" />
+                      <RefreshCw className="mr-1 h-4 w-4" />
                       Regenerate QR Code
                     </Button>
                   </div>
@@ -306,7 +306,7 @@ export function TwoFaSetup() {
                   >
                     {verifying ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="mr-1 h-4 w-4 animate-spin" />
                         Verifying...
                       </>
                     ) : (
@@ -418,7 +418,7 @@ export function TwoFaSetup() {
                   size="lg"
                   className="w-full lg:w-auto px-8 py-6 text-base"
                 >
-                  <Shield className="mr-2 h-5 w-5" />
+                  <Shield className="mr-1 h-5 w-5" />
                   Generate QR Code
                 </Button>
                 <p className="text-xs text-muted-foreground mt-3 text-center">

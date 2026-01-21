@@ -26,7 +26,7 @@ export interface Settings {
   container: 'fixed' | 'fluid';
   layout: string;
   layouts: {
-    demo1: {
+    main: {
       sidebarCollapse: boolean;
       sidebarTheme: 'light' | 'dark';
     };

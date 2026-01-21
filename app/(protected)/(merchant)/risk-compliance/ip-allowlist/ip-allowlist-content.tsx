@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { X, Trash2, Save, LoaderCircleIcon, Pencil } from 'lucide-react';
 import { Container } from '@/components/common/container';
+import { TableActionMenu, TableActionMenuItem } from '@/app/(protected)/components/table-action-menu';
 import {
   getUserIpWhitelist,
   deleteUserIpWhitelist,
@@ -313,31 +314,25 @@ export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChang
           <DataGridColumnHeader column={column} title="Action" />
         ),
         cell: ({ row }) => {
-          return (
-            <div className="flex items-center gap-2">
-              <Button
-                className="size-7"
-                mode="icon"
-                variant="ghost"
-                onClick={() => handleOpenEditDialog(row.original)}
-                title="Edit IP"
-              >
-                <Pencil className="size-4" />
-              </Button>
-              <Button
-                className="size-7"
-                mode="icon"
-                variant="ghost"
-                onClick={() => {
-                  setIpToDelete(row.original);
-                  setDeleteDialogOpen(true);
-                }}
-                title="Delete IP"
-              >
-                <Trash2 className="size-4 text-destructive" />
-              </Button>
-            </div>
-          );
+          const actions: TableActionMenuItem<IpWhitelist>[] = [
+            {
+              label: 'Edit',
+              icon: Pencil,
+              onClick: () => handleOpenEditDialog(row.original),
+            },
+            {
+              label: 'Delete',
+              icon: Trash2,
+              onClick: () => {
+                setIpToDelete(row.original);
+                setDeleteDialogOpen(true);
+              },
+              variant: 'destructive',
+              separator: true,
+            },
+          ];
+
+          return <TableActionMenu row={row.original} actions={actions} />;
         },
         enableSorting: false,
         size: 100,

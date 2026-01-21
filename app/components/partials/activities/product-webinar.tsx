@@ -40,13 +40,13 @@ const ActivitiesProductWebinar = () => {
               </Button>
             </div>
             <div className="flex flex-wrap gap-7.5">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 <span className="text-sm font-medium text-secondary-foreground">
                   Code:
                 </span>
                 <span className="text-sm text-primary">#leaderdev-1</span>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 <span className="text-sm text-secondary-foreground">
                   Progress:
                 </span>
@@ -56,7 +56,7 @@ const ActivitiesProductWebinar = () => {
                   className="h-1"
                 />
               </div>
-              <div className="flex items-center gap-1.5 lg:min-w-24 shrink-0 max-w-auto">
+              <div className="flex items-center gap-1 lg:min-w-24 shrink-0 max-w-auto">
                 <span className="text-sm text-secondary-foreground">
                   Guests:
                 </span>

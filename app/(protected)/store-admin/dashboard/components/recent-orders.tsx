@@ -452,7 +452,7 @@ export function RecentOrders() {
           <DataGridColumnHeader title="Country" column={column} />
         ),
         cell: ({ row }) => (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <img
               src={toAbsoluteUrl(`/media/flags/${row.original.location.flag}`)}
               className="h-4 rounded-full"

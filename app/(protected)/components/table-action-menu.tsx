@@ -55,7 +55,7 @@ export function TableActionMenu<T extends Record<string, any>>({
                   disabled={action.disabled}
                   className={action.variant === 'destructive' ? 'text-destructive focus:text-destructive' : ''}
                 >
-                  <Link href={action.route(row)} className="flex items-center gap-2">
+                  <Link href={action.route(row)} className="flex items-center gap-1">
                     {IconComponent && <IconComponent className="h-4 w-4" />}
                     {action.label}
                   </Link>
@@ -76,7 +76,7 @@ export function TableActionMenu<T extends Record<string, any>>({
                     : ''
                 }
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   {IconComponent && <IconComponent className="h-4 w-4" />}
                   {action.label}
                 </div>

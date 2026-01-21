@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { X, Plus } from 'lucide-react';
 import Link from 'next/link';
-import { Container } from '@/components/common/container';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -121,8 +120,7 @@ export function CreateCountryContent() {
   };
 
   return (
-    <Container>
-      <Card>
+    <Card className="rounded-md">
         <CardHeader>
           <CardTitle>Country Information</CardTitle>
         </CardHeader>
@@ -376,7 +374,6 @@ export function CreateCountryContent() {
           </Form>
         </CardContent>
       </Card>
-    </Container>
   );
 }
 

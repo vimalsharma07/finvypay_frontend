@@ -277,7 +277,7 @@ export function MerchantNotificationsSheet({
                           <h4 className={`text-sm font-semibold ${!notification.isRead ? 'text-foreground' : 'text-muted-foreground'}`}>
                             {notification.title}
                           </h4>
-                          <div className="flex items-center gap-2 flex-shrink-0">
+                          <div className="flex items-center gap-1 flex-shrink-0">
                             {!notification.isRead && (
                               <div className="size-2 rounded-full bg-primary" />
                             )}
@@ -360,17 +360,17 @@ export function MerchantNotificationsSheet({
             disabled={markingAllAsRead || meta?.unreadCount === 0}
           >
             {markingAllAsRead ? (
-              <Loader2 className="size-4 animate-spin mr-2" />
+              <Loader2 className="size-4 animate-spin mr-1" />
             ) : (
-              <CheckSquare className="size-4 mr-2" />
+              <CheckSquare className="size-4 mr-1" />
             )}
             Mark all as read
           </Button>
           <Button variant="outline" onClick={fetchNotifications} disabled={loading}>
             {loading ? (
-              <Loader2 className="size-4 animate-spin mr-2" />
+              <Loader2 className="size-4 animate-spin mr-1" />
             ) : (
-              <Archive className="size-4 mr-2" />
+              <Archive className="size-4 mr-1" />
             )}
             Refresh
           </Button>
@@ -404,12 +404,12 @@ export function MerchantNotificationsSheet({
             >
               {deletingId ? (
                 <>
-                  <Loader2 className="size-4 animate-spin mr-2" />
+                  <Loader2 className="size-4 animate-spin mr-1" />
                   Deleting...
                 </>
               ) : (
                 <>
-                  <Trash2 className="size-4 mr-2" />
+                  <Trash2 className="size-4 mr-1" />
                   Delete
                 </>
               )}

@@ -5,7 +5,7 @@ import { FileText, CheckCircle2, Clock, DollarSign, AlertCircle, Wallet, Trendin
 import {
   Toolbar,
   ToolbarHeading,
-} from '@/layouts/demo1/components/toolbar';
+} from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

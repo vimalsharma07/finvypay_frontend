@@ -243,7 +243,7 @@ export function CreateTicketDialog({
                     <FormControl>
                       <div className="space-y-2">
                         {!selectedFile ? (
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
                             <Input
                               type="file"
                               ref={fileInputRef}
@@ -259,7 +259,7 @@ export function CreateTicketDialog({
                             />
                           </div>
                         ) : (
-                          <div className="flex items-center gap-2 p-3 border rounded-lg bg-muted/50">
+                          <div className="flex items-center gap-1 p-3 border rounded-lg bg-muted/50">
                             <File className="size-4 text-muted-foreground" />
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium truncate">{selectedFile.name}</p>

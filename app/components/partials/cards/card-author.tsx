@@ -88,7 +88,7 @@ const CardAuthor = ({
           <div className="flex flex-col justify-end grow">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex flex-col justify-end gap-0.5">
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1">
                   <Link
                     href="#"
                     className="hover:text-primary-active text-base leading-5 font-medium text-mono"

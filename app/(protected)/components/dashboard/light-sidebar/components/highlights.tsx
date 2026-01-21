@@ -70,9 +70,9 @@ const Highlights = ({ limit }: IHighlightsProps) => {
   ];
 
   const items: IHighlightsItems = [
-    { badgeColor: 'bg-green-500', label: 'Metronic' },
+    { badgeColor: 'bg-green-500', label: 'Product A' },
     { badgeColor: 'bg-destructive', label: 'Bundle' },
-    { badgeColor: 'bg-violet-500', label: 'MetronicNest' },
+    { badgeColor: 'bg-violet-500', label: 'Product B' },
   ];
 
   const renderRow = (row: IHighlightsRow, index: number) => {
@@ -81,7 +81,7 @@ const Highlights = ({ limit }: IHighlightsProps) => {
         key={index}
         className="flex items-center justify-between flex-wrap gap-2"
       >
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           <row.icon className="size-4.5 text-muted-foreground" />
           <span className="text-sm font-normal text-mono">{row.text}</span>
         </div>
@@ -102,7 +102,7 @@ const Highlights = ({ limit }: IHighlightsProps) => {
 
   const renderItem = (item: IHighlightsItem, index: number) => {
     return (
-      <div key={index} className="flex items-center gap-1.5">
+      <div key={index} className="flex items-center gap-1">
         <BadgeDot className={item.badgeColor} />
         <span className="text-sm font-normal text-foreground">
           {item.label}

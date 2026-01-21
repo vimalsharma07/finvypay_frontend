@@ -6,7 +6,7 @@ import {
   Toolbar,
   ToolbarHeading,
   ToolbarActions,
-} from '@/layouts/demo1/components/toolbar';
+} from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { Button } from '@/components/ui/button';
 import { PageSkeleton } from '@/components/ui/skeletons';
@@ -38,7 +38,7 @@ export default function AdminAcquirersPage() {
           />
           <ToolbarActions>
             <Button variant="primary" onClick={handleCreateAcquirer}>
-              <Plus className="size-4 mr-2" />
+              <Plus className="size-4 mr-1" />
               Create Acquirer
             </Button>
           </ToolbarActions>

@@ -287,7 +287,7 @@ export function SearchDialog({
                     variant="ghost"
                     mode="icon"
                     size="sm"
-                    className="mb-1.5 -me-2"
+                    className="mb-1.5 -me-1"
                   >
                     <Settings />
                   </Button>

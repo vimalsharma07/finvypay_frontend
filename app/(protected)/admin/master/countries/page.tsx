@@ -6,7 +6,7 @@ import {
   Toolbar,
   ToolbarHeading,
   ToolbarActions,
-} from '@/layouts/demo1/components/toolbar';
+} from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { getCountries, CountryListResponse, Country, deleteCountry } from '@/lib/services/admin/countries';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
@@ -197,7 +197,7 @@ export default function CountriesPage() {
         );
       case 'currencyCode':
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Badge variant="secondary" className="font-mono">
               {item.currencyCode}
             </Badge>

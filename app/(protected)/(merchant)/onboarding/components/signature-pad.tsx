@@ -165,7 +165,7 @@ export function SignaturePad({
               onClick={clearSignature}
               disabled={disabled || !hasSignature}
             >
-              <RotateCcw className="h-4 w-4 mr-2" />
+              <RotateCcw className="h-4 w-4 mr-1" />
               Clear
             </Button>
           </div>

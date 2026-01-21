@@ -229,12 +229,12 @@ export function ChangePasswordContent() {
               >
                 {isProcessing ? (
                   <>
-                    <LoaderCircleIcon className="size-4 animate-spin mr-2" />
+                    <LoaderCircleIcon className="size-4 animate-spin mr-1" />
                     Resetting...
                   </>
                 ) : (
                   <>
-                    <KeyRound className="h-4 w-4 mr-2" />
+                    <KeyRound className="h-4 w-4 mr-1" />
                     Reset Password
                   </>
                 )}

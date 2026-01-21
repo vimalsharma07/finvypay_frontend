@@ -5,17 +5,18 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FileText } from 'lucide-react';
+import { FileText, X, Plus } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
   ToolbarHeading,
   ToolbarActions,
-} from '@/layouts/demo1/components/toolbar';
+} from '@/layouts/main/components/toolbar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { SearchSelect } from '@/components/ui/molecules/SearchSelect';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
@@ -148,18 +149,25 @@ export default function CreateAcquirerRequestPage() {
   };
 
   return (
-    <Container>
-      <Toolbar>
-        <ToolbarHeading
-          title="Apply for Acquirer"
-          description="Submit a request to add a new payment gateway acquirer account with required documentation and configuration details"
-          icon={FileText}
-        />
-        <ToolbarActions />
-      </Toolbar>
-
-      <Form {...form}>
-        <form className="space-y-6" onSubmit={form.handleSubmit(handleSubmit)}>
+    <>
+      <Container>
+        <Toolbar>
+          <ToolbarHeading
+            title="Apply for Acquirer"
+            description="Submit a request to add a new payment gateway acquirer account with required documentation and configuration details"
+            icon={FileText}
+          />
+          <ToolbarActions />
+        </Toolbar>
+      </Container>
+      <Container>
+        <Card className="rounded-md">
+          <CardHeader>
+            <CardTitle>Acquirer Request Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form className="space-y-6" onSubmit={form.handleSubmit(handleSubmit)}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Acquirer Account</Label>
@@ -224,17 +232,27 @@ export default function CreateAcquirerRequestPage() {
             />
           </div>
 
-          <div className="flex items-center gap-3">
-            <Button type="submit" variant="primary" disabled={isSubmitting || loadingAccounts}>
-              {isSubmitting ? 'Submitting...' : 'Submit Request'}
-            </Button>
-            <Button type="button" variant="ghost" onClick={() => router.push('/acquirer-requests')}>
-              Cancel
-            </Button>
-          </div>
-        </form>
-      </Form>
-    </Container>
+                <div className="flex justify-end gap-4 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.push('/acquirer-requests')}
+                    disabled={isSubmitting || loadingAccounts}
+                  >
+                    <X className="h-4 w-4 me-1" />
+                    Cancel
+                  </Button>
+                  <Button type="submit" variant="primary" disabled={isSubmitting || loadingAccounts}>
+                    <Plus className="h-4 w-4 me-1" />
+                    {isSubmitting ? 'Submitting...' : 'Submit Request'}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </Container>
+    </>
   );
 }
 

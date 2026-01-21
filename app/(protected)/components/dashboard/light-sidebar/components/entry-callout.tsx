@@ -29,16 +29,11 @@ const EntryCallout = ({ className }: IEntryCalloutProps) => {
               ]}
             />
             <h2 className="text-xl font-semibold text-mono">
-              Connect Today & Join <br />
-              the{' '}
-              <Button mode="link" asChild className="text-xl font-semibold">
-                <Link href="#">KeenThemes Network</Link>
-              </Button>
+              Connect Today & Get Started
             </h2>
             <p className="text-sm font-normal text-secondary-foreground leading-5.5">
-              Enhance your projects with premium themes and <br />
-              templates. Join the KeenThemes community today <br />
-              for top-quality designs and resources.
+              Enhance your projects and explore our platform <br />
+              to get started with your journey.
             </p>
           </div>
         </CardContent>

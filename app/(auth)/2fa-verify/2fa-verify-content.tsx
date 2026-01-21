@@ -187,12 +187,12 @@ export function Verify2FAContent() {
               >
                 {isProcessing ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-1 h-4 w-4 animate-spin" />
                     Verifying...
                   </>
                 ) : (
                   <>
-                    <Shield className="mr-2 h-4 w-4" />
+                    <Shield className="mr-1 h-4 w-4" />
                     Verify & Continue
                   </>
                 )}

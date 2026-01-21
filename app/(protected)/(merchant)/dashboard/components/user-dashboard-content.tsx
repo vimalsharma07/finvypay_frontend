@@ -287,7 +287,7 @@ export function UserDashboardContent() {
           </CardHeader>
           <CardContent className="relative z-10">
             <div className="text-3xl font-bold mb-2">{stats.totalTransactions.toLocaleString()}</div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <Badge variant="success" appearance="light" size="sm" className="text-xs">
                 <TrendingUp className="h-3 w-3" />
                 All time
@@ -312,7 +312,7 @@ export function UserDashboardContent() {
           </CardHeader>
           <CardContent className="relative z-10">
             <div className="text-3xl font-bold mb-2">{formatCurrency(stats.totalAmount)}</div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <Badge variant="info" appearance="light" size="sm" className="text-xs">
                 <TrendingUp className="h-3 w-3" />
                 Processed
@@ -337,7 +337,7 @@ export function UserDashboardContent() {
           </CardHeader>
           <CardContent className="relative z-10">
             <div className="text-3xl font-bold mb-2">{stats.successfulTransactions.toLocaleString()}</div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <Badge variant="success" appearance="light" size="sm" className="text-xs">
                 {((stats.successfulTransactions / stats.totalTransactions) * 100).toFixed(1)}% success rate
               </Badge>
@@ -440,7 +440,7 @@ export function UserDashboardContent() {
       {/* Quick Actions */}
       <Card className="mt-5 lg:mt-7.5">
         <CardHeader>
-          <CardTitle className="text-base font-semibold flex items-center gap-2">
+          <CardTitle className="text-base font-semibold flex items-center gap-1">
             <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10">
               <BarChart3 className="h-5 w-5 text-primary" />
             </div>

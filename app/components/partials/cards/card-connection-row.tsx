@@ -49,7 +49,7 @@ const CardConnectionRow = ({
             )}
           </div>
           <div className="grid">
-            <div className="flex items-center gap-1.5 mb-2.5">
+            <div className="flex items-center gap-1 mb-2.5">
               <Link
                 href="#"
                 className="text-base leading-5 font-medium hover:text-primary-active text-mono"

@@ -6,7 +6,7 @@ import {
   Toolbar,
   ToolbarHeading,
   ToolbarActions,
-} from '@/layouts/demo1/components/toolbar';
+} from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
@@ -218,7 +218,7 @@ export default function UserSettlementsPage() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem asChild>
-                <Link href={`/settlement/${row.original.id}`} className="flex items-center gap-2">
+                <Link href={`/settlement/${row.original.id}`} className="flex items-center gap-1">
                   <Eye className="h-4 w-4" />
                   View
                 </Link>

@@ -8,7 +8,7 @@ import {
   Toolbar,
   ToolbarHeading,
   ToolbarActions,
-} from '@/layouts/demo1/components/toolbar';
+} from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -121,13 +121,13 @@ export default function ViewMerchantUserPage() {
           <ToolbarActions>
             <Link href="/admin/user-management/merchant">
               <Button variant="outline">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <ArrowLeft className="h-4 w-4 mr-1" />
                 Back
               </Button>
             </Link>
             <Link href={`/admin/user-management/merchant/${userId}/edit`}>
               <Button>
-                <Edit className="h-4 w-4 mr-2" />
+                <Edit className="h-4 w-4 mr-1" />
                 Edit User
               </Button>
             </Link>

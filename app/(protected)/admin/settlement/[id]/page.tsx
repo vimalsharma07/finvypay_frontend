@@ -4,7 +4,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { FileText, ArrowLeft, Download, ExternalLink } from 'lucide-react';
-import { Toolbar, ToolbarHeading } from '@/layouts/demo1/components/toolbar';
+import { Toolbar, ToolbarHeading } from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

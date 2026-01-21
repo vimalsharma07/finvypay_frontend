@@ -34,7 +34,7 @@ const CardPost = ({ image, label, description, time }: IPostProps) => {
         >
           {description}
         </Link>
-        <time className="flex items-center gap-1.5 text-sm font-medium text-secondary-foreground leading-none">
+        <time className="flex items-center gap-1 text-sm font-medium text-secondary-foreground leading-none">
           <Clock9 size={16} className="text-lg text-muted-foreground" /> {time}
         </time>
       </div>

@@ -1,11 +1,12 @@
 'use client';
 
+import { Fragment } from 'react';
 import dynamic from 'next/dynamic';
 import { Plus } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
-} from '@/layouts/demo1/components/toolbar';
+} from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { FormSkeleton } from '@/components/ui/skeletons';
 
@@ -19,15 +20,17 @@ const RoutingCreateContent = dynamic(
 
 export default function CreateRoutingPage() {
   return (
-    <Container>
-      <Toolbar>
-        <ToolbarHeading
-          title="Create Routing Rule"
-          description="Configure routing rules to optimize payment processing across multiple acquirers"
-          icon={Plus}
-        />
-      </Toolbar>
+    <Fragment>
+      <Container>
+        <Toolbar>
+          <ToolbarHeading
+            title="Create Routing Rule"
+            description="Configure routing rules to optimize payment processing across multiple acquirers"
+            icon={Plus}
+          />
+        </Toolbar>
+      </Container>
       <RoutingCreateContent />
-    </Container>
+    </Fragment>
   );
 }

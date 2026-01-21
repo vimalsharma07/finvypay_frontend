@@ -40,7 +40,7 @@ export function WelcomeMessageDialog({
           </div>
 
           <h3 className="text-lg font-medium text-mono text-center mb-3">
-            Welcome to Metronic
+            Welcome to FinvyPay
           </h3>
 
           <div className="text-sm text-center text-secondary-foreground mb-7">

@@ -238,7 +238,7 @@ export function EditMerchantAcquirerAccountContent() {
           variant="outline"
           className="mb-4"
         >
-          <ArrowLeft className="mr-2 size-4" />
+          <ArrowLeft className="mr-1 size-4" />
           Back to Account Details
         </Button>
 
@@ -640,7 +640,7 @@ export function EditMerchantAcquirerAccountContent() {
                       <>Saving...</>
                     ) : (
                       <>
-                        <Save className="mr-2 size-4" />
+                        <Save className="mr-1 size-4" />
                         Save Changes
                       </>
                     )}

@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { Link2 } from 'lucide-react';
-import { Toolbar, ToolbarHeading } from '@/layouts/demo1/components/toolbar';
+import { Toolbar, ToolbarHeading } from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { PageSkeleton } from '@/components/ui/skeletons';
 import { Suspense } from 'react';

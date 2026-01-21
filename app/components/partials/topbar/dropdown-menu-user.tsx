@@ -54,7 +54,7 @@ export function DropdownMenuUser({ trigger }: { trigger: ReactNode }) {
       <DropdownMenuContent className="w-64" side="bottom" align="end">
         {/* Header */}
         <div className="flex items-center justify-between p-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <img
               className="w-9 h-9 rounded-full border border-border"
               src={toAbsoluteUrl(
@@ -88,7 +88,7 @@ export function DropdownMenuUser({ trigger }: { trigger: ReactNode }) {
         <DropdownMenuItem asChild>
           <Link
             href="/public-profile/profiles/default"
-            className="flex items-center gap-2"
+            className="flex items-center gap-1"
           >
             <UserCircle />
             Public Profile
@@ -97,7 +97,7 @@ export function DropdownMenuUser({ trigger }: { trigger: ReactNode }) {
         <DropdownMenuItem asChild>
           <Link
             href="/account/home/user-profile"
-            className="flex items-center gap-2"
+            className="flex items-center gap-1"
           >
             <User />
             My Profile
@@ -106,7 +106,7 @@ export function DropdownMenuUser({ trigger }: { trigger: ReactNode }) {
 
         {/* My Account Submenu */}
         <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="flex items-center gap-2">
+          <DropdownMenuSubTrigger className="flex items-center gap-1">
             <Settings />
             My Account
           </DropdownMenuSubTrigger>
@@ -114,7 +114,7 @@ export function DropdownMenuUser({ trigger }: { trigger: ReactNode }) {
             <DropdownMenuItem asChild>
               <Link
                 href="/account/home/get-started"
-                className="flex items-center gap-2"
+                className="flex items-center gap-1"
               >
                 <Coffee />
                 Get Started
@@ -123,7 +123,7 @@ export function DropdownMenuUser({ trigger }: { trigger: ReactNode }) {
             <DropdownMenuItem asChild>
               <Link
                 href="/account/home/user-profile"
-                className="flex items-center gap-2"
+                className="flex items-center gap-1"
               >
                 <FileText />
                 My Profile
@@ -132,7 +132,7 @@ export function DropdownMenuUser({ trigger }: { trigger: ReactNode }) {
             <DropdownMenuItem asChild>
               <Link
                 href="/account/billing/basic"
-                className="flex items-center gap-2"
+                className="flex items-center gap-1"
               >
                 <CreditCard />
                 Billing
@@ -141,7 +141,7 @@ export function DropdownMenuUser({ trigger }: { trigger: ReactNode }) {
             <DropdownMenuItem asChild>
               <Link
                 href="/account/security/overview"
-                className="flex items-center gap-2"
+                className="flex items-center gap-1"
               >
                 <Shield />
                 Security
@@ -150,7 +150,7 @@ export function DropdownMenuUser({ trigger }: { trigger: ReactNode }) {
             <DropdownMenuItem asChild>
               <Link
                 href="/account/members/teams"
-                className="flex items-center gap-2"
+                className="flex items-center gap-1"
               >
                 <Users />
                 Members & Roles
@@ -159,7 +159,7 @@ export function DropdownMenuUser({ trigger }: { trigger: ReactNode }) {
             <DropdownMenuItem asChild>
               <Link
                 href="/account/integrations"
-                className="flex items-center gap-2"
+                className="flex items-center gap-1"
               >
                 <BetweenHorizontalStart />
                 Integrations
@@ -168,19 +168,10 @@ export function DropdownMenuUser({ trigger }: { trigger: ReactNode }) {
           </DropdownMenuSubContent>
         </DropdownMenuSub>
 
-        <DropdownMenuItem asChild>
-          <Link
-            href="https://devs.keenthemes.com"
-            className="flex items-center gap-2"
-          >
-            <FileText />
-            Dev Forum
-          </Link>
-        </DropdownMenuItem>
 
         {/* Language Submenu with Radio Group */}
         <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="flex items-center gap-2 [&_[data-slot=dropdown-menu-sub-trigger-indicator]]:hidden hover:[&_[data-slot=badge]]:border-input data-[state=open]:[&_[data-slot=badge]]:border-input">
+          <DropdownMenuSubTrigger className="flex items-center gap-1 [&_[data-slot=dropdown-menu-sub-trigger-indicator]]:hidden hover:[&_[data-slot=badge]]:border-input data-[state=open]:[&_[data-slot=badge]]:border-input">
             <Globe />
             <span className="flex items-center justify-between gap-2 grow relative">
               Language
@@ -211,7 +202,7 @@ export function DropdownMenuUser({ trigger }: { trigger: ReactNode }) {
                 <DropdownMenuRadioItem
                   key={item.code}
                   value={item.code}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-1"
                 >
                   <img
                     src={item.flag}
@@ -229,11 +220,11 @@ export function DropdownMenuUser({ trigger }: { trigger: ReactNode }) {
 
         {/* Footer */}
         <DropdownMenuItem
-          className="flex items-center gap-2"
+          className="flex items-center gap-1"
           onSelect={(event) => event.preventDefault()}
         >
           <Moon />
-          <div className="flex items-center gap-2 justify-between grow">
+          <div className="flex items-center gap-1 justify-between grow">
             Dark Mode
             <Switch
               size="sm"

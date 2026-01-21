@@ -160,7 +160,7 @@ export function RequestDetailContent() {
 
   if (!request) {
     return (
-      <Card>
+      <Card className="rounded-md">
         <CardContent className="text-center py-8">
           <p className="text-muted-foreground">Request not found or has been deleted.</p>
           <Button
@@ -186,16 +186,16 @@ export function RequestDetailContent() {
           variant="outline"
           className="mb-4"
         >
-          <ArrowLeft className="mr-2 size-4" />
+          <ArrowLeft className="mr-1 size-4" />
           Back to Requests
         </Button>
 
         {/* Status and Actions */}
-        <Card>
+        <Card className="rounded-md">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-1">
                   Request Status
                   <Badge variant={getStatusBadgeVariant(request.status)}>
                     {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
@@ -212,7 +212,7 @@ export function RequestDetailContent() {
                     disabled={updating}
                     className="bg-green-600 hover:bg-green-700"
                   >
-                    <CheckCircle className="mr-2 size-4" />
+                    <CheckCircle className="mr-1 size-4" />
                     Approve Request
                   </Button>
                   <Button
@@ -220,7 +220,7 @@ export function RequestDetailContent() {
                     disabled={updating}
                     variant="destructive"
                   >
-                    <X className="mr-2 size-4" />
+                    <X className="mr-1 size-4" />
                     Reject Request
                   </Button>
                 </div>
@@ -231,9 +231,9 @@ export function RequestDetailContent() {
 
         <div className="grid gap-6 md:grid-cols-2">
           {/* Merchant Information */}
-          <Card>
+          <Card className="rounded-md">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-1">
                 <User className="size-5" />
                 Merchant Information
               </CardTitle>
@@ -261,9 +261,9 @@ export function RequestDetailContent() {
           </Card>
 
           {/* Acquirer Account Information */}
-          <Card>
+          <Card className="rounded-md">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-1">
                 <Building2 className="size-5" />
                 Acquirer Account
               </CardTitle>
@@ -291,9 +291,9 @@ export function RequestDetailContent() {
           </Card>
 
           {/* Payment Methods & Currencies */}
-          <Card>
+          <Card className="rounded-md">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-1">
                 <CreditCard className="size-5" />
                 Payment Configuration
               </CardTitle>
@@ -323,9 +323,9 @@ export function RequestDetailContent() {
           </Card>
 
           {/* Rates Information */}
-          <Card>
+          <Card className="rounded-md">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-1">
                 <DollarSign className="size-5" />
                 Rate Structure
               </CardTitle>
@@ -354,9 +354,9 @@ export function RequestDetailContent() {
         </div>
 
         {/* Request Description */}
-        <Card>
+        <Card className="rounded-md">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-1">
               <Calendar className="size-5" />
               Request Details
             </CardTitle>

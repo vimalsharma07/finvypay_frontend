@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { X, Plus } from 'lucide-react';
-import { Container } from '@/components/common/container';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -132,8 +131,7 @@ export function CreateMerchantContent() {
   };
 
   return (
-    <Container>
-      <Card>
+    <Card className="rounded-md">
         <CardHeader>
           <CardTitle>Merchant Information</CardTitle>
         </CardHeader>
@@ -225,7 +223,6 @@ export function CreateMerchantContent() {
           </Form>
         </CardContent>
       </Card>
-    </Container>
   );
 }
 

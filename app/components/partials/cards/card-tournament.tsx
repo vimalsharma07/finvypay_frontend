@@ -58,7 +58,7 @@ const CardTournament = ({
             >
               {title}
             </Link>
-            <time className="flex items-center gap-1.5 text-xs text-secondary-foreground">
+            <time className="flex items-center gap-1 text-xs text-secondary-foreground">
               <div className="rounded-full w-1.5 h-1.5 bg-destructive gap-1.5"></div>{' '}
               {time}
             </time>

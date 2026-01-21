@@ -9,7 +9,7 @@ import {
   Toolbar,
   ToolbarActions,
   ToolbarHeading,
-} from '@/layouts/demo1/components/toolbar';
+} from '@/layouts/main/components/toolbar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -138,7 +138,7 @@ export default function CascadingViewPage() {
           description={`Review complete cascading rule configuration including acquirer chain sequence, priorities, status, and fallback settings for ${cascade.name || 'this rule'}`}
           icon={Link2}
         />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Link href={`${backUrl}/${cascadingId}/edit`}>
             <Button variant="outline">Edit</Button>
           </Link>

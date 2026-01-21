@@ -56,7 +56,7 @@ export function Inventory() {
     >
       <span className="text-sm text-mono">{row.text}</span>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         <span className="text-sm text-mono">Qty: {row.total}</span>
         <span className="border-l border-input h-[12px]"> </span>
         <span className="text-sm font-medium text-primary">Order</span>

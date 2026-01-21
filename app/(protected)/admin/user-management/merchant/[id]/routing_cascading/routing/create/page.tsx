@@ -9,7 +9,7 @@ import {
   Toolbar,
   ToolbarActions,
   ToolbarHeading,
-} from '@/layouts/demo1/components/toolbar';
+} from '@/layouts/main/components/toolbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -456,7 +456,7 @@ export default function RoutingCreatePage() {
               <div className="flex flex-col gap-2">
                 <Label>Connector</Label>
                 {connectorsLoading ? (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
                     <ContentLoader />
                     <span>Loading connectors...</span>
                   </div>

@@ -148,12 +148,12 @@ export function ResetPasswordContent() {
                 >
                   {isProcessing ? (
                     <>
-                      <LoaderCircleIcon className="size-4 animate-spin mr-2" />
+                      <LoaderCircleIcon className="size-4 animate-spin mr-1" />
                       Sending...
                     </>
                   ) : (
                     <>
-                      <Mail className="h-4 w-4 mr-2" />
+                      <Mail className="h-4 w-4 mr-1" />
                       Send Reset Link
                     </>
                   )}
@@ -163,7 +163,7 @@ export function ResetPasswordContent() {
 
             <Button type="button" variant="outline" className="w-full h-11" asChild>
               <Link href="/signin">
-                <ArrowLeft className="size-4 mr-2" />
+                <ArrowLeft className="size-4 mr-1" />
                 Back to Sign In
               </Link>
             </Button>

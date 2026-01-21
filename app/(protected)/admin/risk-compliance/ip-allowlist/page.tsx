@@ -6,7 +6,7 @@ import {
   Toolbar,
   ToolbarHeading,
   ToolbarActions,
-} from '@/layouts/demo1/components/toolbar';
+} from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { Button } from '@/components/ui/button';
 import { PageSkeleton } from '@/components/ui/skeletons';
@@ -34,7 +34,7 @@ export default function AdminIpWhitelistPage() {
           />
           <ToolbarActions>
             <Button variant="primary" onClick={() => setAddDialogOpen(true)}>
-              <Plus className="h-4 w-4 me-2" />
+              <Plus className="h-4 w-4 me-1" />
               Add IP
             </Button>
           </ToolbarActions>

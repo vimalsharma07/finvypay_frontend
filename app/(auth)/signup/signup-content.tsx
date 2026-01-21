@@ -332,12 +332,12 @@ export function SignupContent() {
               >
                 {isProcessing ? (
                   <>
-                    <LoaderCircleIcon className="size-4 animate-spin mr-2" />
+                    <LoaderCircleIcon className="size-4 animate-spin mr-1" />
                     Verifying...
                   </>
                 ) : (
                   <>
-                    <CheckCircle className="h-4 w-4 mr-2" />
+                    <CheckCircle className="h-4 w-4 mr-1" />
                     Verify & Continue
                   </>
                 )}
@@ -352,7 +352,7 @@ export function SignupContent() {
                 }}
                 className="w-full h-11"
               >
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <ArrowLeft className="h-4 w-4 mr-1" />
                 Back to Registration
               </Button>
             </div>
@@ -561,12 +561,12 @@ export function SignupContent() {
             >
               {isProcessing ? (
                 <>
-                  <LoaderCircleIcon className="size-4 animate-spin mr-2" />
+                  <LoaderCircleIcon className="size-4 animate-spin mr-1" />
                   Creating account...
                 </>
               ) : (
                 <>
-                  <UserPlus className="h-4 w-4 mr-2" />
+                  <UserPlus className="h-4 w-4 mr-1" />
                   Create Account
                 </>
               )}

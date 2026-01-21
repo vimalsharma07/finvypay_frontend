@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { X, Plus } from 'lucide-react';
-import { Container } from '@/components/common/container';
 import {
   Form,
   FormControl,
@@ -24,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { createPermission, CreatePermissionPayload } from '@/lib/services/admin/permissions';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
@@ -79,7 +79,7 @@ export function CreatePermissionContent() {
       handleApiResponse(response, {
         onSuccess: () => {
           toast.success('Permission created successfully!');
-          router.push('/admin/permissions');
+          router.push('/admin/roles-permissions/permissions');
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to create permission');
@@ -101,8 +101,11 @@ export function CreatePermissionContent() {
   };
 
   return (
-    <Container>
-      <div className="space-y-6">
+    <Card className="rounded-md">
+      <CardHeader>
+        <CardTitle>Permission Information</CardTitle>
+      </CardHeader>
+      <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -279,25 +282,25 @@ export function CreatePermissionContent() {
               />
             </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t">
+            <div className="flex justify-end gap-4 pt-4">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => router.push('/admin/permissions')}
+                onClick={() => router.push('/admin/roles-permissions/permissions')}
                 disabled={submitting}
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4 me-1" />
                 Cancel
               </Button>
               <Button type="submit" variant="primary" disabled={submitting}>
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4 me-1" />
                 {submitting ? 'Creating...' : 'Create Permission'}
               </Button>
             </div>
           </form>
         </Form>
-      </div>
-    </Container>
+      </CardContent>
+    </Card>
   );
 }
 

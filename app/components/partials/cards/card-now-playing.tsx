@@ -71,7 +71,7 @@ const CardNowPlaying = ({
             >
               {title}
             </Link>
-            <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+            <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
               {date}
             </span>
           </div>

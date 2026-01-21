@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { X, Plus } from 'lucide-react';
-import { Container } from '@/components/common/container';
 import {
   Form,
   FormControl,
@@ -26,6 +25,7 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { createRole, CreateRolePayload } from '@/lib/services/admin/roles';
 import { getPermissions, Permission } from '@/lib/services/admin/permissions';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
@@ -261,15 +261,11 @@ export function CreateRoleContent() {
   };
 
   return (
-    <Container>
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-xl font-semibold mb-2">Admin Permissions</h2>
-          <p className="text-sm text-muted-foreground">
-            You can update permissions for this Admin, please select the actions allowed.
-          </p>
-        </div>
-
+    <Card className="rounded-md">
+      <CardHeader>
+        <CardTitle>Role Information</CardTitle>
+      </CardHeader>
+      <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -349,7 +345,7 @@ export function CreateRoleContent() {
                         <div className="flex items-center justify-between">
                           <h3 className="text-lg font-semibold">{module}</h3>
                           {activeTabPermissions.length > 0 && (
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
                               <Checkbox
                                 checked={
                                   activeTabPermissions
@@ -381,7 +377,7 @@ export function CreateRoleContent() {
                                   {group.subModule}
                                 </h4>
                                 {group.permissions.length > 0 && (
-                                  <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-1">
                                     <Checkbox
                                       checked={group.permissions.every((p) =>
                                         selectedPermissionIds.has(Number(p.id))
@@ -405,7 +401,7 @@ export function CreateRoleContent() {
                                 {group.permissions.map((permission) => (
                                   <div
                                     key={permission.id}
-                                    className="flex items-center gap-2"
+                                    className="flex items-center gap-1"
                                   >
                                     <Checkbox
                                       checked={selectedPermissionIds.has(Number(permission.id))}
@@ -433,24 +429,24 @@ export function CreateRoleContent() {
               </div>
             )}
 
-            <div className="flex justify-end gap-3 pt-4 border-t">
+            <div className="flex justify-end gap-4 pt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => router.push('/admin/roles-permissions/roles')}
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4 me-1" />
                 Cancel
               </Button>
               <Button type="submit" variant="primary">
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4 me-1" />
                 Add Role
               </Button>
             </div>
           </form>
         </Form>
-      </div>
-    </Container>
+      </CardContent>
+    </Card>
   );
 }
 

@@ -14,11 +14,7 @@ export function ShareProfileSettings() {
           <User size={16} className="text-muted-foreground" />
 
           <div className="flex flex-center text-secondary-foreground font-medium text-xs">
-            Anyone at
-            <Link href="#" className="text-xs font-medium link mx-1">
-              KeenThemes
-            </Link>
-            can view
+            Anyone with access can view
           </div>
         </div>
 

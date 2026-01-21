@@ -38,12 +38,12 @@ export function TicketActionMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent side="bottom" align="end" className="w-[180px]">
         <DropdownMenuItem onClick={handleView}>
-          <Eye className="mr-2 size-4" />
+          <Eye className="mr-1 size-4" />
           View
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => onEdit(ticket)}>
-          <Pencil className="mr-2 size-4" />
+          <Pencil className="mr-1 size-4" />
           Edit
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -51,7 +51,7 @@ export function TicketActionMenu({
           variant="destructive"
           onClick={() => onDelete(ticket)}
         >
-          <Trash2 className="mr-2 size-4" />
+          <Trash2 className="mr-1 size-4" />
           Delete
         </DropdownMenuItem>
       </DropdownMenuContent>

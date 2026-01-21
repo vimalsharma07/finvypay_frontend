@@ -8,7 +8,7 @@ import {
   Toolbar,
   ToolbarHeading,
   ToolbarActions,
-} from '@/layouts/demo1/components/toolbar';
+} from '@/layouts/main/components/toolbar';
 import { Button } from '@/components/ui/button';
 import { Plus, ArrowLeft } from 'lucide-react';
 import {
@@ -486,7 +486,7 @@ export default function AcquirerAccountsPage() {
           <ToolbarActions>
             <Link href={`/admin/user-management/merchant/${userId}`}>
               <Button variant="outline">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <ArrowLeft className="h-4 w-4 mr-1" />
                 Back to Merchant
               </Button>
             </Link>
@@ -496,7 +496,7 @@ export default function AcquirerAccountsPage() {
                 router.push(`/admin/user-management/merchant/${userId}/acquirer-accounts/create`);
               }}
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 mr-1" />
               Add Acquirer Account
             </Button>
           </ToolbarActions>

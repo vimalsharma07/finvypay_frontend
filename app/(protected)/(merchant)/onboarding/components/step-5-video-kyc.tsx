@@ -108,7 +108,7 @@ export function Step5VideoKyc({ onboardingData, onNext, onUpdate }: Step5VideoKy
       <CardContent>
         <div className="space-y-4">
           {isVideoUploaded && (
-            <div className="flex items-center gap-2 p-4 bg-success/10 border border-success/20 rounded-lg">
+            <div className="flex items-center gap-1 p-4 bg-success/10 border border-success/20 rounded-lg">
               <CheckCircle2 className="h-5 w-5 text-success" />
               <div>
                 <p className="font-medium text-success">Video KYC Completed</p>

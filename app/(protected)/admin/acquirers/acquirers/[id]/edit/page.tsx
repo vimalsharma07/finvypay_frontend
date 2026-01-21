@@ -5,7 +5,7 @@ import { Plug, ArrowLeft } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
-} from '@/layouts/demo1/components/toolbar';
+} from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { FormSkeleton } from '@/components/ui/skeletons';
 import Link from 'next/link';
@@ -31,7 +31,7 @@ export default function EditAcquirerPage() {
           <div className="flex items-center">
             <Link
               href="/admin/acquirers"
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="size-4" />
               Back

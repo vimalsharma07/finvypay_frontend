@@ -7,7 +7,7 @@ import {
   Toolbar,
   ToolbarHeading,
   ToolbarActions,
-} from '@/layouts/demo1/components/toolbar';
+} from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import {
   getSupportTicketById,
@@ -166,7 +166,7 @@ export default function ViewTicketPage() {
               <div className="text-center py-12">
                 <p className="text-muted-foreground mb-4">Ticket not found</p>
                 <Button variant="outline" onClick={() => router.push('/support')}>
-                  <ArrowLeft className="mr-2 size-4" />
+                  <ArrowLeft className="mr-1 size-4" />
                   Back to Support
                 </Button>
               </div>
@@ -188,7 +188,7 @@ export default function ViewTicketPage() {
           />
           <ToolbarActions>
             <Button variant="outline" onClick={() => router.push('/support')}>
-              <ArrowLeft className="mr-2 size-4" />
+              <ArrowLeft className="mr-1 size-4" />
               Back to Support
             </Button>
           </ToolbarActions>
@@ -226,7 +226,7 @@ export default function ViewTicketPage() {
               {/* Attached Image */}
               {ticket.filePath && (
                 <div className="space-y-3">
-                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-1">
                     <ImageIcon className="size-4" />
                     Attachment
                   </h3>
@@ -259,7 +259,7 @@ export default function ViewTicketPage() {
                               href={ticket.filePath}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2"
+                              className="inline-flex items-center gap-1"
                             >
                               <ExternalLink className="size-4" />
                               Open Full Size
@@ -274,7 +274,7 @@ export default function ViewTicketPage() {
                         href={ticket.filePath}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+                        className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
                       >
                         <ExternalLink className="size-4" />
                         View Attachment
@@ -291,7 +291,7 @@ export default function ViewTicketPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* User Information */}
                 <div className="space-y-3">
-                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-1">
                     <User className="size-4" />
                     User Information
                   </h3>
@@ -309,7 +309,7 @@ export default function ViewTicketPage() {
 
                 {/* Ticket Dates */}
                 <div className="space-y-3">
-                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-1">
                     <Calendar className="size-4" />
                     Ticket Timeline
                   </h3>

@@ -36,14 +36,14 @@ export function TicketActionMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent side="bottom" align="end">
         <DropdownMenuItem onClick={() => onView(ticket)}>
-          <Eye className="mr-2 size-4" />
+          <Eye className="mr-1 size-4" />
           View
         </DropdownMenuItem>
         {isClosed && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => onReopen(ticket)}>
-              <RotateCcw className="mr-2 size-4" />
+              <RotateCcw className="mr-1 size-4" />
               Reopen
             </DropdownMenuItem>
           </>
@@ -55,7 +55,7 @@ export function TicketActionMenu({
               variant="destructive"
               onClick={() => onClose(ticket)}
             >
-              <X className="mr-2 size-4" />
+              <X className="mr-1 size-4" />
               Close
             </DropdownMenuItem>
           </>

@@ -5,7 +5,7 @@ import { UserCheck } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
-} from '@/layouts/demo1/components/toolbar';
+} from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { getOnboardingStatus, OnboardingData, InitializeOnboardingPayload } from '@/lib/services/user/onboarding';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';

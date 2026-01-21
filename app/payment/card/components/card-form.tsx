@@ -291,7 +291,7 @@ export function CardForm() {
       <div className="relative z-10">
         <Card className="shadow-sm border border-muted">
           <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
                 1
               </div>
@@ -391,7 +391,7 @@ export function CardForm() {
           <div className="absolute -left-8 bottom-0 h-28 w-28 -rotate-3 bg-white/10 blur-2xl" />
           <div className="relative flex flex-col gap-5">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <div className="h-9 w-12 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center text-[11px] font-semibold">
                   P4
                 </div>
@@ -421,7 +421,7 @@ export function CardForm() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-xs">
+            <div className="flex items-center gap-1 text-xs">
               <div className="h-8 w-12 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center text-[11px] font-semibold">
                 CVV
               </div>

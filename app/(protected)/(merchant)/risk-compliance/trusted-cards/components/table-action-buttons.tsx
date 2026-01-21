@@ -1,8 +1,8 @@
 'use client';
 
 import { Pencil, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { CardWhitelist } from '@/lib/services/user/card-whitelist';
+import { TableActionMenu, TableActionMenuItem } from '@/app/(protected)/components/table-action-menu';
 
 interface TableActionButtonsProps {
   row: CardWhitelist;
@@ -11,27 +11,21 @@ interface TableActionButtonsProps {
 }
 
 export function TableActionButtons({ row, onEdit, onDelete }: TableActionButtonsProps) {
-  return (
-    <div className="flex items-center gap-2">
-      <Button
-        className="size-7"
-        mode="icon"
-        variant="ghost"
-        onClick={() => onEdit(row)}
-        title="Edit Card"
-      >
-        <Pencil className="size-4" />
-      </Button>
-      <Button
-        className="size-7"
-        mode="icon"
-        variant="ghost"
-        onClick={() => onDelete(row)}
-        title="Delete Card"
-      >
-        <Trash2 className="size-4 text-destructive" />
-      </Button>
-    </div>
-  );
+  const actions: TableActionMenuItem<CardWhitelist>[] = [
+    {
+      label: 'Edit',
+      icon: Pencil,
+      onClick: () => onEdit(row),
+    },
+    {
+      label: 'Delete',
+      icon: Trash2,
+      onClick: () => onDelete(row),
+      variant: 'destructive',
+      separator: true,
+    },
+  ];
+
+  return <TableActionMenu row={row} actions={actions} />;
 }
 
