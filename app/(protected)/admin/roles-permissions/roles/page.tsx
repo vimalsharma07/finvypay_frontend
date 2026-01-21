@@ -1,5 +1,6 @@
 'use client';
 
+import { Fragment } from 'react';
 import dynamic from 'next/dynamic';
 import { ShieldUser, Plus } from 'lucide-react';
 import {
@@ -28,7 +29,7 @@ export default function AdminRolesPage() {
   };
 
   return (
-    <>
+    <Fragment>
       <Container>
         <Toolbar>
           <ToolbarHeading
@@ -45,7 +46,7 @@ export default function AdminRolesPage() {
         </Toolbar>
       </Container>
       <RolesPageContent />
-    </>
+    </Fragment>
   );
 }
 

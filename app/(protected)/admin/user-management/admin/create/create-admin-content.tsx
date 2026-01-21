@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { X, Plus } from 'lucide-react';
-import { Container } from '@/components/common/container';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -92,8 +91,7 @@ export function CreateAdminContent() {
   };
 
   return (
-    <Container>
-      <Card>
+    <Card>
         <CardHeader>
           <CardTitle>Admin Information</CardTitle>
         </CardHeader>
@@ -173,7 +171,6 @@ export function CreateAdminContent() {
           </Form>
         </CardContent>
       </Card>
-    </Container>
   );
 }
 
