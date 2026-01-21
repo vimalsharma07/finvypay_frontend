@@ -48,7 +48,7 @@ import {
   Option,
 } from '@/lib/types/common-types';
 import { generateFilterQuery } from '@/lib/helpers';
-import { getUserConnectors } from '@/lib/services/admin/connectors';
+import { getUserAcquirerAccounts } from '@/lib/services/user/acquirer-accounts';
 import { getCurrencies } from '@/lib/services/admin/currency';
 import { getCountries } from '@/lib/services/admin/countries';
 import { getTimeZones } from '@/i18n/timezones';
@@ -128,14 +128,18 @@ export default function SandboxTransactionsPage() {
     const loadOptions = async () => {
       try {
         const [connectorsRes, currenciesRes, countriesRes] = await Promise.all([
-          getUserConnectors(),
+          getUserAcquirerAccounts({ page: 1, limit: 1000 }),
           getCurrencies({ page: 1, limit: 1000 }),
           getCountries({ page: 1, limit: 1000 }),
         ]);
 
-        if (connectorsRes.data?.data?.data) {
+        // Handle connector/acquirer accounts response
+        if (connectorsRes.data?.success) {
+          const accounts = Array.isArray(connectorsRes.data.data)
+            ? connectorsRes.data.data
+            : (connectorsRes.data.data as any)?.data || [];
           setConnectorOptions(
-            connectorsRes.data.data.data.map((c) => ({
+            accounts.map((c: any) => ({
               label: c.name,
               value: String(c.id),
             }))

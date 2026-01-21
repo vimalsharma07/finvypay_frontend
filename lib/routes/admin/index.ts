@@ -21,6 +21,7 @@ import { merchantRatesRoutes } from './merchant-rates-routes';
 import { adminApplicationRoutes } from './application-routes';
 import { adminSettlementRoutes } from './settlement-routes';
 import { adminNotificationRoutes } from './notification-routes';
+import { adminDashboardRoutes } from './dashboard-routes';
 
 // Re-export individual route sets for direct imports
 export { merchantRatesRoutes };
@@ -44,4 +45,5 @@ export const adminModuleRoutes = {
   applications: adminApplicationRoutes,
   settlements: adminSettlementRoutes,
   notifications: adminNotificationRoutes,
+  dashboard: adminDashboardRoutes,
 } as const;
