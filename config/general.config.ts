@@ -1,10 +1,10 @@
 const generalSettings = {
-  purchaseLink: 'https://1.envato.market/Vm7VRE',
+  purchaseLink: '',
   docsLink: `${process.env.NEXT_PUBLIC_LANDING_URL || 'http://localhost:3009'}/docs`,
   licenseLink: '',
-  devsLink: 'https://devs.keenthemes.com',
-  faqLink: 'https://keenthemes.com/metronic',
-  aboutLink: 'https://keenthemes.com/metronic',
+  devsLink: '',
+  faqLink: '',
+  aboutLink: '',
 };
 
 export { generalSettings };
