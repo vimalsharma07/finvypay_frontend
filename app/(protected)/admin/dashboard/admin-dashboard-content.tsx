@@ -251,8 +251,8 @@ export function AdminDashboardContent() {
           {/* User Counters */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {/* Total Users Card */}
-            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <Card className="group relative overflow-hidden border-0 bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="absolute inset-0 bg-linear-to-br from-blue-500/10 via-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
                 <CardTitle className="text-sm font-semibold text-blue-700 dark:text-blue-300">Total Users</CardTitle>
                 <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/50 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/70 transition-colors duration-300">
@@ -270,8 +270,8 @@ export function AdminDashboardContent() {
             </Card>
 
             {/* Admins Card */}
-            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 dark:from-amber-950/30 dark:via-orange-950/30 dark:to-red-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <Card className="group relative overflow-hidden border-0 bg-linear-to-br from-amber-50 via-orange-50 to-red-50 dark:from-amber-950/30 dark:via-orange-950/30 dark:to-red-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="absolute inset-0 bg-linear-to-br from-amber-500/10 via-orange-500/10 to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
                 <CardTitle className="text-sm font-semibold text-amber-700 dark:text-amber-300">Admins</CardTitle>
                 <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/50 group-hover:bg-amber-200 dark:group-hover:bg-amber-900/70 transition-colors duration-300">
@@ -289,8 +289,8 @@ export function AdminDashboardContent() {
             </Card>
 
             {/* Merchants Card */}
-            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-950/30 dark:via-teal-950/30 dark:to-cyan-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-teal-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <Card className="group relative overflow-hidden border-0 bg-linear-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-950/30 dark:via-teal-950/30 dark:to-cyan-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="absolute inset-0 bg-linear-to-br from-emerald-500/10 via-teal-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
                 <CardTitle className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Merchants</CardTitle>
                 <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 group-hover:bg-emerald-200 dark:group-hover:bg-emerald-900/70 transition-colors duration-300">
@@ -308,8 +308,8 @@ export function AdminDashboardContent() {
             </Card>
 
             {/* Affiliates Card */}
-            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-violet-50 via-fuchsia-50 to-pink-50 dark:from-violet-950/30 dark:via-fuchsia-950/30 dark:to-pink-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 via-fuchsia-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <Card className="group relative overflow-hidden border-0 bg-linear-to-br from-violet-50 via-fuchsia-50 to-pink-50 dark:from-violet-950/30 dark:via-fuchsia-950/30 dark:to-pink-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="absolute inset-0 bg-linear-to-br from-violet-500/10 via-fuchsia-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
                 <CardTitle className="text-sm font-semibold text-violet-700 dark:text-violet-300">Affiliates</CardTitle>
                 <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/50 group-hover:bg-violet-200 dark:group-hover:bg-violet-900/70 transition-colors duration-300">
@@ -330,8 +330,8 @@ export function AdminDashboardContent() {
           {/* Transaction Statistics */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {/* Total Transactions Card */}
-            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:from-slate-950/30 dark:via-gray-950/30 dark:to-zinc-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <div className="absolute inset-0 bg-gradient-to-br from-slate-500/10 via-gray-500/10 to-zinc-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <Card className="group relative overflow-hidden border-0 bg-linear-to-br from-slate-50 via-gray-50 to-zinc-50 dark:from-slate-950/30 dark:via-gray-950/30 dark:to-zinc-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="absolute inset-0 bg-linear-to-br from-slate-500/10 via-gray-500/10 to-zinc-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
                 <CardTitle className="text-sm font-semibold text-slate-700 dark:text-slate-300">Total Transactions</CardTitle>
                 <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-900/50 group-hover:bg-slate-200 dark:group-hover:bg-slate-900/70 transition-colors duration-300">
@@ -349,8 +349,8 @@ export function AdminDashboardContent() {
             </Card>
 
             {/* Success Card */}
-            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-green-950/30 dark:via-emerald-950/30 dark:to-teal-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-emerald-500/10 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <Card className="group relative overflow-hidden border-0 bg-linear-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-green-950/30 dark:via-emerald-950/30 dark:to-teal-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="absolute inset-0 bg-linear-to-br from-green-500/10 via-emerald-500/10 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
                 <CardTitle className="text-sm font-semibold text-green-700 dark:text-green-300">Success</CardTitle>
                 <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/50 group-hover:bg-green-200 dark:group-hover:bg-green-900/70 transition-colors duration-300">
@@ -368,8 +368,8 @@ export function AdminDashboardContent() {
             </Card>
 
             {/* Declined Card */}
-            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-red-50 via-rose-50 to-pink-50 dark:from-red-950/30 dark:via-rose-950/30 dark:to-pink-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 via-rose-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <Card className="group relative overflow-hidden border-0 bg-linear-to-br from-red-50 via-rose-50 to-pink-50 dark:from-red-950/30 dark:via-rose-950/30 dark:to-pink-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="absolute inset-0 bg-linear-to-br from-red-500/10 via-rose-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
                 <CardTitle className="text-sm font-semibold text-red-700 dark:text-red-300">Declined</CardTitle>
                 <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/50 group-hover:bg-red-200 dark:group-hover:bg-red-900/70 transition-colors duration-300">
@@ -387,8 +387,8 @@ export function AdminDashboardContent() {
             </Card>
 
             {/* Chargebacks Card */}
-            <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 dark:from-amber-950/30 dark:via-yellow-950/30 dark:to-orange-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-yellow-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <Card className="group relative overflow-hidden border-0 bg-linear-to-br from-amber-50 via-yellow-50 to-orange-50 dark:from-amber-950/30 dark:via-yellow-950/30 dark:to-orange-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="absolute inset-0 bg-linear-to-br from-amber-500/10 via-yellow-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
                 <CardTitle className="text-sm font-semibold text-amber-700 dark:text-amber-300">Chargebacks</CardTitle>
                 <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/50 group-hover:bg-amber-200 dark:group-hover:bg-amber-900/70 transition-colors duration-300">
