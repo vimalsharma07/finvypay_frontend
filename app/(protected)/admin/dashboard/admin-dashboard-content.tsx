@@ -24,15 +24,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { DynamicApexChart } from '@/components/charts/dynamic-apex-chart';
 import { getAdminDashboard, type DashboardData } from '@/lib/services/admin/dashboard';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
@@ -498,58 +489,6 @@ export function AdminDashboardContent() {
               </CardContent>
             </Card>
           </div>
-
-          {/* Connector Transactions Summary */}
-          {data.connectorTransactionsSummary && data.connectorTransactionsSummary.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Connector Transactions Summary</CardTitle>
-                <CardDescription>
-                  Transaction breakdown by connector
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[400px]">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Connector</TableHead>
-                        <TableHead className="text-right">Total</TableHead>
-                        <TableHead className="text-right">Success</TableHead>
-                        <TableHead className="text-right">Decline</TableHead>
-                        <TableHead className="text-right">Chargeback</TableHead>
-                        <TableHead className="text-right">Refund</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {data.connectorTransactionsSummary.map((connector, index) => (
-                        <TableRow key={index}>
-                          <TableCell className="font-medium">
-                            {connector.connectorName || `Connector ${index + 1}`}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {(connector.totalTransactions || 0).toLocaleString()}
-                          </TableCell>
-                          <TableCell className="text-right text-green-600">
-                            {(connector.successCount || 0).toLocaleString()}
-                          </TableCell>
-                          <TableCell className="text-right text-red-600">
-                            {(connector.declineCount || 0).toLocaleString()}
-                          </TableCell>
-                          <TableCell className="text-right text-amber-600">
-                            {(connector.chargebackCount || 0).toLocaleString()}
-                          </TableCell>
-                          <TableCell className="text-right text-blue-600">
-                            {(connector.refundCount || 0).toLocaleString()}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          )}
         </>
       )}
     </div>

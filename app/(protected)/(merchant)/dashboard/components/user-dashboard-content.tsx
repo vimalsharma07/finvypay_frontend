@@ -30,15 +30,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { getOnboardingStatus, OnboardingData } from '@/lib/services/user/onboarding';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { OnboardingCard } from './onboarding-card';
@@ -523,9 +514,8 @@ export function UserDashboardContent() {
         </Card>
       </div>
 
-      {/* Additional Transaction Stats */}
+      {/* Additional Transaction Stats - Refunds */}
       <div className="grid gap-5 lg:gap-7.5 lg:grid-cols-2 mt-5 lg:mt-7.5">
-        {/* Refunds */}
         <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
@@ -543,92 +533,7 @@ export function UserDashboardContent() {
             </p>
           </CardContent>
         </Card>
-
-        {/* Transaction Summary */}
-        <Card className="relative overflow-hidden">
-          <CardHeader>
-            <CardTitle className="text-sm font-semibold">Transaction Summary</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Success Rate:</span>
-              <Badge variant="outline" className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
-                {stats.successPercentage.toFixed(2)}%
-              </Badge>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Decline Rate:</span>
-              <Badge variant="outline" className="bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300">
-                {stats.declinePercentage?.toFixed(2) || '0.00'}%
-              </Badge>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Chargeback Rate:</span>
-              <Badge variant="outline" className="bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
-                {stats.chargebackPercentage?.toFixed(2) || '0.00'}%
-              </Badge>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Refund Rate:</span>
-              <Badge variant="outline" className="bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-                {stats.refundPercentage?.toFixed(2) || '0.00'}%
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
       </div>
-
-      {/* Connector Transactions Summary */}
-      {dashboardData?.connectorTransactionsSummary && dashboardData.connectorTransactionsSummary.length > 0 && (
-        <Card className="mt-5 lg:mt-7.5">
-          <CardHeader>
-            <CardTitle className="text-base font-semibold">Connector Transactions Summary</CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">
-              Transaction breakdown by connector
-            </p>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[400px]">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Connector</TableHead>
-                    <TableHead className="text-right">Total</TableHead>
-                    <TableHead className="text-right">Success</TableHead>
-                    <TableHead className="text-right">Decline</TableHead>
-                    <TableHead className="text-right">Chargeback</TableHead>
-                    <TableHead className="text-right">Refund</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {dashboardData.connectorTransactionsSummary.map((connector, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">
-                        {connector.connectorName || `Connector ${index + 1}`}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {(connector.totalTransactions || 0).toLocaleString()}
-                      </TableCell>
-                      <TableCell className="text-right text-green-600 dark:text-green-400">
-                        {(connector.successCount || 0).toLocaleString()}
-                      </TableCell>
-                      <TableCell className="text-right text-red-600 dark:text-red-400">
-                        {(connector.declineCount || 0).toLocaleString()}
-                      </TableCell>
-                      <TableCell className="text-right text-amber-600 dark:text-amber-400">
-                        {(connector.chargebackCount || 0).toLocaleString()}
-                      </TableCell>
-                      <TableCell className="text-right text-blue-600 dark:text-blue-400">
-                        {(connector.refundCount || 0).toLocaleString()}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </ScrollArea>
-          </CardContent>
-        </Card>
-      )}
       </>
       )}
 
