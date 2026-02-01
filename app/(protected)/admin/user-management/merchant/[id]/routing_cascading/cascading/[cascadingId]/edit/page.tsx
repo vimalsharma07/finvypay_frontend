@@ -53,6 +53,17 @@ const CASCADING_FOR_OPTIONS = [
   { label: 'APM', value: 4 },
 ];
 
+const DURATION_OPTIONS = [
+  { value: '30 mins', label: '30 minutes' },
+  { value: '1 hour', label: '1 hour' },
+  { value: '2 hours', label: '2 hours' },
+  { value: '4 hours', label: '4 hours' },
+  { value: '6 hours', label: '6 hours (default)' },
+  { value: '8 hours', label: '8 hours' },
+  { value: '12 hours', label: '12 hours' },
+  { value: '24 hours', label: '24 hours' },
+];
+
 type ChainEntry = {
   merchantAcquirerAccountId: string;
   merchantAcquirerAccountName: string;
@@ -66,6 +77,7 @@ export default function CascadingEditPage() {
 
   const [name, setName] = useState('');
   const [type, setType] = useState('DECLINED');
+  const [duration, setDuration] = useState('6 hours');
   const [cascadingFor, setCascadingFor] = useState<number | undefined>(1);
   const [status, setStatus] = useState<boolean>(true);
 
@@ -107,6 +119,12 @@ export default function CascadingEditPage() {
             setName(data.name || '');
             setType(data.type || 'DECLINED');
             setStatus(data.status ?? true);
+            const dur = data.duration;
+            setDuration(
+              dur && DURATION_OPTIONS.some((o) => o.value === dur)
+                ? dur
+                : '6 hours'
+            );
             const cf = data.cascadingFor ?? data.cascading_for;
             setCascadingFor(cf !== undefined ? cf : 1);
 
@@ -264,8 +282,15 @@ export default function CascadingEditPage() {
       toast.error('Primary connector is required');
       return;
     }
-    if (chain.some((c) => !c.merchantAcquirerAccountId || !c.merchantAcquirerAccountName.trim())) {
-      toast.error('All cascade connectors need id and name');
+    if (chain.some((c) => !c.merchantAcquirerAccountId)) {
+      toast.error('All fallback connectors must be selected');
+      return;
+    }
+    const hasPrimaryAsFallback = chain.some(
+      (c) => c.merchantAcquirerAccountId === selectedConnectorId
+    );
+    if (hasPrimaryAsFallback) {
+      toast.error('Fallback connector cannot be the same as Primary Connector');
       return;
     }
 
@@ -274,6 +299,7 @@ export default function CascadingEditPage() {
       // merchantProfileId: Number(selectedProfileId),
       merchantAcquirerAccountId: Number(selectedConnectorId),
       type,
+      duration,
       cascadingFor,
       status,
       config: chain.map((c) => ({
@@ -376,6 +402,21 @@ export default function CascadingEditPage() {
                   </Select>
                 </div>
                 <div className="flex flex-col gap-2">
+                  <Label>Duration</Label>
+                  <Select value={duration} onValueChange={setDuration}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select duration" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DURATION_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-col gap-2">
                   <Label>Status</Label>
                   <div className="flex items-center justify-between rounded-md border px-3 py-2">
                     <span className="text-sm text-muted-foreground">
@@ -431,9 +472,9 @@ export default function CascadingEditPage() {
 
           <Card className="lg:col-span-3">
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Cascade Chain (order matters)</CardTitle>
+              <CardTitle>Fallback Connectors (order matters)</CardTitle>
               <Button variant="outline" size="sm" onClick={addChainEntry}>
-                Add Connector
+                Add Fallback
               </Button>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -442,41 +483,37 @@ export default function CascadingEditPage() {
                   key={idx}
                   className="grid grid-cols-1 md:grid-cols-6 gap-3 border rounded-md p-3"
                 >
-                  <div className="md:col-span-3 flex flex-col gap-1">
-                    <Label>Connector</Label>
+                  <div className="md:col-span-5 flex flex-col gap-1">
+                    <Label>Fallback Connector</Label>
                     <Select
                       value={entry.merchantAcquirerAccountId}
                       onValueChange={(val) => {
-                        updateChainEntry(idx, 'merchantAcquirerAccountId', val);
                         const label =
                           connectorOptions.find((o) => o.value === val)?.label || '';
+                        updateChainEntry(idx, 'merchantAcquirerAccountId', val);
                         updateChainEntry(idx, 'merchantAcquirerAccountName', label);
                       }}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select connector" />
+                        <SelectValue placeholder="Select fallback connector" />
                       </SelectTrigger>
                       <SelectContent>
                         {connectorOptions.map((opt) => {
                           const value = opt.value === null ? 'null' : String(opt.value);
+                          const isPrimary = value === selectedConnectorId;
                           return (
-                            <SelectItem key={value} value={value}>
-                            {opt.label}
+                            <SelectItem
+                              key={value}
+                              value={value}
+                              disabled={isPrimary}
+                            >
+                              {opt.label}
+                              {isPrimary ? ' (Primary)' : ''}
                             </SelectItem>
                           );
                         })}
                       </SelectContent>
                     </Select>
-                  </div>
-                  <div className="md:col-span-2 flex flex-col gap-1">
-                    <Label>Display Name</Label>
-                    <Input
-                      placeholder="e.g., Primary, Fallback"
-                      value={entry.merchantAcquirerAccountName}
-                      onChange={(e) =>
-                        updateChainEntry(idx, 'merchantAcquirerAccountName', e.target.value)
-                      }
-                    />
                   </div>
                   <div className="md:col-span-1 flex items-end">
                     <Button

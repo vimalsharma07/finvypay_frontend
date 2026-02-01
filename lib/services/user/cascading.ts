@@ -86,6 +86,30 @@ export async function getUserMerchantCascading(
   }
 }
 
+export async function updateUserMerchantCascadingStatus(
+  cascadingId: string,
+  status: boolean
+): Promise<ApiResponse<{ success: boolean; message?: string }>> {
+  try {
+    const data = await http.put(`${getBaseUrl()}/${cascadingId}/status`, {
+      status,
+    }) as { success: boolean; message?: string };
+    return {
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+      };
+    }
+    throw error;
+  }
+}
+
 export async function deleteUserMerchantCascading(
   cascadingId: string
 ): Promise<ApiResponse<{ success: boolean; message: string }>> {
@@ -116,6 +140,7 @@ export async function createUserMerchantCascading(
     merchantProfileId: number;
     merchantAcquirerAccountId: number;
     type: string;
+    duration?: string;
     cascadingFor: number;
     status: boolean;
     config: Array<{
@@ -177,6 +202,7 @@ export async function updateUserMerchantCascading(
     name: string;
     merchantAcquirerAccountId: number;
     type: string;
+    duration?: string;
     cascadingFor: number;
     status: boolean;
     config: Array<{

@@ -39,7 +39,7 @@ export const createRoutingSchema = z.object({
 export type CreateRoutingFormData = z.infer<typeof createRoutingSchema>;
 export type RoutingConfigItem = z.infer<typeof routingConfigItemSchema>;
 
-// Create cascading schema
+// Create cascading schema (admin uses local state; user form uses this)
 export const createCascadingSchema = z.object({
   name: z.string()
     .min(1, 'Cascading name is required')
@@ -54,12 +54,22 @@ export const createCascadingSchema = z.object({
     errorMap: () => ({ message: 'Invalid cascading type. Must be one of: DECLINED, FAILED, TIMEOUT, INSUFFICIENT_FUNDS' })
   }),
 
-  cascadingFor: z.number().int().positive('Secondary acquirer account ID must be a positive integer'),
+  duration: z.string().optional(),
 
-  status: z.boolean()
-}).refine((data) => data.merchantAcquirerAccountId !== data.cascadingFor, {
-  message: 'Primary and secondary accounts must be different',
-  path: ['cascadingFor']
+  cascadingFor: z.number().int().min(1).max(4, 'Cascading for must be 1-4 (Card/UPI/Crypto/APM)'),
+
+  status: z.boolean(),
+
+  config: z.array(z.object({
+    merchantAcquirerAccountId: z.string().min(1, 'Fallback connector is required'),
+    merchantAcquirerAccountName: z.string(),
+  })).min(1, 'At least one fallback connector is required'),
+}).refine((data) => {
+  const primaryId = String(data.merchantAcquirerAccountId);
+  return !data.config.some((c) => c.merchantAcquirerAccountId === primaryId);
+}, {
+  message: 'Fallback connector cannot be the same as Primary Connector',
+  path: ['config'],
 });
 
 // Type definitions
