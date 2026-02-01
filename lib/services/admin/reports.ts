@@ -1,14 +1,15 @@
 /**
  * Admin Reports API Service
- * 
- * Centralized API calls for admin reporting operations
+ *
+ * Centralized API calls for admin reporting operations.
+ * All report types use the same endpoint with different type parameter.
  */
 
 import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
 
-// Merchant Turnover Report types
+// Merchant Turnover Report types (for backward compatibility)
 export interface MerchantTurnoverReportItem {
   date: string;
   success_amount: number;
@@ -30,20 +31,29 @@ export interface ReportParams {
   end_date: string;
 }
 
+/** Generic report response - data structure varies by report type */
+export interface GenericReportResponse {
+  success: boolean;
+  data: unknown;
+  message?: string;
+}
+
 /**
- * Get merchant turnover report
- * 
+ * Get report by type (generic - works for all report types)
+ *
+ * @param type - Report type (e.g., merchant-turnover-report, merchant-transaction-report)
  * @param startDate - Start date in YYYY-MM-DD format
  * @param endDate - End date in YYYY-MM-DD format
- * @returns Promise with merchant turnover report response
+ * @returns Promise with report response
  */
-export async function getMerchantTurnoverReport(
+export async function getReport(
+  type: string,
   startDate: string,
   endDate: string
-): Promise<ApiResponse<MerchantTurnoverReportResponse>> {
+): Promise<ApiResponse<GenericReportResponse>> {
   try {
-    const endpoint = adminRoutes.reports.merchantTurnover(startDate, endDate);
-    const data = await http.get(endpoint) as MerchantTurnoverReportResponse;
+    const endpoint = adminRoutes.reports.reportByType(type, startDate, endDate);
+    const data = (await http.get(endpoint)) as GenericReportResponse;
 
     return {
       status: 200,
@@ -58,5 +68,20 @@ export async function getMerchantTurnoverReport(
     }
     throw error;
   }
+}
+
+/**
+ * Get merchant turnover report
+ *
+ * @param startDate - Start date in YYYY-MM-DD format
+ * @param endDate - End date in YYYY-MM-DD format
+ * @returns Promise with merchant turnover report response
+ */
+export async function getMerchantTurnoverReport(
+  startDate: string,
+  endDate: string
+): Promise<ApiResponse<MerchantTurnoverReportResponse>> {
+  const response = await getReport('merchant-turnover-report', startDate, endDate);
+  return response as ApiResponse<MerchantTurnoverReportResponse>;
 }
 
