@@ -73,7 +73,7 @@ export function DashboardPage() {
                   defaultMonth={tempDateRange?.from || defaultStartDate}
                   selected={tempDateRange}
                   onSelect={setTempDateRange}
-                  numberOfMonths={2}
+                  numberOfMonths={1}
                 />
                 <div className="flex items-center justify-end gap-1.5 border-t border-border p-3">
                   <Button variant="outline" onClick={handleDateRangeReset}>

@@ -83,7 +83,7 @@ export function ReportFilters({
                 defaultMonth={tempRange?.from || new Date()}
                 selected={tempRange}
                 onSelect={setTempRange}
-                numberOfMonths={2}
+                numberOfMonths={1}
               />
               <div className="flex items-center justify-end gap-2 border-t border-border p-3">
                 <Button variant="outline" size="sm" onClick={handleReset}>
