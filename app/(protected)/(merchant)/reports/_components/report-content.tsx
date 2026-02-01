@@ -3,16 +3,16 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
-import { getReport } from '@/lib/services/admin/reports';
+import { getReport } from '@/lib/services/user/reports';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { normalizeReportData } from '@/lib/utils/report-utils';
 import { toast } from 'sonner';
 import { ReportFilters, defaultDateRange } from './report-filters';
 import { ReportDataTable } from './report-data-table';
-import type { AdminReportTypeConfig } from '@/config/reports/admin-report-types';
+import type { MerchantReportTypeConfig } from '@/config/reports/merchant-report-types';
 
 export interface ReportContentProps {
-  config: AdminReportTypeConfig;
+  config: MerchantReportTypeConfig;
 }
 
 export function ReportContent({ config }: ReportContentProps) {
