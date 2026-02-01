@@ -101,7 +101,14 @@ const BASE_ADMIN_MENU: MenuConfig = [
     permissionModule: 'Reports', // Explicit permission module mapping
     requirePermission: false,
     children: [
-      {title: 'OverAll Reports', path: '/admin/reports/overall', submodule: 'overall reports' },
+      { title: 'Merchant Turnover', path: '/admin/reports/merchant-turnover', submodule: 'overall reports' },
+      { title: 'Merchant Transaction', path: '/admin/reports/merchant-transaction', submodule: 'Reports' },
+      { title: 'MID Transaction', path: '/admin/reports/mid-transaction', submodule: 'Reports' },
+      { title: 'Transaction Summary', path: '/admin/reports/transaction-summary', submodule: 'Reports' },
+      { title: 'Merchant Transaction Response', path: '/admin/reports/merchant-transaction-response', submodule: 'Reports' },
+      { title: 'Country-wise Transaction', path: '/admin/reports/country-wise-transaction', submodule: 'Reports' },
+      { title: 'BIN-wise Transaction', path: '/admin/reports/bin-wise-transaction', submodule: 'Reports' },
+      { title: 'Provider Rates', path: '/admin/reports/provider-rates', submodule: 'Reports' },
     ],
   },
   {
