@@ -152,8 +152,6 @@ export default function CascadingPage() {
     { key: 'priority', label: 'Priority', sortable: true },
     { key: 'type', label: 'Type', sortable: true },
     { key: 'connector_id', label: 'Main MID', sortable: false },
-    { key: 'cascadeTo', label: 'Cascade To', sortable: false },
-    { key: 'config', label: 'Config', sortable: false },
     { key: 'cascading_for', label: 'Cascading For', sortable: true },
     { key: 'status', label: 'Status', sortable: false },
   ];
@@ -176,27 +174,19 @@ export default function CascadingPage() {
           </Badge>
         );
       case 'connector_id':
-        return <div className="text-sm">{item.connector_id || '-'}</div>;
-      case 'cascadeTo':
         return (
-          <div className="text-sm text-muted-foreground">
-            {item.cascadeTo ? 'Configured' : 'Not Configured'}
-          </div>
-        );
-      case 'config':
-        return (
-          <div className="text-sm text-muted-foreground">
-            {Array.isArray(item.config) && item.config.length > 0
-              ? `${item.config.length} connector(s)`
-              : '-'}
+          <div className="text-sm">
+            {item.connector?.name || item.connector_id || '-'}
           </div>
         );
       case 'cascading_for':
-        return (
-          <Badge variant="outline" className="capitalize">
-            {item.cascading_for}
-          </Badge>
-        );
+        const firstConfigName =
+          Array.isArray(item.config) && item.config.length > 0
+            ? item.config[0].merchantAcquirerAccountName ||
+              item.config[0].connector_name ||
+              '-'
+            : '-';
+        return <div className="text-sm">{firstConfigName}</div>;
       case 'status':
         return (
           <Switch

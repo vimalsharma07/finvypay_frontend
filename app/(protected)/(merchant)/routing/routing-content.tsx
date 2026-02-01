@@ -17,16 +17,12 @@ import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
   getUserMerchantRoutings,
   deleteUserMerchantRouting,
+  updateUserMerchantRoutingStatus,
   UserRouteRule,
   UserRouteRuleListResponse,
   UserRouteRuleListMeta,
 } from '@/lib/services/user/routing';
-import {
-  updateUserRoutingStatus,
-  updateUserRoutingCascade,
-} from '@/lib/services/admin/routing';
 import type { TableAction } from '../../components/table-comp';
-import type { Option } from '@/lib/types/common-types';
 import { useAuth } from '@/hooks/use-auth';
 
 export function UserRoutingPageContent() {
@@ -160,7 +156,7 @@ export function UserRoutingPageContent() {
             {item.priority}
           </Badge>
         );
-      case 'view_route':
+      case 'viewRoute':
         return (
           <div className="text-sm text-muted-foreground max-w-xs truncate">
             {item.viewRoute || '-'}
@@ -172,7 +168,7 @@ export function UserRoutingPageContent() {
             {item.merchantConnector?.name || 'Not Assigned'}
           </div>
         );
-      case 'routing_for':
+      case 'routingFor':
         return (
           <Badge variant="outline" className="capitalize">
             {item.routingFor}
@@ -184,8 +180,7 @@ export function UserRoutingPageContent() {
             checked={item.status}
             onCheckedChange={async (checked) => {
               try {
-                const response = await updateUserRoutingStatus(
-                  userId,
+                const response = await updateUserMerchantRoutingStatus(
                   item.id,
                   checked,
                 );
@@ -204,33 +199,13 @@ export function UserRoutingPageContent() {
             }}
           />
         );
-      case 'is_cascade':
+      case 'isCascade':
         return (
-          <Switch
-            checked={item.isCascade || false}
-            onCheckedChange={async (checked) => {
-              try {
-                const response = await updateUserRoutingCascade(
-                  userId,
-                  item.id,
-                  checked,
-                );
-                handleApiResponse(response, {
-                  onSuccess: () => {
-                    toast.success('Cascade status updated');
-                    fetchRoutings(page, limit, sortBy, sortOrder, selectedProfileId);
-                  },
-                  onError: (errorMessage) => {
-                    toast.error(errorMessage || 'Failed to update cascade');
-                  },
-                });
-              } catch {
-                toast.error('An unexpected error occurred');
-              }
-            }}
-          />
+          <Badge variant={item.isCascade ? 'success' : 'secondary'}>
+            {item.isCascade ? 'Yes' : 'No'}
+          </Badge>
         );
-      case 'split_enable':
+      case 'splitEnable':
         return (
           <Badge variant={item.splitEnable ? 'success' : 'secondary'}>
             {item.splitEnable ? 'Yes' : 'No'}

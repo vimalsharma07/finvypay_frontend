@@ -11,24 +11,40 @@ import type { ApiResponse } from '../types';
 export interface CascadingRule {
   id: string;
   name: string;
-  connector_id: string;
+  connector_id?: string;
+  connectorId?: string;
+  connector?: {
+    id: string;
+    name: string;
+    [key: string]: unknown;
+  };
   type: string;
-  duration: string;
+  duration?: string;
   config: Array<{
-    connector_id: string;
-    connector_name: string;
+    connector_id?: string;
+    connector_name?: string;
+    merchantAcquirerAccountId?: string;
+    merchantAcquirerAccountName?: string;
     number?: number;
     amount?: number;
     minutes?: string;
   }>;
-  cascadeTo: any;
+  cascadeTo?: unknown;
   status: boolean;
   priority: number;
-  cascading_for: number;
+  cascading_for?: number;
+  cascadingFor?: number;
   user_profile_id?: number;
   createdAt?: string;
   updatedAt?: string;
 }
+
+export const CASCADING_FOR_LABELS: Record<number, string> = {
+  1: 'Card',
+  2: 'UPI',
+  3: 'Crypto',
+  4: 'APM',
+};
 
 export interface CascadingRuleListMeta {
   currentPage: number;
@@ -60,6 +76,7 @@ export interface CreateCascadingRulePayload {
   merchantProfileId: number;
   merchantAcquirerAccountId: number;
   type: string;
+  duration?: string;
   cascadingFor?: number;
   status?: boolean;
   config: CascadingConfigEntry[];

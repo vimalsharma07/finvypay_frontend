@@ -1,42 +1,33 @@
 'use client';
 
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Link2, Eye, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { Container } from '@/components/common/container';
-import {
-  Toolbar,
-  ToolbarHeading,
-  ToolbarActions,
-} from '@/layouts/main/components/toolbar';
-import { Button } from '@/components/ui/button';
 import {
   TableComp,
   TableHeader,
   TableAction,
 } from '../../components/table-comp';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { ConfirmComp } from '../../components/confirm-comp';
 import { toast } from 'sonner';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
   getUserMerchantCascading,
   deleteUserMerchantCascading,
+  updateUserMerchantCascadingStatus,
   UserCascadingRule,
   UserCascadingListResponse,
   UserCascadingListMeta,
 } from '@/lib/services/user/cascading';
-import type { Option } from '@/lib/types/common-types';
+import { getUserProfileId, getMerchantProfiles } from '@/lib/services/user/merchant-profile';
 import { useAuth } from '@/hooks/use-auth';
 
 export function UserCascadingPageContent() {
-  const router = useRouter();
   const { user } = useAuth();
 
   const [isClient, setIsClient] = useState(false);
-  const [profileList, setProfileList] = useState<
-    Array<{ id: number | string; merchantProfileName?: string; industry?: { name?: string }; isPrimary?: boolean }>
-  >([]);
   const [loading, setLoading] = useState(true);
   const [profilesLoading, setProfilesLoading] = useState(true);
   const [cascades, setCascades] = useState<UserCascadingRule[]>([]);
@@ -45,7 +36,7 @@ export function UserCascadingPageContent() {
   const [limit, setLimit] = useState(10);
   const [sortBy, setSortBy] = useState<string>('priority');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('ASC');
-  const [selectedProfileId, setSelectedProfileId] = useState<string>('');
+  const [profileId, setProfileId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cascadeToDelete, setCascadeToDelete] = useState<UserCascadingRule | null>(null);
 
@@ -103,52 +94,58 @@ export function UserCascadingPageContent() {
     }
   };
 
+  // Resolve default profile from header (user.merchantProfiles primary/first)
   useEffect(() => {
-    if (user?.merchantProfiles && Array.isArray(user.merchantProfiles)) {
-      setProfileList(user.merchantProfiles as any[]);
-      return;
-    }
-    if (typeof window !== 'undefined') {
+    const resolveProfile = async () => {
+      setProfilesLoading(true);
       try {
-        const raw = localStorage.getItem('user');
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed?.merchantProfiles)) {
-            setProfileList(parsed.merchantProfiles);
-          }
+        // Use same default as header: primary or first profile from user
+        const id = getUserProfileId(null, user);
+        if (id) {
+          setProfileId(id);
+          setProfilesLoading(false);
+          return;
         }
+        // Fallback: fetch from API if user doesn't have merchantProfiles yet
+        const response = await getMerchantProfiles();
+        handleApiResponse(response, {
+          onSuccess: (payload) => {
+            if (!payload?.success || !payload.data) return;
+            const list = Array.isArray(payload.data) ? payload.data : [];
+            if (list.length > 0) {
+              const primary = list.find((p: any) => p.isPrimary);
+              const nextId = (primary?.id ?? list[0]?.id)?.toString() || null;
+              setProfileId(nextId);
+            }
+          },
+          onError: () => {
+            // Silently fail - profileId stays null
+          },
+        });
       } catch {
-        // ignore parse errors
+        // ignore
+      } finally {
+        setProfilesLoading(false);
       }
-    }
+    };
+
+    resolveProfile();
   }, [user]);
 
   useEffect(() => {
-    setProfilesLoading(true);
-    if (!selectedProfileId && profileList.length > 0) {
-      const primary = profileList.find((p) => p.isPrimary);
-      const nextProfileId = (primary?.id ?? profileList[0]?.id)?.toString() || '';
-      if (nextProfileId) {
-        setSelectedProfileId(nextProfileId);
-      }
+    if (profileId) {
+      fetchCascading(page, limit, sortBy, sortOrder, profileId);
     }
-    setProfilesLoading(false);
-  }, [profileList, selectedProfileId]);
-
-  useEffect(() => {
-    if (selectedProfileId) {
-      fetchCascading(page, limit, sortBy, sortOrder, selectedProfileId);
-    }
-  }, [selectedProfileId, page, limit, sortBy, sortOrder]);
+  }, [profileId, page, limit, sortBy, sortOrder]);
 
   const headers: TableHeader<UserCascadingRule>[] = useMemo(
     () => [
       { key: 'name', label: 'Name', sortable: true },
       { key: 'priority', label: 'Priority', sortable: true },
-      { key: 'connectorName', label: 'Connector', sortable: false },
+      { key: 'type', label: 'Type', sortable: false },
+      { key: 'connectorName', label: 'Main MID', sortable: false },
       { key: 'cascadingFor', label: 'Cascading For', sortable: true },
       { key: 'status', label: 'Status', sortable: false },
-      { key: 'type', label: 'Type', sortable: false },
     ],
     [],
   );
@@ -164,21 +161,48 @@ export function UserCascadingPageContent() {
           </Badge>
         );
       case 'connectorName':
-        return <div className="text-sm">{(item as any).connectorName || 'Not Assigned'}</div>;
-      case 'cascadingFor':
         return (
-          <Badge variant="outline" className="capitalize">
-            {item.cascadingFor ?? '-'}
-          </Badge>
+          <div className="text-sm">
+            {item.connector?.name ?? (item as any).connectorName ?? '-'}
+          </div>
         );
+      case 'cascadingFor':
+        const firstConfigName =
+          Array.isArray(item.config) && item.config.length > 0
+            ? item.config[0].merchantAcquirerAccountName ?? '-'
+            : '-';
+        return <div className="text-sm">{firstConfigName}</div>;
       case 'status':
         return (
-          <Badge variant={item.status ? 'success' : 'secondary'}>
-            {item.status ? 'Active' : 'Inactive'}
-          </Badge>
+          <Switch
+            checked={item.status}
+            onCheckedChange={async (checked) => {
+              try {
+                const response = await updateUserMerchantCascadingStatus(
+                  item.id,
+                  checked,
+                );
+                handleApiResponse(response, {
+                  onSuccess: () => {
+                    toast.success('Cascading status updated');
+                    fetchCascading(page, limit, sortBy, sortOrder, profileId ?? undefined);
+                  },
+                  onError: (errorMessage) => {
+                    toast.error(errorMessage || 'Failed to update status');
+                  },
+                });
+              } catch {
+                toast.error('An unexpected error occurred');
+              }
+            }}
+          />
         );
       case 'type':
-        return <div className="text-sm capitalize">{item.type || '-'}</div>;
+        return (
+          <Badge variant="outline" className="capitalize">
+            {item.type ?? '-'}
+          </Badge>
+        );
       default:
         const value = item[key as keyof UserCascadingRule];
         return <div className="text-foreground font-normal">{value != null ? String(value) : '-'}</div>;
@@ -272,7 +296,7 @@ export function UserCascadingPageContent() {
             handleApiResponse(response, {
               onSuccess: () => {
                 toast.success('Cascading rule deleted successfully');
-                fetchCascading(page, limit, sortBy, sortOrder, selectedProfileId);
+                fetchCascading(page, limit, sortBy, sortOrder, profileId ?? undefined);
               },
               onError: (errorMessage) => {
                 toast.error(errorMessage || 'Failed to delete cascading rule');
