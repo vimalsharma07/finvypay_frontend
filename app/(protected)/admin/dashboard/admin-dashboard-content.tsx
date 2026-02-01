@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
   Popover,
   PopoverContent,
@@ -441,54 +440,6 @@ export function AdminDashboardContent() {
             </div>
           )}
 
-          {/* Additional Transaction Stats */}
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Refunds</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-blue-600">
-                  {data.transactionStatistics.refundCount.toLocaleString()}
-                </div>
-                <p className="text-sm text-muted-foreground mt-2">
-                  {data.transactionStatistics.refundPercentage.toFixed(1)}% refund rate
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Transaction Summary</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Success Rate:</span>
-                  <Badge variant="outline" className="bg-green-50 text-green-700">
-                    {data.transactionStatistics.successPercentage.toFixed(2)}%
-                  </Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Decline Rate:</span>
-                  <Badge variant="outline" className="bg-red-50 text-red-700">
-                    {data.transactionStatistics.declinePercentage.toFixed(2)}%
-                  </Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Chargeback Rate:</span>
-                  <Badge variant="outline" className="bg-amber-50 text-amber-700">
-                    {data.transactionStatistics.chargebackPercentage.toFixed(2)}%
-                  </Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Refund Rate:</span>
-                  <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                    {data.transactionStatistics.refundPercentage.toFixed(2)}%
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </>
       )}
     </div>
