@@ -141,14 +141,14 @@ const BASE_ADMIN_MENU: MenuConfig = [
     permissionModule: 'Logs', // Explicit permission module mapping
     requirePermission: false,
     children: [
-      { title: 'Transaction Logs', path: '/admin/logs/txn_logs', submodule: 'Transaction Logs' },
-      { title: 'Webhook Logs', path: '/admin/logs/webhook_logs', submodule: 'Webhook Logs' },
-      { title: 'API Logs', path: '/admin/logs/api_logs', submodule: 'API Logs' },
-      { title: 'Dispute Logs', path: '/admin/logs/dispute_logs', submodule: 'Dispute Logs' },
-      { title: 'App Error Logs', path: '/admin/logs/app_error_logs', submodule: 'App Error Logs' },
-      { title: 'Job Error Logs', path: '/admin/logs/job_error_logs', submodule: 'Job Error Logs' },
-      { title: 'Cron Error Logs', path: '/admin/logs/cron_error_logs', submodule: 'Cron Error Logs' },
-      { title: 'Admin Audit Logs', path: '/admin/logs/admin_audit_logs', submodule: 'Admin Audit Logs' },
+      { title: 'Transaction Logs', path: '/admin/log/txn_logs', submodule: 'Transaction Logs' },
+      { title: 'Webhook Logs', path: '/admin/log/webhook_logs', submodule: 'Webhook Logs' },
+      { title: 'API Logs', path: '/admin/log/api_logs', submodule: 'API Logs' },
+      { title: 'Dispute Logs', path: '/admin/log/dispute_logs', submodule: 'Dispute Logs' },
+      { title: 'App Error Logs', path: '/admin/log/app_error_logs', submodule: 'App Error Logs' },
+      { title: 'Job Error Logs', path: '/admin/log/job_error_logs', submodule: 'Job Error Logs' },
+      { title: 'Cron Error Logs', path: '/admin/log/cron_error_logs', submodule: 'Cron Error Logs' },
+      { title: 'Admin Audit Logs', path: '/admin/log/admin_audit_logs', submodule: 'Admin Audit Logs' },
     ],
   },
   {
