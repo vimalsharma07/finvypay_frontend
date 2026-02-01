@@ -432,7 +432,7 @@ export function UserDashboardContent() {
         <>
       <div className="grid gap-5 lg:gap-7.5 lg:grid-cols-4 mt-5 lg:mt-7.5">
         {/* Total Transactions */}
-        <Card className="relative overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300">
+        <Card className="relative overflow-hidden border-primary/20 bg-linear-to-br from-primary/5 to-primary/10 shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300">
           <div className="absolute top-0 right-0 w-20 h-20 bg-primary/10 rounded-full -mr-10 -mt-10 blur-2xl" />
           <div className="absolute bottom-0 right-0 opacity-10">
             <Activity className="h-32 w-32 text-primary" />
@@ -457,8 +457,8 @@ export function UserDashboardContent() {
         </Card>
 
         {/* Successful Transactions */}
-        <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-green-950/30 dark:via-emerald-950/30 dark:to-teal-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-          <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-emerald-500/10 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <Card className="group relative overflow-hidden border-0 bg-linear-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-green-950/30 dark:via-emerald-950/30 dark:to-teal-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <div className="absolute inset-0 bg-linear-to-br from-green-500/10 via-emerald-500/10 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
             <CardTitle className="text-sm font-semibold text-green-700 dark:text-green-300">Success</CardTitle>
             <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/50 group-hover:bg-green-200 dark:group-hover:bg-green-900/70 transition-colors duration-300">
@@ -476,8 +476,8 @@ export function UserDashboardContent() {
         </Card>
 
         {/* Declined Transactions */}
-        <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-red-50 via-rose-50 to-pink-50 dark:from-red-950/30 dark:via-rose-950/30 dark:to-pink-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-          <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 via-rose-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <Card className="group relative overflow-hidden border-0 bg-linear-to-br from-red-50 via-rose-50 to-pink-50 dark:from-red-950/30 dark:via-rose-950/30 dark:to-pink-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <div className="absolute inset-0 bg-linear-to-br from-red-500/10 via-rose-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
             <CardTitle className="text-sm font-semibold text-red-700 dark:text-red-300">Declined</CardTitle>
             <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/50 group-hover:bg-red-200 dark:group-hover:bg-red-900/70 transition-colors duration-300">
@@ -495,8 +495,8 @@ export function UserDashboardContent() {
         </Card>
 
         {/* Chargebacks */}
-        <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 dark:from-amber-950/30 dark:via-yellow-950/30 dark:to-orange-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-yellow-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <Card className="group relative overflow-hidden border-0 bg-linear-to-br from-amber-50 via-yellow-50 to-orange-50 dark:from-amber-950/30 dark:via-yellow-950/30 dark:to-orange-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <div className="absolute inset-0 bg-linear-to-br from-amber-500/10 via-yellow-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
             <CardTitle className="text-sm font-semibold text-amber-700 dark:text-amber-300">Chargebacks</CardTitle>
             <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/50 group-hover:bg-amber-200 dark:group-hover:bg-amber-900/70 transition-colors duration-300">
@@ -516,8 +516,8 @@ export function UserDashboardContent() {
 
       {/* Additional Transaction Stats - Refunds */}
       <div className="grid gap-5 lg:gap-7.5 lg:grid-cols-2 mt-5 lg:mt-7.5">
-        <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <Card className="group relative overflow-hidden border-0 bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <div className="absolute inset-0 bg-linear-to-br from-blue-500/10 via-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
             <CardTitle className="text-sm font-semibold text-blue-700 dark:text-blue-300">Refunds</CardTitle>
             <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/50 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/70 transition-colors duration-300">
@@ -540,7 +540,7 @@ export function UserDashboardContent() {
       {/* Secondary Stats Grid */}
       <div className="grid gap-5 lg:gap-7.5 lg:grid-cols-3 mt-5 lg:mt-7.5">
         {/* Trusted Cards */}
-        <Card className="relative overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 group">
+        <Card className="relative overflow-hidden border-primary/20 bg-linear-to-br from-primary/5 to-primary/10 shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full -mr-12 -mt-12 blur-2xl" />
           <div className="absolute bottom-0 right-0 opacity-10">
             <CreditCard className="h-32 w-32 text-primary" />
@@ -562,15 +562,15 @@ export function UserDashboardContent() {
         </Card>
 
         {/* Active Risks */}
-        <Card className="relative overflow-hidden border-[var(--color-warning-alpha,var(--color-yellow-200))]/30 bg-gradient-to-br from-[var(--color-warning-soft,var(--color-yellow-50))] to-[var(--color-warning-soft,var(--color-yellow-100))] dark:from-[var(--color-warning-soft,var(--color-yellow-950))] dark:to-[var(--color-warning-soft,var(--color-yellow-900))] shadow-md shadow-[var(--color-warning-accent,var(--color-yellow-500))]/10 hover:shadow-lg hover:shadow-[var(--color-warning-accent,var(--color-yellow-500))]/20 transition-all duration-300 group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--color-warning-accent,var(--color-yellow-500))]/10 rounded-full -mr-12 -mt-12 blur-2xl" />
+        <Card className="relative overflow-hidden border-(--color-warning-alpha,var(--color-yellow-200))/30 bg-linear-to-br from-(--color-warning-soft,var(--color-yellow-50)) to-(--color-warning-soft,var(--color-yellow-100)) dark:from-(--color-warning-soft,var(--color-yellow-950)) dark:to-(--color-warning-soft,var(--color-yellow-900)) shadow-md shadow-(--color-warning-accent,var(--color-yellow-500))/10 hover:shadow-lg hover:shadow-(--color-warning-accent,var(--color-yellow-500))/20 transition-all duration-300 group">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-(--color-warning-accent,var(--color-yellow-500))/10 rounded-full -mr-12 -mt-12 blur-2xl" />
           <div className="absolute bottom-0 right-0 opacity-10">
-            <Shield className="h-32 w-32 text-[var(--color-warning-accent,var(--color-yellow-600))]" />
+            <Shield className="h-32 w-32 text-(--color-warning-accent,var(--color-yellow-600))" />
           </div>
           <CardHeader className="relative z-10">
             <CardTitle className="text-sm font-medium flex items-center gap-2.5">
-              <div className="p-1.5 rounded-lg bg-[var(--color-warning-accent,var(--color-yellow-500))]/10 group-hover:bg-[var(--color-warning-accent,var(--color-yellow-500))]/20 transition-colors">
-                <Shield className="h-4 w-4 text-[var(--color-warning-accent,var(--color-yellow-600))]" />
+              <div className="p-1.5 rounded-lg bg-(--color-warning-accent,var(--color-yellow-500))/10 group-hover:bg-(--color-warning-accent,var(--color-yellow-500))/20 transition-colors">
+                <Shield className="h-4 w-4 text-(--color-warning-accent,var(--color-yellow-600))" />
               </div>
               Active Risks
             </CardTitle>
@@ -584,15 +584,15 @@ export function UserDashboardContent() {
         </Card>
 
         {/* Support Tickets */}
-        <Card className="relative overflow-hidden border-[var(--color-info-alpha,var(--color-violet-200))]/30 bg-gradient-to-br from-[var(--color-info-soft,var(--color-violet-50))] to-[var(--color-info-soft,var(--color-violet-100))] dark:from-[var(--color-info-soft,var(--color-violet-950))] dark:to-[var(--color-info-soft,var(--color-violet-900))] shadow-md shadow-[var(--color-info-accent,var(--color-violet-500))]/10 hover:shadow-lg hover:shadow-[var(--color-info-accent,var(--color-violet-500))]/20 transition-all duration-300 group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--color-info-accent,var(--color-violet-500))]/10 rounded-full -mr-12 -mt-12 blur-2xl" />
+        <Card className="relative overflow-hidden border-(--color-info-alpha,var(--color-violet-200))/30 bg-linear-to-br from-(--color-info-soft,var(--color-violet-50)) to-(--color-info-soft,var(--color-violet-100)) dark:from-(--color-info-soft,var(--color-violet-950)) dark:to-(--color-info-soft,var(--color-violet-900)) shadow-md shadow-(--color-info-accent,var(--color-violet-500))/10 hover:shadow-lg hover:shadow-(--color-info-accent,var(--color-violet-500))/20 transition-all duration-300 group">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-(--color-info-accent,var(--color-violet-500))/10 rounded-full -mr-12 -mt-12 blur-2xl" />
           <div className="absolute bottom-0 right-0 opacity-10">
-            <Ticket className="h-32 w-32 text-[var(--color-info-accent,var(--color-violet-600))]" />
+            <Ticket className="h-32 w-32 text-(--color-info-accent,var(--color-violet-600))" />
           </div>
           <CardHeader className="relative z-10">
             <CardTitle className="text-sm font-medium flex items-center gap-2.5">
-              <div className="p-1.5 rounded-lg bg-[var(--color-info-accent,var(--color-violet-500))]/10 group-hover:bg-[var(--color-info-accent,var(--color-violet-500))]/20 transition-colors">
-                <Ticket className="h-4 w-4 text-[var(--color-info-accent,var(--color-violet-600))]" />
+              <div className="p-1.5 rounded-lg bg-(--color-info-accent,var(--color-violet-500))/10 group-hover:bg-(--color-info-accent,var(--color-violet-500))/20 transition-colors">
+                <Ticket className="h-4 w-4 text-(--color-info-accent,var(--color-violet-600))" />
               </div>
               Open Tickets
             </CardTitle>
@@ -610,19 +610,19 @@ export function UserDashboardContent() {
       <Card className="mt-5 lg:mt-7.5">
         <CardHeader>
           <CardTitle className="text-base font-semibold flex items-center gap-1">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10">
+            <div className="p-2 rounded-lg bg-linear-to-br from-primary/20 to-primary/10">
               <BarChart3 className="h-5 w-5 text-primary" />
             </div>
-            <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Quick Actions</span>
+            <span className="bg-linear-to-r from-primary to-primary/70 bg-clip-text text-transparent">Quick Actions</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <a
               href="/transactions"
-              className="group relative flex items-center gap-4 p-4 border-2 rounded-xl border-primary/20 bg-gradient-to-br from-primary/5 via-primary/3 to-transparent hover:border-primary/50 hover:from-primary/10 hover:via-primary/5 hover:to-primary/3 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20"
+              className="group relative flex items-center gap-4 p-4 border-2 rounded-xl border-primary/20 bg-linear-to-br from-primary/5 via-primary/3 to-transparent hover:border-primary/50 hover:from-primary/10 hover:via-primary/5 hover:to-primary/3 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20"
             >
-              <div className="p-3 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 group-hover:from-primary/30 group-hover:to-primary/20 transition-all shadow-sm">
+              <div className="p-3 rounded-lg bg-linear-to-br from-primary/20 to-primary/10 group-hover:from-primary/30 group-hover:to-primary/20 transition-all shadow-sm">
                 <Activity className="h-6 w-6 text-primary" />
               </div>
               <div className="flex-1 relative z-10">
@@ -633,42 +633,42 @@ export function UserDashboardContent() {
             </a>
             <a
               href="/risk-compliance/trusted-cards"
-              className="group relative flex items-center gap-4 p-4 border-2 rounded-xl border-[var(--color-info-alpha,var(--color-violet-200))]/30 bg-gradient-to-br from-[var(--color-info-soft,var(--color-violet-50))]/50 via-[var(--color-info-soft,var(--color-violet-50))]/30 to-transparent hover:border-[var(--color-info-accent,var(--color-violet-500))]/50 hover:from-[var(--color-info-soft,var(--color-violet-50))] hover:via-[var(--color-info-soft,var(--color-violet-50))]/50 hover:to-[var(--color-info-soft,var(--color-violet-50))]/30 transition-all duration-300 hover:shadow-lg hover:shadow-[var(--color-info-accent,var(--color-violet-500))]/20"
+              className="group relative flex items-center gap-4 p-4 border-2 rounded-xl border-(--color-info-alpha,var(--color-violet-200))/30 bg-linear-to-br from-(--color-info-soft,var(--color-violet-50))/50 via-(--color-info-soft,var(--color-violet-50))/30 to-transparent hover:border-(--color-info-accent,var(--color-violet-500))/50 hover:from-(--color-info-soft,var(--color-violet-50)) hover:via-(--color-info-soft,var(--color-violet-50))/50 hover:to-(--color-info-soft,var(--color-violet-50))/30 transition-all duration-300 hover:shadow-lg hover:shadow-(--color-info-accent,var(--color-violet-500))/20"
             >
-              <div className="p-3 rounded-lg bg-gradient-to-br from-[var(--color-info-accent,var(--color-violet-500))]/20 to-[var(--color-info-accent,var(--color-violet-500))]/10 group-hover:from-[var(--color-info-accent,var(--color-violet-500))]/30 group-hover:to-[var(--color-info-accent,var(--color-violet-500))]/20 transition-all shadow-sm">
-                <CreditCard className="h-6 w-6 text-[var(--color-info-accent,var(--color-violet-600))]" />
+              <div className="p-3 rounded-lg bg-linear-to-br from-(--color-info-accent,var(--color-violet-500))/20 to-(--color-info-accent,var(--color-violet-500))/10 group-hover:from-(--color-info-accent,var(--color-violet-500))/30 group-hover:to-(--color-info-accent,var(--color-violet-500))/20 transition-all shadow-sm">
+                <CreditCard className="h-6 w-6 text-(--color-info-accent,var(--color-violet-600))" />
               </div>
               <div className="flex-1 relative z-10">
-                <div className="font-semibold text-sm mb-1 text-[var(--color-info-accent,var(--color-violet-700))] group-hover:text-[var(--color-info-accent,var(--color-violet-600))] transition-colors">Manage Cards</div>
-                <div className="text-xs text-muted-foreground group-hover:text-[var(--color-info-accent,var(--color-violet-600))]/70 transition-colors">Trusted cards</div>
+                <div className="font-semibold text-sm mb-1 text-(--color-info-accent,var(--color-violet-700)) group-hover:text-(--color-info-accent,var(--color-violet-600)) transition-colors">Manage Cards</div>
+                <div className="text-xs text-muted-foreground group-hover:text-(--color-info-accent,var(--color-violet-600))/70 transition-colors">Trusted cards</div>
               </div>
-              <ArrowRight className="h-4 w-4 text-[var(--color-info-accent,var(--color-violet-500))]/60 group-hover:text-[var(--color-info-accent,var(--color-violet-600))] group-hover:translate-x-1 transition-all relative z-10" />
+              <ArrowRight className="h-4 w-4 text-(--color-info-accent,var(--color-violet-500))/60 group-hover:text-(--color-info-accent,var(--color-violet-600)) group-hover:translate-x-1 transition-all relative z-10" />
             </a>
             <a
               href="/risk-compliance/manage-risk"
-              className="group relative flex items-center gap-4 p-4 border-2 rounded-xl border-[var(--color-warning-alpha,var(--color-yellow-200))]/30 bg-gradient-to-br from-[var(--color-warning-soft,var(--color-yellow-50))]/50 via-[var(--color-warning-soft,var(--color-yellow-50))]/30 to-transparent hover:border-[var(--color-warning-accent,var(--color-yellow-500))]/50 hover:from-[var(--color-warning-soft,var(--color-yellow-50))] hover:via-[var(--color-warning-soft,var(--color-yellow-50))]/50 hover:to-[var(--color-warning-soft,var(--color-yellow-50))]/30 transition-all duration-300 hover:shadow-lg hover:shadow-[var(--color-warning-accent,var(--color-yellow-500))]/20"
+              className="group relative flex items-center gap-4 p-4 border-2 rounded-xl border-(--color-warning-alpha,var(--color-yellow-200))/30 bg-linear-to-br from-(--color-warning-soft,var(--color-yellow-50))/50 via-(--color-warning-soft,var(--color-yellow-50))/30 to-transparent hover:border-(--color-warning-accent,var(--color-yellow-500))/50 hover:from-(--color-warning-soft,var(--color-yellow-50)) hover:via-(--color-warning-soft,var(--color-yellow-50))/50 hover:to-(--color-warning-soft,var(--color-yellow-50))/30 transition-all duration-300 hover:shadow-lg hover:shadow-(--color-warning-accent,var(--color-yellow-500))/20"
             >
-              <div className="p-3 rounded-lg bg-gradient-to-br from-[var(--color-warning-accent,var(--color-yellow-500))]/20 to-[var(--color-warning-accent,var(--color-yellow-500))]/10 group-hover:from-[var(--color-warning-accent,var(--color-yellow-500))]/30 group-hover:to-[var(--color-warning-accent,var(--color-yellow-500))]/20 transition-all shadow-sm">
-                <Shield className="h-6 w-6 text-[var(--color-warning-accent,var(--color-yellow-600))]" />
+              <div className="p-3 rounded-lg bg-linear-to-br from-(--color-warning-accent,var(--color-yellow-500))/20 to-(--color-warning-accent,var(--color-yellow-500))/10 group-hover:from-(--color-warning-accent,var(--color-yellow-500))/30 group-hover:to-(--color-warning-accent,var(--color-yellow-500))/20 transition-all shadow-sm">
+                <Shield className="h-6 w-6 text-(--color-warning-accent,var(--color-yellow-600))" />
               </div>
               <div className="flex-1 relative z-10">
-                <div className="font-semibold text-sm mb-1 text-[var(--color-warning-accent,var(--color-yellow-700))] group-hover:text-[var(--color-warning-accent,var(--color-yellow-600))] transition-colors">Risk Management</div>
-                <div className="text-xs text-muted-foreground group-hover:text-[var(--color-warning-accent,var(--color-yellow-600))]/70 transition-colors">Configure risks</div>
+                <div className="font-semibold text-sm mb-1 text-(--color-warning-accent,var(--color-yellow-700)) group-hover:text-(--color-warning-accent,var(--color-yellow-600)) transition-colors">Risk Management</div>
+                <div className="text-xs text-muted-foreground group-hover:text-(--color-warning-accent,var(--color-yellow-600))/70 transition-colors">Configure risks</div>
               </div>
-              <ArrowRight className="h-4 w-4 text-[var(--color-warning-accent,var(--color-yellow-500))]/60 group-hover:text-[var(--color-warning-accent,var(--color-yellow-600))] group-hover:translate-x-1 transition-all relative z-10" />
+              <ArrowRight className="h-4 w-4 text-(--color-warning-accent,var(--color-yellow-500))/60 group-hover:text-(--color-warning-accent,var(--color-yellow-600)) group-hover:translate-x-1 transition-all relative z-10" />
             </a>
             <a
               href="/support"
-              className="group relative flex items-center gap-4 p-4 border-2 rounded-xl border-[var(--color-success-alpha,var(--color-green-200))]/30 bg-gradient-to-br from-[var(--color-success-soft,var(--color-green-50))]/50 via-[var(--color-success-soft,var(--color-green-50))]/30 to-transparent hover:border-[var(--color-success-accent,var(--color-green-500))]/50 hover:from-[var(--color-success-soft,var(--color-green-50))] hover:via-[var(--color-success-soft,var(--color-green-50))]/50 hover:to-[var(--color-success-soft,var(--color-green-50))]/30 transition-all duration-300 hover:shadow-lg hover:shadow-[var(--color-success-accent,var(--color-green-500))]/20"
+              className="group relative flex items-center gap-4 p-4 border-2 rounded-xl border-(--color-success-alpha,var(--color-green-200))/30 bg-linear-to-br from-(--color-success-soft,var(--color-green-50))/50 via-(--color-success-soft,var(--color-green-50))/30 to-transparent hover:border-(--color-success-accent,var(--color-green-500))/50 hover:from-(--color-success-soft,var(--color-green-50)) hover:via-(--color-success-soft,var(--color-green-50))/50 hover:to-(--color-success-soft,var(--color-green-50))/30 transition-all duration-300 hover:shadow-lg hover:shadow-(--color-success-accent,var(--color-green-500))/20"
             >
-              <div className="p-3 rounded-lg bg-gradient-to-br from-[var(--color-success-accent,var(--color-green-500))]/20 to-[var(--color-success-accent,var(--color-green-500))]/10 group-hover:from-[var(--color-success-accent,var(--color-green-500))]/30 group-hover:to-[var(--color-success-accent,var(--color-green-500))]/20 transition-all shadow-sm">
-                <Ticket className="h-6 w-6 text-[var(--color-success-accent,var(--color-green-600))]" />
+              <div className="p-3 rounded-lg bg-linear-to-br from-(--color-success-accent,var(--color-green-500))/20 to-(--color-success-accent,var(--color-green-500))/10 group-hover:from-(--color-success-accent,var(--color-green-500))/30 group-hover:to-(--color-success-accent,var(--color-green-500))/20 transition-all shadow-sm">
+                <Ticket className="h-6 w-6 text-(--color-success-accent,var(--color-green-600))" />
               </div>
               <div className="flex-1 relative z-10">
-                <div className="font-semibold text-sm mb-1 text-[var(--color-success-accent,var(--color-green-700))] group-hover:text-[var(--color-success-accent,var(--color-green-600))] transition-colors">Support</div>
-                <div className="text-xs text-muted-foreground group-hover:text-[var(--color-success-accent,var(--color-green-600))]/70 transition-colors">View tickets</div>
+                <div className="font-semibold text-sm mb-1 text-(--color-success-accent,var(--color-green-700)) group-hover:text-(--color-success-accent,var(--color-green-600)) transition-colors">Support</div>
+                <div className="text-xs text-muted-foreground group-hover:text-(--color-success-accent,var(--color-green-600))/70 transition-colors">View tickets</div>
               </div>
-              <ArrowRight className="h-4 w-4 text-[var(--color-success-accent,var(--color-green-500))]/60 group-hover:text-[var(--color-success-accent,var(--color-green-600))] group-hover:translate-x-1 transition-all relative z-10" />
+              <ArrowRight className="h-4 w-4 text-(--color-success-accent,var(--color-green-500))/60 group-hover:text-(--color-success-accent,var(--color-green-600)) group-hover:translate-x-1 transition-all relative z-10" />
             </a>
           </div>
         </CardContent>
