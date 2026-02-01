@@ -1,13 +1,21 @@
 'use client';
 
-import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import { Calculator } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { DateRange } from 'react-day-picker';
+import { Calculator, CalendarDays } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
   ToolbarActions,
 } from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
+import { Button } from '@/components/ui/button';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
   getSettlementCalculations,
@@ -47,6 +55,14 @@ export default function AdminSettlementCalculationsPage() {
     pageIndex: 0,
     pageSize: 10,
   });
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [tempDateRange, setTempDateRange] = useState<DateRange | undefined>(undefined);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+
+  const formatDateForAPI = (date: Date | undefined): string => {
+    if (!date) return '';
+    return format(date, 'yyyy-MM-dd');
+  };
 
   const formatCurrency = (amount: string | null | undefined) => {
     if (!amount) return '—';
@@ -77,10 +93,15 @@ export default function AdminSettlementCalculationsPage() {
     try {
       const page = pagination.pageIndex + 1;
       const limit = pagination.pageSize;
+      const hasDateFilter = dateRange?.from && dateRange?.to;
+      const startDate = hasDateFilter ? formatDateForAPI(dateRange.from) : undefined;
+      const endDate = hasDateFilter ? formatDateForAPI(dateRange.to) : undefined;
 
       const response = await getSettlementCalculations({
         page,
         limit,
+        startDate,
+        endDate,
       });
       handleApiResponse(response, {
         onSuccess: (res) => {
@@ -102,7 +123,7 @@ export default function AdminSettlementCalculationsPage() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.pageIndex, pagination.pageSize]);
+  }, [pagination.pageIndex, pagination.pageSize, dateRange]);
 
   useEffect(() => {
     fetchData();
@@ -222,6 +243,23 @@ export default function AdminSettlementCalculationsPage() {
     []
   );
 
+  const handleDateRangeApply = () => {
+    if (tempDateRange?.from && tempDateRange?.to) {
+      setDateRange(tempDateRange);
+      setIsDatePickerOpen(false);
+      setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+    } else {
+      toast.error('Please select both start and end dates');
+    }
+  };
+
+  const handleDateRangeClear = () => {
+    setTempDateRange(undefined);
+    setDateRange(undefined);
+    setIsDatePickerOpen(false);
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  };
+
   const table = useReactTable({
     data,
     columns,
@@ -247,7 +285,42 @@ export default function AdminSettlementCalculationsPage() {
             icon={Calculator}
           />
           <ToolbarActions>
-            {/* reserved for filters or bulk actions */}
+            <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-[280px] justify-start text-left font-normal">
+                  <CalendarDays className="mr-2 h-4 w-4" />
+                  {dateRange?.from ? (
+                    dateRange.to ? (
+                      <>
+                        {format(dateRange.from, 'LLL dd, y')} - {format(dateRange.to, 'LLL dd, y')}
+                      </>
+                    ) : (
+                      format(dateRange.from, 'LLL dd, y')
+                    )
+                  ) : (
+                    <span>Pick a date range</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  initialFocus
+                  mode="range"
+                  defaultMonth={tempDateRange?.from ?? new Date()}
+                  selected={tempDateRange}
+                  onSelect={setTempDateRange}
+                  numberOfMonths={1}
+                />
+                <div className="flex items-center justify-end gap-2 border-t p-3">
+                  <Button variant="outline" size="sm" onClick={handleDateRangeClear}>
+                    Clear
+                  </Button>
+                  <Button size="sm" onClick={handleDateRangeApply}>
+                    Apply
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
           </ToolbarActions>
         </Toolbar>
       </Container>

@@ -285,7 +285,7 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
               defaultMonth={tempDateRange?.from ?? new Date()}
               selected={tempDateRange}
               onSelect={setTempDateRange}
-              numberOfMonths={2}
+              numberOfMonths={1}
             />
             <div className="flex items-center justify-end gap-2 border-t p-3">
               <Button variant="outline" size="sm" onClick={handleDateRangeClear}>

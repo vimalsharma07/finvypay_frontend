@@ -311,6 +311,8 @@ export interface SettlementCalculation {
 export interface SettlementCalculationListParams {
   page?: number;
   limit?: number;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface SettlementCalculationListResponse {
@@ -471,14 +473,20 @@ export async function getSettlementSummary(): Promise<ApiResponse<SettlementSumm
 }
 
 /**
- * Get settlement calculations list (with pagination)
+ * Get settlement calculations list (with pagination and optional date filter)
  */
 export async function getSettlementCalculations(
   params?: SettlementCalculationListParams
 ): Promise<ApiResponse<SettlementCalculationListResponse>> {
   try {
+    const query: Record<string, string | number | undefined> = {};
+    if (params?.page != null) query.page = params.page;
+    if (params?.limit != null) query.limit = params.limit;
+    if (params?.startDate) query.start_date = params.startDate;
+    if (params?.endDate) query.end_date = params.endDate;
+
     const data = await http.get(adminRoutes.settlements.calculationsList, {
-      query: params as Record<string, string | number | undefined>,
+      query,
     }) as SettlementCalculationListResponse;
     return {
       status: 200,
