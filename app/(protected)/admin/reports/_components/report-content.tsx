@@ -14,6 +14,38 @@ export interface ReportContentProps {
   config: AdminReportTypeConfig;
 }
 
+/** Flatten nested merchant-transaction-response structure into table rows */
+function flattenMerchantTransactionResponse(
+  obj: Record<string, unknown>
+): Record<string, unknown>[] {
+  const rows: Record<string, unknown>[] = [];
+  const walk = (o: Record<string, unknown>) => {
+    for (const [key, value] of Object.entries(o)) {
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          if (item && typeof item === 'object' && 'id' in item) {
+            rows.push({ ...item, response: key });
+          }
+        }
+      } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+        walk(value as Record<string, unknown>);
+      }
+    }
+  };
+  walk(obj);
+  return rows;
+}
+
+function normalizeData(raw: unknown, slug: string): unknown {
+  if (raw === undefined || raw === null) return [];
+  if (slug === 'merchant-transaction-response' && raw && typeof raw === 'object' && !Array.isArray(raw)) {
+    return flattenMerchantTransactionResponse(raw as Record<string, unknown>);
+  }
+  if (Array.isArray(raw)) return raw;
+  if (raw && typeof raw === 'object') return [raw];
+  return [];
+}
+
 export function ReportContent({ config }: ReportContentProps) {
   const [data, setData] = useState<unknown>(null);
   const [loading, setLoading] = useState(true);
@@ -31,14 +63,7 @@ export function ReportContent({ config }: ReportContentProps) {
       handleApiResponse(response, {
         onSuccess: (res) => {
           if (res?.success !== false && res?.data !== undefined) {
-            const raw = res.data;
-            setData(
-              Array.isArray(raw)
-                ? raw
-                : raw && typeof raw === 'object'
-                  ? [raw]
-                  : []
-            );
+            setData(normalizeData(res.data, config.slug));
           } else {
             setData([]);
           }
