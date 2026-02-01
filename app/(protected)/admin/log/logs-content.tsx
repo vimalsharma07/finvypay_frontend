@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { format, startOfMonth, endOfMonth } from 'date-fns';
+import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import {
   CalendarDays,
@@ -54,14 +54,8 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
-    const today = new Date();
-    return {
-      from: startOfMonth(today),
-      to: endOfMonth(today),
-    };
-  });
-  const [tempDateRange, setTempDateRange] = useState<DateRange | undefined>(dateRange);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [tempDateRange, setTempDateRange] = useState<DateRange | undefined>(undefined);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
@@ -110,10 +104,11 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
     }
   };
 
-  // Initial fetch and when filters change
+  // Fetch logs - only pass dates when user has applied a date filter
   useEffect(() => {
-    const startDate = dateRange?.from ? formatDateForAPI(dateRange.from) : undefined;
-    const endDate = dateRange?.to ? formatDateForAPI(dateRange.to) : undefined;
+    const hasDateFilter = dateRange?.from && dateRange?.to;
+    const startDate = hasDateFilter ? formatDateForAPI(dateRange.from) : undefined;
+    const endDate = hasDateFilter ? formatDateForAPI(dateRange.to) : undefined;
     fetchLogs(page, limit, startDate, endDate);
   }, [page, limit, dateRange, logType]);
 
@@ -127,14 +122,9 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
     }
   };
 
-  const handleDateRangeReset = () => {
-    const today = new Date();
-    const resetRange = {
-      from: startOfMonth(today),
-      to: endOfMonth(today),
-    };
-    setTempDateRange(resetRange);
-    setDateRange(resetRange);
+  const handleDateRangeClear = () => {
+    setTempDateRange(undefined);
+    setDateRange(undefined);
     setIsDatePickerOpen(false);
     setPage(1);
   };
@@ -292,14 +282,14 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
             <Calendar
               initialFocus
               mode="range"
-              defaultMonth={tempDateRange?.from}
+              defaultMonth={tempDateRange?.from ?? new Date()}
               selected={tempDateRange}
               onSelect={setTempDateRange}
               numberOfMonths={2}
             />
             <div className="flex items-center justify-end gap-2 border-t p-3">
-              <Button variant="outline" size="sm" onClick={handleDateRangeReset}>
-                Reset
+              <Button variant="outline" size="sm" onClick={handleDateRangeClear}>
+                Clear
               </Button>
               <Button size="sm" onClick={handleDateRangeApply}>
                 Apply
@@ -319,7 +309,9 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
             <FileText className="h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-lg font-medium text-muted-foreground">No logs found</p>
             <p className="text-sm text-muted-foreground mt-2">
-              No {logTypeLabel.toLowerCase()} found for the selected date range
+              {dateRange
+                ? `No ${logTypeLabel.toLowerCase()} found for the selected date range`
+                : `No ${logTypeLabel.toLowerCase()} found`}
             </p>
           </CardContent>
         </Card>
