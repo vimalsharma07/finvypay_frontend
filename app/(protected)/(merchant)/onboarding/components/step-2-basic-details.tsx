@@ -367,7 +367,8 @@ export function Step2BasicDetails({ onboardingData, onNext, onUpdate }: Step2Bas
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        {isCompanyOrPartnership ? 'Company Name' : 'Full Name'} *
+                        {isCompanyOrPartnership ? 'Company Name' : 'Full Name'}{' '}
+                        <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="Enter name" />
@@ -382,7 +383,7 @@ export function Step2BasicDetails({ onboardingData, onNext, onUpdate }: Step2Bas
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email Address *</FormLabel>
+                      <FormLabel>Email Address <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <Input type="email" {...field} placeholder="Enter email" />
                       </FormControl>
@@ -397,7 +398,7 @@ export function Step2BasicDetails({ onboardingData, onNext, onUpdate }: Step2Bas
                     name="countryCodeId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Country Code *</FormLabel>
+                        <FormLabel>Country Code <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
                           <CountryCodeSelector
                             value={field.value}
@@ -415,7 +416,7 @@ export function Step2BasicDetails({ onboardingData, onNext, onUpdate }: Step2Bas
                     name="phoneNumber"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone Number *</FormLabel>
+                        <FormLabel>Phone Number <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="Enter phone number" />
                         </FormControl>
@@ -430,7 +431,7 @@ export function Step2BasicDetails({ onboardingData, onNext, onUpdate }: Step2Bas
                   name="address"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Address *</FormLabel>
+                      <FormLabel>Address <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="Enter address" />
                       </FormControl>
@@ -450,7 +451,7 @@ export function Step2BasicDetails({ onboardingData, onNext, onUpdate }: Step2Bas
                     name="registrationNumber"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Registration Number *</FormLabel>
+                        <FormLabel>Registration Number <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="Enter registration number" />
                         </FormControl>
@@ -465,7 +466,7 @@ export function Step2BasicDetails({ onboardingData, onNext, onUpdate }: Step2Bas
                       name="dateOfIncorporation"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Date of Incorporation *</FormLabel>
+                          <FormLabel>Date of Incorporation <span className="text-destructive">*</span></FormLabel>
                           <FormControl>
                             <Input type="date" {...field} placeholder="YYYY-MM-DD" />
                           </FormControl>
@@ -479,7 +480,7 @@ export function Step2BasicDetails({ onboardingData, onNext, onUpdate }: Step2Bas
                       name="countryOfIncorporationId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Country of Incorporation *</FormLabel>
+                          <FormLabel>Country of Incorporation <span className="text-destructive">*</span></FormLabel>
                           <FormControl>
                             <CountryCodeSelector
                               value={field.value}

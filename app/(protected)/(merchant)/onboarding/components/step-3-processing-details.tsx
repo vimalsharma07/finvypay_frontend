@@ -282,7 +282,8 @@ export function Step3ProcessingDetails({
             <MultiSelectField
               control={form.control}
               name="acceptedPaymentMethods"
-              label="Accepted Payment Methods *"
+              label="Accepted Payment Methods"
+              required
               options={PAYMENT_METHODS}
               placeholder="Select payment methods"
               disabled={loadingData}
@@ -294,7 +295,7 @@ export function Step3ProcessingDetails({
               name="industryId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Industry *</FormLabel>
+                  <FormLabel>Industry <span className="text-destructive">*</span></FormLabel>
                   <Select
                     value={field.value ? String(field.value) : undefined}
                     onValueChange={(val) => field.onChange(Number(val))}
@@ -324,7 +325,7 @@ export function Step3ProcessingDetails({
               name="processingCountryId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Processing Country *</FormLabel>
+                  <FormLabel>Processing Country <span className="text-destructive">*</span></FormLabel>
                   <FormControl>
                     <CountryCodeSelector
                       value={field.value}
@@ -342,7 +343,8 @@ export function Step3ProcessingDetails({
             <MultiSelectField
               control={form.control}
               name="processingCurrency"
-              label="Processing Currency *"
+              label="Processing Currency"
+              required
               options={currencyOptions}
               placeholder="Select currencies"
               disabled={loadingData}
@@ -354,7 +356,7 @@ export function Step3ProcessingDetails({
               name="monthlyVolume"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Monthly Volume (USD) *</FormLabel>
+                  <FormLabel>Monthly Volume (USD) <span className="text-destructive">*</span></FormLabel>
                   <FormControl>
                     <Input
                       type="number"
