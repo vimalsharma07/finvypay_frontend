@@ -163,12 +163,13 @@ export function getTransactionColumns(
       ),
       cell: ({ row }) => {
         const status = row.original.status;
-        const amountColor = status === 1 
-          ? 'text-green-700 dark:text-green-500' 
-          : status === 2 || status === 3 
-          ? 'text-red-700 dark:text-red-500' 
-          : status === 0 
-          ? 'text-amber-700 dark:text-amber-500' 
+        // PENDING=0, SUCCESS=1, FAILED=2, BLOCKED=3, ABANDONED=4, REDIRECTED=5
+        const amountColor = status === 1
+          ? 'text-green-700 dark:text-green-500'
+          : status === 2 || status === 3
+          ? 'text-red-700 dark:text-red-500'
+          : status === 0
+          ? 'text-amber-700 dark:text-amber-500'
           : 'text-foreground';
         return (
           <div className={cn('font-semibold tabular-nums', amountColor)}>
@@ -191,13 +192,14 @@ export function getTransactionColumns(
       ),
       cell: ({ row }) => {
         const status = row.original.status;
+        // PENDING=0, SUCCESS=1, FAILED=2, BLOCKED=3, ABANDONED=4, REDIRECTED=5
         const statusConfig = {
           0: { label: 'Pending', icon: Clock, className: 'text-amber-700 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900' },
-          1: { label: 'Approved', icon: CheckCircle2, className: 'text-green-700 dark:text-green-500 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-900' },
-          2: { label: 'Declined', icon: XCircle, className: 'text-red-700 dark:text-red-500 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900' },
-          3: { label: 'Failed', icon: XCircle, className: 'text-red-700 dark:text-red-500 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900' },
-          4: { label: 'Refunded', icon: AlertCircle, className: 'text-slate-700 dark:text-slate-400 bg-slate-50 dark:bg-slate-950/30 border-slate-200 dark:border-slate-900' },
-          5: { label: 'Chargeback', icon: AlertCircle, className: 'text-red-700 dark:text-red-500 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900' },
+          1: { label: 'Success', icon: CheckCircle2, className: 'text-green-700 dark:text-green-500 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-900' },
+          2: { label: 'Failed', icon: XCircle, className: 'text-red-700 dark:text-red-500 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900' },
+          3: { label: 'Blocked', icon: XCircle, className: 'text-red-700 dark:text-red-500 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900' },
+          4: { label: 'Abandoned', icon: AlertCircle, className: 'text-slate-700 dark:text-slate-400 bg-slate-50 dark:bg-slate-950/30 border-slate-200 dark:border-slate-900' },
+          5: { label: 'Redirected', icon: AlertCircle, className: 'text-slate-700 dark:text-slate-400 bg-slate-50 dark:bg-slate-950/30 border-slate-200 dark:border-slate-900' },
         };
         const config = statusConfig[status as keyof typeof statusConfig] || { label: `Status ${status}`, icon: AlertCircle, className: '' };
         const Icon = config.icon;
