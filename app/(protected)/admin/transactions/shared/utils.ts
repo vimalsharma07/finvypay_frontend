@@ -5,7 +5,8 @@
 import { Transaction } from '@/lib/services/admin/transaction';
 
 /**
- * Format status number to readable text with variant
+ * Transaction status mapping (API sends numeric status)
+ * PENDING = 0, SUCCESS = 1, FAILED = 2, BLOCKED = 3, ABANDONED = 4, REDIRECTED = 5
  */
 export function formatTransactionStatus(status: number): {
   label: string;
@@ -16,11 +17,11 @@ export function formatTransactionStatus(status: number): {
     { label: string; variant: 'primary' | 'success' | 'destructive' | 'warning' | 'secondary' }
   > = {
     0: { label: 'Pending', variant: 'warning' },
-    1: { label: 'Approved', variant: 'success' },
-    2: { label: 'Declined', variant: 'destructive' },
-    3: { label: 'Failed', variant: 'destructive' },
-    4: { label: 'Refunded', variant: 'secondary' },
-    5: { label: 'Chargeback', variant: 'destructive' },
+    1: { label: 'Success', variant: 'success' },
+    2: { label: 'Failed', variant: 'destructive' },
+    3: { label: 'Blocked', variant: 'destructive' },
+    4: { label: 'Abandoned', variant: 'secondary' },
+    5: { label: 'Redirected', variant: 'secondary' },
   };
   return statusMap[status] || { label: `Status ${status}`, variant: 'secondary' as const };
 }

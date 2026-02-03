@@ -32,7 +32,7 @@ export function TransactionActionMenu({
   onSuspicious,
   showDisabledActions = true, // Default to true for production transactions
 }: TransactionActionMenuProps) {
-  // Check if transaction is successful (status === 1 means Approved)
+  // Check if transaction is successful (status === 1 means Success)
   const isSuccessful = transaction.status === 1;
   const showActionOptions = showDisabledActions && isSuccessful;
 

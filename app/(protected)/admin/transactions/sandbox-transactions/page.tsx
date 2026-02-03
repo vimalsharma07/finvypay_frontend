@@ -256,7 +256,6 @@ export default function SandboxTransactionsPage() {
       },
       { field: 'transaction_id', label: 'Transaction ID', type: FieldTypes.input },
       { field: 'order_id', label: 'Order ID', type: FieldTypes.input },
-      { field: 'gateway_id', label: 'Gateway ID', type: FieldTypes.input },
       { field: 'email', label: 'Email', type: FieldTypes.input },
       { field: 'phone_number', label: 'Phone Number', type: FieldTypes.input },
       { field: 'card_number', label: 'Card Number', type: FieldTypes.input },
