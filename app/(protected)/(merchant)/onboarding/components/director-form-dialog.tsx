@@ -125,7 +125,7 @@ export function DirectorFormDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name *</FormLabel>
+                  <FormLabel>Name <span className="text-destructive">*</span></FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="Enter director name" />
                   </FormControl>
@@ -139,7 +139,7 @@ export function DirectorFormDialog({
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email Address *</FormLabel>
+                  <FormLabel>Email Address <span className="text-destructive">*</span></FormLabel>
                   <FormControl>
                     <Input type="email" {...field} placeholder="Enter email" />
                   </FormControl>
@@ -154,7 +154,7 @@ export function DirectorFormDialog({
                 name="countryCodeId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Country Code *</FormLabel>
+                    <FormLabel>Country Code <span className="text-destructive">*</span></FormLabel>
                     <FormControl>
                       <CountryCodeSelector
                         value={field.value}
@@ -171,7 +171,7 @@ export function DirectorFormDialog({
                 name="phoneNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone Number *</FormLabel>
+                    <FormLabel>Phone Number <span className="text-destructive">*</span></FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="Enter phone number" />
                     </FormControl>
@@ -186,7 +186,7 @@ export function DirectorFormDialog({
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Address *</FormLabel>
+                  <FormLabel>Address <span className="text-destructive">*</span></FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="Enter address" />
                   </FormControl>

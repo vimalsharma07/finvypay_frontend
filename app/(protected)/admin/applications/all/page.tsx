@@ -201,16 +201,18 @@ export default function AdminApplicationListPage() {
                 View
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem
-              disabled={actioningId === row.original.id}
-              onClick={() => handleChangeStatus(row.original.id, 'approved')}
-              className="flex items-center gap-1"
-            >
-              <CheckCircle2 className="h-4 w-4" />
-              <span className={cn('text-success', actioningId === row.original.id && 'opacity-70')}>
-                {actioningId === row.original.id ? 'Approving...' : 'Approve'}
-              </span>
-            </DropdownMenuItem>
+            {row.original.kycStatus === 'rate_accepted' && (
+              <DropdownMenuItem
+                disabled={actioningId === row.original.id}
+                onClick={() => handleChangeStatus(row.original.id, 'approved')}
+                className="flex items-center gap-1"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                <span className={cn('text-success', actioningId === row.original.id && 'opacity-70')}>
+                  {actioningId === row.original.id ? 'Approving...' : 'Approve'}
+                </span>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               disabled={actioningId === row.original.id}
               onClick={() => handleChangeStatus(row.original.id, 'rejected')}

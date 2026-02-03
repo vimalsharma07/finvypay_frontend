@@ -33,6 +33,7 @@ interface MultiSelectFieldProps {
   placeholder?: string;
   disabled?: boolean;
   variant?: 'secondary' | 'destructive' | 'outline';
+  required?: boolean;
 }
 
 export function MultiSelectField({
@@ -43,6 +44,7 @@ export function MultiSelectField({
   placeholder = 'Select options',
   disabled = false,
   variant = 'secondary',
+  required = false,
 }: MultiSelectFieldProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -62,7 +64,10 @@ export function MultiSelectField({
       name={name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>{label}</FormLabel>
+          <FormLabel>
+            {label}
+            {required && <span className="text-destructive ml-0.5">*</span>}
+          </FormLabel>
           <Popover>
             <PopoverTrigger asChild>
               <FormControl>

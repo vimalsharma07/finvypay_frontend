@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { MultiSelectField } from '@/app/(protected)/admin/acquirers/acquirer-accounts/[id]/edit/components/multi-select-field';
 import { CountryCodeSelector } from './country-code-selector';
 import {
@@ -61,12 +62,14 @@ type ProcessingDetailsFormData = z.infer<typeof processingDetailsSchema>;
 interface Step3ProcessingDetailsProps {
   onboardingData: OnboardingData;
   onNext: () => void;
+  onBack: () => void;
   onUpdate: (data: UpdateProcessingDetailsPayload) => void;
 }
 
 export function Step3ProcessingDetails({
   onboardingData,
   onNext,
+  onBack,
   onUpdate,
 }: Step3ProcessingDetailsProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -85,7 +88,7 @@ export function Step3ProcessingDetails({
         // Fetch industries
         const industriesResponse = await getIndustries({
           page: 1,
-          limit: 100,
+          limit: 1000,
           sortBy: 'name',
           sortOrder: 'ASC',
         });
@@ -93,7 +96,7 @@ export function Step3ProcessingDetails({
         // Fetch countries
         const countriesResponse = await getCountries({
           page: 1,
-          limit: 100,
+          limit: 1000,
           sortBy: 'countryName',
           sortOrder: 'ASC',
         });
@@ -101,7 +104,7 @@ export function Step3ProcessingDetails({
         // Fetch currencies
         const currenciesResponse = await getCurrencies({
           page: 1,
-          limit: 500,
+          limit: 1000,
           sortBy: 'code',
           sortOrder: 'ASC',
         });
@@ -281,7 +284,8 @@ export function Step3ProcessingDetails({
             <MultiSelectField
               control={form.control}
               name="acceptedPaymentMethods"
-              label="Accepted Payment Methods *"
+              label="Accepted Payment Methods"
+              required
               options={PAYMENT_METHODS}
               placeholder="Select payment methods"
               disabled={loadingData}
@@ -293,7 +297,7 @@ export function Step3ProcessingDetails({
               name="industryId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Industry *</FormLabel>
+                  <FormLabel>Industry <span className="text-destructive">*</span></FormLabel>
                   <Select
                     value={field.value ? String(field.value) : undefined}
                     onValueChange={(val) => field.onChange(Number(val))}
@@ -323,7 +327,7 @@ export function Step3ProcessingDetails({
               name="processingCountryId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Processing Country *</FormLabel>
+                  <FormLabel>Processing Country <span className="text-destructive">*</span></FormLabel>
                   <FormControl>
                     <CountryCodeSelector
                       value={field.value}
@@ -341,7 +345,8 @@ export function Step3ProcessingDetails({
             <MultiSelectField
               control={form.control}
               name="processingCurrency"
-              label="Processing Currency *"
+              label="Processing Currency"
+              required
               options={currencyOptions}
               placeholder="Select currencies"
               disabled={loadingData}
@@ -353,7 +358,7 @@ export function Step3ProcessingDetails({
               name="monthlyVolume"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Monthly Volume (USD) *</FormLabel>
+                  <FormLabel>Monthly Volume (USD) <span className="text-destructive">*</span></FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -395,9 +400,14 @@ export function Step3ProcessingDetails({
               )}
             />
 
-            <div className="flex justify-end pt-4">
-              <Button type="submit" variant="primary" disabled={isSubmitting || loadingData}>
+            <div className="flex justify-between pt-4">
+              <Button type="button" variant="outline" onClick={onBack} className="gap-2">
+                <ChevronLeft className="h-4 w-4" />
+                Back
+              </Button>
+              <Button type="submit" variant="primary" disabled={isSubmitting || loadingData} className="gap-2">
                 {isSubmitting ? 'Saving...' : 'Continue'}
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
           </form>

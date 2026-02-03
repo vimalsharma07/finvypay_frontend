@@ -153,7 +153,7 @@ export function FileUploadCard({
           <div>
             <label className="text-sm font-medium">
               {label}
-              {required && <span className="text-destructive ml-1">*</span>}
+              {required && <span className="text-destructive ml-0.5">*</span>}
             </label>
             {description && (
               <p className="text-sm text-muted-foreground mt-1">{description}</p>

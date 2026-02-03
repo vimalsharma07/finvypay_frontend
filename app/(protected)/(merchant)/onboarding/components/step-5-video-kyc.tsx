@@ -11,15 +11,16 @@ import {
 } from '@/lib/services/user/onboarding';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, ChevronRight, ChevronLeft } from 'lucide-react';
 
 interface Step5VideoKycProps {
   onboardingData: OnboardingData;
   onNext: () => void;
+  onBack: () => void;
   onUpdate?: () => void;
 }
 
-export function Step5VideoKyc({ onboardingData, onNext, onUpdate }: Step5VideoKycProps) {
+export function Step5VideoKyc({ onboardingData, onNext, onBack, onUpdate }: Step5VideoKycProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [hasUploaded, setHasUploaded] = useState(false);
   const [recordedVideo, setRecordedVideo] = useState<Blob | null>(null);
@@ -126,14 +127,20 @@ export function Step5VideoKyc({ onboardingData, onNext, onUpdate }: Step5VideoKy
             maxDuration={4}
           />
           
-          <div className="flex justify-end pt-4 border-t">
+          <div className="flex justify-between pt-4 border-t">
+            <Button type="button" variant="outline" onClick={onBack} className="gap-2">
+              <ChevronLeft className="h-4 w-4" />
+              Back
+            </Button>
             <Button 
               type="button" 
               variant="primary" 
               onClick={handleNext}
               disabled={!isVideoUploaded || isUploading}
+              className="gap-2"
             >
-              Next
+              Continue
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>

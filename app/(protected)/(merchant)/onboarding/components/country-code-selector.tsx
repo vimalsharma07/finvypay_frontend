@@ -6,6 +6,14 @@ import { getCountries, Country } from '@/lib/services/admin/countries';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import type { Option } from '@/lib/types/common-types';
 
+function getFlagEmoji(country: Country): string {
+  if (country.flag) return country.flag;
+  const code = country.isoTwo;
+  if (!code || code.length !== 2) return '🌐';
+  const codePoints = code.toUpperCase().split('').map((char) => 127397 + char.charCodeAt(0));
+  return String.fromCodePoint(...codePoints);
+}
+
 interface CountryCodeSelectorProps {
   value?: number;
   onChange: (countryCodeId: number) => void;
@@ -28,7 +36,7 @@ export function CountryCodeSelector({
       try {
         const response = await getCountries({
           page: 1,
-          limit: 100,
+          limit: 1000,
           sortBy: 'countryName',
           sortOrder: 'ASC',
         });
@@ -54,17 +62,20 @@ export function CountryCodeSelector({
     fetchCountries();
   }, []);
 
-  // Convert countries to SearchSelect options format
-  // Format: "PhoneCode (CountryName)" for better searchability if showPhoneCode is true
-  // Otherwise, just show country name
-  // Users can search by phone code (e.g., "+1") or country name (e.g., "United States")
+  // Convert countries to SearchSelect options format with flag emoji
+  // Format: "(+93) Afghanistan 🇦🇫" - (code) country name flag
   const countryOptions: Option[] = useMemo(() => {
-    return countries.map((country) => ({
-      value: country.id,
-      label: showPhoneCode 
-        ? `${country.phoneCode} (${country.countryName})`
-        : country.countryName,
-    }));
+    return countries.map((country) => {
+      const flag = getFlagEmoji(country);
+      const phoneCode = country.phoneCode ? `+${country.phoneCode.replace(/^\+/, '')}` : '';
+      const text = showPhoneCode
+        ? `(${phoneCode}) ${country.countryName} ${flag}`.trim()
+        : `${country.countryName} ${flag}`.trim();
+      return {
+        value: country.id,
+        label: text,
+      };
+    });
   }, [countries, showPhoneCode]);
 
   const handleChange = (selectedValue: string) => {
