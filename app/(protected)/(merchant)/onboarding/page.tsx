@@ -111,17 +111,33 @@ export default function OnboardingPage() {
               const profileStep = data.data.user?.profileStep ?? 0;
               const kycStatus = data.data.user?.kycStatus;
               const onboarding = data.data.onboarding;
+              const signedAgreement = onboarding?.signedAgreement;
               const kycType = data.data.kycType || onboarding?.kycType;
               const needsDirectorsStep = kycType && kycType !== 'individual';
               
+              // Statuses that indicate onboarding is complete (signed + optionally rates accepted)
+              const completedStatuses = [
+                'agreement_received',
+                'rate_assigned',
+                'rate_accepted',
+                'approved',
+              ];
+
               // If onboarding doesn't exist, start from step 1
               if (!onboarding) {
                 setCurrentStep(1);
               }
-              // If status is pending_for_approval, show completed step
-              else if (kycStatus === 'pending_for_approval' || kycStatus === 'agreement_received') {
+              // Show completed step: signed agreement OR any post-agreement status
+              else if (
+                completedStatuses.includes(kycStatus) ||
+                (kycStatus === 'pending_for_approval' && signedAgreement)
+              ) {
                 const finalStep = needsDirectorsStep ? 7 : 6;
                 setCurrentStep(finalStep);
+              } else if (kycStatus === 'pending_for_approval' && !signedAgreement) {
+                // Video KYC done but agreement not signed - show agreement step
+                const agreementStep = needsDirectorsStep ? 6 : 5;
+                setCurrentStep(agreementStep);
               } else {
                 // Determine current step based on profileStep
                 // profileStep: 0=not started, 1=basic details, 2=processing, 3=directors, 4=video KYC done
