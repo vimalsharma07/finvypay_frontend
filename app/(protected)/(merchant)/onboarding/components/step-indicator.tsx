@@ -1,5 +1,7 @@
 'use client';
 
+import { CheckCircle2 } from 'lucide-react';
+
 interface Step {
   number: number;
   title: string;
@@ -28,24 +30,12 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
                   isActive
                     ? 'bg-primary text-white'
                     : isCompleted
-                    ? 'bg-success text-white'
+                    ? 'bg-primary text-white'
                     : 'bg-muted text-muted-foreground'
                 }`}
               >
                 {isCompleted ? (
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
+                  <CheckCircle2 className="w-5 h-5" />
                 ) : (
                   step.number
                 )}
@@ -55,7 +45,7 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
                 <div
                   className={`w-0.5 h-16 mt-2 ${
                     isCompleted || isActive
-                      ? 'bg-success'
+                      ? 'bg-primary'
                       : 'bg-muted'
                   }`}
                 />

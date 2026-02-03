@@ -25,7 +25,7 @@ import {
   OnboardingDetails,
   getOnboardingStatus,
 } from '@/lib/services/user/onboarding';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import { getCountries, Country } from '@/lib/services/admin/countries';
@@ -54,6 +54,7 @@ const companySchema = baseSchema.extend({
 interface Step2BasicDetailsProps {
   onboardingData: OnboardingData;
   onNext: () => void;
+  onBack: () => void;
   onUpdate: (data: UpdateBasicDetailsPayload) => void;
 }
 
@@ -86,7 +87,7 @@ const fileTypeToPathMap: Partial<Record<FileUploadType, keyof OnboardingDetails>
   signed_agreement: 'signedAgreement',
 };
 
-export function Step2BasicDetails({ onboardingData, onNext, onUpdate }: Step2BasicDetailsProps) {
+export function Step2BasicDetails({ onboardingData, onNext, onBack, onUpdate }: Step2BasicDetailsProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<Record<FileUploadType, boolean>>(
     {} as Record<FileUploadType, boolean>
@@ -565,23 +566,29 @@ export function Step2BasicDetails({ onboardingData, onNext, onUpdate }: Step2Bas
         })}
       </div>
 
-      {/* Continue Button - At bottom of form */}
+      {/* Back and Continue Buttons - At bottom of form */}
       <div className="flex flex-col items-end gap-2 pt-4">
         {!checkAllDocumentsUploaded && (
           <p className="text-sm text-destructive">
             Please upload all required documents to continue
           </p>
         )}
-        <Button 
-          type="submit" 
-          form="basic-details-form"
-          variant="primary" 
-          disabled={isSubmitting || !checkAllDocumentsUploaded}
-          className="gap-2"
-        >
-          {isSubmitting ? 'Saving...' : 'Continue'}
-          <ChevronRight className="h-4 w-4" />
-        </Button>
+        <div className="flex justify-between w-full gap-4">
+          <Button type="button" variant="outline" onClick={onBack} className="gap-2">
+            <ChevronLeft className="h-4 w-4" />
+            Back
+          </Button>
+          <Button 
+            type="submit" 
+            form="basic-details-form"
+            variant="primary" 
+            disabled={isSubmitting || !checkAllDocumentsUploaded}
+            className="gap-2"
+          >
+            {isSubmitting ? 'Saving...' : 'Continue'}
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );

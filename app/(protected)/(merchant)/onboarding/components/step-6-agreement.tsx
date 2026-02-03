@@ -15,15 +15,16 @@ import {
 } from '@/lib/services/user/onboarding';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
-import { CheckCircle2, FileText, ChevronRight } from 'lucide-react';
+import { CheckCircle2, FileText, ChevronRight, ChevronLeft } from 'lucide-react';
 
 interface Step6AgreementProps {
   onboardingData: OnboardingData;
   onNext: () => void;
+  onBack: () => void;
   onUpdate?: () => void;
 }
 
-export function Step6Agreement({ onboardingData, onNext, onUpdate }: Step6AgreementProps) {
+export function Step6Agreement({ onboardingData, onNext, onBack, onUpdate }: Step6AgreementProps) {
   const [agreement, setAgreement] = useState<Agreement | null>(null);
   const [canSign, setCanSign] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -266,8 +267,12 @@ export function Step6Agreement({ onboardingData, onNext, onUpdate }: Step6Agreem
             />
           </div>
 
-          {/* Continue Button - At bottom, enabled only after upload */}
-          <div className="flex justify-end pt-4 border-t">
+          {/* Back and Continue Buttons - At bottom */}
+          <div className="flex justify-between pt-4 border-t">
+            <Button type="button" variant="outline" onClick={onBack} className="gap-2">
+              <ChevronLeft className="h-4 w-4" />
+              Back
+            </Button>
             <Button 
               type="button" 
               variant="primary" 

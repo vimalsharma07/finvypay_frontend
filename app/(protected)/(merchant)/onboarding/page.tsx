@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { UserCheck } from 'lucide-react';
 import {
   Toolbar,
@@ -28,6 +29,7 @@ import {
  * Multi-step onboarding process for user profile verification
  */
 export default function OnboardingPage() {
+  const router = useRouter();
   const [onboardingData, setOnboardingData] = useState<OnboardingData | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
@@ -278,6 +280,14 @@ export default function OnboardingPage() {
     }
   };
 
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    } else {
+      router.push('/dashboard');
+    }
+  };
+
   if (loading) {
     return (
       <Fragment>
@@ -321,6 +331,7 @@ export default function OnboardingPage() {
             {currentStep === 1 && (
               <Step1KycType
                 onNext={handleNext}
+                onBack={handleBack}
                 onUpdate={handleKycTypeUpdate}
               />
             )}
@@ -328,6 +339,7 @@ export default function OnboardingPage() {
               <Step2BasicDetails
                 onboardingData={onboardingData}
                 onNext={handleNext}
+                onBack={handleBack}
                 onUpdate={handleBasicDetailsUpdate}
               />
             )}
@@ -335,6 +347,7 @@ export default function OnboardingPage() {
               <Step3ProcessingDetails
                 onboardingData={onboardingData}
                 onNext={handleNext}
+                onBack={handleBack}
                 onUpdate={handleProcessingDetailsUpdate}
               />
             )}
@@ -342,6 +355,7 @@ export default function OnboardingPage() {
               <Step4Directors
                 onboardingData={onboardingData}
                 onNext={handleNext}
+                onBack={handleBack}
                 onUpdate={handleDirectorsUpdate}
               />
             )}
@@ -349,6 +363,7 @@ export default function OnboardingPage() {
               <Step5VideoKyc
                 onboardingData={onboardingData}
                 onNext={handleNext}
+                onBack={handleBack}
                 onUpdate={handleVideoKycUpdate}
               />
             )}
@@ -356,6 +371,7 @@ export default function OnboardingPage() {
               <Step5VideoKyc
                 onboardingData={onboardingData}
                 onNext={handleNext}
+                onBack={handleBack}
                 onUpdate={handleVideoKycUpdate}
               />
             )}
@@ -363,6 +379,7 @@ export default function OnboardingPage() {
               <Step6Agreement
                 onboardingData={onboardingData}
                 onNext={handleNext}
+                onBack={handleBack}
                 onUpdate={handleAgreementUpdate}
               />
             )}
@@ -370,6 +387,7 @@ export default function OnboardingPage() {
               <Step6Agreement
                 onboardingData={onboardingData}
                 onNext={handleNext}
+                onBack={handleBack}
                 onUpdate={handleAgreementUpdate}
               />
             )}

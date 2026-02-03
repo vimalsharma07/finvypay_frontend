@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, ChevronRight } from 'lucide-react';
+import { Plus, ChevronRight, ChevronLeft } from 'lucide-react';
 import { DirectorFormDialog } from './director-form-dialog';
 import { DirectorItem } from './director-item';
 import {
@@ -24,10 +24,11 @@ import { toast } from 'sonner';
 interface Step4DirectorsProps {
   onboardingData: OnboardingData;
   onNext: () => void;
+  onBack: () => void;
   onUpdate?: () => void;
 }
 
-export function Step4Directors({ onboardingData, onNext, onUpdate }: Step4DirectorsProps) {
+export function Step4Directors({ onboardingData, onNext, onBack, onUpdate }: Step4DirectorsProps) {
   const [directors, setDirectors] = useState<Director[]>([]);
   const [loading, setLoading] = useState(true);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -284,9 +285,17 @@ export function Step4Directors({ onboardingData, onNext, onUpdate }: Step4Direct
         </CardHeader>
         <CardContent>
           {directors.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <p className="mb-4">No directors added yet.</p>
-              <p>Click "Add Director" to get started.</p>
+            <div className="space-y-6">
+              <div className="text-center py-12 text-muted-foreground">
+                <p className="mb-4">No directors added yet.</p>
+                <p>Click "Add Director" to get started.</p>
+              </div>
+              <div className="flex justify-start pt-4 border-t">
+                <Button type="button" variant="outline" onClick={onBack} className="gap-2">
+                  <ChevronLeft className="h-4 w-4" />
+                  Back
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="space-y-4">
@@ -307,7 +316,11 @@ export function Step4Directors({ onboardingData, onNext, onUpdate }: Step4Direct
           )}
 
           {directors.length > 0 && (
-            <div className="flex justify-end pt-6 border-t mt-6">
+            <div className="flex justify-between pt-6 border-t mt-6">
+              <Button type="button" variant="outline" onClick={onBack} className="gap-2">
+                <ChevronLeft className="h-4 w-4" />
+                Back
+              </Button>
               <Button
                 type="button"
                 variant="primary"

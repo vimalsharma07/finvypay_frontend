@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Building2, Users, User, ChevronRight } from 'lucide-react';
+import { Building2, Users, User, ChevronRight, ChevronLeft } from 'lucide-react';
 import { initializeOnboarding, InitializeOnboardingPayload } from '@/lib/services/user/onboarding';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
@@ -30,6 +30,7 @@ type KycTypeFormData = z.infer<typeof kycTypeSchema>;
 
 interface Step1KycTypeProps {
   onNext: () => void;
+  onBack: () => void;
   onUpdate: (data: InitializeOnboardingPayload) => void;
 }
 
@@ -54,7 +55,7 @@ const kycTypeOptions = [
   },
 ];
 
-export function Step1KycType({ onNext, onUpdate }: Step1KycTypeProps) {
+export function Step1KycType({ onNext, onBack, onUpdate }: Step1KycTypeProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<KycTypeFormData>({
@@ -181,7 +182,11 @@ export function Step1KycType({ onNext, onUpdate }: Step1KycTypeProps) {
               )}
             />
 
-            <div className="flex justify-end pt-4">
+            <div className="flex justify-between pt-4">
+              <Button type="button" variant="outline" onClick={onBack} className="gap-2">
+                <ChevronLeft className="h-4 w-4" />
+                Back
+              </Button>
               <Button
                 type="submit"
                 variant="primary"

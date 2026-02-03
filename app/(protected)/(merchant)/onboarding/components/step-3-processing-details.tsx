@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { MultiSelectField } from '@/app/(protected)/admin/acquirers/acquirer-accounts/[id]/edit/components/multi-select-field';
 import { CountryCodeSelector } from './country-code-selector';
 import {
@@ -62,12 +62,14 @@ type ProcessingDetailsFormData = z.infer<typeof processingDetailsSchema>;
 interface Step3ProcessingDetailsProps {
   onboardingData: OnboardingData;
   onNext: () => void;
+  onBack: () => void;
   onUpdate: (data: UpdateProcessingDetailsPayload) => void;
 }
 
 export function Step3ProcessingDetails({
   onboardingData,
   onNext,
+  onBack,
   onUpdate,
 }: Step3ProcessingDetailsProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -398,7 +400,11 @@ export function Step3ProcessingDetails({
               )}
             />
 
-            <div className="flex justify-end pt-4">
+            <div className="flex justify-between pt-4">
+              <Button type="button" variant="outline" onClick={onBack} className="gap-2">
+                <ChevronLeft className="h-4 w-4" />
+                Back
+              </Button>
               <Button type="submit" variant="primary" disabled={isSubmitting || loadingData} className="gap-2">
                 {isSubmitting ? 'Saving...' : 'Continue'}
                 <ChevronRight className="h-4 w-4" />
