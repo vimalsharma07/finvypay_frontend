@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Building2, Users, User } from 'lucide-react';
+import { Building2, Users, User, ChevronRight } from 'lucide-react';
 import { initializeOnboarding, InitializeOnboardingPayload } from '@/lib/services/user/onboarding';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
@@ -186,8 +186,10 @@ export function Step1KycType({ onNext, onUpdate }: Step1KycTypeProps) {
                 type="submit"
                 variant="primary"
                 disabled={isSubmitting || !form.watch('kycType')}
+                className="gap-2"
               >
                 {isSubmitting ? 'Initializing...' : 'Continue'}
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
           </form>

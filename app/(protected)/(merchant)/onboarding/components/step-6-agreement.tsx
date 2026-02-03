@@ -15,7 +15,7 @@ import {
 } from '@/lib/services/user/onboarding';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
-import { CheckCircle2, FileText } from 'lucide-react';
+import { CheckCircle2, FileText, ChevronRight } from 'lucide-react';
 
 interface Step6AgreementProps {
   onboardingData: OnboardingData;
@@ -266,15 +266,17 @@ export function Step6Agreement({ onboardingData, onNext, onUpdate }: Step6Agreem
             />
           </div>
 
-          {/* Next Button - Always visible, enabled only after upload */}
+          {/* Continue Button - At bottom, enabled only after upload */}
           <div className="flex justify-end pt-4 border-t">
             <Button 
               type="button" 
               variant="primary" 
               onClick={handleNext}
               disabled={!isSignatureUploaded || isUploading}
+              className="gap-2"
             >
-              Next
+              Continue
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>

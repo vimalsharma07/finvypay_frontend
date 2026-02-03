@@ -25,6 +25,7 @@ import {
   OnboardingDetails,
   getOnboardingStatus,
 } from '@/lib/services/user/onboarding';
+import { ChevronRight } from 'lucide-react';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import { getCountries, Country } from '@/lib/services/admin/countries';
@@ -112,7 +113,7 @@ export function Step2BasicDetails({ onboardingData, onNext, onUpdate }: Step2Bas
       try {
         const response = await getCountries({
           page: 1,
-          limit: 100,
+          limit: 1000,
           sortBy: 'countryName',
           sortOrder: 'ASC',
         });
@@ -357,7 +358,7 @@ export function Step2BasicDetails({ onboardingData, onNext, onUpdate }: Step2Bas
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            <form id="basic-details-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
               {/* Common Fields */}
               <div className="space-y-4">
                 <FormField
@@ -535,21 +536,6 @@ export function Step2BasicDetails({ onboardingData, onNext, onUpdate }: Step2Bas
                   />
                 </div>
               )}
-
-              <div className="flex flex-col items-end gap-2 pt-4">
-                {!checkAllDocumentsUploaded && (
-                  <p className="text-sm text-destructive">
-                    Please upload all required documents to continue
-                  </p>
-                )}
-                <Button 
-                  type="submit" 
-                  variant="primary" 
-                  disabled={isSubmitting || !checkAllDocumentsUploaded}
-                >
-                  {isSubmitting ? 'Saving...' : 'Continue'}
-                </Button>
-              </div>
             </form>
           </Form>
         </CardContent>
@@ -576,6 +562,25 @@ export function Step2BasicDetails({ onboardingData, onNext, onUpdate }: Step2Bas
             />
           );
         })}
+      </div>
+
+      {/* Continue Button - At bottom of form */}
+      <div className="flex flex-col items-end gap-2 pt-4">
+        {!checkAllDocumentsUploaded && (
+          <p className="text-sm text-destructive">
+            Please upload all required documents to continue
+          </p>
+        )}
+        <Button 
+          type="submit" 
+          form="basic-details-form"
+          variant="primary" 
+          disabled={isSubmitting || !checkAllDocumentsUploaded}
+          className="gap-2"
+        >
+          {isSubmitting ? 'Saving...' : 'Continue'}
+          <ChevronRight className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );

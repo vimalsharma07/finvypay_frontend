@@ -111,7 +111,6 @@ export default function OnboardingPage() {
               const profileStep = data.data.user?.profileStep ?? 0;
               const kycStatus = data.data.user?.kycStatus;
               const onboarding = data.data.onboarding;
-              const signedAgreement = onboarding?.signedAgreement;
               const kycType = data.data.kycType || onboarding?.kycType;
               const needsDirectorsStep = kycType && kycType !== 'individual';
               
@@ -119,24 +118,23 @@ export default function OnboardingPage() {
               if (!onboarding) {
                 setCurrentStep(1);
               }
-              // Check if signedAgreement is null - redirect to agreement step (only if onboarding exists)
-              else if (signedAgreement === null || signedAgreement === undefined) {
-                // Determine agreement step number based on whether directors step is shown
-                const agreementStep = needsDirectorsStep ? 6 : 5;
-                setCurrentStep(agreementStep);
-              }
               // If status is pending_for_approval, show completed step
-              else if (kycStatus === 'pending_for_approval') {
+              else if (kycStatus === 'pending_for_approval' || kycStatus === 'agreement_received') {
                 const finalStep = needsDirectorsStep ? 7 : 6;
                 setCurrentStep(finalStep);
               } else {
                 // Determine current step based on profileStep
+                // profileStep: 0=not started, 1=basic details, 2=processing, 3=directors, 4=video KYC done
                 if (profileStep === 0) {
                   setCurrentStep(1);
-                } else if (profileStep >= 1 && profileStep < 5) {
+                } else if (profileStep >= 1 && profileStep < 4) {
                   setCurrentStep(profileStep + 1);
+                } else if (profileStep >= 4) {
+                  // Video KYC done - show agreement step (5 for individual, 6 for company/partnership)
+                  const agreementStep = needsDirectorsStep ? 6 : 5;
+                  setCurrentStep(agreementStep);
                 } else {
-                  setCurrentStep(5);
+                  setCurrentStep(profileStep + 1);
                 }
               }
 

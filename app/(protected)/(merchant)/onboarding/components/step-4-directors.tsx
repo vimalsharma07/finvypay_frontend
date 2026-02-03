@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, ChevronRight } from 'lucide-react';
 import { DirectorFormDialog } from './director-form-dialog';
 import { DirectorItem } from './director-item';
 import {
@@ -313,8 +313,10 @@ export function Step4Directors({ onboardingData, onNext, onUpdate }: Step4Direct
                 variant="primary"
                 onClick={handleContinue}
                 disabled={!allDirectorsHaveDocuments}
+                className="gap-2"
               >
                 Continue
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
           )}

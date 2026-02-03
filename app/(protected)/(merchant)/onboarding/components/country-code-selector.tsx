@@ -28,7 +28,7 @@ export function CountryCodeSelector({
       try {
         const response = await getCountries({
           page: 1,
-          limit: 100,
+          limit: 1000,
           sortBy: 'countryName',
           sortOrder: 'ASC',
         });

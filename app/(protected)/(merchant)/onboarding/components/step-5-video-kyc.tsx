@@ -11,7 +11,7 @@ import {
 } from '@/lib/services/user/onboarding';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, ChevronRight } from 'lucide-react';
 
 interface Step5VideoKycProps {
   onboardingData: OnboardingData;
@@ -132,8 +132,10 @@ export function Step5VideoKyc({ onboardingData, onNext, onUpdate }: Step5VideoKy
               variant="primary" 
               onClick={handleNext}
               disabled={!isVideoUploaded || isUploading}
+              className="gap-2"
             >
-              Next
+              Continue
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>

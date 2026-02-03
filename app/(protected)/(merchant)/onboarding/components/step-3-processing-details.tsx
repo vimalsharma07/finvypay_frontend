@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ChevronRight } from 'lucide-react';
 import { MultiSelectField } from '@/app/(protected)/admin/acquirers/acquirer-accounts/[id]/edit/components/multi-select-field';
 import { CountryCodeSelector } from './country-code-selector';
 import {
@@ -85,7 +86,7 @@ export function Step3ProcessingDetails({
         // Fetch industries
         const industriesResponse = await getIndustries({
           page: 1,
-          limit: 100,
+          limit: 1000,
           sortBy: 'name',
           sortOrder: 'ASC',
         });
@@ -93,7 +94,7 @@ export function Step3ProcessingDetails({
         // Fetch countries
         const countriesResponse = await getCountries({
           page: 1,
-          limit: 100,
+          limit: 1000,
           sortBy: 'countryName',
           sortOrder: 'ASC',
         });
@@ -101,7 +102,7 @@ export function Step3ProcessingDetails({
         // Fetch currencies
         const currenciesResponse = await getCurrencies({
           page: 1,
-          limit: 500,
+          limit: 1000,
           sortBy: 'code',
           sortOrder: 'ASC',
         });
@@ -396,8 +397,9 @@ export function Step3ProcessingDetails({
             />
 
             <div className="flex justify-end pt-4">
-              <Button type="submit" variant="primary" disabled={isSubmitting || loadingData}>
+              <Button type="submit" variant="primary" disabled={isSubmitting || loadingData} className="gap-2">
                 {isSubmitting ? 'Saving...' : 'Continue'}
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
           </form>
