@@ -77,14 +77,12 @@ export function filterTransactions(
     const fullName = `${transaction.firstName} ${transaction.lastName}`.toLowerCase();
     const userEmail = transaction.email?.toLowerCase() || '';
     const transactionId = transaction.transactionId?.toLowerCase() || '';
-    const gatewayId = transaction.gatewayId?.toLowerCase() || '';
     const country = transaction.country?.toLowerCase() || '';
 
     return (
       fullName.includes(query) ||
       userEmail.includes(query) ||
       transactionId.includes(query) ||
-      gatewayId.includes(query) ||
       country.includes(query)
     );
   });

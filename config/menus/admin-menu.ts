@@ -91,7 +91,6 @@ const BASE_ADMIN_MENU: MenuConfig = [
     children: [
       {title: 'Settlement Summary', path: '/admin/settlement/summary', submodule: 'Settlement Summary' },
       { title: 'All Settlements', path: '/admin/settlement/all', submodule: 'All Settlements' },
-      { title: 'Merchant Balances', path: '/admin/settlement/merchant-balances', submodule: 'Merchant Balances' },
       {title: 'Settlement Calculations', path: '/admin/settlement/calculations', submodule: 'Settlement Calculations' },
     ],
   },

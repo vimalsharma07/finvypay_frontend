@@ -253,7 +253,6 @@ export function TransactionDetailsDialog({
                 <div className="grid grid-cols-2 gap-4">
                   <InfoField label="Transaction ID" value={transaction.transactionId} />
                   <InfoField label="Order ID" value={transaction.orderId} />
-                  <InfoField label="Gateway ID" value={transaction.gatewayId} />
                   <InfoField label="User ID" value={transaction.userId} />
                   <InfoField label="Amount" value={`${transaction.amount} ${transaction.currency}`} />
                   <InfoField label="Amount (USD)" value={`$${parseFloat(transaction.amountInUsd).toFixed(2)}`} />

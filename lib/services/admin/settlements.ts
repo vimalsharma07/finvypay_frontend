@@ -225,6 +225,32 @@ export interface SettlementSummaryResponse {
   message?: string;
 }
 
+/** Single row from GET /admin/settlements/summary (list) */
+export interface SettlementSummaryItem {
+  id: string;
+  user: { name: string };
+  transaction_date: string;
+  opening_balance: number;
+  net_amount: number;
+  payout_amount: number;
+  closing_balance: number;
+  payout_date: string | null;
+  is_payout_completed: boolean;
+}
+
+export interface SettlementSummaryListParams {
+  userId?: string | number;
+  page?: number;
+  limit?: number;
+}
+
+export interface SettlementSummaryListResponse {
+  success: boolean;
+  data: SettlementSummaryItem[];
+  meta: SettlementListMeta;
+  message?: string;
+}
+
 export interface SettlementCalculationAcquirer {
   id: number;
   acquirerName: string;
@@ -418,6 +444,49 @@ export async function updateSettlement(
   }
 }
 
+export interface GenerateSettlementPayload {
+  userId: number;
+  startDate: string;
+  endDate: string;
+  disputesStartDate: string;
+  disputesEndDate: string;
+  type?: string;
+  remarks?: string;
+}
+
+export interface GenerateSettlementResponse {
+  success: boolean;
+  data?: unknown;
+  message?: string;
+}
+
+/**
+ * Generate settlement
+ */
+export async function generateSettlement(
+  payload: GenerateSettlementPayload
+): Promise<ApiResponse<GenerateSettlementResponse>> {
+  try {
+    const data = await http.post(adminRoutes.settlements.generate, payload) as GenerateSettlementResponse;
+    return {
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
 /**
  * Get merchant balances list (with pagination)
  */
@@ -448,11 +517,45 @@ export async function getMerchantBalances(
 }
 
 /**
- * Get settlement summary
+ * Get settlement summary (legacy aggregate)
  */
 export async function getSettlementSummary(): Promise<ApiResponse<SettlementSummaryResponse>> {
   try {
     const data = await http.get(adminRoutes.settlements.summary) as SettlementSummaryResponse;
+    return {
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Get settlement summary list (with optional userId filter and pagination)
+ */
+export async function getSettlementSummaryList(
+  params?: SettlementSummaryListParams
+): Promise<ApiResponse<SettlementSummaryListResponse>> {
+  try {
+    const query: Record<string, string | number | undefined> = {};
+    if (params?.userId != null) query.userId = params.userId;
+    if (params?.page != null) query.page = params.page;
+    if (params?.limit != null) query.limit = params.limit;
+
+    const data = await http.get(adminRoutes.settlements.summary, {
+      query,
+    }) as SettlementSummaryListResponse;
     return {
       status: 200,
       data,
