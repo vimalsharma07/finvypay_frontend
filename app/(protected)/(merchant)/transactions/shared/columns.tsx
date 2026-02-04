@@ -136,26 +136,6 @@ export function getTransactionColumns(
       },
     },
     {
-      id: 'gatewayId',
-      accessorKey: 'gatewayId',
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Gateway" />
-      ),
-      cell: ({ row }) => {
-        return (
-          <div className="font-medium text-foreground">
-            {row.original.gatewayId}
-          </div>
-        );
-      },
-      size: 110,
-      minSize: 100,
-      meta: {
-        headerClassName: 'text-left',
-        cellClassName: 'text-left',
-      },
-    },
-    {
       id: 'amountInUsd',
       accessorKey: 'amountInUsd',
       header: ({ column }) => (

@@ -279,6 +279,31 @@ export interface UserSettlementSummaryResponse {
   message?: string;
 }
 
+/** Single row from GET /merchant/settlements/summary (list) */
+export interface UserSettlementSummaryItem {
+  id: string;
+  user?: { name: string };
+  transaction_date: string;
+  opening_balance: number;
+  net_amount: number;
+  payout_amount: number;
+  closing_balance: number;
+  payout_date: string | null;
+  is_payout_completed: boolean;
+}
+
+export interface UserSettlementSummaryListResponse {
+  success: boolean;
+  data: UserSettlementSummaryItem[];
+  meta?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+  message?: string;
+}
+
 export interface UserSettlementBalanceData {
   currentBalance: string;
   lastUpdated: string;
@@ -292,11 +317,44 @@ export interface UserSettlementBalanceResponse {
 }
 
 /**
- * Get settlement summary for the authenticated user
+ * Get settlement summary for the authenticated user (legacy aggregate)
  */
 export async function getUserSettlementSummary(): Promise<ApiResponse<UserSettlementSummaryResponse>> {
   try {
     const data = await http.get('/merchant/settlements/summary') as UserSettlementSummaryResponse;
+    return {
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Get settlement summary list for the authenticated merchant (with optional pagination)
+ */
+export async function getUserSettlementSummaryList(params?: {
+  page?: number;
+  limit?: number;
+}): Promise<ApiResponse<UserSettlementSummaryListResponse>> {
+  try {
+    const query: Record<string, string | number | undefined> = {};
+    if (params?.page != null) query.page = params.page;
+    if (params?.limit != null) query.limit = params.limit;
+    const data = await http.get('/merchant/settlements/summary', {
+      query: Object.keys(query).length ? query : undefined,
+    }) as UserSettlementSummaryListResponse;
     return {
       status: 200,
       data,

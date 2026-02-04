@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import { Receipt, MoreHorizontal, Eye } from 'lucide-react';
+import { Receipt } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -28,16 +28,8 @@ import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardFooter, CardTable } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import Link from 'next/link';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 
 const DATE_FMT = 'yyyy-MM-dd';
@@ -49,7 +41,7 @@ export default function UserSettlementsPage() {
   const [meta, setMeta] = useState<{ total: number; page: number; limit: number; totalPages: number } | null>(null);
 
   const [sorting, setSorting] = useState<SortingState>([
-    { id: 'createdAt', desc: true },
+    { id: 'settlementDate', desc: true },
   ]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -194,38 +186,6 @@ export default function UserSettlementsPage() {
           <DataGridColumnHeader column={column} title="Success Count" />
         ),
         cell: ({ row }) => formatNumber(row.original.totalSuccessCount),
-      },
-      {
-        accessorKey: 'createdAt',
-        header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Created" />
-        ),
-        cell: ({ row }) =>
-          row.original.createdAt
-            ? format(new Date(row.original.createdAt), DATE_TIME_FMT)
-            : '—',
-      },
-      {
-        id: 'actions',
-        header: 'Actions',
-        cell: ({ row }) => (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="sm" variant="ghost" className="px-2">
-                <MoreHorizontal className="h-4 w-4" />
-                <span className="sr-only">Actions</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem asChild>
-                <Link href={`/settlement/${row.original.id}`} className="flex items-center gap-1">
-                  <Eye className="h-4 w-4" />
-                  View
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ),
       },
     ],
     []
