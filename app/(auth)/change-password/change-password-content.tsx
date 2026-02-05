@@ -24,6 +24,8 @@ import {
   getChangePasswordSchema,
 } from '../forms/change-password-schema';
 import Link from 'next/link';
+import { isAuthenticated } from '@/lib/auth-storage';
+import { getRedirectPathByRole, getUserRole } from '@/lib/utils/menu-utils';
 
 export function ChangePasswordContent() {
   const router = useRouter();
@@ -38,6 +40,18 @@ export function ChangePasswordContent() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [passwordConfirmationVisible, setPasswordConfirmationVisible] =
     useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Redirect if user is already authenticated
+  useEffect(() => {
+    if (isAuthenticated()) {
+      const userRole = getUserRole();
+      const redirectPath = getRedirectPathByRole(userRole);
+      router.replace(redirectPath);
+      return;
+    }
+    setIsCheckingAuth(false);
+  }, [router]);
 
   const form = useForm<ChangePasswordSchemaType>({
     resolver: zodResolver(getChangePasswordSchema()),
@@ -83,6 +97,18 @@ export function ChangePasswordContent() {
     } finally {
       setIsProcessing(false);
     }
+  }
+
+  // Show loading state while checking authentication
+  if (isCheckingAuth || isAuthenticated()) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <LoaderCircleIcon className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="text-sm text-muted-foreground">Redirecting...</p>
+        </div>
+      </div>
+    );
   }
 
   return (

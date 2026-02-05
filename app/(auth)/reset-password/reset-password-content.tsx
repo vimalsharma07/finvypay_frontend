@@ -1,7 +1,8 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle, ArrowLeft, Check, Mail } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -21,12 +22,27 @@ import {
 import { Input } from '@/components/ui/input';
 import { LoaderCircleIcon } from 'lucide-react';
 import { RecaptchaPopover } from '@/components/common/recaptcha-popover';
+import { isAuthenticated } from '@/lib/auth-storage';
+import { getRedirectPathByRole, getUserRole } from '@/lib/utils/menu-utils';
 
 export function ResetPasswordContent() {
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [showRecaptcha, setShowRecaptcha] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Redirect if user is already authenticated
+  useEffect(() => {
+    if (isAuthenticated()) {
+      const userRole = getUserRole();
+      const redirectPath = getRedirectPathByRole(userRole);
+      router.replace(redirectPath);
+      return;
+    }
+    setIsCheckingAuth(false);
+  }, [router]);
 
   const formSchema = z.object({
     email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -74,6 +90,18 @@ export function ResetPasswordContent() {
       setIsProcessing(false);
     }
   };
+
+  // Show loading state while checking authentication
+  if (isCheckingAuth || isAuthenticated()) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <LoaderCircleIcon className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="text-sm text-muted-foreground">Redirecting...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Suspense>
