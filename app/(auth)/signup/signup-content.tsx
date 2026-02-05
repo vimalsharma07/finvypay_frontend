@@ -25,6 +25,8 @@ import { LoaderCircleIcon } from 'lucide-react';
 import { getSignupSchema, SignupSchemaType } from '../forms/signup-schema';
 import { z } from 'zod';
 import { useResendOtp } from '@/hooks/use-resend-otp';
+import { isAuthenticated } from '@/lib/auth-storage';
+import { getRedirectPathByRole, getUserRole } from '@/lib/utils/menu-utils';
 
 // OTP verification schema
 const otpSchema = z.object({
@@ -48,6 +50,18 @@ export function SignupContent() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [otpValue, setOtpValue] = useState<string>('');
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Redirect if user is already authenticated
+  useEffect(() => {
+    if (isAuthenticated()) {
+      const userRole = getUserRole();
+      const redirectPath = getRedirectPathByRole(userRole);
+      router.replace(redirectPath);
+      return;
+    }
+    setIsCheckingAuth(false);
+  }, [router]);
 
   // Resend OTP hook
   const {
@@ -205,6 +219,18 @@ export function SignupContent() {
     } finally {
       setIsProcessing(false);
     }
+  }
+
+  // Show loading state while checking authentication
+  if (isCheckingAuth || isAuthenticated()) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <LoaderCircleIcon className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="text-sm text-muted-foreground">Redirecting...</p>
+        </div>
+      </div>
+    );
   }
 
   // OTP Verification Step

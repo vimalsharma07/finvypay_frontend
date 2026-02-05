@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useCallback, useEffect, useState } from 'react';
-import Link from 'next/dist/client/link';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertCircle, CheckCircle, Mail } from 'lucide-react';
 import { verifyEmail } from '@/lib/services/auth';
@@ -9,12 +9,26 @@ import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { LoaderCircleIcon } from 'lucide-react';
+import { isAuthenticated } from '@/lib/auth-storage';
+import { getRedirectPathByRole, getUserRole } from '@/lib/utils/menu-utils';
 
 export function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [message, setMessage] = useState<string | null>('Verifying...');
   const [error, setError] = useState<string | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Redirect if user is already authenticated
+  useEffect(() => {
+    if (isAuthenticated()) {
+      const userRole = getUserRole();
+      const redirectPath = getRedirectPathByRole(userRole);
+      router.replace(redirectPath);
+      return;
+    }
+    setIsCheckingAuth(false);
+  }, [router]);
 
   const verify = useCallback(
     async (token: string) => {
@@ -54,6 +68,18 @@ export function VerifyEmailContent() {
 
     verify(token);
   }, [searchParams, verify]);
+
+  // Show loading state while checking authentication
+  if (isCheckingAuth || isAuthenticated()) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <LoaderCircleIcon className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="text-sm text-muted-foreground">Redirecting...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Suspense>

@@ -28,7 +28,7 @@ import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { useGoogleOAuth } from '@/hooks/use-google-oauth';
 import { ForgotPasswordDialog } from './components/forgot-password-dialog';
 import { useOtpSignin } from '@/hooks/use-otp-signin';
-import { handleLoginRedirect, getRedirectPathByRole } from '@/lib/utils/menu-utils';
+import { handleLoginRedirect, getRedirectPathByRole, getUserRole } from '@/lib/utils/menu-utils';
 import { isAuthenticated } from '@/lib/auth-storage';
 import { fetchAndStorePermissions } from '@/lib/utils/auth-helpers';
 
@@ -52,6 +52,18 @@ export function SigninContent() {
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [otpValue, setOtpValue] = useState<string>('');
   const [otpEmail, setOtpEmail] = useState<string>('');
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Redirect if user is already authenticated - check immediately
+  useEffect(() => {
+    if (isAuthenticated()) {
+      const userRole = getUserRole();
+      const redirectPath = getRedirectPathByRole(userRole);
+      router.replace(redirectPath);
+      return;
+    }
+    setIsCheckingAuth(false);
+  }, [router]);
 
   // Google OAuth hook
   const {
@@ -106,14 +118,6 @@ export function SigninContent() {
   // Handle resend OTP for OTP signin (use sendOtp from hook)
   const [resendCooldown, setResendCooldown] = useState(0);
   const resendTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Redirect if user is already authenticated
-  useEffect(() => {
-    if (isAuthenticated()) {
-      const redirectPath = getRedirectPathByRole();
-      router.replace(redirectPath);
-    }
-  }, [router]);
 
   useEffect(() => {
     if (resendCooldown > 0) {
@@ -278,6 +282,18 @@ export function SigninContent() {
       return;
     }
     await verifyOtp(otpEmail, values.otp);
+  }
+
+  // Show loading state while checking authentication
+  if (isCheckingAuth || isAuthenticated()) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <LoaderCircleIcon className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="text-sm text-muted-foreground">Redirecting...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
