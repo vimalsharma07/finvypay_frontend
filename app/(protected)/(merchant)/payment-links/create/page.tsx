@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -29,10 +29,7 @@ import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
   createUserPaymentLink,
 } from '@/lib/services/user/payment-links';
-import {
-  getCurrencies,
-  Currency,
-} from '@/lib/services/admin/currency';
+import { useCurrencies } from '@/lib/hooks/use-currencies';
 import { z } from 'zod';
 
 const createPaymentLinkSchema = z.object({
@@ -70,8 +67,7 @@ export default function CreatePaymentLinkPage() {
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [currencies, setCurrencies] = useState<Currency[]>([]);
-  const [loadingCurrencies, setLoadingCurrencies] = useState(true);
+  const { currencies, loading: loadingCurrencies } = useCurrencies();
 
   const {
     register,
@@ -90,40 +86,6 @@ export default function CreatePaymentLinkPage() {
       expiryValidity: '24hr',
     },
   });
-
-  // Fetch currencies
-  useEffect(() => {
-    const fetchCurrencies = async () => {
-      setLoadingCurrencies(true);
-      try {
-        const response = await getCurrencies({
-          page: 1,
-          limit: 500,
-          sortBy: 'code',
-          sortOrder: 'ASC',
-        });
-
-        handleApiResponse(response, {
-          onSuccess: (data) => {
-            if (data.success && data.data) {
-              // Handle both array format and nested data format
-              const currenciesArray = Array.isArray(data.data) ? data.data : (data.data.data || []);
-              setCurrencies(currenciesArray);
-            }
-          },
-          onError: (errorMessage) => {
-            toast.error(errorMessage || 'Failed to load currencies');
-          },
-        });
-      } catch (error) {
-        toast.error('An unexpected error occurred while loading currencies');
-      } finally {
-        setLoadingCurrencies(false);
-      }
-    };
-
-    fetchCurrencies();
-  }, []);
 
   const onSubmit = async (data: CreatePaymentLinkFormData): Promise<void> => {
     try {

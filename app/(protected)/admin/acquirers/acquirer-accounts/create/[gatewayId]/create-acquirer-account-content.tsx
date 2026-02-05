@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,8 +19,8 @@ import {
   Acquirer,
   AcquirerListResponse,
 } from '@/lib/services/admin/acquirers';
-import { getCountries, Country, CountryListResponse } from '@/lib/services/admin/countries';
-import { getCurrencies, Currency, CurrencyListResponse } from '@/lib/services/admin/currency';
+import { useCountries } from '@/lib/hooks/use-countries';
+import { useCurrencies } from '@/lib/hooks/use-currencies';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import {
@@ -76,10 +76,29 @@ export function CreateAcquirerAccountContent() {
   const acquirerId = (params?.gatewayId || params?.acquirerId) as string;
 
   const [acquirers, setAcquirers] = useState<Acquirer[]>([]);
-  const [countries, setCountries] = useState<Array<{ code: string; name: string }>>([]);
-  const [currencies, setCurrencies] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const { countries: countriesData, loading: loadingCountries } = useCountries();
+  const { currencies: currenciesData, loading: loadingCurrencies } = useCurrencies();
+  const availableCountries = useMemo(
+    () =>
+      countriesData
+        .filter((country) => country.status === 'active' && !country.isDeleted)
+        .map((country) => ({
+          code: country.isoTwo,
+          name: country.countryName,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [countriesData]
+  );
+  const availableCurrencies = useMemo(
+    () =>
+      currenciesData
+        .filter((currency) => !currency.isDeleted)
+        .map((currency) => currency.code)
+        .sort(),
+    [currenciesData]
+  );
 
   const form = useForm<CreateAcquirerAccountFormData>({
     resolver: zodResolver(createAcquirerAccountSchema),
@@ -124,11 +143,9 @@ export function CreateAcquirerAccountContent() {
 
       setLoading(true);
       try {
-        const [acquirerResponse, acquirersResponse, countriesResponse, currenciesResponse] = await Promise.all([
+        const [acquirerResponse, acquirersResponse] = await Promise.all([
           getAcquirerById(acquirerId),
           getAcquirers({ page: 1, limit: 100 }),
-          getCountries({ page: 1, limit: 500 }),
-          getCurrencies({ page: 1, limit: 500 }),
         ]);
 
         // Handle Selected Acquirer Data
@@ -172,46 +189,6 @@ export function CreateAcquirerAccountContent() {
           },
         });
 
-        // Handle Countries Data
-        handleApiResponse<CountryListResponse>(countriesResponse, {
-          onSuccess: (data) => {
-            // New format: { success: true, data: [...] }
-            if (data && data.success && data.data && Array.isArray(data.data)) {
-              const countryList: Country[] = data.data;
-              const transformedCountries = countryList
-                .filter((country) => country.status === 'active' && !country.isDeleted)
-                .map((country) => ({
-                  code: country.isoTwo,
-                  name: country.countryName,
-                }))
-                .sort((a, b) => a.name.localeCompare(b.name));
-              setCountries(transformedCountries);
-            }
-          },
-          onError: (errorMessage) => {
-            console.error('Error fetching countries:', errorMessage);
-            toast.error('Failed to load countries for dropdown');
-          },
-        });
-
-        // Handle Currencies Data
-        handleApiResponse<CurrencyListResponse>(currenciesResponse, {
-          onSuccess: (data) => {
-            // New format: { success: true, data: [...] }
-            if (data && data.success && data.data && Array.isArray(data.data)) {
-              const currencyList: Currency[] = data.data;
-              const currencyCodes = currencyList
-                .filter((currency) => !currency.isDeleted)
-                .map((currency) => currency.code)
-                .sort();
-              setCurrencies(currencyCodes);
-            }
-          },
-          onError: (errorMessage) => {
-            console.error('Error fetching currencies:', errorMessage);
-            toast.error('Failed to load currencies for dropdown');
-          },
-        });
       } catch (error) {
         console.error('Error fetching all data:', error);
         toast.error('An error occurred while loading data');
@@ -290,7 +267,9 @@ export function CreateAcquirerAccountContent() {
     }
   };
 
-  if (loading) {
+  const isFormLoading = loading || loadingCountries || loadingCurrencies;
+
+  if (isFormLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
@@ -309,7 +288,7 @@ export function CreateAcquirerAccountContent() {
               <BasicInformationSection
                 control={form.control}
                 acquirers={acquirers}
-                currencies={currencies}
+                currencies={availableCurrencies}
                 submitting={submitting}
                 disableAcquirer={true}
                 showStatus={false}
@@ -319,7 +298,7 @@ export function CreateAcquirerAccountContent() {
 
               <CountriesCardTypesSection
                 control={form.control}
-                countries={countries}
+                countries={availableCountries}
                 submitting={submitting}
               />
 

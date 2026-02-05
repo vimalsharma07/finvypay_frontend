@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -28,7 +28,7 @@ import {
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
-import { getCountries, Country } from '@/lib/services/admin/countries';
+import { useCountries } from '@/lib/hooks/use-countries';
 
 type KycType = 'individual' | 'company' | 'partnership';
 
@@ -92,8 +92,7 @@ export function Step2BasicDetails({ onboardingData, onNext, onBack, onUpdate }: 
   const [uploadedFiles, setUploadedFiles] = useState<Record<FileUploadType, boolean>>(
     {} as Record<FileUploadType, boolean>
   );
-  const [countries, setCountries] = useState<Country[]>([]);
-  const [loadingCountries, setLoadingCountries] = useState(true);
+  const { countries, loading: loadingCountries } = useCountries();
 
   // Get kycType from onboarding data
   const kycType = useMemo(() => {
@@ -106,39 +105,6 @@ export function Step2BasicDetails({ onboardingData, onNext, onBack, onUpdate }: 
   const schema = isCompanyOrPartnership ? companySchema : baseSchema;
 
   type FormData = z.infer<typeof baseSchema> | z.infer<typeof companySchema>;
-
-  // Fetch countries for country code mapping
-  useEffect(() => {
-    const fetchCountries = async () => {
-      setLoadingCountries(true);
-      try {
-        const response = await getCountries({
-          page: 1,
-          limit: 1000,
-          sortBy: 'countryName',
-          sortOrder: 'ASC',
-        });
-
-        handleApiResponse(response, {
-          onSuccess: (data) => {
-            // New format: { success: true, data: [...] }
-            if (data && data.success && data.data) {
-              setCountries(Array.isArray(data.data) ? data.data : []);
-            }
-          },
-          onError: (errorMessage) => {
-            console.error('Failed to fetch countries:', errorMessage);
-          },
-        });
-      } catch (error) {
-        console.error('Countries fetch error:', error);
-      } finally {
-        setLoadingCountries(false);
-      }
-    };
-
-    fetchCountries();
-  }, []);
 
   // Find country code ID from country code string
   const findCountryCodeId = (countryCode: string | null): number | undefined => {
