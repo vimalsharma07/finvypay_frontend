@@ -3,7 +3,7 @@
 import { Fragment, useEffect, useState, useMemo } from 'react';
 import { format, startOfYear, endOfYear } from 'date-fns';
 import { DateRange } from 'react-day-picker';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
@@ -46,6 +46,7 @@ import {
 import { getMerchantRates, updateMerchantRatesStatus, MerchantRates } from '@/lib/services/user/merchant-rates';
 import { getMerchantDashboard, type MerchantDashboardData } from '@/lib/services/user/dashboard';
 import { toast } from 'sonner';
+import { DynamicApexChart } from '@/components/charts/dynamic-apex-chart';
 
 /**
  * User Dashboard Content Component
@@ -270,6 +271,84 @@ export function UserDashboardContent() {
       openTickets: 0,
     };
   }, [dashboardData]);
+
+  // Chart data for transaction statistics (pie + bar)
+  const transactionChartData = useMemo(() => {
+    if (!dashboardData?.transactionStatistics) return null;
+
+    const stats = dashboardData.transactionStatistics;
+    return {
+      pie: {
+        series: [
+          stats.successCount,
+          stats.declineCount,
+          stats.chargebackCount,
+          stats.refundCount,
+        ],
+        labels: ['Success', 'Decline', 'Chargeback', 'Refund'],
+      },
+      bar: {
+        categories: ['Success', 'Decline', 'Chargeback', 'Refund'],
+        data: [
+          stats.successCount,
+          stats.declineCount,
+          stats.chargebackCount,
+          stats.refundCount,
+        ],
+      },
+    };
+  }, [dashboardData]);
+
+  const pieChartOptions = useMemo(() => ({
+    chart: {
+      type: 'pie' as const,
+      toolbar: { show: false },
+    },
+    labels: transactionChartData?.pie.labels || [],
+    colors: ['#10b981', '#ef4444', '#f59e0b', '#3b82f6'],
+    legend: {
+      position: 'bottom' as const,
+    },
+    dataLabels: {
+      enabled: true,
+      formatter: (val: number) => `${val.toFixed(1)}%`,
+    },
+    tooltip: {
+      y: {
+        formatter: (val: number) => val.toLocaleString(),
+      },
+    },
+  }), [transactionChartData]);
+
+  const barChartOptions = useMemo(() => ({
+    chart: {
+      type: 'bar' as const,
+      toolbar: { show: false },
+    },
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        columnWidth: '55%',
+        distributed: true,
+      },
+    },
+    dataLabels: {
+      enabled: true,
+      formatter: (val: number) => val.toLocaleString(),
+    },
+    xaxis: {
+      categories: transactionChartData?.bar.categories || [],
+    },
+    colors: ['#10b981', '#ef4444', '#f59e0b', '#3b82f6'],
+    legend: {
+      show: false,
+    },
+    tooltip: {
+      y: {
+        formatter: (val: number) => val.toLocaleString(),
+      },
+    },
+  }), [transactionChartData]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -534,6 +613,41 @@ export function UserDashboardContent() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Transaction Charts */}
+      {transactionChartData && (
+        <div className="grid gap-4 md:grid-cols-2 mt-5 lg:mt-7.5">
+          <Card>
+            <CardHeader>
+              <CardTitle>Transaction Distribution</CardTitle>
+              <CardDescription>Pie chart showing transaction types</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DynamicApexChart
+                type="pie"
+                series={transactionChartData.pie.series}
+                options={pieChartOptions}
+                height={350}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Transaction Counts</CardTitle>
+              <CardDescription>Bar chart showing transaction volumes</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DynamicApexChart
+                type="bar"
+                series={[{ name: 'Count', data: transactionChartData.bar.data }]}
+                options={barChartOptions}
+                height={350}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      )}
       </>
       )}
 
