@@ -76,6 +76,7 @@ export default function AdminSettlementsPage() {
   const [endDate, setEndDate] = useState('');
   const [disputesStartDate, setDisputesStartDate] = useState('');
   const [disputesEndDate, setDisputesEndDate] = useState('');
+  const [generateType, setGenerateType] = useState<string>('NORMAL');
   const [generating, setGenerating] = useState(false);
 
   const [sorting, setSorting] = useState<SortingState>([
@@ -187,7 +188,7 @@ export default function AdminSettlementsPage() {
         endDate,
         disputesStartDate,
         disputesEndDate,
-        type: 'NORMAL',
+        type: generateType as 'NORMAL' | 'MANUAL',
         remarks: 'T+5 settlement',
       };
       const response = await generateSettlement(payload);
@@ -497,7 +498,7 @@ export default function AdminSettlementsPage() {
       <Container>
         <Card className="mb-6">
           <CardContent className="pt-6">
-            <h3 className="text-lg font-semibold mb-4">Manual Settlements</h3>
+            <h3 className="text-lg font-semibold mb-4">Settlements</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="generate-merchant">
@@ -567,6 +568,22 @@ export default function AdminSettlementsPage() {
                   onChange={(e) => setDisputesEndDate(e.target.value)}
                   disabled={generating}
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="generate-type">Settlement Type</Label>
+                <Select
+                  value={generateType}
+                  onValueChange={setGenerateType}
+                  disabled={generating}
+                >
+                  <SelectTrigger id="generate-type">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="NORMAL">NORMAL (uses acquirer rates)</SelectItem>
+                    <SelectItem value="MANUAL">MANUAL (uses merchant rates)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="flex justify-end mt-4">
