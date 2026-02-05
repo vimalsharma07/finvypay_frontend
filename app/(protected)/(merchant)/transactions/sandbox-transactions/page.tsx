@@ -49,8 +49,8 @@ import {
 } from '@/lib/types/common-types';
 import { generateFilterQuery } from '@/lib/helpers';
 import { getUserAcquirerAccounts } from '@/lib/services/user/acquirer-accounts';
-import { getCurrencies } from '@/lib/services/admin/currency';
-import { getCountries } from '@/lib/services/admin/countries';
+import { useCurrencies } from '@/lib/hooks/use-currencies';
+import { useCountries } from '@/lib/hooks/use-countries';
 import { getTimeZones } from '@/i18n/timezones';
 
 export default function SandboxTransactionsPage() {
@@ -64,9 +64,28 @@ export default function SandboxTransactionsPage() {
 
   // Dropdown options
   const [connectorOptions, setConnectorOptions] = useState<Option[]>([]);
-  const [currencyOptions, setCurrencyOptions] = useState<Option[]>([]);
-  const [countryOptions, setCountryOptions] = useState<Option[]>([]);
-  const [timeZoneOptions, setTimeZoneOptions] = useState<Option[]>([]);
+  const { currencies } = useCurrencies();
+  const { countries } = useCountries();
+  const currencyOptions = useMemo(
+    () =>
+      currencies.map((currency) => ({
+        label: currency.code,
+        value: currency.code,
+      })),
+    [currencies]
+  );
+  const countryOptions = useMemo(
+    () =>
+      countries.map((country) => ({
+        label: country.countryName,
+        value: country.isoTwo,
+      })),
+    [countries]
+  );
+  const timeZoneOptions = useMemo(
+    () => getTimeZones().map((z) => ({ label: z.label, value: z.value })),
+    []
+  );
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -123,17 +142,12 @@ export default function SandboxTransactionsPage() {
     fetchTransactions(page, limit, filters);
   }, [fetchTransactions, page, limit, filters]);
 
-  // Fetch filter options
+  // Fetch connector filter options
   useEffect(() => {
-    const loadOptions = async () => {
+    const loadConnectorOptions = async () => {
       try {
-        const [connectorsRes, currenciesRes, countriesRes] = await Promise.all([
-          getUserAcquirerAccounts({ page: 1, limit: 1000 }),
-          getCurrencies({ page: 1, limit: 1000 }),
-          getCountries({ page: 1, limit: 1000 }),
-        ]);
+        const connectorsRes = await getUserAcquirerAccounts({ page: 1, limit: 1000 });
 
-        // Handle connector/acquirer accounts response
         if (connectorsRes.data?.success) {
           const accounts = Array.isArray(connectorsRes.data.data)
             ? connectorsRes.data.data
@@ -145,32 +159,12 @@ export default function SandboxTransactionsPage() {
             }))
           );
         }
-
-        if (currenciesRes.data?.data?.data) {
-          setCurrencyOptions(
-            currenciesRes.data.data.data.map((c) => ({
-              label: c.code,
-              value: c.code,
-            }))
-          );
-        }
-
-        if (countriesRes.data?.data?.data) {
-          setCountryOptions(
-            countriesRes.data.data.data.map((c) => ({
-              label: c.countryName,
-              value: c.isoTwo,
-            }))
-          );
-        }
-
-        setTimeZoneOptions(getTimeZones().map((z) => ({ label: z.label, value: z.value })));
       } catch (error) {
-        console.error('Failed to load filter options', error);
+        console.error('Failed to load connector options', error);
       }
     };
 
-    loadOptions();
+    loadConnectorOptions();
   }, []);
 
   // Client-side filtering

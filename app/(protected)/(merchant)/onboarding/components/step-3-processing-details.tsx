@@ -34,8 +34,7 @@ import {
   getOnboardingStatus,
 } from '@/lib/services/user/onboarding';
 import { getIndustries, Industry } from '@/lib/services/admin/industries';
-import { getCountries, Country } from '@/lib/services/admin/countries';
-import { getCurrencies, Currency } from '@/lib/services/admin/currency';
+import { useCurrencies } from '@/lib/hooks/use-currencies';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 
@@ -74,13 +73,12 @@ export function Step3ProcessingDetails({
 }: Step3ProcessingDetailsProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [industries, setIndustries] = useState<Industry[]>([]);
-  const [countries, setCountries] = useState<Country[]>([]);
-  const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  const { currencies, loading: loadingCurrencies } = useCurrencies();
 
   const onboarding = onboardingData?.onboarding;
 
-  // Fetch industries, countries, and currencies
+  // Fetch industries data (countries/currencies handled via shared hooks)
   useEffect(() => {
     const fetchData = async () => {
       setLoadingData(true);
@@ -93,45 +91,11 @@ export function Step3ProcessingDetails({
           sortOrder: 'ASC',
         });
 
-        // Fetch countries
-        const countriesResponse = await getCountries({
-          page: 1,
-          limit: 1000,
-          sortBy: 'countryName',
-          sortOrder: 'ASC',
-        });
-
-        // Fetch currencies
-        const currenciesResponse = await getCurrencies({
-          page: 1,
-          limit: 1000,
-          sortBy: 'code',
-          sortOrder: 'ASC',
-        });
-
         handleApiResponse(industriesResponse, {
           onSuccess: (data) => {
             // New format: { success: true, data: [...] }
             if (data && data.success && data.data) {
               setIndustries(Array.isArray(data.data) ? data.data : []);
-            }
-          },
-        });
-
-        handleApiResponse(countriesResponse, {
-          onSuccess: (data) => {
-            // New format: { success: true, data: [...] }
-            if (data && data.success && data.data) {
-              setCountries(Array.isArray(data.data) ? data.data : []);
-            }
-          },
-        });
-
-        handleApiResponse(currenciesResponse, {
-          onSuccess: (data) => {
-            // New format: { success: true, data: [...] }
-            if (data && data.success && data.data) {
-              setCurrencies(Array.isArray(data.data) ? data.data : []);
             }
           },
         });
@@ -349,7 +313,7 @@ export function Step3ProcessingDetails({
               required
               options={currencyOptions}
               placeholder="Select currencies"
-              disabled={loadingData}
+              disabled={loadingData || loadingCurrencies}
             />
 
             {/* Monthly Volume */}
@@ -405,7 +369,12 @@ export function Step3ProcessingDetails({
                 <ChevronLeft className="h-4 w-4" />
                 Back
               </Button>
-              <Button type="submit" variant="primary" disabled={isSubmitting || loadingData} className="gap-2">
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={isSubmitting || loadingData || loadingCurrencies}
+                className="gap-2"
+              >
                 {isSubmitting ? 'Saving...' : 'Continue'}
                 <ChevronRight className="h-4 w-4" />
               </Button>

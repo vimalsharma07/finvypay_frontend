@@ -50,8 +50,8 @@ import {
 import { generateFilterQuery } from '@/lib/helpers';
 import { getMerchants } from '@/lib/services/admin/users';
 import { getUserConnectors } from '@/lib/services/admin/connectors';
-import { getCurrencies } from '@/lib/services/admin/currency';
-import { getCountries } from '@/lib/services/admin/countries';
+import { useCurrencies } from '@/lib/hooks/use-currencies';
+import { useCountries } from '@/lib/hooks/use-countries';
 import { getTimeZones } from '@/i18n/timezones';
 
 export default function SandboxTransactionsPage() {
@@ -67,9 +67,28 @@ export default function SandboxTransactionsPage() {
   const [userOptions, setUserOptions] = useState<Option[]>([]);
   const [companyOptions, setCompanyOptions] = useState<Option[]>([]);
   const [connectorOptions, setConnectorOptions] = useState<Option[]>([]);
-  const [currencyOptions, setCurrencyOptions] = useState<Option[]>([]);
-  const [countryOptions, setCountryOptions] = useState<Option[]>([]);
-  const [timeZoneOptions, setTimeZoneOptions] = useState<Option[]>([]);
+  const { currencies } = useCurrencies();
+  const { countries } = useCountries();
+  const currencyOptions = useMemo(
+    () =>
+      currencies.map((currency) => ({
+        label: currency.code,
+        value: currency.code,
+      })),
+    [currencies]
+  );
+  const countryOptions = useMemo(
+    () =>
+      countries.map((country) => ({
+        label: country.countryName,
+        value: country.isoTwo,
+      })),
+    [countries]
+  );
+  const timeZoneOptions = useMemo(
+    () => getTimeZones().map((z) => ({ label: z.label, value: z.value })),
+    []
+  );
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -130,11 +149,9 @@ export default function SandboxTransactionsPage() {
   useEffect(() => {
     const loadOptions = async () => {
       try {
-        const [usersRes, connectorsRes, currenciesRes, countriesRes] = await Promise.all([
+        const [usersRes, connectorsRes] = await Promise.all([
           getMerchants({ page: 1, limit: 1000 }),
           getUserConnectors(),
-          getCurrencies({ page: 1, limit: 1000 }),
-          getCountries({ page: 1, limit: 1000 }),
         ]);
 
         if (usersRes.data && Array.isArray(usersRes.data.data)) {
@@ -161,26 +178,6 @@ export default function SandboxTransactionsPage() {
             }))
           );
         }
-
-        if (currenciesRes.data?.data?.data) {
-          setCurrencyOptions(
-            currenciesRes.data.data.data.map((c) => ({
-              label: c.code,
-              value: c.code,
-            }))
-          );
-        }
-
-        if (countriesRes.data?.data?.data) {
-          setCountryOptions(
-            countriesRes.data.data.data.map((c) => ({
-              label: c.countryName,
-              value: c.isoTwo,
-            }))
-          );
-        }
-
-        setTimeZoneOptions(getTimeZones().map((z) => ({ label: z.label, value: z.value })));
       } catch (error) {
         console.error('Failed to load filter options', error);
       }

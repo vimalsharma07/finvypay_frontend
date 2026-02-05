@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { SearchSelect } from '@/components/ui/molecules/SearchSelect';
-import { getCountries, Country } from '@/lib/services/admin/countries';
-import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import { useCountries } from '@/lib/hooks/use-countries';
+import { Country } from '@/lib/services/admin/countries';
 import type { Option } from '@/lib/types/common-types';
 
 function getFlagEmoji(country: Country): string {
@@ -27,40 +27,7 @@ export function CountryCodeSelector({
   disabled = false,
   showPhoneCode = true, // Default to showing phone code for backward compatibility
 }: CountryCodeSelectorProps) {
-  const [countries, setCountries] = useState<Country[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchCountries = async () => {
-      setLoading(true);
-      try {
-        const response = await getCountries({
-          page: 1,
-          limit: 1000,
-          sortBy: 'countryName',
-          sortOrder: 'ASC',
-        });
-
-        handleApiResponse(response, {
-          onSuccess: (data) => {
-            // New format: { success: true, data: [...] }
-            if (data && data.success && data.data) {
-              setCountries(Array.isArray(data.data) ? data.data : []);
-            }
-          },
-          onError: (errorMessage) => {
-            console.error('Failed to fetch countries:', errorMessage);
-          },
-        });
-      } catch (error) {
-        console.error('Countries fetch error:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCountries();
-  }, []);
+  const { countries, loading } = useCountries();
 
   // Convert countries to SearchSelect options format with flag emoji
   // Format: "(+93) Afghanistan 🇦🇫" - (code) country name flag
