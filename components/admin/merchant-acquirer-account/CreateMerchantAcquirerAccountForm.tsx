@@ -694,64 +694,66 @@ export function CreateMerchantAcquirerAccountForm({
                   {fields.map((field, index) => (
                     <div
                       key={field.id}
-                      className="grid grid-cols-4 gap-4 items-start"
+                      className={`grid gap-4 items-end ${index === 0 && fields.length === 1 ? 'grid-cols-3' : 'grid-cols-[1fr_1fr_1fr_auto]'}`}
                     >
-                      <div>
+                      <div className="space-y-1">
                         <Label className="text-sm font-semibold">Min.</Label>
                         <Input
                           type="text"
                           {...register(`mdr.${index}.min`)}
-                          className="mt-1 block w-full rounded-md"
+                          className="block w-full rounded-md"
                         />
                         {errors.mdr &&
                           Array.isArray(errors.mdr) &&
                           errors.mdr[index]?.min && (
-                            <p className="mt-1 text-xs text-red-500">
+                            <p className="text-xs text-red-500">
                               {errors.mdr[index]?.min?.message}
                             </p>
                           )}
                       </div>
-                      <div>
+                      <div className="space-y-1">
                         <Label className="text-sm font-semibold">Max.</Label>
                         <Input
                           type="text"
                           {...register(`mdr.${index}.max`)}
-                          className="mt-1 block w-full rounded-md"
+                          className="block w-full rounded-md"
                         />
                         {errors.mdr &&
                           Array.isArray(errors.mdr) &&
                           errors.mdr[index]?.max && (
-                            <p className="mt-1 text-xs text-red-500">
+                            <p className="text-xs text-red-500">
                               {errors.mdr[index]?.max?.message}
                             </p>
                           )}
                       </div>
-                      <div>
+                      <div className="space-y-1">
                         <Label className="text-sm font-semibold">Rate %</Label>
                         <Input
                           type="text"
                           {...register(`mdr.${index}.rate`)}
-                          className="mt-1 block w-full rounded-md"
+                          className="block w-full rounded-md"
                         />
                         {errors.mdr &&
                           Array.isArray(errors.mdr) &&
                           errors.mdr[index]?.rate && (
-                            <p className="mt-1 text-xs text-red-500">
+                            <p className="text-xs text-red-500">
                               {errors.mdr[index]?.rate?.message}
                             </p>
                           )}
                       </div>
-                      <div className="flex items-end">
+                      {index > 0 ? (
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
                           onClick={() => remove(index)}
-                          disabled={fields.length === 1}
+                          className="shrink-0 self-end"
                         >
                           Remove
                         </Button>
-                      </div>
+                      ) : (
+                        <span className="w-[72px] shrink-0" aria-hidden />
+                      )}
                     </div>
                   ))}
                 </div>
