@@ -46,6 +46,7 @@ import {
 } from '@/lib/services/admin/connectors';
 import { softDeleteMerchantAcquirerAccount, rejectMerchantAcquirerAccount, RejectMerchantAcquirerAccountPayload, togglePrimaryMerchantAcquirerAccount, toggleActiveMerchantAcquirerAccount } from '@/lib/services/admin/acquirer-accounts';
 import { getMerchantProfiles, MerchantProfile } from '@/lib/services/admin/merchant-acquirer-account';
+import { getUserById, User } from '@/lib/services/admin/users';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { SearchSelect } from '@/components/ui/molecules/SearchSelect';
 import type { Option } from '@/lib/types/common-types';
@@ -77,6 +78,23 @@ export default function AcquirerAccountsPage() {
   const [loadingProfiles, setLoadingProfiles] = useState(false);
   const [togglingPrimary, setTogglingPrimary] = useState<Record<string, boolean>>({});
   const [togglingActive, setTogglingActive] = useState<Record<string, boolean>>({});
+  const [merchantUser, setMerchantUser] = useState<User | null>(null);
+
+  // Fetch merchant user (name, email)
+  useEffect(() => {
+    const fetchMerchantUser = async () => {
+      if (!userId) return;
+      try {
+        const response = await getUserById(userId);
+        handleApiResponse<User>(response, {
+          onSuccess: (data) => setMerchantUser(data),
+        });
+      } catch {
+        // Non-blocking; page still works without merchant name
+      }
+    };
+    fetchMerchantUser();
+  }, [userId]);
 
   // Fetch connectors
   const fetchConnectors = async (
@@ -484,10 +502,10 @@ export default function AcquirerAccountsPage() {
             icon={Cpu}
           />
           <ToolbarActions>
-            <Link href={`/admin/user-management/merchant/${userId}`}>
+            <Link href="/admin/user-management/merchant">
               <Button variant="outline">
                 <ArrowLeft className="h-4 w-4 mr-1" />
-                Back to Merchant
+                Back to Merchant List
               </Button>
             </Link>
             <Button
@@ -503,7 +521,11 @@ export default function AcquirerAccountsPage() {
         </Toolbar>
       </Container>
       <Container>
-        <div className="mb-6 flex justify-end">
+        <div className="mb-6 flex flex-wrap items-end justify-start gap-6">
+          <div>
+            <p className="font-medium text-foreground">{merchantUser?.name ?? '-'}</p>
+            <p className="text-sm text-muted-foreground">{merchantUser?.email ?? '-'}</p>
+          </div>
           <div className="space-y-2 w-full md:w-80 flex-shrink-0">
             <Label htmlFor="profile-select">Merchant Profile</Label>
             <div className="relative">
