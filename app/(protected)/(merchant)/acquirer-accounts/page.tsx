@@ -146,8 +146,6 @@ export default function UserAcquirerAccountsPage() {
       { key: 'name', label: 'Name', sortable: false },
       { key: 'terminalId', label: 'Terminal ID', sortable: false },
       { key: 'industryName', label: 'Industry', sortable: false },
-      { key: 'acquirer', label: 'Acquirer', sortable: false },
-      { key: 'acquirerAccount', label: 'Connector', sortable: false },
       { key: 'currency', label: 'Currency', sortable: false },
       { key: 'isPrimary', label: 'Primary', sortable: false },
       { key: 'isActive', label: 'Status', sortable: false },
@@ -163,10 +161,6 @@ export default function UserAcquirerAccountsPage() {
         return <div className="text-sm">{item.terminalId || '-'}</div>;
       case 'industryName':
         return <div className="text-sm">{(item as any).industryName || '-'}</div>;
-      case 'acquirer':
-        return <div className="text-sm">{item.acquirer?.name || 'Not Assigned'}</div>;
-      case 'acquirerAccount':
-        return <div className="text-sm">{item.acquirerAccount?.name || 'Not Assigned'}</div>;
       case 'currency':
         return <Badge variant="secondary">{(item as any).currency || 'N/A'}</Badge>;
       case 'isPrimary':
