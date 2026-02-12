@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
-import { Pencil, Eye, Plug, Route, Trash2, Percent, Shield, Lock } from 'lucide-react';
+import { Pencil, Eye, Plug, Route, Trash2, Percent, Shield, Lock, Copy } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   getUsers,
@@ -64,6 +64,7 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
   const [loadingSecurity, setLoadingSecurity] = useState(false);
   const [updatingBinEnabled, setUpdatingBinEnabled] = useState(false);
   const [binEnabled, setBinEnabled] = useState<boolean | null>(null);
+  const [otpCopied, setOtpCopied] = useState(false);
   
   // Use external filters prop
   const filters = externalFilters;
@@ -343,6 +344,19 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
     fetchSecuritySettings(user.id);
   };
 
+  const handleCopyOtp = async () => {
+    if (!userForSecurity?.otp) return;
+    try {
+      await navigator.clipboard.writeText(userForSecurity.otp);
+      setOtpCopied(true);
+      toast.success('OTP copied to clipboard');
+      setTimeout(() => setOtpCopied(false), 2000);
+    } catch (error) {
+      console.error('Copy OTP error:', error);
+      toast.error('Failed to copy OTP');
+    }
+  };
+
   // Handle BIN enabled toggle
   const handleBinEnabledToggle = async (checked: boolean) => {
     if (!userForSecurity) return;
@@ -510,32 +524,79 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
 
       {/* Security Dialog */}
       <Dialog open={securityDialogOpen} onOpenChange={setSecurityDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Security</DialogTitle>
-            <DialogDescription>
-              Security settings for {userForSecurity?.name || 'merchant'}
-            </DialogDescription>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader className="pb-2">
+            <div className="flex items-start gap-3">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Lock className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <DialogTitle className="text-base font-semibold">
+                  Security settings
+                </DialogTitle>
+                <DialogDescription className="text-sm">
+                  Manage BIN checks and view the latest OTP for{' '}
+                  <span className="font-medium text-foreground">
+                    {userForSecurity?.name || 'this merchant'}
+                  </span>
+                  .
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-6 py-2">
             {loadingSecurity ? (
               <div className="flex items-center justify-center py-8">
                 <div className="text-sm text-muted-foreground">Loading security settings...</div>
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="bin-enabled"
-                  checked={binEnabled ?? false}
-                  disabled={updatingBinEnabled}
-                  onCheckedChange={handleBinEnabledToggle}
-                />
-                <Label
-                  htmlFor="bin-enabled"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Bin Check
-                </Label>
+              <div className="space-y-4">
+                <section className="rounded-lg border bg-muted/40 px-4 py-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="bin-enabled"
+                          checked={binEnabled ?? false}
+                          disabled={updatingBinEnabled}
+                          onCheckedChange={handleBinEnabledToggle}
+                        />
+                        <Label
+                          htmlFor="bin-enabled"
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          Bin Check
+                        </Label>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        When enabled, card BINs will be validated for this merchant before routing.
+                      </p>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="rounded-lg border bg-background px-4 py-3 shadow-[0_1px_0_rgba(15,23,42,0.04)]">
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Latest OTP
+                      </p>
+                      <p className="mt-1 text-sm font-mono text-foreground">
+                        {userForSecurity?.otp ? userForSecurity.otp : 'No OTP available'}
+                      </p>
+                    </div>
+                    {userForSecurity?.otp && (
+                      <button
+                        type="button"
+                        onClick={handleCopyOtp}
+                        className="inline-flex items-center gap-1 rounded-md border bg-muted px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted/80"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                        {otpCopied ? 'Copied' : 'Copy'}
+                      </button>
+                    )}
+                  </div>
+                </section>
               </div>
             )}
           </div>
