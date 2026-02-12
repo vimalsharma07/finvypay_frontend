@@ -27,6 +27,7 @@ export interface Merchant {
   avatarUrl: string | null;
   isProfileCompleted: boolean;
   isKycCompleted: boolean | null;
+  otp?: string | null;
   profileStep: number;
   entityType: string | null;
   createdAt: string;
