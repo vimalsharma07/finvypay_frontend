@@ -10,7 +10,7 @@ export const CONNECTOR_TYPES = {
 
 export const CONNECTOR_RATES_TYPE = {
   NORMAL: 'NORMAL',
-  TIERED: 'TIERED',
+  TIERED: 'DYNAMIC',
 } as const;
 
 export const CRYPTO_FLOW = {
