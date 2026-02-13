@@ -1,15 +1,18 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
-import { Pencil, Eye, Plug, Route, Trash2, Percent, Shield, Lock, Copy } from 'lucide-react';
+import { Fragment, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Pencil, Eye, Plug, Route, Trash2, Percent, Shield, Lock, Copy, LogIn } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   getUsers,
   deleteUser,
   disableUser2Fa,
   updateUser,
+  impersonateUser,
   User,
   UserListResponse,
+  ImpersonateAuthResponse,
 } from '@/lib/services/admin/users';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
@@ -37,6 +40,7 @@ interface MerchantUsersPageContentProps {
 }
 
 export function MerchantUsersPageContent({ filters: externalFilters = {} }: MerchantUsersPageContentProps) {
+  const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<UserListResponse['meta'] | null>(null);
@@ -65,7 +69,9 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
   const [updatingBinEnabled, setUpdatingBinEnabled] = useState(false);
   const [binEnabled, setBinEnabled] = useState<boolean | null>(null);
   const [otpCopied, setOtpCopied] = useState(false);
-  
+  const [impersonatingUserId, setImpersonatingUserId] = useState<string | null>(null);
+  const impersonateWindowCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   // Use external filters prop
   const filters = externalFilters;
 
@@ -141,6 +147,16 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
     fetchUsers(page, limit, sortBy, sortOrder, filters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit, sortBy, sortOrder, externalFilters]);
+
+  // Clean up impersonation window check on unmount
+  useEffect(() => {
+    return () => {
+      if (impersonateWindowCheckRef.current) {
+        clearInterval(impersonateWindowCheckRef.current);
+        impersonateWindowCheckRef.current = null;
+      }
+    };
+  }, []);
 
   // Handle page change
   const handlePageChange = (pageIndex: number) => {
@@ -357,6 +373,86 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
     }
   };
 
+  // Handle impersonation (login as this user)
+  const handleImpersonateUser = async (user: User) => {
+    setImpersonatingUserId(user.id);
+    try {
+      const response = await impersonateUser(user.id);
+
+      handleApiResponse<ImpersonateAuthResponse>(response, {
+        onSuccess: (data) => {
+          if (!data?.success || !data.data?.accessToken) {
+            toast.error('Impersonation response did not include an access token');
+            return;
+          }
+
+          // Normalize access & refresh tokens from different possible formats
+          let accessTokenValue: string;
+          let refreshTokenValue: string | undefined;
+
+          const accessTokenData = data.data.accessToken;
+
+          if (typeof accessTokenData === 'object' && accessTokenData !== null) {
+            accessTokenValue =
+              (accessTokenData as any).accessToken ||
+              (accessTokenData as any).token ||
+              String(accessTokenData);
+            refreshTokenValue =
+              (accessTokenData as any).refreshToken ?? data.data.refreshToken;
+          } else {
+            accessTokenValue = accessTokenData as string;
+            refreshTokenValue = data.data.refreshToken;
+          }
+
+          const params = new URLSearchParams({
+            accessToken: accessTokenValue,
+          });
+          if (refreshTokenValue) {
+            params.set('refreshToken', refreshTokenValue);
+          }
+
+          const targetName = user.name || user.email || `ID ${user.id}`;
+          toast.success(`Opening impersonated session for ${targetName} in a new window`);
+
+          // Open merchant session in a new window so the admin session stays intact
+          if (typeof window !== 'undefined') {
+            if (impersonateWindowCheckRef.current) {
+              clearInterval(impersonateWindowCheckRef.current);
+              impersonateWindowCheckRef.current = null;
+            }
+            const impersonateWindow = window.open(
+              `/impersonate?${params.toString()}`,
+              '_blank',
+              'noopener,noreferrer,width=1280,height=800,resizable,scrollbars'
+            );
+            if (impersonateWindow) {
+              impersonateWindowCheckRef.current = setInterval(() => {
+                if (impersonateWindow.closed) {
+                  if (impersonateWindowCheckRef.current) {
+                    clearInterval(impersonateWindowCheckRef.current);
+                    impersonateWindowCheckRef.current = null;
+                  }
+                  toast.info('Impersonate session closed. You are still logged in as admin.');
+                }
+              }, 300);
+            }
+          }
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to impersonate user');
+        },
+        onUnauthorized: () => {
+          toast.error('Unauthorized. Please check your authentication.');
+        },
+      });
+    } catch (error) {
+      console.error('Impersonation error:', error);
+      toast.error('Unexpected error while trying to impersonate user');
+    } finally {
+      setImpersonatingUserId(null);
+    }
+  };
+
   // Handle BIN enabled toggle
   const handleBinEnabledToggle = async (checked: boolean) => {
     if (!userForSecurity) return;
@@ -430,6 +526,16 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
       icon: Lock,
       onClick: (row: User) => {
         handleSecurityClick(row);
+      },
+      separator: true,
+    },
+    {
+      label: 'Login this user',
+      icon: LogIn,
+      onClick: (row: User) => {
+        if (!impersonatingUserId) {
+          void handleImpersonateUser(row);
+        }
       },
       separator: true,
     },

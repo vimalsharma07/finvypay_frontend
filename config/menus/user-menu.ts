@@ -113,14 +113,9 @@ const BASE_USER_MENU: MenuConfig = [
     permissionModule: 'Reports',
     requirePermission: false,
     children: [
-      { title: 'Overall Turnover', path: '/reports/merchant-turnover', submodule: 'Reports' },
-      { title: 'My Transaction', path: '/reports/merchant-transaction', submodule: 'Reports' },
-      { title: 'MID Transaction', path: '/reports/mid-transaction', submodule: 'Reports' },
+      { title: 'Overall Turnover Report', path: '/reports/merchant-turnover', submodule: 'Reports' },
       { title: 'Transaction Summary', path: '/reports/transaction-summary', submodule: 'Reports' },
-      { title: 'Transaction Response', path: '/reports/merchant-transaction-response', submodule: 'Reports' },
-      { title: 'Country-wise Transaction', path: '/reports/country-wise-transaction', submodule: 'Reports' },
       { title: 'BIN-wise Transaction', path: '/reports/bin-wise-transaction', submodule: 'Reports' },
-      { title: 'Provider Rates', path: '/reports/provider-rates', submodule: 'Reports' },
     ],
   },
   {

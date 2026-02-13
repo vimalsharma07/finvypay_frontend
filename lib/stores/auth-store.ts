@@ -138,6 +138,25 @@ const initialState = {
   isPermissionsLoading: false,
 };
 
+// Storage that uses sessionStorage in impersonation window so admin tab's localStorage is never overwritten
+const AUTH_STORAGE_KEY = 'auth-storage';
+const IMPERSONATION_KEY = 'impersonation';
+
+function getAuthStorage() {
+  if (typeof window === 'undefined') return localStorage;
+  return sessionStorage.getItem(IMPERSONATION_KEY) === '1' ? sessionStorage : localStorage;
+}
+
+const authPersistStorage = {
+  getItem: (name: string) => getAuthStorage().getItem(name),
+  setItem: (name: string, value: string) => {
+    getAuthStorage().setItem(name, value);
+  },
+  removeItem: (name: string) => {
+    getAuthStorage().removeItem(name);
+  },
+} as const;
+
 // Create the store with persistence
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -235,16 +254,14 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: 'auth-storage', // localStorage key
-      // Only persist user and permissions, not loading states
-      partialize: (state) => ({
+      name: AUTH_STORAGE_KEY,
+      storage: authPersistStorage as any,
+      partialize: (state): Partial<AuthState> => ({
         user: state.user,
         permissions: state.permissions,
-      }),
-      // Rebuild structure on rehydration (in case structure changes)
+      }) as any,
       onRehydrateStorage: () => (state) => {
         if (state?.permissions?.all) {
-          // Rebuild optimized structure from flat array
           state.permissions = buildPermissionStructure(state.permissions.all);
         }
       },
