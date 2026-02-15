@@ -107,7 +107,7 @@ export function RichTextEditor({
     if (!editor) return;
     const current = editor.getHTML();
     const next = getHtml(value);
-    if (next !== current) editor.commands.setContent(next, false);
+    if (next !== current) editor.commands.setContent(next, { emitUpdate: false });
   }, [editor, value]);
 
   React.useEffect(() => {
