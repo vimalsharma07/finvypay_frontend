@@ -9,10 +9,11 @@ import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
 
 // Log entry types
-export type LogType = 
+export type LogType =
   | 'txn_logs'
   | 'webhook_logs'
   | 'api_logs'
+  | 'provider_logs'
   | 'dispute_logs'
   | 'app_error_logs'
   | 'job_error_logs'
