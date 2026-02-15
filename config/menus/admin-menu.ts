@@ -143,6 +143,7 @@ const BASE_ADMIN_MENU: MenuConfig = [
       { title: 'Transaction Logs', path: '/admin/log/txn_logs', submodule: 'Transaction Logs' },
       { title: 'Webhook Logs', path: '/admin/log/webhook_logs', submodule: 'Webhook Logs' },
       { title: 'API Logs', path: '/admin/log/api_logs', submodule: 'API Logs' },
+      { title: 'Provider Logs', path: '/admin/log/provider_logs', submodule: 'Provider Logs' },
       { title: 'Dispute Logs', path: '/admin/log/dispute_logs', submodule: 'Dispute Logs' },
       { title: 'App Error Logs', path: '/admin/log/app_error_logs', submodule: 'App Error Logs' },
       { title: 'Job Error Logs', path: '/admin/log/job_error_logs', submodule: 'Job Error Logs' },
