@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import Link from 'next/link';
-import { Moon } from 'lucide-react';
+import { Moon, User } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { performLogout } from '@/lib/utils/logout';
 import { useTheme } from 'next-themes';
@@ -15,9 +15,21 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Switch } from '@/components/ui/switch';
 
+const APP_ROLES = ['admin', 'merchant', 'affiliate'];
+
+function getRoleSlug(role: unknown): string | null {
+  if (typeof role === 'string') return role;
+  if (role && typeof role === 'object' && 'slug' in role && typeof (role as { slug: string }).slug === 'string') return (role as { slug: string }).slug;
+  if (role && typeof role === 'object' && 'name' in role && typeof (role as { name: string }).name === 'string') return (role as { name: string }).name;
+  if (role && typeof role === 'object' && 'type' in role && typeof (role as { type: string }).type === 'string') return (role as { type: string }).type;
+  return null;
+}
+
 export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
+  const roleSlug = getRoleSlug(user?.role);
+  const showProBadge = roleSlug ? !APP_ROLES.includes(roleSlug.toLowerCase()) : true;
 
   const handleThemeToggle = (checked: boolean) => {
     setTheme(checked ? 'dark' : 'light');
@@ -48,9 +60,11 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
               </Link>
             </div>
           </div>
-          <Badge variant="primary" appearance="light" size="sm">
-            Pro
-          </Badge>
+          {showProBadge && (
+            <Badge variant="primary" appearance="light" size="sm">
+              Pro
+            </Badge>
+          )}
         </div>
 
         <DropdownMenuSeparator />
@@ -59,8 +73,9 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
         <DropdownMenuItem asChild>
           <Link
             href="/profile"
-            className="flex items-center gap-1"
+            className="flex items-center gap-2"
           >
+            <User className="size-4" />
             Profile
           </Link>
         </DropdownMenuItem>

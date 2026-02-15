@@ -204,7 +204,7 @@ export function Header() {
         )}
 
         {/* HeaderTopbar */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-3 shrink-0 overflow-visible">
           {/* Search Dialog - Mobile (on right side) */}
           {mobileMode && (
             <SearchDialog
@@ -239,13 +239,13 @@ export function Header() {
                     variant="ghost"
                     mode="icon"
                     shape="circle"
-                    className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary relative"
+                    className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary relative overflow-visible"
                   >
                     <Bell className="size-4.5!" />
                     {adminUnreadCount > 0 && (
                       <Badge
                         variant="destructive"
-                        className="absolute -top-1 -right-1 size-5 flex items-center justify-center p-0 text-[10px] font-bold"
+                        className="absolute -top-0.5 -right-0.5 min-w-5 h-5 flex items-center justify-center px-1 py-0 text-[10px] font-bold z-10 pointer-events-none"
                       >
                         {adminUnreadCount > 99 ? '99+' : adminUnreadCount}
                       </Badge>
@@ -271,13 +271,13 @@ export function Header() {
                     variant="ghost"
                     mode="icon"
                     shape="circle"
-                    className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary relative"
+                    className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary relative overflow-visible"
                   >
                     <Bell className="size-4.5!" />
                     {merchantUnreadCount > 0 && (
                       <Badge
                         variant="destructive"
-                        className="absolute -top-1 -right-1 size-5 flex items-center justify-center p-0 text-[10px] font-bold"
+                        className="absolute -top-0.5 -right-0.5 min-w-5 h-5 flex items-center justify-center px-1 py-0 text-[10px] font-bold z-10 pointer-events-none"
                       >
                         {merchantUnreadCount > 99 ? '99+' : merchantUnreadCount}
                       </Badge>

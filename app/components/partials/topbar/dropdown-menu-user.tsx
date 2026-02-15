@@ -35,10 +35,22 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Switch } from '@/components/ui/switch';
 
+const APP_ROLES = ['admin', 'merchant', 'affiliate'];
+
+function getRoleSlug(role: unknown): string | null {
+  if (typeof role === 'string') return role;
+  if (role && typeof role === 'object' && 'slug' in role && typeof (role as { slug: string }).slug === 'string') return (role as { slug: string }).slug;
+  if (role && typeof role === 'object' && 'name' in role && typeof (role as { name: string }).name === 'string') return (role as { name: string }).name;
+  if (role && typeof role === 'object' && 'type' in role && typeof (role as { type: string }).type === 'string') return (role as { type: string }).type;
+  return null;
+}
+
 export function DropdownMenuUser({ trigger }: { trigger: ReactNode }) {
   const { user } = useAuth();
   const { changeLanguage, language } = useLanguage();
   const { theme, setTheme } = useTheme();
+  const roleSlug = getRoleSlug(user?.role);
+  const showProBadge = roleSlug ? !APP_ROLES.includes(roleSlug.toLowerCase()) : true;
 
   const handleLanguage = (lang: Language) => {
     changeLanguage(lang.code);
@@ -77,9 +89,11 @@ export function DropdownMenuUser({ trigger }: { trigger: ReactNode }) {
               </Link>
             </div>
           </div>
-          <Badge variant="primary" appearance="light" size="sm">
-            Pro
-          </Badge>
+          {showProBadge && (
+            <Badge variant="primary" appearance="light" size="sm">
+              Pro
+            </Badge>
+          )}
         </div>
 
         <DropdownMenuSeparator />
