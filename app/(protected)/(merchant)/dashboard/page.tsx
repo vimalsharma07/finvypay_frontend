@@ -1,33 +1,46 @@
 'use client';
 
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import { LayoutGrid } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
+  ToolbarActions,
 } from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
-import { UserDashboardContent } from './components';
+import { UserDashboardContent, DashboardDateFilter } from './components';
+import { DateRange } from 'react-day-picker';
+import { startOfYear, endOfYear } from 'date-fns';
+
+const defaultDateRange = (): DateRange => {
+  const today = new Date();
+  return { from: startOfYear(today), to: endOfYear(today) };
+};
 
 /**
  * User Dashboard Page
- * 
+ *
  * Dedicated dashboard for user role with user-specific statistics and quick actions
  */
 export default function UserDashboardPage() {
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(defaultDateRange);
+
   return (
     <Fragment>
       <Container>
         <Toolbar>
-            <ToolbarHeading
-              title="Dashboard"
-              description="Overview of your payment transactions, account activity, revenue analytics, and key performance metrics"
-              icon={LayoutGrid}
-            />
+          <ToolbarHeading
+            title="Dashboard"
+            description="Overview of your payment transactions, account activity, revenue analytics, and key performance metrics"
+            icon={LayoutGrid}
+          />
+          <ToolbarActions>
+            <DashboardDateFilter dateRange={dateRange} onDateRangeChange={setDateRange} />
+          </ToolbarActions>
         </Toolbar>
       </Container>
       <Container>
-        <UserDashboardContent />
+        <UserDashboardContent dateRange={dateRange} />
       </Container>
     </Fragment>
   );

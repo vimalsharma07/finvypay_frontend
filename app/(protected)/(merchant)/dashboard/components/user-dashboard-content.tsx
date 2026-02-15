@@ -6,10 +6,10 @@ import { DateRange } from 'react-day-picker';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
+import {
   TrendingDown,
-  DollarSign, 
-  CreditCard, 
+  DollarSign,
+  CreditCard,
   AlertCircle,
   CheckCircle2,
   Clock,
@@ -20,15 +20,8 @@ import {
   BarChart3,
   XCircle,
   RefreshCw,
-  CalendarDays,
   Loader2,
 } from 'lucide-react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
 import { getOnboardingStatus, OnboardingData } from '@/lib/services/user/onboarding';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { OnboardingCard } from './onboarding-card';
@@ -47,12 +40,16 @@ import { getMerchantDashboard, type MerchantDashboardData } from '@/lib/services
 import { toast } from 'sonner';
 import { DynamicApexChart } from '@/components/charts/dynamic-apex-chart';
 
+export interface UserDashboardContentProps {
+  dateRange?: DateRange | undefined;
+}
+
 /**
  * User Dashboard Content Component
- * 
+ *
  * Displays user-specific dashboard widgets and statistics
  */
-export function UserDashboardContent() {
+export function UserDashboardContent({ dateRange: dateRangeProp }: UserDashboardContentProps = {}) {
   const { user } = useAuth();
   const [onboardingData, setOnboardingData] = useState<OnboardingData | null>(null);
   const [onboardingLoading, setOnboardingLoading] = useState(true);
@@ -63,16 +60,11 @@ export function UserDashboardContent() {
   const [showTwoFaBanner, setShowTwoFaBanner] = useState(false);
   const [dashboardData, setDashboardData] = useState<MerchantDashboardData | null>(null);
   const [dashboardLoading, setDashboardLoading] = useState(true);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
-    // Default to current year
+  const [internalDateRange] = useState<DateRange | undefined>(() => {
     const today = new Date();
-    return {
-      from: startOfYear(today),
-      to: endOfYear(today),
-    };
+    return { from: startOfYear(today), to: endOfYear(today) };
   });
-  const [tempDateRange, setTempDateRange] = useState<DateRange | undefined>(dateRange);
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const dateRange = dateRangeProp ?? internalDateRange;
 
   // Get full user data from localStorage (includes isTwoFaEnabled)
   // Zustand store only has id, email, role, so we need to check localStorage directly
@@ -214,26 +206,6 @@ export function UserDashboardContent() {
       fetchDashboard(startDate, endDate);
     }
   }, [dateRange]);
-
-  const handleDateRangeApply = () => {
-    if (tempDateRange?.from && tempDateRange?.to) {
-      setDateRange(tempDateRange);
-      setIsDatePickerOpen(false);
-    } else {
-      toast.error('Please select both start and end dates');
-    }
-  };
-
-  const handleDateRangeReset = () => {
-    const today = new Date();
-    const resetRange = {
-      from: startOfYear(today),
-      to: endOfYear(today),
-    };
-    setTempDateRange(resetRange);
-    setDateRange(resetRange);
-    setIsDatePickerOpen(false);
-  };
 
   // Use API data or fallback to defaults
   const stats = useMemo(() => {
@@ -458,46 +430,6 @@ export function UserDashboardContent() {
           />
         </div>
       )}
-
-      {/* Date Range Filter */}
-      <div className="flex items-center justify-end mt-5 lg:mt-7.5">
-        <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="w-[280px] justify-start text-left font-normal">
-              <CalendarDays className="mr-2 h-4 w-4" />
-              {dateRange?.from ? (
-                dateRange.to ? (
-                  <>
-                    {format(dateRange.from, 'LLL dd, y')} - {format(dateRange.to, 'LLL dd, y')}
-                  </>
-                ) : (
-                  format(dateRange.from, 'LLL dd, y')
-                )
-              ) : (
-                <span>Pick a date range</span>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="end">
-            <Calendar
-              initialFocus
-              mode="range"
-              defaultMonth={tempDateRange?.from}
-              selected={tempDateRange}
-              onSelect={setTempDateRange}
-              numberOfMonths={1}
-            />
-            <div className="flex items-center justify-end gap-2 border-t p-3">
-              <Button variant="outline" size="sm" onClick={handleDateRangeReset}>
-                Reset
-              </Button>
-              <Button size="sm" onClick={handleDateRangeApply}>
-                Apply
-              </Button>
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
 
       {/* Stats Grid */}
       {dashboardLoading ? (

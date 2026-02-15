@@ -18,29 +18,29 @@ export function SidebarHeader() {
   };
 
   return (
-    <div className="sidebar-header hidden lg:flex items-center relative justify-between px-3 lg:px-6 shrink-0">
-      <Link href="/">
-        <div className="dark:hidden">
+    <div className="sidebar-header hidden lg:flex items-center justify-center relative shrink-0 min-h-0 overflow-hidden mt-5 py-5 px-5 lg:px-4">
+      <Link href="/" className="flex items-center justify-center min-w-0 shrink flex-1">
+        <div className="dark:hidden flex items-center justify-center">
           <img
             src={toAbsoluteUrl('/media/app/finvypay.png')}
-            className="default-logo h-[182px] max-w-none"
+            className="default-logo max-h-[30px] h-auto w-auto object-contain object-center"
             alt="Default Logo"
           />
           <img
             src={toAbsoluteUrl('/media/app/mini-logo.svg')}
-            className="small-logo h-[22px] max-w-none"
+            className="small-logo max-h-[30px] h-auto w-auto object-contain object-center"
             alt="Mini Logo"
           />
         </div>
-        <div className="hidden dark:block">
+        <div className="hidden dark:flex items-center justify-center">
           <img
             src={toAbsoluteUrl('/media/app/finvypay.png')}
-            className="default-logo h-[86px] max-w-none"
+            className="default-logo max-h-[30px] h-auto w-auto object-contain object-center"
             alt="Default Dark Logo"
           />
           <img
             src={toAbsoluteUrl('/media/app/mini-logo.svg')}
-            className="small-logo h-[22px] max-w-none"
+            className="small-logo max-h-[30px] h-auto w-auto object-contain object-center"
             alt="Mini Logo"
           />
         </div>
