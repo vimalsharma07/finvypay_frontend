@@ -1,16 +1,13 @@
 'use client';
 
-import { Fragment, useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Pencil, Eye, Trash2, LogIn } from 'lucide-react';
+import { Fragment, useEffect, useState } from 'react';
+import { Pencil, Eye, Trash2 } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   getUsers,
   deleteUser,
-  impersonateUser,
   User,
   UserListResponse,
-  ImpersonateAuthResponse,
 } from '@/lib/services/admin/users';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
@@ -27,7 +24,6 @@ interface AffiliateUsersPageContentProps {
 }
 
 export function AffiliateUsersPageContent({ filters: externalFilters = {} }: AffiliateUsersPageContentProps) {
-  const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<UserListResponse['meta'] | null>(null);
@@ -43,8 +39,7 @@ export function AffiliateUsersPageContent({ filters: externalFilters = {} }: Aff
   // Delete dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
-  const impersonateWindowCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
+  
   // Use external filters prop
   const filters = externalFilters;
 
@@ -119,16 +114,6 @@ export function AffiliateUsersPageContent({ filters: externalFilters = {} }: Aff
     fetchUsers(page, limit, sortBy, sortOrder, filters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit, sortBy, sortOrder, externalFilters]);
-
-  // Clean up impersonation window check on unmount
-  useEffect(() => {
-    return () => {
-      if (impersonateWindowCheckRef.current) {
-        clearInterval(impersonateWindowCheckRef.current);
-        impersonateWindowCheckRef.current = null;
-      }
-    };
-  }, []);
 
   // Handle page change
   const handlePageChange = (pageIndex: number) => {
@@ -220,87 +205,6 @@ export function AffiliateUsersPageContent({ filters: externalFilters = {} }: Aff
     }
   };
 
-  // Impersonation state
-  const [impersonatingUserId, setImpersonatingUserId] = useState<string | null>(null);
-
-  // Handle impersonation (login as this affiliate)
-  const handleImpersonateUser = async (user: User) => {
-    setImpersonatingUserId(user.id);
-    try {
-      const response = await impersonateUser(user.id);
-
-      handleApiResponse<ImpersonateAuthResponse>(response, {
-        onSuccess: (data) => {
-          if (!data?.success || !data.data?.accessToken) {
-            toast.error('Impersonation response did not include an access token');
-            return;
-          }
-
-          let accessTokenValue: string;
-          let refreshTokenValue: string | undefined;
-
-          const accessTokenData = data.data.accessToken;
-
-          if (typeof accessTokenData === 'object' && accessTokenData !== null) {
-            accessTokenValue =
-              (accessTokenData as any).accessToken ||
-              (accessTokenData as any).token ||
-              String(accessTokenData);
-            refreshTokenValue =
-              (accessTokenData as any).refreshToken ?? data.data.refreshToken;
-          } else {
-            accessTokenValue = accessTokenData as string;
-            refreshTokenValue = data.data.refreshToken;
-          }
-
-          const params = new URLSearchParams({
-            accessToken: accessTokenValue,
-          });
-          if (refreshTokenValue) {
-            params.set('refreshToken', refreshTokenValue);
-          }
-
-          const targetName = user.name || user.email || `ID ${user.id}`;
-          toast.success(`Opening impersonated session for ${targetName} in a new window`);
-
-          if (typeof window !== 'undefined') {
-            if (impersonateWindowCheckRef.current) {
-              clearInterval(impersonateWindowCheckRef.current);
-              impersonateWindowCheckRef.current = null;
-            }
-            const impersonateWindow = window.open(
-              `/impersonate?${params.toString()}`,
-              '_blank',
-              'noopener,noreferrer,width=1280,height=800,resizable,scrollbars'
-            );
-            if (impersonateWindow) {
-              impersonateWindowCheckRef.current = setInterval(() => {
-                if (impersonateWindow.closed) {
-                  if (impersonateWindowCheckRef.current) {
-                    clearInterval(impersonateWindowCheckRef.current);
-                    impersonateWindowCheckRef.current = null;
-                  }
-                  toast.info('Impersonate session closed. You are still logged in as admin.');
-                }
-              }, 300);
-            }
-          }
-        },
-        onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to impersonate user');
-        },
-        onUnauthorized: () => {
-          toast.error('Unauthorized. Please check your authentication.');
-        },
-      });
-    } catch (error) {
-      console.error('Impersonation error:', error);
-      toast.error('Unexpected error while trying to impersonate user');
-    } finally {
-      setImpersonatingUserId(null);
-    }
-  };
-
   // Define actions
   const actions: TableAction<User>[] = [
     {
@@ -312,16 +216,6 @@ export function AffiliateUsersPageContent({ filters: externalFilters = {} }: Aff
       label: 'View',
       icon: Eye,
       route: (row: User) => `/admin/user-management/affiliate/${row.id}`,
-    },
-    {
-      label: 'Login this user',
-      icon: LogIn,
-      onClick: (row: User) => {
-        if (!impersonatingUserId) {
-          void handleImpersonateUser(row);
-        }
-      },
-      separator: true,
     },
     {
       label: 'Delete',

@@ -8,7 +8,6 @@ const AUTH_KEYS = {
   TOKEN_EXPIRY: 'token_expiry',
   USER: 'user',
   USER_PROFILE: 'user_profile',
-  IMPERSONATION: 'impersonation',
 } as const;
 
 /**
@@ -41,9 +40,11 @@ export function storeAuthData(data: {
       sessionStorage.setItem(AUTH_KEYS.TOKEN_EXPIRY, data.tokenExpiry);
     }
 
-    // Store user data: use sessionStorage when impersonating so admin tab is not affected
+    // Store user data in localStorage (persists across page reloads)
     if (data.userData) {
-      const isImpersonation = sessionStorage.getItem(AUTH_KEYS.IMPERSONATION) === '1';
+      localStorage.setItem(AUTH_KEYS.USER, JSON.stringify(data.userData));
+      
+      // Store user profile (without sensitive data)
       const userProfile = {
         id: data.userData.id,
         email: data.userData.email,
@@ -57,42 +58,10 @@ export function storeAuthData(data: {
         createdAt: data.userData.createdAt,
         updatedAt: data.userData.updatedAt,
       };
-      if (isImpersonation) {
-        sessionStorage.setItem(AUTH_KEYS.USER, JSON.stringify(data.userData));
-        sessionStorage.setItem(AUTH_KEYS.USER_PROFILE, JSON.stringify(userProfile));
-      } else {
-        localStorage.setItem(AUTH_KEYS.USER, JSON.stringify(data.userData));
-        localStorage.setItem(AUTH_KEYS.USER_PROFILE, JSON.stringify(userProfile));
-      }
+      localStorage.setItem(AUTH_KEYS.USER_PROFILE, JSON.stringify(userProfile));
     }
   } catch (error) {
     console.error('Failed to store auth data:', error);
-  }
-}
-
-/**
- * Set user (and profile) in sessionStorage only. Used by impersonation window so admin tab is not affected.
- */
-export function setSessionUserOnly(userData: any): void {
-  if (typeof window === 'undefined') return;
-  try {
-    sessionStorage.setItem(AUTH_KEYS.USER, JSON.stringify(userData));
-    const userProfile = {
-      id: userData.id,
-      email: userData.email,
-      name: userData.name,
-      role: userData.role,
-      profileImage: userData.profileImage,
-      avatarUrl: userData.avatarUrl,
-      isProfileCompleted: userData.isProfileCompleted,
-      isKycCompleted: userData.isKycCompleted,
-      emailVerifiedAt: userData.emailVerifiedAt,
-      createdAt: userData.createdAt,
-      updatedAt: userData.updatedAt,
-    };
-    sessionStorage.setItem(AUTH_KEYS.USER_PROFILE, JSON.stringify(userProfile));
-  } catch (error) {
-    console.error('Failed to set session user:', error);
   }
 }
 
@@ -129,33 +98,31 @@ export function getTokenExpiry(): string | null {
 }
 
 /**
- * Get user data.
- * In impersonation window we read from sessionStorage first so the admin tab's localStorage is never used.
+ * Get user data
  */
 export function getUser(): any | null {
   if (typeof window === 'undefined') return null;
   
   try {
-    // Impersonation: user lives only in this tab's sessionStorage; never touch localStorage
-    const sessionUser = sessionStorage.getItem(AUTH_KEYS.USER);
-    if (sessionUser) {
-      return JSON.parse(sessionUser);
-    }
-
     // First, try to get from Zustand store (single source of truth)
+    // This ensures consistency with the Zustand store
     try {
+      // Dynamic import to avoid circular dependencies
       const { useAuthStore } = require('@/lib/stores/auth-store');
       const state = useAuthStore.getState();
       if (state?.user) {
         return state.user;
       }
     } catch (error) {
+      // Zustand store not available or error accessing it
+      // Fall through to localStorage fallback
       if (process.env.NODE_ENV === 'development') {
         console.debug('[getUser] Zustand store not available, using localStorage fallback');
       }
     }
     
     // Fallback to localStorage (for backward compatibility)
+    // Note: This should match where storeAuthData stores the user (line 45)
     const user = localStorage.getItem(AUTH_KEYS.USER);
     return user ? JSON.parse(user) : null;
   } catch (error) {
@@ -167,14 +134,11 @@ export function getUser(): any | null {
 }
 
 /**
- * Get user profile (without sensitive data).
- * Prefer sessionStorage when in impersonation so admin tab is not affected.
+ * Get user profile (without sensitive data)
  */
 export function getUserProfile(): any | null {
   if (typeof window === 'undefined') return null;
   try {
-    const sessionProfile = sessionStorage.getItem(AUTH_KEYS.USER_PROFILE);
-    if (sessionProfile) return JSON.parse(sessionProfile);
     const profile = localStorage.getItem(AUTH_KEYS.USER_PROFILE);
     return profile ? JSON.parse(profile) : null;
   } catch {
@@ -206,20 +170,19 @@ export function isTokenExpired(): boolean {
 
 /**
  * Clear all authentication data
- * Clears tokens and, when impersonating, session-only user; otherwise clears localStorage user.
+ * Clears tokens from sessionStorage and user data from localStorage
  */
 export function clearAuthData(): void {
   if (typeof window === 'undefined') return;
   
   try {
+    // Clear tokens from sessionStorage
     sessionStorage.removeItem(AUTH_KEYS.ACCESS_TOKEN);
     sessionStorage.removeItem(AUTH_KEYS.REFRESH_TOKEN);
     sessionStorage.removeItem(AUTH_KEYS.SESSION_ID);
     sessionStorage.removeItem(AUTH_KEYS.TOKEN_EXPIRY);
-    sessionStorage.removeItem(AUTH_KEYS.USER);
-    sessionStorage.removeItem(AUTH_KEYS.USER_PROFILE);
-    sessionStorage.removeItem(AUTH_KEYS.IMPERSONATION);
-
+    
+    // Clear user data from localStorage
     localStorage.removeItem(AUTH_KEYS.USER);
     localStorage.removeItem(AUTH_KEYS.USER_PROFILE);
   } catch (error) {

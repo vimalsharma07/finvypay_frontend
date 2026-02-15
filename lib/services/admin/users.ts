@@ -1,6 +1,6 @@
 /**
  * Merchants API Service
- *
+ * 
  * Centralized API calls for merchant management
  * All merchant-related API calls should be defined here
  */
@@ -101,21 +101,6 @@ export interface MerchantListResponse {
 // Backward compatibility
 export interface UserListData extends MerchantListData {}
 export interface UserListResponse extends MerchantListResponse {}
-
-/**
- * Impersonation auth response (mirrors auth service structure)
- */
-export interface ImpersonateAuthResponse {
-  success: boolean;
-  data?: {
-    accessToken: string | { accessToken: string; refreshToken?: string };
-    refreshToken?: string;
-    sessionId?: string;
-    tokenExpiry?: string;
-    [key: string]: any;
-  };
-  message?: string;
-}
 
 /**
  * 1. Get all merchants (with pagination and filters)
@@ -402,44 +387,6 @@ export async function searchUsers(
   params?: Omit<UserListParams, 'search'>
 ): Promise<ApiResponse<UserListResponse>> {
   return searchMerchants(query, params as Omit<MerchantListParams, 'search'>) as Promise<ApiResponse<UserListResponse>>;
-}
-
-/**
- * Impersonate a user (admin logs in as merchant/affiliate)
- * 
- * NOTE: This does NOT mutate auth state.
- * The caller (usually an admin UI) is responsible for deciding
- * where and how to use the returned access/refresh tokens.
- */
-export async function impersonateUser(
-  id: string
-): Promise<ApiResponse<ImpersonateAuthResponse>> {
-  try {
-    const data = await http.post(
-      adminRoutes.users.impersonate(id),
-      {},
-      {
-        auth: true,
-      }
-    ) as ImpersonateAuthResponse;
-
-    return {
-      status: 200,
-      data,
-    };
-  } catch (error) {
-    if (error instanceof ApiError) {
-      return {
-        status: error.status,
-        error: error.message,
-        data: error.data,
-      };
-    }
-    return {
-      status: 0,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
-  }
 }
 
 /**

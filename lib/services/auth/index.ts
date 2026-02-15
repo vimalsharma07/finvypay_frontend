@@ -6,7 +6,7 @@
  */
 
 import { http, ApiError } from '../../api';
-import { storeAuthData, setSessionUserOnly } from '../../auth-storage';
+import { storeAuthData } from '../../auth-storage';
 import { authRoutes } from '../../routes/auth-routes';
 import type { ApiResponse } from '../types';
 
@@ -895,49 +895,34 @@ export async function getProfile(): Promise<ApiResponse<any>> {
     // Handle nested response structure: {success: true, data: {...}} or direct user object
     const userData = response?.data || response;
     
-    // Update storage and Zustand store. In impersonation use sessionStorage only so admin tab is not affected.
+    // Update localStorage and Zustand store with the profile data
     if (typeof window !== 'undefined' && userData) {
       try {
-        const isImpersonation = sessionStorage.getItem('impersonation') === '1';
-        const storedUser = isImpersonation
-          ? sessionStorage.getItem('user')
-          : localStorage.getItem('user');
+        const storedUser = localStorage.getItem('user');
         let updatedUser;
         if (storedUser) {
           const existingUserData = JSON.parse(storedUser);
+          // Merge the profile data with existing user data
           updatedUser = { ...existingUserData, ...userData };
-        } else {
-          updatedUser = userData;
-        }
-        if (isImpersonation) {
-          setSessionUserOnly(updatedUser);
-        } else {
           localStorage.setItem('user', JSON.stringify(updatedUser));
-          const userProfile = {
-            id: updatedUser.id,
-            email: updatedUser.email,
-            name: updatedUser.name,
-            role: updatedUser.role,
-            profileImage: updatedUser.profileImage,
-            avatarUrl: updatedUser.avatarUrl,
-            isProfileCompleted: updatedUser.isProfileCompleted,
-            isKycCompleted: updatedUser.isKycCompleted,
-            emailVerifiedAt: updatedUser.emailVerifiedAt,
-            createdAt: updatedUser.createdAt,
-            updatedAt: updatedUser.updatedAt,
-          };
-          localStorage.setItem('user_profile', JSON.stringify(userProfile));
+        } else {
+          // If no user data exists, store the profile directly
+          updatedUser = userData;
+          localStorage.setItem('user', JSON.stringify(userData));
         }
+        
+        // Also update Zustand store if available
         try {
           const { useAuthStore } = require('@/lib/stores/auth-store');
           useAuthStore.getState().setUser(updatedUser);
         } catch (storeError) {
+          // Zustand store not available, that's okay
           if (process.env.NODE_ENV === 'development') {
             console.debug('Zustand store not available for profile update');
           }
         }
       } catch (err) {
-        console.error('Failed to update user data:', err);
+        console.error('Failed to update user data in localStorage:', err);
       }
     }
 

@@ -1,10 +1,8 @@
 /**
  * Merchant Report Types Configuration
  *
- * Only these three reports are shown to merchants:
- * - Overall turnover report
- * - Transaction summary
- * - BIN-wise transaction
+ * Centralized config for all merchant report types. Same report types as Admin,
+ * using /user/report API with different type parameter.
  *
  * - slug: URL path segment (e.g., /reports/merchant-turnover)
  * - apiType: API type parameter sent to backend
@@ -23,8 +21,20 @@ export const MERCHANT_REPORT_TYPES: MerchantReportTypeConfig[] = [
   {
     slug: 'merchant-turnover',
     apiType: 'merchant-turnover-report',
-    title: 'Overall Turnover Report',
+    title: 'Merchant Turnover',
     description: 'View merchant turnover reports with transaction statistics, success rates, and performance metrics',
+  },
+  {
+    slug: 'merchant-transaction',
+    apiType: 'merchant-transaction-report',
+    title: 'Merchant Transaction',
+    description: 'View merchant transaction reports with detailed transaction data',
+  },
+  {
+    slug: 'mid-transaction',
+    apiType: 'mid-transaction-report',
+    title: 'MID Transaction',
+    description: 'View MID (Merchant ID) transaction reports',
   },
   {
     slug: 'transaction-summary',
@@ -33,10 +43,28 @@ export const MERCHANT_REPORT_TYPES: MerchantReportTypeConfig[] = [
     description: 'View transaction summary reports with aggregated metrics',
   },
   {
+    slug: 'merchant-transaction-response',
+    apiType: 'merchant-transaction-response',
+    title: 'Merchant Transaction Response',
+    description: 'View merchant transaction response reports',
+  },
+  {
+    slug: 'country-wise-transaction',
+    apiType: 'country-wise-transaction-report',
+    title: 'Country-wise Transaction',
+    description: 'View country-wise transaction distribution and metrics',
+  },
+  {
     slug: 'bin-wise-transaction',
     apiType: 'bin-wise-transaction-report',
     title: 'BIN-wise Transaction',
     description: 'View BIN (Bank Identification Number) wise transaction reports',
+  },
+  {
+    slug: 'provider-rates',
+    apiType: 'provider-rates',
+    title: 'Provider Rates',
+    description: 'View provider rates and fee structures',
   },
 ];
 
