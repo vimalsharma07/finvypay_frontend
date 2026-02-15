@@ -36,10 +36,6 @@ export function AgreementsPageContent() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [agreementToDelete, setAgreementToDelete] = useState<Agreement | null>(null);
 
-  // Edit dialog state (for future implementation)
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [agreementToEdit, setAgreementToEdit] = useState<Agreement | null>(null);
-
   // Fetch agreements function
   const fetchAgreements = async (
     pageNum: number,
@@ -111,12 +107,6 @@ export function AgreementsPageContent() {
     setPage(1); // Reset to first page when sorting changes
   };
 
-  // Handle edit
-  const handleEditAgreement = (agreement: Agreement) => {
-    setAgreementToEdit(agreement);
-    setEditDialogOpen(true);
-  };
-
   // Delete agreement handler
   const handleDeleteAgreement = async (agreementId: string) => {
     try {
@@ -176,9 +166,7 @@ export function AgreementsPageContent() {
     {
       label: 'Edit',
       icon: Pencil,
-      onClick: (row: Agreement) => {
-        handleEditAgreement(row);
-      },
+      route: (row) => `/admin/master/agreements/${row.id}/edit`,
     },
     {
       label: 'Delete',
