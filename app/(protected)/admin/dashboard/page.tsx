@@ -1,14 +1,18 @@
 'use client';
 
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import dynamicImport from 'next/dynamic';
 import { LayoutGrid } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
+  ToolbarActions,
 } from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { PageSkeleton } from '@/components/ui/skeletons';
+import { DashboardDateFilter } from '../../(merchant)/dashboard/components/dashboard-date-filter';
+import { DateRange } from 'react-day-picker';
+import { startOfYear, endOfYear } from 'date-fns';
 
 // Dynamically import to avoid SSR issues with client-only code
 const AdminDashboardContent = dynamicImport(
@@ -19,12 +23,19 @@ const AdminDashboardContent = dynamicImport(
   }
 );
 
+const defaultDateRange = (): DateRange => {
+  const today = new Date();
+  return { from: startOfYear(today), to: endOfYear(today) };
+};
+
 /**
  * Admin Dashboard Page
- * 
+ *
  * Displays admin-specific dashboard with user counters, transaction statistics, and connector summaries
  */
 export default function AdminDashboardPage() {
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(defaultDateRange);
+
   return (
     <Fragment>
       <Container>
@@ -34,10 +45,13 @@ export default function AdminDashboardPage() {
             description="Overview of system statistics, transaction analytics, user activity, and key performance metrics for administrative monitoring"
             icon={LayoutGrid}
           />
+          <ToolbarActions>
+            <DashboardDateFilter dateRange={dateRange} onDateRangeChange={setDateRange} />
+          </ToolbarActions>
         </Toolbar>
       </Container>
       <Container>
-        <AdminDashboardContent />
+        <AdminDashboardContent dateRange={dateRange} />
       </Container>
     </Fragment>
   );

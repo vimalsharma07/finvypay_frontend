@@ -13,35 +13,27 @@ import {
   RefreshCw,
   CreditCard,
   Loader2,
-  CalendarDays,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
 import { DynamicApexChart } from '@/components/charts/dynamic-apex-chart';
 import { getAdminDashboard, type DashboardData } from '@/lib/services/admin/dashboard';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-export function AdminDashboardContent() {
+export interface AdminDashboardContentProps {
+  dateRange?: DateRange | undefined;
+}
+
+export function AdminDashboardContent({ dateRange: dateRangeProp }: AdminDashboardContentProps = {}) {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
-    // Default to current year
+  const [internalDateRange] = useState<DateRange | undefined>(() => {
     const today = new Date();
-    return {
-      from: startOfYear(today),
-      to: endOfYear(today),
-    };
+    return { from: startOfYear(today), to: endOfYear(today) };
   });
-  const [tempDateRange, setTempDateRange] = useState<DateRange | undefined>(dateRange);
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const dateRange = dateRangeProp ?? internalDateRange;
 
   // Format date for API (YYYY-MM-DD)
   const formatDateForAPI = (date: Date | undefined): string => {
@@ -85,26 +77,6 @@ export function AdminDashboardContent() {
       fetchDashboard(startDate, endDate);
     }
   }, [dateRange]);
-
-  const handleDateRangeApply = () => {
-    if (tempDateRange?.from && tempDateRange?.to) {
-      setDateRange(tempDateRange);
-      setIsDatePickerOpen(false);
-    } else {
-      toast.error('Please select both start and end dates');
-    }
-  };
-
-  const handleDateRangeReset = () => {
-    const today = new Date();
-    const resetRange = {
-      from: startOfYear(today),
-      to: endOfYear(today),
-    };
-    setTempDateRange(resetRange);
-    setDateRange(resetRange);
-    setIsDatePickerOpen(false);
-  };
 
   // Chart data for transaction statistics
   const transactionChartData = useMemo(() => {
@@ -197,46 +169,6 @@ export function AdminDashboardContent() {
 
   return (
     <div className="space-y-6">
-      {/* Date Range Filter */}
-      <div className="flex items-center justify-end">
-        <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="w-[280px] justify-start text-left font-normal">
-              <CalendarDays className="mr-2 h-4 w-4" />
-              {dateRange?.from ? (
-                dateRange.to ? (
-                  <>
-                    {format(dateRange.from, 'LLL dd, y')} - {format(dateRange.to, 'LLL dd, y')}
-                  </>
-                ) : (
-                  format(dateRange.from, 'LLL dd, y')
-                )
-              ) : (
-                <span>Pick a date range</span>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="end">
-            <Calendar
-              initialFocus
-              mode="range"
-              defaultMonth={tempDateRange?.from}
-              selected={tempDateRange}
-              onSelect={setTempDateRange}
-              numberOfMonths={1}
-            />
-            <div className="flex items-center justify-end gap-2 border-t p-3">
-              <Button variant="outline" size="sm" onClick={handleDateRangeReset}>
-                Reset
-              </Button>
-              <Button size="sm" onClick={handleDateRangeApply}>
-                Apply
-              </Button>
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
-
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
