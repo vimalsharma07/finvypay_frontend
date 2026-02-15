@@ -3,6 +3,11 @@ import { z } from 'zod';
 const AGREEMENT_TYPES = ['user', 'merchant'] as const;
 const AGREEMENT_STATUSES = ['active', 'inactive'] as const;
 
+/** Strip HTML tags for length validation (rich text content) */
+function plainTextLength(html: string): number {
+  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().length;
+}
+
 /**
  * Validation schema for creating a new agreement
  */
@@ -20,7 +25,9 @@ export const createAgreementSchema = z.object({
   desc: z
     .string()
     .min(1, { message: 'Description is required.' })
-    .min(10, { message: 'Description must be at least 10 characters.' }),
+    .refine((val) => plainTextLength(val) >= 10, {
+      message: 'Description must be at least 10 characters (excluding formatting).',
+    }),
   status: z
     .string()
     .min(1, { message: 'Status is required.' })
@@ -42,7 +49,9 @@ export const updateAgreementSchema = z.object({
   desc: z
     .string()
     .min(1, { message: 'Description is required.' })
-    .min(10, { message: 'Description must be at least 10 characters.' }),
+    .refine((val) => plainTextLength(val) >= 10, {
+      message: 'Description must be at least 10 characters (excluding formatting).',
+    }),
   status: z
     .string()
     .min(1, { message: 'Status is required.' })
