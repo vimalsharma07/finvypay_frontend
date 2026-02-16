@@ -3,7 +3,7 @@
  */
 
 export const CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'AED', 'SGD'];
-export const PROVIDER_TYPES = ['CARD', 'BANK', 'WALLET', 'CRYPTO'];
+export const PROVIDER_TYPES = ['CARD', 'CRYPTO'];
 export const FLOW_TYPES = ['PAYIN', 'PAYOUT', 'REFUND'];
 export const TIMEZONES = [
   'UTC',

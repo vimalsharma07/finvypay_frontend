@@ -12,7 +12,6 @@ import type { ApiResponse } from '../types';
 export type LogType =
   | 'txn_logs'
   | 'webhook_logs'
-  | 'api_logs'
   | 'provider_logs'
   | 'dispute_logs'
   | 'app_error_logs'

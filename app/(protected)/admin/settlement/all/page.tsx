@@ -1,6 +1,8 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { DateRange } from 'react-day-picker';
+import { format } from 'date-fns';
 import { FileText } from 'lucide-react';
 import {
   Toolbar,
@@ -8,6 +10,7 @@ import {
   ToolbarActions,
 } from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
+import { DateRangeFilter } from '@/components/ui/date-range-filter';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
   getSettlements,
@@ -43,7 +46,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import {
   DropdownMenu,
@@ -52,7 +54,6 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
 import { MoreHorizontal, Eye, Download, ExternalLink, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
@@ -72,10 +73,8 @@ export default function AdminSettlementsPage() {
   // Generate settlement form
   const [merchantOptions, setMerchantOptions] = useState<{ label: string; value: string }[]>([]);
   const [generateUserId, setGenerateUserId] = useState<string>('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [disputesStartDate, setDisputesStartDate] = useState('');
-  const [disputesEndDate, setDisputesEndDate] = useState('');
+  const [settlementDateRange, setSettlementDateRange] = useState<DateRange | undefined>(undefined);
+  const [chargebacksDateRange, setChargebacksDateRange] = useState<DateRange | undefined>(undefined);
   const [generateType, setGenerateType] = useState<string>('NORMAL');
   const [generating, setGenerating] = useState(false);
 
@@ -86,6 +85,7 @@ export default function AdminSettlementsPage() {
     pageIndex: 0,
     pageSize: 10,
   });
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
   const formatCurrency = (amount: string | null | undefined) => {
     if (!amount) return '—';
@@ -108,6 +108,11 @@ export default function AdminSettlementsPage() {
     return isPaid ? 'success' : 'warning';
   };
 
+  const formatDateForAPI = (date: Date | undefined): string => {
+    if (!date) return '';
+    return format(date, 'yyyy-MM-dd');
+  };
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -115,12 +120,17 @@ export default function AdminSettlementsPage() {
       const limit = pagination.pageSize;
       const sortBy = sorting[0]?.id || 'createdAt';
       const sortOrder = sorting[0]?.desc ? 'DESC' : 'ASC';
+      const hasDateFilter = dateRange?.from && dateRange?.to;
+      const startDate = hasDateFilter ? formatDateForAPI(dateRange.from) : undefined;
+      const endDate = hasDateFilter ? formatDateForAPI(dateRange.to) : undefined;
 
       const response = await getSettlements({
         page,
         limit,
         sortBy,
         sortOrder,
+        startDate,
+        endDate,
       });
       handleApiResponse(response, {
         onSuccess: (res) => {
@@ -142,7 +152,7 @@ export default function AdminSettlementsPage() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.pageIndex, pagination.pageSize, sorting]);
+  }, [pagination.pageIndex, pagination.pageSize, sorting, dateRange]);
 
   useEffect(() => {
     fetchData();
@@ -172,14 +182,18 @@ export default function AdminSettlementsPage() {
       toast.error('Please select a merchant');
       return;
     }
-    if (!startDate || !endDate) {
+    if (!settlementDateRange?.from || !settlementDateRange?.to) {
       toast.error('Please select start and end dates');
       return;
     }
-    if (!disputesStartDate || !disputesEndDate) {
+    if (!chargebacksDateRange?.from || !chargebacksDateRange?.to) {
       toast.error('Please select chargebacks start and end dates');
       return;
     }
+    const startDate = formatDateForAPI(settlementDateRange.from);
+    const endDate = formatDateForAPI(settlementDateRange.to);
+    const disputesStartDate = formatDateForAPI(chargebacksDateRange.from);
+    const disputesEndDate = formatDateForAPI(chargebacksDateRange.to);
     setGenerating(true);
     try {
       const payload: GenerateSettlementPayload = {
@@ -490,7 +504,15 @@ export default function AdminSettlementsPage() {
             icon={FileText}
           />
           <ToolbarActions>
-            {/* reserved for filters or bulk actions */}
+            <DateRangeFilter
+              value={dateRange}
+              onChange={(range) => {
+                setDateRange(range);
+                setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+              }}
+              placeholder="Select from and to date"
+              numberOfMonths={2}
+            />
           </ToolbarActions>
         </Toolbar>
       </Container>
@@ -522,51 +544,29 @@ export default function AdminSettlementsPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="start-date">
-                  Start Date <span className="text-destructive">*</span>
+                <Label>
+                  Start Date – End Date <span className="text-destructive">*</span>
                 </Label>
-                <Input
-                  id="start-date"
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+                <DateRangeFilter
+                  value={settlementDateRange}
+                  onChange={setSettlementDateRange}
+                  placeholder="dd/mm/yyyy – dd/mm/yyyy"
+                  numberOfMonths={2}
                   disabled={generating}
+                  triggerClassName="min-w-[260px] w-full"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="end-date">
-                  End Date <span className="text-destructive">*</span>
+                <Label>
+                  Chargebacks Start – End Date <span className="text-destructive">*</span>
                 </Label>
-                <Input
-                  id="end-date"
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
+                <DateRangeFilter
+                  value={chargebacksDateRange}
+                  onChange={setChargebacksDateRange}
+                  placeholder="dd/mm/yyyy – dd/mm/yyyy"
+                  numberOfMonths={2}
                   disabled={generating}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="disputes-start">
-                  Chargebacks Start Date <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="disputes-start"
-                  type="date"
-                  value={disputesStartDate}
-                  onChange={(e) => setDisputesStartDate(e.target.value)}
-                  disabled={generating}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="disputes-end">
-                  Chargebacks End Date <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="disputes-end"
-                  type="date"
-                  value={disputesEndDate}
-                  onChange={(e) => setDisputesEndDate(e.target.value)}
-                  disabled={generating}
+                  triggerClassName="min-w-[260px] w-full"
                 />
               </div>
               <div className="space-y-2">

@@ -10,7 +10,7 @@ import {
 } from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { PageSkeleton } from '@/components/ui/skeletons';
-import { DashboardDateFilter } from '../../(merchant)/dashboard/components/dashboard-date-filter';
+import { DateRangeFilter } from '@/components/ui/date-range-filter';
 import { DateRange } from 'react-day-picker';
 import { startOfYear, endOfYear } from 'date-fns';
 
@@ -46,7 +46,13 @@ export default function AdminDashboardPage() {
             icon={LayoutGrid}
           />
           <ToolbarActions>
-            <DashboardDateFilter dateRange={dateRange} onDateRangeChange={setDateRange} />
+            <DateRangeFilter
+              value={dateRange}
+              onChange={setDateRange}
+              defaultRange={defaultDateRange()}
+              placeholder="Select from and to date"
+              numberOfMonths={2}
+            />
           </ToolbarActions>
         </Toolbar>
       </Container>

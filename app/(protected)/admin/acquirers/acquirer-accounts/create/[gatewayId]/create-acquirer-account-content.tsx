@@ -246,7 +246,7 @@ export function CreateAcquirerAccountContent() {
       handleApiResponse(response, {
         onSuccess: () => {
           toast.success('Acquirer account created successfully!');
-          router.push('/admin/acquirers/acquirer-accounts');
+          router.push(`/admin/acquirers/acquirer-accounts?acquirerId=${acquirerId}`);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to create acquirer account');

@@ -7,7 +7,8 @@ import { getReport } from '@/lib/services/user/reports';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { normalizeReportData } from '@/lib/utils/report-utils';
 import { toast } from 'sonner';
-import { ReportFilters, defaultDateRange } from './report-filters';
+import { DateRangeFilter } from '@/components/ui/date-range-filter';
+import { defaultDateRange } from './report-filters';
 import { ReportDataTable } from './report-data-table';
 import type { MerchantReportTypeConfig } from '@/config/reports/merchant-report-types';
 
@@ -18,7 +19,7 @@ export interface ReportContentProps {
 export function ReportContent({ config }: ReportContentProps) {
   const [data, setData] = useState<unknown>(null);
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(defaultDateRange);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => defaultDateRange());
 
   const formatDateForAPI = (date: Date | undefined): string => {
     if (!date) return '';
@@ -61,12 +62,21 @@ export function ReportContent({ config }: ReportContentProps) {
   }, [dateRange?.from, dateRange?.to, config.apiType]);
 
   return (
-    <div className="space-y-6">
-      <ReportFilters dateRange={dateRange} onDateRangeChange={setDateRange} />
+    <div className="space-y-6 min-w-0">
+      <div className="flex items-center justify-end">
+        <DateRangeFilter
+          value={dateRange}
+          onChange={setDateRange}
+          defaultRange={defaultDateRange()}
+          placeholder="Select from and to date"
+          numberOfMonths={2}
+        />
+      </div>
       <ReportDataTable
         data={data}
         loading={loading}
         title={config.title}
+        reportSlug={config.slug}
         emptyMessage="No data available for the selected date range"
       />
     </div>

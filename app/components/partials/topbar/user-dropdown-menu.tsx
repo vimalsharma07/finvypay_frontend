@@ -25,11 +25,18 @@ function getRoleSlug(role: unknown): string | null {
   return null;
 }
 
+function isAdminRole(roleSlug: string | null): boolean {
+  if (!roleSlug) return false;
+  const r = roleSlug.toLowerCase();
+  return r === 'admin' || r === 'super_admin';
+}
+
 export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
   const roleSlug = getRoleSlug(user?.role);
   const showProBadge = roleSlug ? !APP_ROLES.includes(roleSlug.toLowerCase()) : true;
+  const profileHref = isAdminRole(roleSlug) ? '/admin/profile' : '/profile';
 
   const handleThemeToggle = (checked: boolean) => {
     setTheme(checked ? 'dark' : 'light');
@@ -47,7 +54,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
             </div>
             <div className="flex flex-col">
               <Link
-                href="/profile"
+                href={profileHref}
                 className="text-sm text-mono hover:text-primary font-semibold"
               >
                 {user?.name || ''}
@@ -72,7 +79,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
         {/* Simplified Menu */}
         <DropdownMenuItem asChild>
           <Link
-            href="/profile"
+            href={profileHref}
             className="flex items-center gap-2"
           >
             <User className="size-4" />

@@ -167,6 +167,8 @@ export interface SettlementListParams {
   limit?: number;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface SettlementListMeta {
@@ -585,8 +587,8 @@ export async function getSettlementCalculations(
     const query: Record<string, string | number | undefined> = {};
     if (params?.page != null) query.page = params.page;
     if (params?.limit != null) query.limit = params.limit;
-    if (params?.startDate) query.start_date = params.startDate;
-    if (params?.endDate) query.end_date = params.endDate;
+    if (params?.startDate) query.startDate = params.startDate;
+    if (params?.endDate) query.endDate = params.endDate;
 
     const data = await http.get(adminRoutes.settlements.calculationsList, {
       query,
