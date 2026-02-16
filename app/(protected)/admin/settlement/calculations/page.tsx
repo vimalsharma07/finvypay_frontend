@@ -2,20 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DateRange } from 'react-day-picker';
-import { Calculator, CalendarDays } from 'lucide-react';
+import { Calculator } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
   ToolbarActions,
 } from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
-import { Button } from '@/components/ui/button';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
+import { DateRangeFilter } from '@/components/ui/date-range-filter';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
   getSettlementCalculations,
@@ -56,8 +50,6 @@ export default function AdminSettlementCalculationsPage() {
     pageSize: 10,
   });
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
-  const [tempDateRange, setTempDateRange] = useState<DateRange | undefined>(undefined);
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   const formatDateForAPI = (date: Date | undefined): string => {
     if (!date) return '';
@@ -243,20 +235,8 @@ export default function AdminSettlementCalculationsPage() {
     []
   );
 
-  const handleDateRangeApply = () => {
-    if (tempDateRange?.from && tempDateRange?.to) {
-      setDateRange(tempDateRange);
-      setIsDatePickerOpen(false);
-      setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-    } else {
-      toast.error('Please select both start and end dates');
-    }
-  };
-
-  const handleDateRangeClear = () => {
-    setTempDateRange(undefined);
-    setDateRange(undefined);
-    setIsDatePickerOpen(false);
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    setDateRange(range);
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   };
 
@@ -285,42 +265,12 @@ export default function AdminSettlementCalculationsPage() {
             icon={Calculator}
           />
           <ToolbarActions>
-            <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-[280px] justify-start text-left font-normal">
-                  <CalendarDays className="mr-2 h-4 w-4" />
-                  {dateRange?.from ? (
-                    dateRange.to ? (
-                      <>
-                        {format(dateRange.from, 'LLL dd, y')} - {format(dateRange.to, 'LLL dd, y')}
-                      </>
-                    ) : (
-                      format(dateRange.from, 'LLL dd, y')
-                    )
-                  ) : (
-                    <span>Pick a date range</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  initialFocus
-                  mode="range"
-                  defaultMonth={tempDateRange?.from ?? new Date()}
-                  selected={tempDateRange}
-                  onSelect={setTempDateRange}
-                  numberOfMonths={1}
-                />
-                <div className="flex items-center justify-end gap-2 border-t p-3">
-                  <Button variant="outline" size="sm" onClick={handleDateRangeClear}>
-                    Clear
-                  </Button>
-                  <Button size="sm" onClick={handleDateRangeApply}>
-                    Apply
-                  </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
+            <DateRangeFilter
+              value={dateRange}
+              onChange={handleDateRangeChange}
+              placeholder="Select from and to date"
+              numberOfMonths={2}
+            />
           </ToolbarActions>
         </Toolbar>
       </Container>

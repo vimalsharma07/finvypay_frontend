@@ -4,33 +4,22 @@ import { useState, useEffect, useMemo } from 'react';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import {
-  CalendarDays,
+  ColumnDef,
+  getCoreRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from '@tanstack/react-table';
+import {
   Loader2,
   FileText,
   AlertCircle,
-  CheckCircle2,
-  XCircle,
-  Clock,
   Eye,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardHeading, CardTable, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { DateRangeFilter } from '@/components/ui/date-range-filter';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import {
   Dialog,
   DialogContent,
@@ -38,10 +27,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { DataGrid } from '@/components/ui/data-grid';
+import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
+import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { DataGridTable } from '@/components/ui/data-grid-table';
 import { getAdminLogs, type LogEntry, type LogType } from '@/lib/services/admin/logs';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
+import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 
 interface LogsContentProps {
   logType: LogType;
@@ -55,8 +48,6 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
-  const [tempDateRange, setTempDateRange] = useState<DateRange | undefined>(undefined);
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
 
@@ -112,20 +103,8 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
     fetchLogs(page, limit, startDate, endDate);
   }, [page, limit, dateRange, logType]);
 
-  const handleDateRangeApply = () => {
-    if (tempDateRange?.from && tempDateRange?.to) {
-      setDateRange(tempDateRange);
-      setIsDatePickerOpen(false);
-      setPage(1); // Reset to first page when date range changes
-    } else {
-      toast.error('Please select both start and end dates');
-    }
-  };
-
-  const handleDateRangeClear = () => {
-    setTempDateRange(undefined);
-    setDateRange(undefined);
-    setIsDatePickerOpen(false);
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    setDateRange(range);
     setPage(1);
   };
 
@@ -250,55 +229,231 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
     );
   };
 
+  const getEventBadge = (event: string | null | undefined) => {
+    if (!event) return <span className="text-muted-foreground">—</span>;
+    return (
+      <Badge variant="outline" className="bg-slate-50 text-slate-700 dark:bg-slate-950 dark:text-slate-300 font-mono text-xs inline-flex max-w-full min-w-0" title={event}>
+        <span className="truncate">{event}</span>
+      </Badge>
+    );
+  };
+
+  // Admin audit logs: Event, Admin, Created At, Error Message, View (no Transaction ID, Type, Status).
+  // App error logs: Error Message, Created At, View (no Transaction ID, Type, Status).
+  // Provider logs: Transaction ID, Provider, Action, Method, Response Status, Created At, Error Message, View.
+  // Other log types: Transaction ID, Type, Status, Created At, Error Message, View.
+  const isAdminAuditLogs = logType === 'admin_audit_logs';
+  const isAppErrorLogs = logType === 'app_error_logs';
+  const isProviderLogs = logType === 'provider_logs';
+  const showTxnTypeStatus = !isAdminAuditLogs && !isAppErrorLogs && !isProviderLogs;
+
+  const columns = useMemo<ColumnDef<LogEntry>[]>(
+    () => {
+      const cols: ColumnDef<LogEntry>[] = [];
+
+      if (showTxnTypeStatus || isProviderLogs) {
+        cols.push({
+          id: 'transactionId',
+          accessorFn: (row) => getTransactionId(row),
+          header: ({ column }) => <DataGridColumnHeader column={column} title="Transaction ID" />,
+          cell: ({ row }) => (
+            <div className="font-mono text-xs min-w-[140px]">
+              {getTransactionId(row.original) || '—'}
+            </div>
+          ),
+          enableSorting: false,
+          size: 180,
+        });
+      }
+
+      if (showTxnTypeStatus) {
+        cols.push({
+          id: 'type',
+          accessorKey: 'type',
+          header: ({ column }) => <DataGridColumnHeader column={column} title="Type" />,
+          cell: ({ row }) => (row.original.type ? getTypeBadge(row.original.type) : <span className="text-muted-foreground">—</span>),
+          enableSorting: false,
+          size: 140,
+        });
+      }
+
+      if (showTxnTypeStatus) {
+        cols.push({
+          id: 'status',
+          accessorFn: (row) => getStatus(row),
+          header: ({ column }) => <DataGridColumnHeader column={column} title="Status" />,
+          cell: ({ row }) => {
+            const s = getStatus(row.original);
+            return s !== null && s !== undefined ? getStatusBadge(s) : <span className="text-muted-foreground">—</span>;
+          },
+          enableSorting: false,
+          size: 110,
+        });
+      }
+
+      if (isProviderLogs) {
+        cols.push({
+          id: 'provider',
+          accessorKey: 'provider',
+          header: ({ column }) => <DataGridColumnHeader column={column} title="Provider" />,
+          cell: ({ row }) => (
+            <span className="text-sm font-medium">{row.original.provider ?? '—'}</span>
+          ),
+          enableSorting: false,
+          size: 130,
+        });
+        cols.push({
+          id: 'action',
+          accessorKey: 'action',
+          header: ({ column }) => <DataGridColumnHeader column={column} title="Action" />,
+          cell: ({ row }) => (
+            <Badge variant="outline" className="font-mono text-xs">
+              {row.original.action ?? '—'}
+            </Badge>
+          ),
+          enableSorting: false,
+          size: 100,
+        });
+        cols.push({
+          id: 'method',
+          accessorKey: 'method',
+          header: ({ column }) => <DataGridColumnHeader column={column} title="Method" />,
+          cell: ({ row }) => (
+            <Badge variant="secondary" className="font-mono text-xs">
+              {row.original.method ?? '—'}
+            </Badge>
+          ),
+          enableSorting: false,
+          size: 80,
+        });
+        cols.push({
+          id: 'responseStatus',
+          accessorKey: 'responseStatus',
+          header: ({ column }) => <DataGridColumnHeader column={column} title="Response Status" />,
+          cell: ({ row }) => {
+            const status = row.original.responseStatus;
+            const isOk = status != null && status >= 200 && status < 300;
+            return (
+              <Badge variant="outline" className={isOk ? 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300' : 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300'}>
+                {status != null ? String(status) : '—'}
+              </Badge>
+            );
+          },
+          enableSorting: false,
+          size: 120,
+        });
+      }
+
+      if (isAdminAuditLogs) {
+        cols.push({
+          id: 'event',
+          accessorKey: 'event',
+          header: ({ column }) => <DataGridColumnHeader column={column} title="Event" />,
+          cell: ({ row }) => (
+            <div className="min-w-0 max-w-[280px] overflow-hidden" title={row.original.event ?? ''}>
+              {getEventBadge(row.original.event)}
+            </div>
+          ),
+          enableSorting: false,
+          size: 280,
+        });
+        cols.push({
+          id: 'admin',
+          accessorFn: (row) => getAdminName(row),
+          header: ({ column }) => <DataGridColumnHeader column={column} title="Admin" />,
+          cell: ({ row }) => {
+            const label = getAdminName(row.original) || row.original.admin?.email || '—';
+            return (
+              <div className="min-w-0 max-w-[140px] overflow-hidden truncate text-sm" title={typeof label === 'string' ? label : ''}>
+                {label}
+              </div>
+            );
+          },
+          enableSorting: false,
+          size: 140,
+        });
+      }
+
+      cols.push({
+        id: 'createdAt',
+        accessorFn: (row) => getCreatedAt(row),
+        header: ({ column }) => <DataGridColumnHeader column={column} title="Created At" />,
+        cell: ({ row }) => <span className="text-sm whitespace-nowrap">{formatDate(getCreatedAt(row.original))}</span>,
+        enableSorting: false,
+        size: 180,
+      });
+      cols.push({
+        id: 'errorMessage',
+        accessorFn: (row) => getErrorMessage(row),
+        header: ({ column }) => <DataGridColumnHeader column={column} title="Error Message" />,
+        cell: ({ row }) => (
+          <div className="max-w-[280px] truncate text-sm" title={getErrorMessage(row.original) || ''}>
+            {getErrorMessage(row.original) || '—'}
+          </div>
+        ),
+        enableSorting: false,
+        size: 260,
+      });
+      cols.push({
+        id: 'actions',
+        header: ({ column }) => <DataGridColumnHeader column={column} title="View" />,
+        cell: ({ row }) => (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleViewDetails(row.original)}
+            className="h-8"
+          >
+            <Eye className="h-4 w-4 mr-1" />
+            View
+          </Button>
+        ),
+        enableSorting: false,
+        size: 90,
+      });
+
+      return cols;
+    },
+    [isAdminAuditLogs, isAppErrorLogs, isProviderLogs, showTxnTypeStatus]
+  );
+
+  const table = useReactTable({
+    data: logs,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    manualPagination: true,
+    pageCount: meta ? meta.totalPages : 0,
+    getRowId: (row) => String(row.id),
+    onPaginationChange: (updater) => {
+      const next = typeof updater === 'function' ? updater({ pageIndex: page - 1, pageSize: limit }) : updater;
+      if (next.pageIndex !== page - 1) setPage(next.pageIndex + 1);
+      if (next.pageSize !== limit) {
+        setLimit(next.pageSize);
+        setPage(1);
+      }
+    },
+    state: {
+      pagination: { pageIndex: page - 1, pageSize: limit },
+    },
+  });
+
   return (
     <div className="space-y-6">
-      {/* Date Range Filter */}
-      <div className="flex items-center justify-between">
+      {/* Date range and count above table, right-aligned */}
+      <div className="flex items-center justify-between gap-4">
         <div className="text-sm text-muted-foreground">
-          {meta && (
-            <span>
-              Showing {logs.length} of {meta.total} logs
-            </span>
-          )}
+          {!loading && meta && <span>Showing {logs.length} of {meta.total} logs</span>}
         </div>
-        <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="w-[280px] justify-start text-left font-normal">
-              <CalendarDays className="mr-2 h-4 w-4" />
-              {dateRange?.from ? (
-                dateRange.to ? (
-                  <>
-                    {format(dateRange.from, 'LLL dd, y')} - {format(dateRange.to, 'LLL dd, y')}
-                  </>
-                ) : (
-                  format(dateRange.from, 'LLL dd, y')
-                )
-              ) : (
-                <span>Pick a date range</span>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="end">
-            <Calendar
-              initialFocus
-              mode="range"
-              defaultMonth={tempDateRange?.from ?? new Date()}
-              selected={tempDateRange}
-              onSelect={setTempDateRange}
-              numberOfMonths={1}
-            />
-            <div className="flex items-center justify-end gap-2 border-t p-3">
-              <Button variant="outline" size="sm" onClick={handleDateRangeClear}>
-                Clear
-              </Button>
-              <Button size="sm" onClick={handleDateRangeApply}>
-                Apply
-              </Button>
-            </div>
-          </PopoverContent>
-        </Popover>
+        <DateRangeFilter
+          value={dateRange}
+          onChange={handleDateRangeChange}
+          placeholder="Pick a date range"
+          numberOfMonths={2}
+          triggerClassName="w-[280px]"
+          size="sm"
+        />
       </div>
-
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -316,149 +471,30 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
           </CardContent>
         </Card>
       ) : (
-        <>
-          <Card>
-            <CardHeader>
-              <CardTitle>{logTypeLabel}</CardTitle>
+        <DataGrid
+          table={table}
+          recordCount={meta?.total ?? logs.length}
+          isLoading={false}
+          tableLayout={modernTableLayout}
+          tableClassNames={modernTableClassNames}
+        >
+          <Card className={modernTableCardClasses.card}>
+            <CardHeader className={modernTableCardClasses.header}>
+              <CardHeading>
+                <CardTitle className="text-lg font-semibold">{logTypeLabel}</CardTitle>
+              </CardHeading>
             </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[600px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      {logs.some(log => getErrorMessage(log)) && <TableHead>Error Message</TableHead>}
-                      {logs.some(log => getTransactionId(log)) && <TableHead>Transaction ID</TableHead>}
-                      {logs.some(log => getOrderId(log)) && <TableHead>Order ID</TableHead>}
-                      {logs.some(log => log.type) && <TableHead>Type</TableHead>}
-                      {logs.some(log => getStatus(log) !== null && getStatus(log) !== undefined) && <TableHead>Status</TableHead>}
-                      {logs.some(log => getUserName(log)) && <TableHead>User</TableHead>}
-                      {logs.some(log => log.adminId) && <TableHead>Admin ID</TableHead>}
-                      {logs.some(log => log.rpId) && <TableHead>RP ID</TableHead>}
-                      <TableHead>Created At</TableHead>
-                      {logs.some(log => log.error || log.errorMessage) && <TableHead>Error</TableHead>}
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {logs.map((log) => {
-                      const hasErrorMessage = logs.some(l => getErrorMessage(l));
-                      const hasTransactionId = logs.some(l => getTransactionId(l));
-                      const hasOrderId = logs.some(l => getOrderId(l));
-                      const hasType = logs.some(l => l.type);
-                      const hasStatus = logs.some(l => getStatus(l) !== null && getStatus(l) !== undefined);
-                      const hasUserName = logs.some(l => getUserName(l));
-                      const hasAdminId = logs.some(l => l.adminId);
-                      const hasRpId = logs.some(l => l.rpId);
-                      const hasError = logs.some(l => l.error || l.errorMessage);
-                      
-                      return (
-                        <TableRow key={log.id}>
-                          {hasErrorMessage && (
-                            <TableCell className="max-w-[300px]">
-                              <div className="truncate text-sm" title={getErrorMessage(log) || ''}>
-                                {getErrorMessage(log) || '—'}
-                              </div>
-                            </TableCell>
-                          )}
-                          {hasTransactionId && (
-                            <TableCell className="font-mono text-xs">
-                              {getTransactionId(log) || '—'}
-                            </TableCell>
-                          )}
-                          {hasOrderId && (
-                            <TableCell className="font-mono text-xs">
-                              {getOrderId(log) || '—'}
-                            </TableCell>
-                          )}
-                          {hasType && (
-                            <TableCell>
-                              {log.type ? getTypeBadge(log.type) : '—'}
-                            </TableCell>
-                          )}
-                          {hasStatus && (
-                            <TableCell>
-                              {getStatus(log) !== null && getStatus(log) !== undefined 
-                                ? getStatusBadge(getStatus(log)!) 
-                                : '—'}
-                            </TableCell>
-                          )}
-                          {hasUserName && (
-                            <TableCell>
-                              <span className="text-sm font-medium">{getUserName(log) || '—'}</span>
-                            </TableCell>
-                          )}
-                          {hasAdminId && (
-                            <TableCell className="text-sm">
-                              {log.adminId ? String(log.adminId) : '—'}
-                            </TableCell>
-                          )}
-                          {hasRpId && (
-                            <TableCell className="text-sm">
-                              {log.rpId ? String(log.rpId) : '—'}
-                            </TableCell>
-                          )}
-                          <TableCell className="text-sm">
-                            {formatDate(getCreatedAt(log))}
-                          </TableCell>
-                          {hasError && (
-                            <TableCell>
-                              {(log.error || log.errorMessage) ? (
-                                <Badge variant="destructive" className="text-xs">
-                                  <AlertCircle className="h-3 w-3 mr-1" />
-                                  Error
-                                </Badge>
-                              ) : (
-                                <span className="text-muted-foreground">—</span>
-                              )}
-                            </TableCell>
-                          )}
-                          <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleViewDetails(log)}
-                              className="h-8"
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              View
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+            <CardTable className={modernTableCardClasses.table}>
+              <ScrollArea className="w-full">
+                <DataGridTable />
+                <ScrollBar orientation="horizontal" />
               </ScrollArea>
-            </CardContent>
+            </CardTable>
+            <CardFooter className={modernTableCardClasses.footer}>
+              <DataGridPagination />
+            </CardFooter>
           </Card>
-
-          {/* Pagination */}
-          {meta && meta.totalPages > 1 && (
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                Page {meta.page} of {meta.totalPages}
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                >
-                  Previous
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}
-                  disabled={page === meta.totalPages}
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
-          )}
-        </>
+        </DataGrid>
       )}
 
       {/* Log Details Dialog */}
@@ -536,6 +572,45 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
                       </Badge>
                     </div>
                   </div>
+                )}
+                {/* Provider log fields */}
+                {selectedLog.provider && (
+                  <>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Provider</label>
+                      <p className="text-sm font-medium">{selectedLog.provider}</p>
+                    </div>
+                    {selectedLog.action && (
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Action</label>
+                        <p className="text-sm font-mono">{selectedLog.action}</p>
+                      </div>
+                    )}
+                    {selectedLog.method && (
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Method</label>
+                        <p className="text-sm font-mono">{selectedLog.method}</p>
+                      </div>
+                    )}
+                    {selectedLog.responseStatus != null && (
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Response Status</label>
+                        <p className="text-sm font-mono">{selectedLog.responseStatus}</p>
+                      </div>
+                    )}
+                    {selectedLog.endpoint && (
+                      <div className="col-span-2">
+                        <label className="text-sm font-medium text-muted-foreground">Endpoint</label>
+                        <p className="text-sm font-mono break-all">{selectedLog.endpoint}</p>
+                      </div>
+                    )}
+                    {selectedLog.providerReference && (
+                      <div className="col-span-2">
+                        <label className="text-sm font-medium text-muted-foreground">Provider Reference</label>
+                        <p className="text-sm font-mono break-all">{selectedLog.providerReference}</p>
+                      </div>
+                    )}
+                  </>
                 )}
                 {selectedLog.details && (
                   <div>
@@ -625,6 +700,18 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
                 </div>
               )}
 
+              {/* Request (e.g. provider logs) */}
+              {selectedLog.request != null && typeof selectedLog.request === 'object' && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Request</label>
+                  <div className="mt-1 p-3 bg-muted rounded-md">
+                    <pre className="text-xs overflow-x-auto">
+                      {JSON.stringify(selectedLog.request, null, 2)}
+                    </pre>
+                  </div>
+                </div>
+              )}
+
               {/* Payload */}
               {selectedLog.payload && (
                 <div>
@@ -638,12 +725,14 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
               )}
 
               {/* Response */}
-              {selectedLog.response && (
+              {selectedLog.response != null && (typeof selectedLog.response === 'object' || typeof selectedLog.response === 'string') && (
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Response</label>
                   <div className="mt-1 p-3 bg-muted rounded-md">
                     <pre className="text-xs overflow-x-auto">
-                      {JSON.stringify(selectedLog.response, null, 2)}
+                      {typeof selectedLog.response === 'string'
+                        ? selectedLog.response
+                        : JSON.stringify(selectedLog.response, null, 2)}
                     </pre>
                   </div>
                 </div>

@@ -24,5 +24,7 @@ export const authRoutes = {
   permissions: '/auth/permissions',
   verify2FA: '/auth/2fa/verify',
   profile: '/auth/profile',
+  /** Admin profile (when role is ADMIN or SUPER_ADMIN) */
+  adminProfile: '/admin/profile',
 } as const;
 

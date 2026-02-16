@@ -37,7 +37,7 @@ export default function RoutingCascadingLayout({
             icon={Route}
           />
           <ToolbarActions>
-            <Link href={`/admin/user-management/merchant/${userId}`}>
+            <Link href="/admin/user-management/merchant">
               <Button variant="outline">
                 <ArrowLeft className="h-4 w-4 mr-1" />
                 Back to User

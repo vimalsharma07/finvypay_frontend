@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,29 +17,15 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { createAcquirer, CreateAcquirerPayload } from '@/lib/services/admin/acquirers';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import { ImageInput, type ImageInputFiles } from '@/components/image-input';
 import { uploadFile, deleteFile, deleteFileByPublicId } from '@/lib/services/file-upload';
 
-// Available provider types
-const PROVIDER_TYPES = [
-  { value: 'test-gateway.provider.ts', label: 'TestGateway', description: 'Test Provider for sandbox testing' },
-  { value: 'cardserv.provider.ts', label: 'CardServ', description: 'CardServ payment provider' },
-] as const;
-
 // Form schema
 const createAcquirerSchema = z.object({
   acquirerName: z.string().min(1, 'Acquirer name is required'),
-  providerType: z.string().min(1, 'Provider type is required'),
   fileName: z.string().min(1, 'File name is required'),
   iconUrl: z.string().optional(),
   fields: z.array(
@@ -65,27 +51,11 @@ export function CreateAcquirerContent() {
     resolver: zodResolver(createAcquirerSchema),
     defaultValues: {
       acquirerName: '',
-      providerType: '',
       fileName: '',
       iconUrl: '',
       fields: [{ fieldName: '', fieldValue: '' }],
     },
   });
-
-  // Watch providerType to auto-fill fileName
-  const selectedProviderType = form.watch('providerType');
-  
-  useEffect(() => {
-    if (selectedProviderType) {
-      const provider = PROVIDER_TYPES.find(p => p.value === selectedProviderType);
-      if (provider) {
-        form.setValue('fileName', provider.value);
-        if (!form.getValues('acquirerName')) {
-          form.setValue('acquirerName', provider.label);
-        }
-      }
-    }
-  }, [selectedProviderType, form]);
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -211,49 +181,6 @@ export function CreateAcquirerContent() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
-                name="providerType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Provider Type <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <Select
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        const provider = PROVIDER_TYPES.find(p => p.value === value);
-                        if (provider) {
-                          form.setValue('fileName', provider.value);
-                          if (!form.getValues('acquirerName')) {
-                            form.setValue('acquirerName', provider.label);
-                          }
-                        }
-                      }}
-                      value={field.value}
-                      disabled={submitting}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Provider Type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {PROVIDER_TYPES.map((provider) => (
-                          <SelectItem key={provider.value} value={provider.value}>
-                            <div className="flex flex-col">
-                              <span className="font-medium">{provider.label}</span>
-                              <span className="text-xs text-muted-foreground">{provider.description}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
                 name="acquirerName"
                 render={({ field }) => (
                   <FormItem>
@@ -262,7 +189,27 @@ export function CreateAcquirerContent() {
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Enter Acquirer Name"
+                        placeholder="e.g. Stripe Acquirer"
+                        {...field}
+                        disabled={submitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="fileName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      File Name <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g. stripe.js"
                         {...field}
                         disabled={submitting}
                       />
@@ -272,19 +219,6 @@ export function CreateAcquirerContent() {
                 )}
               />
             </div>
-
-            <FormField
-              control={form.control}
-              name="fileName"
-              render={({ field }) => (
-                <FormItem className="hidden">
-                  <FormControl>
-                    <Input {...field} type="hidden" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <FormField
               control={form.control}

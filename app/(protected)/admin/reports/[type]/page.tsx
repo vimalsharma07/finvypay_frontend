@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, use } from 'react';
+import { use } from 'react';
 import dynamic from 'next/dynamic';
 import { BarChart3 } from 'lucide-react';
 import {
@@ -48,7 +48,7 @@ export default function ReportPage({ params }: ReportPageProps) {
   }
 
   return (
-    <Fragment>
+    <div className="overflow-x-hidden">
       <Container>
         <Toolbar>
           <ToolbarHeading
@@ -62,6 +62,6 @@ export default function ReportPage({ params }: ReportPageProps) {
       <Container>
         <ReportContent config={config} />
       </Container>
-    </Fragment>
+    </div>
   );
 }

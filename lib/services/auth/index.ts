@@ -878,15 +878,32 @@ export async function refreshToken(): Promise<ApiResponse<RefreshTokenResponse>>
   }
 }
 
+/** Admin roles that use /admin/profile instead of /auth/profile */
+function getProfileEndpoint(): string {
+  if (typeof window === 'undefined') return authRoutes.profile;
+  try {
+    const raw = localStorage.getItem('user');
+    if (!raw) return authRoutes.profile;
+    const user = JSON.parse(raw);
+    const role = (user?.role ?? '').toString().toLowerCase();
+    const isAdmin = role === 'admin' || role === 'super_admin';
+    return isAdmin ? authRoutes.adminProfile : authRoutes.profile;
+  } catch {
+    return authRoutes.profile;
+  }
+}
+
 /**
  * Get user profile
- * 
+ * Calls /admin/profile when logged in as admin/super_admin, otherwise /auth/profile
+ *
  * @returns Promise with user profile data including 2FA status
  */
 export async function getProfile(): Promise<ApiResponse<any>> {
   try {
+    const endpoint = getProfileEndpoint();
     const response = await http.get(
-      authRoutes.profile,
+      endpoint,
       {
         auth: true, // Requires authentication
       }
