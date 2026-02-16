@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { getUserPaymentLinkById } from '@/lib/services/user/payment-links';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import { getPaymentReturnUrl } from '@/lib/utils/payment-return-url';
 import { http } from '@/lib/api';
 
 const numericString = (min: number, max: number, message: string) =>
@@ -183,10 +184,11 @@ export function CardForm() {
         cardholderName: `${customerData.firstName} ${customerData.lastName}`,
         source: searchParams.get('source') || 'link', // Payment source (link, api, etc.)
         token: paymentLinkId || '', // Payment link ID passed as token
+        returnUrl: getPaymentReturnUrl(),
         ...customerData,
       };
 
-      // Process payment via API
+      // Process payment via API (production); same payload shape for sandbox/card with returnUrl
       const response = await http.post('/api/v1/production/card', paymentPayload);
 
       // Check if 3DS redirect is required
