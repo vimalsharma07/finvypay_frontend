@@ -10,17 +10,13 @@ import {
   TrendingUp,
   TrendingDown,
   XCircle,
-  RefreshCw,
-  CreditCard,
   Loader2,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { DynamicApexChart } from '@/components/charts/dynamic-apex-chart';
 import { getAdminDashboard, type DashboardData } from '@/lib/services/admin/dashboard';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
 
 export interface AdminDashboardContentProps {
   dateRange?: DateRange | undefined;
@@ -158,15 +154,6 @@ export function AdminDashboardContent({ dateRange: dateRangeProp }: AdminDashboa
     },
   }), [transactionChartData]);
 
-  const totalUsers = useMemo(() => {
-    if (!data?.userCounters) return 0;
-    return (
-      data.userCounters.totalAdmin +
-      data.userCounters.totalMerchant +
-      data.userCounters.totalAffiliate
-    );
-  }, [data]);
-
   return (
     <div className="space-y-6">
       {loading ? (
@@ -180,26 +167,7 @@ export function AdminDashboardContent({ dateRange: dateRangeProp }: AdminDashboa
       ) : (
         <>
           {/* User Counters */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {/* Total Users Card */}
-            <Card className="group relative overflow-hidden border-0 bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <div className="absolute inset-0 bg-linear-to-br from-blue-500/10 via-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                <CardTitle className="text-sm font-semibold text-blue-700 dark:text-blue-300">Total Users</CardTitle>
-                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/50 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/70 transition-colors duration-300">
-                  <Users className="h-5 w-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform duration-300" />
-                </div>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-3xl font-bold text-blue-900 dark:text-blue-100 mb-1 group-hover:scale-105 transition-transform duration-300 inline-block">
-                  {totalUsers.toLocaleString()}
-                </div>
-                <p className="text-xs text-blue-600/70 dark:text-blue-300/70 font-medium">
-                  All user types combined
-                </p>
-              </CardContent>
-            </Card>
-
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* Admins Card */}
             <Card className="group relative overflow-hidden border-0 bg-linear-to-br from-amber-50 via-orange-50 to-red-50 dark:from-amber-950/30 dark:via-orange-950/30 dark:to-red-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="absolute inset-0 bg-linear-to-br from-amber-500/10 via-orange-500/10 to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -259,26 +227,7 @@ export function AdminDashboardContent({ dateRange: dateRangeProp }: AdminDashboa
           </div>
 
           {/* Transaction Statistics */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {/* Total Transactions Card */}
-            <Card className="group relative overflow-hidden border-0 bg-linear-to-br from-slate-50 via-gray-50 to-zinc-50 dark:from-slate-950/30 dark:via-gray-950/30 dark:to-zinc-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <div className="absolute inset-0 bg-linear-to-br from-slate-500/10 via-gray-500/10 to-zinc-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                <CardTitle className="text-sm font-semibold text-slate-700 dark:text-slate-300">Total Transactions</CardTitle>
-                <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-900/50 group-hover:bg-slate-200 dark:group-hover:bg-slate-900/70 transition-colors duration-300">
-                  <CreditCard className="h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300" />
-                </div>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-1 group-hover:scale-105 transition-transform duration-300 inline-block">
-                  {data.transactionStatistics.totalTransactions.toLocaleString()}
-                </div>
-                <p className="text-xs text-slate-600/70 dark:text-slate-300/70 font-medium">
-                  All transaction types
-                </p>
-              </CardContent>
-            </Card>
-
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* Success Card */}
             <Card className="group relative overflow-hidden border-0 bg-linear-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-green-950/30 dark:via-emerald-950/30 dark:to-teal-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="absolute inset-0 bg-linear-to-br from-green-500/10 via-emerald-500/10 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
