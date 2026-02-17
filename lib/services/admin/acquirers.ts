@@ -324,12 +324,13 @@ export interface MerchantAcquirerRequest {
   merchant: MerchantAcquirerRequestMerchant;
   merchantProfileId: string;
   merchantProfile: MerchantAcquirerRequestMerchantProfile;
-  acquirerAccountId: string;
-  acquirerAccount: MerchantAcquirerRequestAcquirerAccount;
+  acquirerAccountId?: string;
+  acquirerAccount?: MerchantAcquirerRequestAcquirerAccount;
+  processingVolume?: string | number;
   acceptedPaymentMethods: string[];
   processingCurrency: string[];
   status: 'pending' | 'approved' | 'rejected';
-  description: string;
+  description?: string;
   isDeleted: boolean;
   deletedAt: string | null;
   createdAt: string;

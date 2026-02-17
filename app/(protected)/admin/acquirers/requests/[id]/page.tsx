@@ -6,6 +6,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Container } from '@/components/common/container';
 import { Toolbar, ToolbarHeading } from '@/layouts/main/components/toolbar';
+import { FileText } from 'lucide-react';
 import {
   getMerchantAcquirerRequest,
   MerchantAcquirerRequest,
@@ -53,7 +54,8 @@ export default function AdminAcquirerRequestDetailPage() {
         <Toolbar>
           <ToolbarHeading
             title="Acquirer Request Details"
-            description={request ? `Request #${request.id} - ${request.merchant.name}` : 'Loading request details...'}
+            description={request ? `Request #${request.id} — ${request.merchantProfile?.merchantProfileName ?? request.merchant?.name ?? 'Acquirer request'}` : 'Loading request details...'}
+            icon={FileText}
           />
         </Toolbar>
       </Container>

@@ -1,20 +1,17 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { User } from 'lucide-react';
-import {
-  Toolbar,
-  ToolbarHeading,
-} from '@/layouts/main/components/toolbar';
+import { User, Loader2, Mail } from 'lucide-react';
+import { Toolbar, ToolbarHeading } from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
 import { getProfile } from '@/lib/services/auth';
-import { Loader2, Mail } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 
-const labelClass = 'text-xs uppercase tracking-wide text-muted-foreground';
-const valueClass = 'text-sm font-semibold text-foreground';
+const labelClass = 'block text-sm font-medium text-muted-foreground';
+const valueClass = 'mt-0.5 text-sm font-medium text-foreground';
 
 function kycStatusBadge(status: string | null | undefined) {
   if (!status) return <span className="text-muted-foreground">—</span>;
@@ -97,81 +94,85 @@ export default function AdminProfilePage() {
       </Container>
       <Container>
         {loading ? (
-          <Card>
+          <Card className={modernTableCardClasses.card}>
             <CardContent className="flex items-center justify-center py-16">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <Loader2 className="size-8 animate-spin text-muted-foreground" />
             </CardContent>
           </Card>
         ) : (
           <div className="grid gap-6 lg:grid-cols-3">
-            <Card className="lg:col-span-1">
-              <CardHeader className="flex flex-col items-start gap-3">
-                <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center text-lg font-bold">
+            {/* Profile summary card */}
+            <Card className={modernTableCardClasses.card}>
+              <CardHeader className={`${modernTableCardClasses.header} flex flex-col items-start gap-4`}>
+                <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
                   {initials}
                 </div>
-                <div>
+                <div className="space-y-1">
                   <CardTitle className="text-xl">{String(displayUser?.name ?? 'Admin')}</CardTitle>
-                  <CardDescription className="flex items-center gap-1 mt-1">
-                    <Mail className="h-4 w-4" />
-                    {String(displayUser?.email ?? '—')}
+                  <CardDescription className="flex items-center gap-2 pt-0.5 text-sm">
+                    <Mail className="size-4 shrink-0" />
+                    <span className="truncate">{String(displayUser?.email ?? '—')}</span>
                   </CardDescription>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {displayUser?.role != null && (
-                    <span className="rounded-md border border-border px-2 py-1 text-xs font-medium text-muted-foreground">
-                      {String(displayUser.role)}
-                    </span>
+                    <Badge variant="secondary">{String(displayUser.role)}</Badge>
                   )}
                   {kycStatusBadge(displayUser?.kycStatus as string)}
                 </div>
               </CardHeader>
             </Card>
 
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Basic Details</CardTitle>
-                <CardDescription>Your account information</CardDescription>
+            {/* Basic details card */}
+            <Card className={`${modernTableCardClasses.card} lg:col-span-2`}>
+              <CardHeader className={modernTableCardClasses.header}>
+                <div className="space-y-1">
+                  <CardTitle>Basic Details</CardTitle>
+                  <CardDescription className="mt-1">
+                    Your account information
+                  </CardDescription>
+                </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <div className={labelClass}>Name</div>
-                    <div className={valueClass}>{displayUser?.name != null ? String(displayUser.name) : '—'}</div>
+              <CardContent className="space-y-6 pt-5">
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="space-y-1">
+                    <span className={labelClass}>Name</span>
+                    <p className={valueClass}>{displayUser?.name != null ? String(displayUser.name) : '—'}</p>
                   </div>
-                  <div>
-                    <div className={labelClass}>Email</div>
-                    <div className={valueClass}>{displayUser?.email != null ? String(displayUser.email) : '—'}</div>
+                  <div className="space-y-1">
+                    <span className={labelClass}>Email</span>
+                    <p className={valueClass}>{displayUser?.email != null ? String(displayUser.email) : '—'}</p>
                   </div>
-                  <div>
-                    <div className={labelClass}>Role</div>
-                    <div className={valueClass}>{displayUser?.role != null ? String(displayUser.role) : '—'}</div>
+                  <div className="space-y-1">
+                    <span className={labelClass}>Role</span>
+                    <p className={valueClass}>{displayUser?.role != null ? String(displayUser.role) : '—'}</p>
                   </div>
-                  <div>
-                    <div className={labelClass}>Unique ID</div>
-                    <div className={valueClass + ' font-mono text-xs break-all'}>
+                  <div className="space-y-1 sm:col-span-2">
+                    <span className={labelClass}>Unique ID</span>
+                    <p className={`${valueClass} break-all font-mono text-xs`}>
                       {displayUser?.uniqueId != null ? String(displayUser.uniqueId) : displayUser?.id != null ? String(displayUser.id) : '—'}
-                    </div>
+                    </p>
                   </div>
-                  <div>
-                    <div className={labelClass}>KYC Status</div>
-                    <div className={valueClass}>{kycStatusBadge(displayUser?.kycStatus as string)}</div>
+                  <div className="space-y-1">
+                    <span className={labelClass}>KYC Status</span>
+                    <div className="mt-0.5">{kycStatusBadge(displayUser?.kycStatus as string)}</div>
                   </div>
-                  {(displayUser?.status != null || displayUser?.accountStatus != null) && (
-                    <div>
-                      <div className={labelClass}>Status</div>
-                      <div className={valueClass}>{String(displayUser?.status ?? displayUser?.accountStatus ?? '—')}</div>
+                  {(displayUser?.createdAt != null || displayUser?.created_at != null) && (
+                    <div className="space-y-1">
+                      <span className={labelClass}>Created at</span>
+                      <p className={valueClass}>{formatDate(displayUser?.createdAt ?? displayUser?.created_at)}</p>
                     </div>
                   )}
-                  {(displayUser?.createdAt != null || displayUser?.created_at != null) && (
-                    <div>
-                      <div className={labelClass}>Created At</div>
-                      <div className={valueClass}>{formatDate(displayUser?.createdAt ?? displayUser?.created_at)}</div>
+                  {(displayUser?.status != null || displayUser?.accountStatus != null) && (
+                    <div className="space-y-1">
+                      <span className={labelClass}>Status</span>
+                      <p className={valueClass}>{String(displayUser?.status ?? displayUser?.accountStatus ?? '—')}</p>
                     </div>
                   )}
                   {(displayUser?.phone != null || displayUser?.phoneNumber != null) && (
-                    <div>
-                      <div className={labelClass}>Phone</div>
-                      <div className={valueClass}>{String(displayUser?.phone ?? displayUser?.phoneNumber ?? '—')}</div>
+                    <div className="space-y-1">
+                      <span className={labelClass}>Phone</span>
+                      <p className={valueClass}>{String(displayUser?.phone ?? displayUser?.phoneNumber ?? '—')}</p>
                     </div>
                   )}
                 </div>

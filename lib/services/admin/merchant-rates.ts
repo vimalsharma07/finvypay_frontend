@@ -17,6 +17,8 @@ export interface MerchantRates {
   flaggedFee: number;
   setupFee: number;
   refundFee: number;
+  minTxnAmount?: number;
+  maxTxnAmount?: number;
 }
 
 export async function getMerchantRates(

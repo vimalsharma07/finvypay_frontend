@@ -129,12 +129,11 @@ export function RequestsContent() {
     const searchLower = searchQuery.toLowerCase();
     return requests.filter(
       (item) =>
+        item.merchantProfile?.merchantProfileName?.toLowerCase().includes(searchLower) ||
         item.merchant?.name?.toLowerCase().includes(searchLower) ||
         item.merchant?.email?.toLowerCase().includes(searchLower) ||
-        item.acquirerAccount?.name?.toLowerCase().includes(searchLower) ||
-        item.acquirerAccount?.terminalId?.toLowerCase().includes(searchLower) ||
-        item.description?.toLowerCase().includes(searchLower) ||
-        item.status?.toLowerCase().includes(searchLower),
+        item.status?.toLowerCase().includes(searchLower) ||
+        String(item.processingVolume ?? '').toLowerCase().includes(searchLower),
     );
   }, [searchQuery, requests]);
 
@@ -153,13 +152,13 @@ export function RequestsContent() {
     setApproving(true);
     try {
       const payload: UpdateMerchantAcquirerRequestStatusPayload = {
-        status: 'approved'
+        status: 'approved',
       };
 
       const response = await updateMerchantAcquirerRequestStatus(requestToApprove.id, payload);
       handleApiResponse(response, {
         onSuccess: () => {
-          toast.success(`Request for ${requestToApprove.merchant.name} approved successfully!`);
+          toast.success(`Request for ${requestToApprove.merchantProfile?.merchantProfileName ?? requestToApprove.merchant?.name} approved successfully!`);
           setApproveDialogOpen(false);
           setRequestToApprove(null);
           fetchMerchantAcquirerRequests(page, limit);
@@ -182,13 +181,13 @@ export function RequestsContent() {
     setRejecting(true);
     try {
       const payload: UpdateMerchantAcquirerRequestStatusPayload = {
-        status: 'rejected'
+        status: 'rejected',
       };
 
       const response = await updateMerchantAcquirerRequestStatus(requestToReject.id, payload);
       handleApiResponse(response, {
         onSuccess: () => {
-          toast.success(`Request for ${requestToReject.merchant.name} rejected successfully!`);
+          toast.success(`Request for ${requestToReject.merchantProfile?.merchantProfileName ?? requestToReject.merchant?.name} rejected successfully!`);
           setRejectDialogOpen(false);
           setRequestToReject(null);
           fetchMerchantAcquirerRequests(page, limit);
@@ -225,116 +224,80 @@ export function RequestsContent() {
 
   const columns = useMemo<ColumnDef<MerchantAcquirerRequest>[]>(() => [
     {
-      id: 'merchantName',
-      accessorFn: (row) => row.merchant?.name || '',
+      id: 'sno',
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Merchant" />
+        <DataGridColumnHeader column={column} title="S.No" />
       ),
       cell: ({ row }) => {
-        return (
-          <div className="font-medium">
-            {row.original.merchant?.name || '-'}
-          </div>
-        );
+        const sno = pagination.pageIndex * pagination.pageSize + row.index + 1;
+        return <div className="text-sm">{sno}</div>;
       },
+      enableSorting: false,
+      size: 70,
     },
     {
-      id: 'merchantEmail',
-      accessorFn: (row) => row.merchant?.email || '',
+      id: 'merchantProfileName',
+      accessorFn: (row) => row.merchantProfile?.merchantProfileName || '',
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Email" />
+        <DataGridColumnHeader column={column} title="Merchant Profile" />
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="max-w-[200px] truncate text-muted-foreground">
-            {row.original.merchant?.email || '-'}
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <div className="font-medium">
+          {row.original.merchantProfile?.merchantProfileName || '-'}
+        </div>
+      ),
     },
     {
-      id: 'acquirerAccountName',
-      accessorKey: 'acquirerAccount.name',
+      id: 'processingVolume',
+      accessorFn: (row) => row.processingVolume ?? '',
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Acquirer Account" />
+        <DataGridColumnHeader column={column} title="Processing Volume" />
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="max-w-[200px] truncate">
-            {row.original.acquirerAccount?.name || '-'}
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <div className="text-sm">
+          {row.original.processingVolume != null ? String(row.original.processingVolume) : '-'}
+        </div>
+      ),
     },
     {
-      id: 'terminalId',
-      accessorKey: 'acquirerAccount.terminalId',
+      id: 'acceptedPaymentMethods',
+      accessorKey: 'acceptedPaymentMethods',
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Terminal ID" />
+        <DataGridColumnHeader column={column} title="Accepted Payment Methods" />
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="font-mono text-sm">
-            {row.original.acquirerAccount?.terminalId || '-'}
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <div className="flex flex-wrap gap-1 max-w-[150px]">
+          {(row.original.acceptedPaymentMethods || []).length > 0 ? (
+            row.original.acceptedPaymentMethods.map((m) => (
+              <Badge key={m} variant="secondary" className="capitalize text-xs">
+                {m}
+              </Badge>
+            ))
+          ) : (
+            <span className="text-sm text-muted-foreground">-</span>
+          )}
+        </div>
+      ),
     },
     {
       id: 'processingCurrency',
       accessorKey: 'processingCurrency',
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Currencies" />
+        <DataGridColumnHeader column={column} title="Processing Currency" />
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="max-w-[150px] truncate">
-            {row.original.processingCurrency?.join(', ') || '-'}
-          </div>
-        );
-      },
-    },
-    {
-      id: 'paymentMethods',
-      accessorKey: 'acceptedPaymentMethods',
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Payment Methods" />
+      cell: ({ row }) => (
+        <div className="flex flex-wrap gap-1 max-w-[150px]">
+          {(row.original.processingCurrency || []).length > 0 ? (
+            row.original.processingCurrency.map((c) => (
+              <Badge key={c} variant="outline" className="text-xs">
+                {c}
+              </Badge>
+            ))
+          ) : (
+            <span className="text-sm text-muted-foreground">-</span>
+          )}
+        </div>
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="max-w-[150px] truncate">
-            {row.original.acceptedPaymentMethods?.join(', ') || '-'}
-          </div>
-        );
-      },
-    },
-    {
-      id: 'description',
-      accessorKey: 'description',
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Description" />
-      ),
-      cell: ({ row }) => {
-        return (
-          <div className="max-w-[250px] truncate text-muted-foreground">
-            {row.original.description || '-'}
-          </div>
-        );
-      },
-    },
-    {
-      id: 'createdAt',
-      accessorKey: 'createdAt',
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Requested At" />
-      ),
-      cell: ({ row }) => {
-        return (
-          <div className="text-sm text-muted-foreground">
-            {new Date(row.original.createdAt).toLocaleDateString()}
-          </div>
-        );
-      },
     },
     {
       id: 'status',
@@ -373,7 +336,7 @@ export function RequestsContent() {
       enableSorting: false,
       size: 100,
     },
-  ], []);
+  ], [pagination.pageIndex, pagination.pageSize]);
 
   const table = useReactTable({
     data: filteredData,
@@ -443,7 +406,7 @@ export function RequestsContent() {
             <AlertDialogTitle>Approve Acquirer Request</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to approve the acquirer request for{' '}
-              <strong>{requestToApprove?.merchant.name}</strong>?
+              <strong>{requestToApprove?.merchantProfile?.merchantProfileName ?? requestToApprove?.merchant?.name}</strong>?
               This will enable the acquirer account for this merchant.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -467,7 +430,7 @@ export function RequestsContent() {
             <AlertDialogTitle>Reject Acquirer Request</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to reject the acquirer request for{' '}
-              <strong>{requestToReject?.merchant.name}</strong>?
+              <strong>{requestToReject?.merchantProfile?.merchantProfileName ?? requestToReject?.merchant?.name}</strong>?
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

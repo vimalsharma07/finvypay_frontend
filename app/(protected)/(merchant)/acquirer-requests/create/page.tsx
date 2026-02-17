@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -13,20 +13,14 @@ import {
   ToolbarActions,
 } from '@/layouts/main/components/toolbar';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { SearchSelect } from '@/components/ui/molecules/SearchSelect';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
-import {
-  createUserAcquirerRequest,
-} from '@/lib/services/user/acquirer-requests';
-import {
-  getUserAcquirerAccounts,
-  UserAcquirerAccount,
-  UserAcquirerAccountListResponse,
-} from '@/lib/services/user/acquirer-accounts';
+import { createUserAcquirerRequest } from '@/lib/services/user/acquirer-requests';
+import { getUserProfileId } from '@/lib/services/user/merchant-profile';
+import { useAuth } from '@/hooks/use-auth';
 import {
   Form,
   FormControl,
@@ -48,6 +42,7 @@ const CURRENCY_OPTIONS = [
 ];
 
 const formSchema = z.object({
+  processingVolume: z.number({ invalid_type_error: 'Processing volume is required' }).min(1, 'Processing volume must be at least 1'),
   acceptedPaymentMethods: z.array(z.string()).min(1, 'Select at least one payment method'),
   processingCurrency: z.array(z.string()).min(1, 'Select at least one currency'),
   description: z.string().optional(),
@@ -55,78 +50,31 @@ const formSchema = z.object({
 
 export default function CreateAcquirerRequestPage() {
   const router = useRouter();
+  const { user } = useAuth();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [loadingAccounts, setLoadingAccounts] = useState(true);
-  const [accounts, setAccounts] = useState<UserAcquirerAccount[]>([]);
-  const [selectedAccountId, setSelectedAccountId] = useState<string>('');
-  const [selectedProfileId, setSelectedProfileId] = useState<string>('');
+  const profileId = getUserProfileId(null, user);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      processingVolume: 50000,
       acceptedPaymentMethods: ['card'],
       processingCurrency: ['USD'],
       description: 'Need acquirer for USD/EUR processing',
     },
   });
 
-  // Fetch acquirer accounts to populate select
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      setLoadingAccounts(true);
-      try {
-        const response = await getUserAcquirerAccounts({ page: 1, limit: 50 });
-        handleApiResponse<UserAcquirerAccountListResponse>(response, {
-          onSuccess: (data) => {
-            const list = Array.isArray(data.data) ? data.data : (data.data?.data ?? []);
-            const normalized = list.map((item: any) => ({
-              ...item,
-              industryName: item.merchantProfile?.industry?.name,
-            }));
-            setAccounts(normalized as UserAcquirerAccount[]);
-
-            const first = normalized[0];
-            if (first) {
-              setSelectedAccountId(String(first.id));
-              if (first.merchantProfileId) {
-                setSelectedProfileId(String(first.merchantProfileId));
-              }
-            }
-          },
-          onError: (errorMessage) => {
-            toast.error(errorMessage || 'Failed to load acquirer accounts');
-          },
-        });
-      } catch {
-        toast.error('An unexpected error occurred');
-      } finally {
-        setLoadingAccounts(false);
-      }
-    };
-    fetchAccounts();
-  }, []);
-
-  const accountOptions = useMemo(
-    () =>
-      accounts.map((acc) => ({
-        value: acc.id.toString(),
-        label: acc.name || `Account ${acc.id}`,
-        profileId: acc.merchantProfileId,
-        subtitle: acc.merchantProfile?.industry?.name || acc.merchantProfile?.merchantProfileName || '',
-      })),
-    [accounts],
-  );
-
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (!selectedAccountId || !selectedProfileId) {
-      toast.error('Please select an acquirer account.');
+    if (!profileId) {
+      toast.error('Merchant profile not found. Please ensure you have an active profile.');
       return;
     }
     setIsSubmitting(true);
     try {
       const payload = {
-        merchantProfileId: Number(selectedProfileId),
-        acquirerAccountId: Number(selectedAccountId),
+        merchantProfileId: Number(profileId),
+        processingVolume: values.processingVolume,
         acceptedPaymentMethods: values.acceptedPaymentMethods,
         processingCurrency: values.processingCurrency,
         description: values.description || undefined,
@@ -169,31 +117,34 @@ export default function CreateAcquirerRequestPage() {
             <Form {...form}>
               <form className="space-y-6" onSubmit={form.handleSubmit(handleSubmit)}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Acquirer Account</Label>
-              <SearchSelect
-                options={accountOptions.map((opt) => ({
-                  value: opt.value,
-                  label: opt.label,
-                  description: opt.subtitle,
-                }))}
-                value={selectedAccountId}
-                onChange={(val) => {
-                  setSelectedAccountId(val);
-                  const matched = accountOptions.find((opt) => opt.value === val);
-                  if (matched?.profileId) {
-                    setSelectedProfileId(String(matched.profileId));
-                  }
-                }}
-                placeholder={loadingAccounts ? 'Loading accounts...' : 'Select acquirer account'}
-                disabled={loadingAccounts}
-              />
-              {selectedProfileId && (
-                <p className="text-xs text-muted-foreground">
-                  Profile ID: {selectedProfileId}
-                </p>
+            <FormField
+              control={form.control}
+              name="processingVolume"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Processing Volume</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={1}
+                      step={1}
+                      placeholder="e.g. 50000"
+                      value={field.value ?? ''}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (v === '') {
+                          field.onChange(undefined as any);
+                          return;
+                        }
+                        const n = Number(v);
+                        if (!Number.isNaN(n)) field.onChange(n);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-            </div>
+            />
 
             <MultiSelectField
               control={form.control}
@@ -201,7 +152,6 @@ export default function CreateAcquirerRequestPage() {
               label="Accepted Payment Methods"
               options={PAYMENT_METHOD_OPTIONS}
               placeholder="Select payment methods"
-              disabled={loadingAccounts}
             />
 
             <MultiSelectField
@@ -210,7 +160,6 @@ export default function CreateAcquirerRequestPage() {
               label="Processing Currency"
               options={CURRENCY_OPTIONS}
               placeholder="Select currencies"
-              disabled={loadingAccounts}
             />
 
             <FormField
@@ -237,12 +186,12 @@ export default function CreateAcquirerRequestPage() {
                     type="button"
                     variant="outline"
                     onClick={() => router.push('/acquirer-requests')}
-                    disabled={isSubmitting || loadingAccounts}
+                    disabled={isSubmitting || !profileId}
                   >
                     <X className="h-4 w-4 me-1" />
                     Cancel
                   </Button>
-                  <Button type="submit" variant="primary" disabled={isSubmitting || loadingAccounts}>
+                  <Button type="submit" variant="primary" disabled={isSubmitting || !profileId}>
                     <Plus className="h-4 w-4 me-1" />
                     {isSubmitting ? 'Submitting...' : 'Submit Request'}
                   </Button>

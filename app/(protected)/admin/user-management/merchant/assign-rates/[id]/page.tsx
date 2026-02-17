@@ -27,6 +27,8 @@ const ratesSchema = z.object({
   flaggedFee: z.number({ invalid_type_error: 'Flagged fee is required' }).min(0),
   setupFee: z.number({ invalid_type_error: 'Setup fee is required' }).min(0),
   refundFee: z.number({ invalid_type_error: 'Refund fee is required' }).min(0),
+  minTxnAmount: z.number({ invalid_type_error: 'Min transaction amount is required' }).min(0),
+  maxTxnAmount: z.number({ invalid_type_error: 'Max transaction amount is required' }).min(0),
 });
 
 type RatesFormData = z.infer<typeof ratesSchema>;
@@ -51,6 +53,8 @@ export default function AssignRatesPage() {
       flaggedFee: undefined as any,
       setupFee: undefined as any,
       refundFee: undefined as any,
+      minTxnAmount: undefined as any,
+      maxTxnAmount: undefined as any,
     },
     mode: 'onChange',
   });
@@ -80,6 +84,8 @@ export default function AssignRatesPage() {
                 flaggedFee: Number(rates.flaggedFee ?? 0),
                 setupFee: Number(rates.setupFee ?? 0),
                 refundFee: Number(rates.refundFee ?? 0),
+                minTxnAmount: Number(rates.minTxnAmount ?? 0),
+                maxTxnAmount: Number(rates.maxTxnAmount ?? 0),
               });
             } else {
               // No rates found; keep defaults
@@ -94,6 +100,8 @@ export default function AssignRatesPage() {
                 flaggedFee: undefined as any,
                 setupFee: undefined as any,
                 refundFee: undefined as any,
+                minTxnAmount: undefined as any,
+                maxTxnAmount: undefined as any,
               });
             }
           },
@@ -226,6 +234,8 @@ export default function AssignRatesPage() {
                 {numberField('flaggedFee', 'Flagged Fee (amount)', '0.01')}
                 {numberField('setupFee', 'Setup Fee (amount)', '0.01')}
                 {numberField('refundFee', 'Refund Fee (amount)', '0.01')}
+                {numberField('minTxnAmount', 'Min Transaction Amount', '0.01')}
+                {numberField('maxTxnAmount', 'Max Transaction Amount', '0.01')}
               </div>
 
               <div className="flex justify-end pt-2">

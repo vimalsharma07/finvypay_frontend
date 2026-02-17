@@ -22,6 +22,7 @@ export interface UserAcquirerRequest {
     terminalId?: string;
     rates?: Record<string, string | number>;
   };
+  processingVolume?: string | number;
   acceptedPaymentMethods?: string[];
   processingCurrency?: string[];
   status?: string;
@@ -62,19 +63,19 @@ export async function getUserAcquirerRequests(
   }
 }
 
+export interface CreateAcquirerRequestPayload {
+  merchantProfileId: number;
+  processingVolume: number;
+  acceptedPaymentMethods: string[];
+  processingCurrency: string[];
+  description?: string;
+}
+
 export async function createUserAcquirerRequest(
-  payload: {
-    merchantProfileId: number | string;
-    acquirerAccountId: number | string;
-    acceptedPaymentMethods: string[];
-    processingCurrency: string[];
-    description?: string;
-  }
+  payload: CreateAcquirerRequestPayload
 ): Promise<ApiResponse<{ success: boolean; message?: string }>> {
   try {
-    const data = await http.post(getBaseUrl(), {
-      ...payload,
-    }) as { success: boolean; message?: string };
+    const data = await http.post(getBaseUrl(), payload) as { success: boolean; message?: string };
     return { status: 201, data };
   } catch (error) {
     if (error instanceof ApiError) {
