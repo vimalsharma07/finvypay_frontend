@@ -170,59 +170,68 @@ export function AdminDashboardContent({ dateRange: dateRangeProp }: AdminDashboa
       ) : (
         <>
           {/* User Counters */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 lg:gap-7.5 lg:grid-cols-3">
             {/* Admins Card */}
-            <Card className="group relative overflow-hidden border-0 bg-linear-to-br from-amber-50 via-orange-50 to-red-50 dark:from-amber-950/30 dark:via-orange-950/30 dark:to-red-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <div className="absolute inset-0 bg-linear-to-br from-amber-500/10 via-orange-500/10 to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                <CardTitle className="text-sm font-semibold text-amber-700 dark:text-amber-300">Admins</CardTitle>
-                <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/50 group-hover:bg-amber-200 dark:group-hover:bg-amber-900/70 transition-colors duration-300">
-                  <UserCog className="h-5 w-5 text-amber-600 dark:text-amber-400 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300" />
-                </div>
+            <Card className="relative overflow-hidden border-amber-200/30 dark:border-amber-900/30 bg-linear-to-br from-amber-500/5 to-amber-500/10 shadow-md shadow-amber-500/10 hover:shadow-lg hover:shadow-amber-500/20 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/10 rounded-full -mr-10 -mt-10 blur-2xl" />
+              <div className="absolute bottom-0 right-0 opacity-10">
+                <UserCog className="h-32 w-32 text-amber-600 dark:text-amber-500" />
+              </div>
+              <CardHeader className="relative z-10">
+                <CardTitle className="text-sm font-medium text-foreground flex items-center justify-between w-full">
+                  <span className="flex-1">Admins</span>
+                  <div className="p-2 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                    <UserCog className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                </CardTitle>
               </CardHeader>
               <CardContent className="relative z-10">
-                <div className="text-3xl font-bold text-amber-900 dark:text-amber-100 mb-1 group-hover:scale-105 transition-transform duration-300 inline-block">
-                  {data.userCounters.totalAdmin.toLocaleString()}
-                </div>
-                <p className="text-xs text-amber-600/70 dark:text-amber-300/70 font-medium">
+                <div className="text-3xl font-bold mb-2">{data.userCounters.totalAdmin.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground">
                   Administrative users
                 </p>
               </CardContent>
             </Card>
 
             {/* Merchants Card */}
-            <Card className="group relative overflow-hidden border-0 bg-linear-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-950/30 dark:via-teal-950/30 dark:to-cyan-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <div className="absolute inset-0 bg-linear-to-br from-emerald-500/10 via-teal-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                <CardTitle className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Merchants</CardTitle>
-                <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 group-hover:bg-emerald-200 dark:group-hover:bg-emerald-900/70 transition-colors duration-300">
-                  <UserCheck className="h-5 w-5 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-300" />
-                </div>
+            <Card className="relative overflow-hidden border-emerald-200/30 dark:border-emerald-900/30 bg-linear-to-br from-emerald-500/5 to-emerald-500/10 shadow-md shadow-emerald-500/10 hover:shadow-lg hover:shadow-emerald-500/20 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/10 rounded-full -mr-10 -mt-10 blur-2xl" />
+              <div className="absolute bottom-0 right-0 opacity-10">
+                <UserCheck className="h-32 w-32 text-emerald-600 dark:text-emerald-500" />
+              </div>
+              <CardHeader className="relative z-10">
+                <CardTitle className="text-sm font-medium text-foreground flex items-center justify-between w-full">
+                  <span className="flex-1">Merchants</span>
+                  <div className="p-2 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+                    <UserCheck className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                </CardTitle>
               </CardHeader>
               <CardContent className="relative z-10">
-                <div className="text-3xl font-bold text-emerald-900 dark:text-emerald-100 mb-1 group-hover:scale-105 transition-transform duration-300 inline-block">
-                  {data.userCounters.totalMerchant.toLocaleString()}
-                </div>
-                <p className="text-xs text-emerald-600/70 dark:text-emerald-300/70 font-medium">
+                <div className="text-3xl font-bold mb-2">{data.userCounters.totalMerchant.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground">
                   Merchant accounts
                 </p>
               </CardContent>
             </Card>
 
             {/* Affiliates Card */}
-            <Card className="group relative overflow-hidden border-0 bg-linear-to-br from-violet-50 via-fuchsia-50 to-pink-50 dark:from-violet-950/30 dark:via-fuchsia-950/30 dark:to-pink-950/30 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <div className="absolute inset-0 bg-linear-to-br from-violet-500/10 via-fuchsia-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                <CardTitle className="text-sm font-semibold text-violet-700 dark:text-violet-300">Affiliates</CardTitle>
-                <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/50 group-hover:bg-violet-200 dark:group-hover:bg-violet-900/70 transition-colors duration-300">
-                  <Users className="h-5 w-5 text-violet-600 dark:text-violet-400 group-hover:scale-110 transition-transform duration-300" />
-                </div>
+            <Card className="relative overflow-hidden border-violet-200/30 dark:border-violet-900/30 bg-linear-to-br from-violet-500/5 to-violet-500/10 shadow-md shadow-violet-500/10 hover:shadow-lg hover:shadow-violet-500/20 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-violet-500/10 rounded-full -mr-10 -mt-10 blur-2xl" />
+              <div className="absolute bottom-0 right-0 opacity-10">
+                <Users className="h-32 w-32 text-violet-600 dark:text-violet-500" />
+              </div>
+              <CardHeader className="relative z-10">
+                <CardTitle className="text-sm font-medium text-foreground flex items-center justify-between w-full">
+                  <span className="flex-1">Affiliates</span>
+                  <div className="p-2 rounded-lg bg-violet-500/10 flex items-center justify-center shrink-0">
+                    <Users className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                  </div>
+                </CardTitle>
               </CardHeader>
               <CardContent className="relative z-10">
-                <div className="text-3xl font-bold text-violet-900 dark:text-violet-100 mb-1 group-hover:scale-105 transition-transform duration-300 inline-block">
-                  {data.userCounters.totalAffiliate.toLocaleString()}
-                </div>
-                <p className="text-xs text-violet-600/70 dark:text-violet-300/70 font-medium">
+                <div className="text-3xl font-bold mb-2">{data.userCounters.totalAffiliate.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground">
                   Affiliate partners
                 </p>
               </CardContent>
