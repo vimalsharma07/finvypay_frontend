@@ -160,7 +160,10 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
 
 
   const handleSubmit = (values: CheckoutFormValues) => {
-    // Redirect to card payment page with customer data
+    // No payment API is called on this page. We only:
+    // 1) GET payment link details via getUserPaymentLinkById(paymentLinkId) above
+    // 2) Redirect to /payment/card with form data in query params.
+    // The actual payment API (POST with payload + returnUrl) is called on the card page.
     const queryParams = new URLSearchParams({
       paymentLinkId,
       firstName: values.firstName,
@@ -345,28 +348,7 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
               )}
             />
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="orderId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Order ID</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="ORD-2024-0001"
-                        autoComplete="off"
-                        readOnly
-                        className="bg-muted"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-            </div>
+            {/* Order ID is auto-generated and passed in background; not shown to user */}
 
             <div className="grid gap-4 md:grid-cols-3">
               <FormField
