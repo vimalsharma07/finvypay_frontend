@@ -23,11 +23,13 @@ import { toast } from 'sonner';
 
 export interface AdminDashboardContentProps {
   dateRange?: DateRange | undefined;
+  merchantId?: string;
 }
 
-export function AdminDashboardContent({ dateRange: dateRangeProp }: AdminDashboardContentProps = {}) {
+export function AdminDashboardContent({ dateRange: dateRangeProp, merchantId: merchantIdProp = 'all' }: AdminDashboardContentProps = {}) {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedMerchantId, setSelectedMerchantId] = useState<string>(merchantIdProp);
   const [internalDateRange] = useState<DateRange | undefined>(() => {
     const today = new Date();
     return { from: startOfYear(today), to: endOfYear(today) };
@@ -40,11 +42,16 @@ export function AdminDashboardContent({ dateRange: dateRangeProp }: AdminDashboa
     return format(date, 'yyyy-MM-dd');
   };
 
+  // Update selectedMerchantId when prop changes
+  useEffect(() => {
+    setSelectedMerchantId(merchantIdProp);
+  }, [merchantIdProp]);
+
   // Fetch dashboard data
-  const fetchDashboard = async (from: string, to: string) => {
+  const fetchDashboard = async (from: string, to: string, merchantId?: number) => {
     setLoading(true);
     try {
-      const response = await getAdminDashboard(from, to);
+      const response = await getAdminDashboard(from, to, merchantId);
       handleApiResponse(response, {
         onSuccess: (res) => {
           if (res?.success && res.data) {
@@ -68,14 +75,15 @@ export function AdminDashboardContent({ dateRange: dateRangeProp }: AdminDashboa
     }
   };
 
-  // Initial fetch and when date range changes
+  // Initial fetch and when date range or merchant changes
   useEffect(() => {
     if (dateRange?.from && dateRange?.to) {
       const startDate = formatDateForAPI(dateRange.from);
       const endDate = formatDateForAPI(dateRange.to);
-      fetchDashboard(startDate, endDate);
+      const merchantId = selectedMerchantId === 'all' ? undefined : parseInt(selectedMerchantId, 10);
+      fetchDashboard(startDate, endDate, merchantId);
     }
-  }, [dateRange]);
+  }, [dateRange, selectedMerchantId]);
 
   // Chart data for transaction statistics
   const transactionChartData = useMemo(() => {

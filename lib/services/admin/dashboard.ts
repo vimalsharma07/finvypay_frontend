@@ -62,14 +62,19 @@ export interface DashboardResponse {
  * 
  * @param from - Start date in YYYY-MM-DD format
  * @param to - End date in YYYY-MM-DD format
+ * @param merchantId - Optional merchant ID to filter by specific merchant
  * @returns Promise with dashboard response
  */
 export async function getAdminDashboard(
   from: string,
-  to: string
+  to: string,
+  merchantId?: number
 ): Promise<ApiResponse<DashboardResponse>> {
   try {
-    const endpoint = adminRoutes.dashboard.dashboard(from, to);
+    let endpoint = adminRoutes.dashboard.dashboard(from, to);
+    if (merchantId) {
+      endpoint += `&merchantId=${merchantId}`;
+    }
     const data = await http.get(endpoint) as DashboardResponse;
 
     return {
