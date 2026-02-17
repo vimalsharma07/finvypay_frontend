@@ -8,7 +8,8 @@ import {
   ToolbarActions,
 } from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
-import { UserDashboardContent, DashboardDateFilter } from './components';
+import { DateRangeFilter } from '@/components/ui/date-range-filter';
+import { UserDashboardContent } from './components';
 import { DateRange } from 'react-day-picker';
 import { startOfYear, endOfYear } from 'date-fns';
 
@@ -23,7 +24,7 @@ const defaultDateRange = (): DateRange => {
  * Dedicated dashboard for user role with user-specific statistics and quick actions
  */
 export default function UserDashboardPage() {
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(defaultDateRange);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => defaultDateRange());
 
   return (
     <Fragment>
@@ -35,7 +36,13 @@ export default function UserDashboardPage() {
             icon={LayoutGrid}
           />
           <ToolbarActions>
-            <DashboardDateFilter dateRange={dateRange} onDateRangeChange={setDateRange} />
+            <DateRangeFilter
+              value={dateRange}
+              onChange={setDateRange}
+              defaultRange={defaultDateRange()}
+              placeholder="Select from and to date"
+              numberOfMonths={2}
+            />
           </ToolbarActions>
         </Toolbar>
       </Container>
