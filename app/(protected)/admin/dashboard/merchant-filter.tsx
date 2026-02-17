@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useState, useEffect, useMemo } from 'react';
+import { SearchSelect } from '@/components/ui/molecules/SearchSelect';
 import { getMerchants, type Merchant } from '@/lib/services/admin/users';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { Loader2 } from 'lucide-react';
+import type { Option } from '@/lib/types/common-types';
 
 interface MerchantFilterProps {
   value: string;
@@ -21,20 +22,16 @@ export function MerchantFilter({ value, onChange }: MerchantFilterProps) {
       try {
         // Try without role filter first to see all users, then we can filter client-side if needed
         const response = await getMerchants({ page: 1, limit: 1000 });
-        console.log('Merchants API Response:', response);
         handleApiResponse(response, {
           onSuccess: (res) => {
-            console.log('Merchants Success Response:', res);
             // res is MerchantListResponse: { success: boolean, data: Merchant[], meta: {...} }
             if (res?.success && Array.isArray(res.data)) {
               // Filter merchants client-side by role
               const merchantUsers = res.data.filter((user: Merchant) => 
                 user.role?.toLowerCase() === 'merchant' || user.role === 'MERCHANT'
               );
-              console.log('Filtered Merchants:', merchantUsers);
               setMerchants(merchantUsers);
             } else {
-              console.warn('Unexpected response structure:', res);
               // Try direct array access as fallback
               if (Array.isArray(res)) {
                 const merchantUsers = res.filter((user: Merchant) => 
@@ -58,36 +55,45 @@ export function MerchantFilter({ value, onChange }: MerchantFilterProps) {
     fetchMerchants();
   }, []);
 
+  // Convert merchants to options format for SearchSelect
+  // Display format: "Merchant Name (email@example.com)"
+  const options = useMemo<Option[]>(() => {
+    const merchantOptions: Option[] = [
+      { label: 'All Merchants', value: 'all' }
+    ];
+    
+    merchants.forEach((merchant) => {
+      const displayLabel = merchant.name 
+        ? `${merchant.name} (${merchant.email})`
+        : merchant.email;
+      merchantOptions.push({
+        label: displayLabel,
+        value: String(merchant.id),
+      });
+    });
+    
+    return merchantOptions;
+  }, [merchants]);
+
+  if (loading) {
+    return (
+      <div className="w-[350px] flex items-center justify-center gap-2 px-3 py-2 border border-input rounded-md bg-background">
+        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+        <span className="text-sm text-muted-foreground">Loading merchants...</span>
+      </div>
+    );
+  }
+
   return (
-    <Select value={value} onValueChange={onChange} disabled={loading}>
-      <SelectTrigger className="w-[250px]">
-        <SelectValue placeholder="Select merchant...">
-          {loading ? (
-            <span className="flex items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Loading...
-            </span>
-          ) : value === 'all' ? (
-            'All Merchants'
-          ) : (
-            merchants.find(m => String(m.id) === value)?.email || 'Select merchant...'
-          )}
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="all">All Merchants</SelectItem>
-        {merchants.length === 0 && !loading ? (
-          <SelectItem value="no-merchants" disabled>
-            No merchants found
-          </SelectItem>
-        ) : (
-          merchants.map((merchant) => (
-            <SelectItem key={merchant.id} value={String(merchant.id)}>
-              {merchant.email}
-            </SelectItem>
-          ))
-        )}
-      </SelectContent>
-    </Select>
+    <div className="w-[350px]">
+      <SearchSelect
+        options={options}
+        value={value}
+        onChange={onChange}
+        placeholder="Select merchant..."
+        disabled={loading}
+        maxHeight="300px"
+      />
+    </div>
   );
 }

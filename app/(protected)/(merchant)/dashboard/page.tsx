@@ -11,11 +11,11 @@ import { Container } from '@/components/common/container';
 import { DateRangeFilter } from '@/components/ui/date-range-filter';
 import { UserDashboardContent } from './components';
 import { DateRange } from 'react-day-picker';
-import { startOfYear, endOfYear } from 'date-fns';
+import { startOfMonth, endOfMonth } from 'date-fns';
 
 const defaultDateRange = (): DateRange => {
   const today = new Date();
-  return { from: startOfYear(today), to: endOfYear(today) };
+  return { from: startOfMonth(today), to: endOfMonth(today) };
 };
 
 /**

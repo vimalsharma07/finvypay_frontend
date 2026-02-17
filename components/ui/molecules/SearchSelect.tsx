@@ -53,17 +53,19 @@ export function SearchSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between"
+          className="w-full justify-between min-w-[200px]"
           disabled={disabled}
         >
-          {selectedOption
-            ? selectedOption[valueToShow]
-            : placeholder}
+          <span className="truncate text-left flex-1">
+            {selectedOption
+              ? selectedOption[valueToShow]
+              : placeholder}
+          </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[var(--radix-popover-trigger-width)] p-0" 
+        className="w-[var(--radix-popover-trigger-width)] p-0 min-w-[350px]" 
         align="start"
         side="bottom"
         sideOffset={4}
@@ -84,16 +86,17 @@ export function SearchSelect({
                 onChange(String(option[valueToSet]));
                 setOpen(false);
               }}
+              className="flex items-center"
             >
                   <Check
                     className={cn(
-                      'mr-2 h-4 w-4',
+                      'mr-2 h-4 w-4 shrink-0',
                       value === option[valueToSet]
                         ? 'opacity-100'
                         : 'opacity-0'
                     )}
                   />
-                  {option[valueToShow]}
+                  <span className="truncate flex-1">{option[valueToShow]}</span>
                 </CommandItem>
               ))}
             </CommandGroup>

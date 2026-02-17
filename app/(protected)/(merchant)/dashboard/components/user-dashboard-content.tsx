@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState, useMemo } from 'react';
-import { format, startOfYear, endOfYear } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -59,7 +59,7 @@ export function UserDashboardContent({ dateRange: dateRangeProp }: UserDashboard
   const [dashboardLoading, setDashboardLoading] = useState(true);
   const [internalDateRange] = useState<DateRange | undefined>(() => {
     const today = new Date();
-    return { from: startOfYear(today), to: endOfYear(today) };
+    return { from: startOfMonth(today), to: endOfMonth(today) };
   });
   const dateRange = dateRangeProp ?? internalDateRange;
 

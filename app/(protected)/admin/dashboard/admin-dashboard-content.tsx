@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { format, startOfYear, endOfYear } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import {
   Users,
@@ -32,7 +32,7 @@ export function AdminDashboardContent({ dateRange: dateRangeProp, merchantId: me
   const [selectedMerchantId, setSelectedMerchantId] = useState<string>(merchantIdProp);
   const [internalDateRange] = useState<DateRange | undefined>(() => {
     const today = new Date();
-    return { from: startOfYear(today), to: endOfYear(today) };
+    return { from: startOfMonth(today), to: endOfMonth(today) };
   });
   const dateRange = dateRangeProp ?? internalDateRange;
 
