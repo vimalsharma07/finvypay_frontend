@@ -143,7 +143,7 @@ export function Header() {
   return (
     <header
       className={cn(
-        'header fixed top-0 z-10 start-0 flex items-stretch shrink-0 border-b border-transparent bg-background end-0 pe-(--removed-body-scroll-bar-size,0px)',
+        'header fixed top-0 z-50 start-0 flex items-stretch shrink-0 border-b border-transparent bg-background/95 backdrop-blur-sm end-0 pe-(--removed-body-scroll-bar-size,0px)',
         headerSticky && 'border-b border-border',
       )}
     >
@@ -176,9 +176,9 @@ export function Header() {
 
         {/* Search Input - Desktop */}
         {!mobileMode && (
-          <div className="flex-1 max-w-md mx-auto">
+          <div className="flex-1 max-w-md mx-auto relative z-50">
             <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
               <Input
                 ref={searchInputRef}
                 type="text"
@@ -186,9 +186,9 @@ export function Header() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsSearchDialogOpen(true)}
                 placeholder="Search..."
-                className="pl-9 pr-20 h-9 bg-muted/50 border-border/50 focus-visible:ring-primary focus-visible:border-primary"
+                className="pl-9 pr-20 h-9 bg-muted/50 border-border/50 focus-visible:ring-primary focus-visible:border-primary relative z-10"
               />
-              <kbd className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+              <kbd className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 z-10">
                 <span className="text-xs">{isMac ? '⌘' : 'Ctrl'}</span>K
               </kbd>
             </div>

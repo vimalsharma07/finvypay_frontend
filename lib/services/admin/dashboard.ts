@@ -37,10 +37,18 @@ export interface ConnectorTransactionsSummary {
   [key: string]: unknown;
 }
 
+export interface AcquirerWiseVolume {
+  acquirerName: string;
+  totalAmount: number;
+  totalAmountUsd: number;
+  transactionCount: number;
+}
+
 export interface DashboardData {
   userCounters: UserCounters;
   transactionStatistics: TransactionStatistics;
   connectorTransactionsSummary: ConnectorTransactionsSummary[];
+  acquirerWiseVolumes: AcquirerWiseVolume[];
 }
 
 export interface DashboardResponse {

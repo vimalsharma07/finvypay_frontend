@@ -48,8 +48,11 @@ export function AdminDashboardContent({ dateRange: dateRangeProp }: AdminDashboa
       handleApiResponse(response, {
         onSuccess: (res) => {
           if (res?.success && res.data) {
+            console.log('Dashboard data received:', res.data);
+            console.log('Acquirer volumes:', res.data.acquirerWiseVolumes);
             setData(res.data);
           } else {
+            console.log('No data in response:', res);
             setData(null);
           }
         },
@@ -156,6 +159,81 @@ export function AdminDashboardContent({ dateRange: dateRangeProp }: AdminDashboa
       },
     },
   }), [transactionChartData]);
+
+  // Acquirer-wise volumes chart data
+  const acquirerVolumesChartData = useMemo(() => {
+    console.log('Processing acquirer volumes data:', data?.acquirerWiseVolumes);
+    if (!data?.acquirerWiseVolumes) {
+      console.log('No acquirerWiseVolumes in data');
+      return null;
+    }
+    
+    if (data.acquirerWiseVolumes.length === 0) {
+      console.log('acquirerWiseVolumes array is empty');
+      return null;
+    }
+
+    const volumes = data.acquirerWiseVolumes;
+    const chartData = {
+      categories: volumes.map((v) => v.acquirerName),
+      amounts: volumes.map((v) => parseFloat(v.totalAmountUsd.toFixed(2))),
+    };
+    console.log('Chart data prepared:', chartData);
+    return chartData;
+  }, [data]);
+
+  // Acquirer volumes bar chart options
+  const acquirerVolumesChartOptions = useMemo(() => {
+    if (!acquirerVolumesChartData) return {};
+
+    return {
+      chart: {
+        type: 'bar' as const,
+        toolbar: { show: false },
+      },
+      plotOptions: {
+        bar: {
+          horizontal: true,
+          columnWidth: '60%',
+          borderRadius: 4,
+        },
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: (val: number) => `$${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        style: {
+          fontSize: '12px',
+          fontWeight: 600,
+        },
+      },
+      xaxis: {
+        categories: acquirerVolumesChartData.categories,
+        labels: {
+          style: {
+            fontSize: '12px',
+          },
+        },
+      },
+      yaxis: {
+        labels: {
+          formatter: (val: number) => `$${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+          style: {
+            fontSize: '12px',
+          },
+        },
+      },
+      colors: ['#3b82f6'],
+      tooltip: {
+        y: {
+          formatter: (val: number) => `$${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        },
+      },
+      grid: {
+        borderColor: 'var(--color-border)',
+        strokeDashArray: 4,
+      },
+    };
+  }, [acquirerVolumesChartData]);
 
   return (
     <div className="space-y-6">
@@ -371,6 +449,32 @@ export function AdminDashboardContent({ dateRange: dateRangeProp }: AdminDashboa
               </Card>
             </div>
           )}
+
+          {/* Acquirer-wise Transaction Volumes Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Acquirer-wise Transaction Volumes</CardTitle>
+              <CardDescription>Total transaction volumes grouped by acquirer</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {acquirerVolumesChartData && acquirerVolumesChartData.categories.length > 0 ? (
+                <DynamicApexChart
+                  type="bar"
+                  series={[{ name: 'Volume (USD)', data: acquirerVolumesChartData.amounts }]}
+                  options={acquirerVolumesChartOptions}
+                  height={Math.max(300, acquirerVolumesChartData.categories.length * 50)}
+                />
+              ) : data && Array.isArray(data.acquirerWiseVolumes) ? (
+                <div className="text-center py-10 text-muted-foreground">
+                  No transaction data available for the selected date range
+                </div>
+              ) : (
+                <div className="text-center py-10 text-muted-foreground">
+                  {loading ? 'Loading acquirer volumes data...' : 'No acquirer data available'}
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
         </>
       )}
