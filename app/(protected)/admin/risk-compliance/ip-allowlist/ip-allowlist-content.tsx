@@ -5,7 +5,6 @@ import { Network } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   getIpWhitelist,
-  deleteIpWhitelist,
   updateIpWhitelistStatus,
   updateIpWhitelist,
   createIpWhitelist,
@@ -35,20 +34,10 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Search, X, Pencil, Trash2, CheckCircle2, Plus } from 'lucide-react';
+import { Search, X, Pencil, CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { TableActionMenu, TableActionMenuItem } from '@/app/(protected)/components/table-action-menu';
 import { DynamicAddIpDialogAdmin, DynamicEditIpDialog } from '@/components/dialogs';
@@ -62,10 +51,8 @@ export function IpAllowlistPageContent({ addDialogOpen: externalAddDialogOpen, s
   const [ipWhitelist, setIpWhitelist] = useState<IpWhitelist[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<IpWhitelistListResponse['data']['meta'] | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [ipToDelete, setIpToDelete] = useState<IpWhitelist | null>(null);
-  const [deleting, setDeleting] = useState(false);
   const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [ipToEdit, setIpToEdit] = useState<IpWhitelist | null>(null);
   const [updating, setUpdating] = useState(false);
@@ -138,10 +125,11 @@ export function IpAllowlistPageContent({ addDialogOpen: externalAddDialogOpen, s
     );
   }, [searchQuery, ipWhitelist]);
 
+  /** API status IDs: 1 = pending, 2 = approved, 3 = rejected */
   const handleApproveIp = async (id: string) => {
     setApprovingId(id);
     try {
-      const response = await updateIpWhitelistStatus(id, { status: 'approved' });
+      const response = await updateIpWhitelistStatus(id, { status: 2 });
       handleApiResponse(response, {
         onSuccess: () => {
           toast.success('IP whitelist entry approved successfully!');
@@ -160,6 +148,31 @@ export function IpAllowlistPageContent({ addDialogOpen: externalAddDialogOpen, s
       console.error('Approve IP whitelist error:', error);
     } finally {
       setApprovingId(null);
+    }
+  };
+
+  const handleRejectIp = async (id: string) => {
+    setRejectingId(id);
+    try {
+      const response = await updateIpWhitelistStatus(id, { status: 3 });
+      handleApiResponse(response, {
+        onSuccess: () => {
+          toast.success('IP whitelist entry rejected.');
+          fetchIpWhitelist(page, limit, sortBy, sortOrder);
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to reject IP whitelist entry');
+        },
+        onValidationError: (errors, messages) => {
+          console.error('Validation errors:', errors);
+          toast.error(Array.isArray(messages) ? messages.join(', ') : messages);
+        },
+      });
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+      console.error('Reject IP whitelist error:', error);
+    } finally {
+      setRejectingId(null);
     }
   };
 
@@ -216,30 +229,6 @@ export function IpAllowlistPageContent({ addDialogOpen: externalAddDialogOpen, s
       console.error('Add IP whitelist error:', error);
     } finally {
       setAdding(false);
-    }
-  };
-
-  const handleDeleteIp = async () => {
-    if (!ipToDelete) return;
-    setDeleting(true);
-    try {
-      const response = await deleteIpWhitelist(ipToDelete.id);
-      handleApiResponse(response, {
-        onSuccess: () => {
-          toast.success('IP whitelist entry deleted successfully!');
-          setDeleteDialogOpen(false);
-          setIpToDelete(null);
-          fetchIpWhitelist(page, limit, sortBy, sortOrder);
-        },
-        onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to delete IP whitelist entry');
-        },
-      });
-    } catch (error) {
-      toast.error('An unexpected error occurred');
-      console.error('Delete IP whitelist error:', error);
-    } finally {
-      setDeleting(false);
     }
   };
 
@@ -311,43 +300,40 @@ export function IpAllowlistPageContent({ addDialogOpen: externalAddDialogOpen, s
         cell: ({ row }) => {
           const isPending = row.original.status === 'pending';
           const isApproving = approvingId === row.original.id;
+          const isRejecting = rejectingId === row.original.id;
           const actions: TableActionMenuItem<IpWhitelist>[] = [];
           if (isPending) {
             actions.push({
               label: 'Approve',
               icon: CheckCircle2,
               onClick: () => handleApproveIp(row.original.id),
-              disabled: isApproving,
+              disabled: isApproving || isRejecting,
             });
-          }
-          actions.push(
-            {
-              label: 'Edit',
-              icon: Pencil,
-              onClick: () => {
-                setIpToEdit(row.original);
-                setEditDialogOpen(true);
-              },
-              separator: isPending,
-            },
-            {
-              label: 'Delete',
-              icon: Trash2,
-              onClick: () => {
-                setIpToDelete(row.original);
-                setDeleteDialogOpen(true);
-              },
+            actions.push({
+              label: 'Reject',
+              icon: XCircle,
+              onClick: () => handleRejectIp(row.original.id),
+              disabled: isApproving || isRejecting,
               variant: 'destructive',
               separator: true,
-            }
-          );
+            });
+          }
+          actions.push({
+            label: 'Edit',
+            icon: Pencil,
+            onClick: () => {
+              setIpToEdit(row.original);
+              setEditDialogOpen(true);
+            },
+            separator: isPending,
+          });
           return <TableActionMenu row={row.original} actions={actions} />;
         },
         enableSorting: false,
         size: 80,
       },
     ],
-    [approvingId],
+    [approvingId, rejectingId],
   );
 
   const table = useReactTable({
@@ -457,30 +443,6 @@ export function IpAllowlistPageContent({ addDialogOpen: externalAddDialogOpen, s
         isSubmitting={updating}
       />
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete IP Whitelist Entry</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete IP &quot;{ipToDelete?.ip}&quot;? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>
-              <X className="h-4 w-4" />
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteIp}
-              disabled={deleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              <Trash2 className="h-4 w-4" />
-              {deleting ? 'Deleting...' : 'Delete'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Fragment>
   );
 }

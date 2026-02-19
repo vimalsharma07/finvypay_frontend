@@ -8,6 +8,26 @@ import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
 
+/** Transaction status enum – display by name in UI, send ID in API */
+export enum TransactionStatus {
+  PENDING = 0,
+  SUCCESS = 1,
+  FAILED = 2,
+  BLOCKED = 3,
+  ABANDONED = 4,
+  REDIRECTED = 5,
+}
+
+/** Options for advance filter: label = display name, value = status ID for API */
+export const TRANSACTION_STATUS_FILTER_OPTIONS = [
+  { label: 'Pending', value: TransactionStatus.PENDING },
+  { label: 'Success', value: TransactionStatus.SUCCESS },
+  { label: 'Failed', value: TransactionStatus.FAILED },
+  { label: 'Blocked', value: TransactionStatus.BLOCKED },
+  { label: 'Abandoned', value: TransactionStatus.ABANDONED },
+  { label: 'Redirected', value: TransactionStatus.REDIRECTED },
+] as const;
+
 // Transaction types matching the API response structure
 export interface TransactionUser {
   id: string;
@@ -24,6 +44,8 @@ export interface Transaction {
   connectorId: string | null;
   gatewayId: string;
   orderId: string;
+  acquirerId?: number;
+  acquirerName?: string | null;
   firstName: string;
   lastName: string;
   email: string;
@@ -71,6 +93,23 @@ export interface TransactionListParams {
   limit?: number;
   /** Search by transactionId, orderId, or email (partial match) */
   search?: string;
+  /** Advance filter params (production & sandbox) */
+  userId?: string;
+  orderId?: string;
+  cardBin?: string;
+  currency?: string;
+  country?: string;
+  refundDateStart?: string;
+  refundDateEnd?: string;
+  message?: string;
+  transactionId?: string;
+  email?: string;
+  connector?: string;
+  status?: string;
+  transactionDateStart?: string;
+  transactionDateEnd?: string;
+  chargebackDateStart?: string;
+  chargebackDateEnd?: string;
 }
 
 export interface TransactionListMeta {

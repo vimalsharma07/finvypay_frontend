@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import { Receipt } from 'lucide-react';
+import { Receipt, FileText, ExternalLink } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -27,6 +27,7 @@ import { DataGridTable } from '@/components/ui/data-grid-table';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardFooter, CardTable } from '@/components/ui/card';
+import { TableActionMenu, TableActionMenuItem } from '@/app/(protected)/components/table-action-menu';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -67,6 +68,14 @@ export default function UserSettlementsPage() {
 
   const paidStatusVariant = (isPaid: boolean) => {
     return isPaid ? 'success' : 'warning';
+  };
+
+  const handleViewPdf = (pdfUrl: string | null) => {
+    if (!pdfUrl) {
+      toast.error('No PDF available for this settlement');
+      return;
+    }
+    window.open(pdfUrl, '_blank', 'noopener,noreferrer');
   };
 
   const fetchData = useCallback(async () => {
@@ -186,6 +195,34 @@ export default function UserSettlementsPage() {
           <DataGridColumnHeader column={column} title="Success Count" />
         ),
         cell: ({ row }) => formatNumber(row.original.totalSuccessCount),
+      },
+      {
+        id: 'actions',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Actions" />
+        ),
+        cell: ({ row }) => {
+          const actions: TableActionMenuItem<UserSettlement>[] = [
+            {
+              label: 'View',
+              icon: FileText,
+              route: (r) => `/settlement/${r.id}`,
+            },
+            ...(row.original.pdfUrl
+              ? [
+                  {
+                    label: 'View PDF',
+                    icon: ExternalLink,
+                    onClick: (r) => handleViewPdf(r.pdfUrl),
+                    separator: true,
+                  } as TableActionMenuItem<UserSettlement>,
+                ]
+              : []),
+          ];
+          return <TableActionMenu row={row.original} actions={actions} />;
+        },
+        enableSorting: false,
+        size: 80,
       },
     ],
     []

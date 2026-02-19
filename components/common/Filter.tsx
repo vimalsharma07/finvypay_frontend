@@ -29,7 +29,7 @@ import {
   Option,
 } from "@/lib/types/common-types";
 import { generateFilterQuery, formatDate } from "@/lib/helpers";
-import { DateRangePicker } from "@/components/ui/molecules/DatePicker";
+import { DateRangePicker, SingleDatePicker } from "@/components/ui/molecules/DatePicker";
 import { SearchSelect } from "@/components/ui/molecules/SearchSelect";
 import { MultiSelect } from "./MultiSelect";
 
@@ -188,6 +188,20 @@ export function Filter({
     return null;
   };
 
+  const handleSingleDateChange = useCallback(
+    (field: keyof FilterFields, value: string | null) => {
+      setFilterValues((prev: FilterFields) => {
+        if (!value || value.trim() === "") {
+          const next = { ...prev };
+          delete next[field as keyof FilterFields];
+          return next;
+        }
+        return { ...prev, [field]: value.trim() };
+      });
+    },
+    []
+  );
+
   const handleApplyFilters = useCallback(() => {
     const queryObject: any = generateFilterQuery(filterValues);
     setOpen(false);
@@ -197,8 +211,9 @@ export function Filter({
   const handleResetFilters = useCallback(() => {
     setFilterValues({});
     setOpen(false);
+    onApplyFilters({});
     router.replace(baseUrl);
-  }, [baseUrl, router, setOpen]);
+  }, [baseUrl, router, setOpen, onApplyFilters]);
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -348,6 +363,22 @@ export function Filter({
                     }
                   />
                 )}
+                {filter.type === FieldTypes.date && (
+                  <SingleDatePicker
+                    value={
+                      (filterValues[filter.field as keyof FilterFields] as string) || null
+                    }
+                    onChange={(value) =>
+                      handleSingleDateChange(
+                        filter.field as keyof FilterFields,
+                        value
+                      )
+                    }
+                    placeholder={`Select ${filter.label}`}
+                    className="text-xs md:text-sm w-full"
+                  />
+                )}
+
                 {filter.type === FieldTypes.dateRange && (
                   <div>
                     <DateRangePicker

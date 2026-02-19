@@ -9,6 +9,7 @@ import {
   markSuspicious,
   Transaction,
   TransactionListResponse,
+  TRANSACTION_STATUS_FILTER_OPTIONS,
 } from '@/lib/services/admin/transaction';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
@@ -47,12 +48,11 @@ import {
   FiltersSchema,
   Option,
 } from '@/lib/types/common-types';
-import { generateFilterQuery } from '@/lib/helpers';
+import { generateFilterQuery, mapAdminTransactionFiltersToApiParams } from '@/lib/helpers';
 import { getMerchants } from '@/lib/services/admin/users';
 import { getUserConnectors } from '@/lib/services/admin/connectors';
 import { useCurrencies } from '@/lib/hooks/use-currencies';
 import { useCountries } from '@/lib/hooks/use-countries';
-import { getTimeZones } from '@/i18n/timezones';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 
 interface TransactionsPageContentProps {
@@ -82,7 +82,6 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
 
   // Dropdown options
   const [userOptions, setUserOptions] = useState<Option[]>([]);
-  const [companyOptions, setCompanyOptions] = useState<Option[]>([]);
   const [connectorOptions, setConnectorOptions] = useState<Option[]>([]);
   const { currencies } = useCurrencies();
   const { countries } = useCountries();
@@ -102,11 +101,6 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
       })),
     [countries]
   );
-  const timeZoneOptions = useMemo(
-    () => getTimeZones().map((z) => ({ label: z.label, value: z.value })),
-    []
-  );
-
   // Pagination state
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
@@ -127,10 +121,12 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
     async (pageNum: number, pageLimit: number, activeFilters: FilterFields = {}) => {
       setLoading(true);
       try {
+        const filterQuery = generateFilterQuery(activeFilters);
+        const apiParams = mapAdminTransactionFiltersToApiParams(filterQuery);
         const params = {
           page: pageNum,
           limit: pageLimit,
-          ...generateFilterQuery(activeFilters),
+          ...apiParams,
         };
 
         const response = await getProductionTransactions(params);
@@ -176,14 +172,6 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
             value: String(user.id),
           }));
           setUserOptions(mappedUsers);
-          setCompanyOptions(
-            usersRes.data.data
-              .filter((u) => u.name)
-              .map((u) => ({
-                label: u.name,
-                value: u.name,
-              }))
-          );
         }
 
         if (connectorsRes.data?.data?.data) {
@@ -230,18 +218,6 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
   }, [meta]);
 
   // Handlers for action menu
-  const handleWebhookLogs = useCallback((transaction: Transaction) => {
-    console.log('Webhook logs for transaction:', transaction.transactionId);
-  }, []);
-
-  const handleProviderLogs = useCallback((transaction: Transaction) => {
-    console.log('Provider logs for transaction:', transaction.transactionId);
-  }, []);
-
-  const handleTransactionLogs = useCallback((transaction: Transaction) => {
-    console.log('Transaction logs for transaction:', transaction.transactionId);
-  }, []);
-
   const handleViewDetails = useCallback((transaction: Transaction) => {
     setSelectedTransaction(transaction);
     setDetailsDialogOpen(true);
@@ -273,17 +249,9 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
   const filterSchema: FiltersSchema[] = useMemo(
     () => [
       { field: 'user_id', label: 'Merchant', type: FieldTypes.multiSelect, options: userOptions },
-      {
-        field: 'company_name',
-        label: 'Company',
-        type: FieldTypes.multiSelect,
-        options: companyOptions,
-      },
       { field: 'transaction_id', label: 'Transaction ID', type: FieldTypes.input },
       { field: 'order_id', label: 'Order ID', type: FieldTypes.input },
       { field: 'email', label: 'Email', type: FieldTypes.input },
-      { field: 'phone_number', label: 'Phone Number', type: FieldTypes.input },
-      { field: 'card_number', label: 'Card Number', type: FieldTypes.input },
       { field: 'card_bin', label: 'Card Bin', type: FieldTypes.input },
       {
         field: 'connector',
@@ -297,39 +265,14 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
         type: FieldTypes.searchSelect,
         options: currencyOptions,
       },
-      { field: 'amount_greater_than', label: 'Amount greater than', type: FieldTypes.input },
-      { field: 'amount_less_than', label: 'Amount less than', type: FieldTypes.input },
       {
         field: 'status',
         label: 'Status',
         type: FieldTypes.multiSelect,
-        options: [
-          'Success',
-          'Failed',
-          'Initialized',
-          'Pending',
-          'Redirect',
-          'Blocked',
-          'Abandoned',
-        ].map((label) => ({ label, value: label.toLowerCase() })),
-      },
-      {
-        field: 'card_type',
-        label: 'Card Type',
-        type: FieldTypes.select,
-        options: ['VISA', 'MASTER', 'DINNER CLUB', 'JCB'].map((label) => ({
-          label,
-          value: label,
+        options: TRANSACTION_STATUS_FILTER_OPTIONS.map((o) => ({
+          label: o.label,
+          value: String(o.value),
         })),
-      },
-      {
-        field: 'is_card_wl',
-        label: 'Card FT/WTL',
-        type: FieldTypes.select,
-        options: [
-          { label: 'FT', value: 'FT' },
-          { label: 'WTL', value: 'WTL' },
-        ],
       },
       {
         field: 'country',
@@ -337,20 +280,12 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
         type: FieldTypes.searchSelect,
         options: countryOptions,
       },
-      { field: 'created_at', label: 'Created At', type: FieldTypes.dateRange },
-      { field: 'transaction_date', label: 'Transaction Date', type: FieldTypes.dateRange },
-      { field: 'refund_date', label: 'Refund Date', type: FieldTypes.dateRange },
-      { field: 'chargeback_date', label: 'ChargeBack Date', type: FieldTypes.dateRange },
-      { field: 'suspicious_date', label: 'Suspicious Date', type: FieldTypes.dateRange },
+      { field: 'transaction_date', label: 'Transaction Date', type: FieldTypes.date },
+      { field: 'refund_date', label: 'Refund Date', type: FieldTypes.date },
+      { field: 'chargeback_date', label: 'ChargeBack Date', type: FieldTypes.date },
       { field: 'message', label: 'Message', type: FieldTypes.input },
-      {
-        field: 'time_zone',
-        label: 'Time Zone',
-        type: FieldTypes.searchSelect,
-        options: timeZoneOptions,
-      },
     ],
-    [userOptions, companyOptions, connectorOptions, currencyOptions, countryOptions, timeZoneOptions]
+    [userOptions, connectorOptions, currencyOptions, countryOptions]
   );
 
   const handleChargebackSubmit = useCallback(
@@ -434,24 +369,13 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
   const columns = useMemo<ColumnDef<Transaction>[]>(
     () =>
       getTransactionColumns(
-        handleWebhookLogs,
-        handleProviderLogs,
-        handleTransactionLogs,
         handleViewDetails,
         true,
         handleChargeback,
         handleRefund,
         handleSuspicious
       ),
-    [
-      handleWebhookLogs,
-      handleProviderLogs,
-      handleTransactionLogs,
-      handleViewDetails,
-      handleChargeback,
-      handleRefund,
-      handleSuspicious,
-    ]
+    [handleViewDetails, handleChargeback, handleRefund, handleSuspicious]
   );
 
   const table = useReactTable({

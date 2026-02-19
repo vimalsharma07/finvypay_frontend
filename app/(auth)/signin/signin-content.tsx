@@ -21,11 +21,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { LoaderCircleIcon } from 'lucide-react';
-import { Icons } from '@/components/common/icons';
 import { getSigninSchema, SigninSchemaType } from '../forms/signin-schema';
 import { login, validateUser } from '@/lib/services/auth';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
-import { useGoogleOAuth } from '@/hooks/use-google-oauth';
 import { ForgotPasswordDialog } from './components/forgot-password-dialog';
 import { useOtpSignin } from '@/hooks/use-otp-signin';
 import { handleLoginRedirect, getRedirectPathByRole, getUserRole } from '@/lib/utils/menu-utils';
@@ -64,29 +62,6 @@ export function SigninContent() {
     }
     setIsCheckingAuth(false);
   }, [router]);
-
-  // Google OAuth hook
-  const {
-    signInWithGoogle,
-    isProcessing: isGoogleProcessing,
-    error: googleError,
-  } = useGoogleOAuth({
-    onSuccess: async (data) => {
-      try {
-        // Fetch and store permissions after successful Google login
-        await fetchAndStorePermissions();
-        handleLoginRedirect(data, router);
-      } catch (permError) {
-        // Even if permissions fetch fails, still redirect (backend handles authorization)
-        console.error('Failed to fetch permissions:', permError);
-        handleLoginRedirect(data, router);
-      }
-    },
-    onError: (errorMessage) => {
-      setError(errorMessage);
-    },
-    autoLoad: true, // Auto-load Google script
-  });
 
   // OTP Signin hook
   const {
@@ -319,38 +294,12 @@ export function SigninContent() {
           </p>
         </div>
 
-        <div className="flex flex-col gap-3.5">
-          <Button
-            variant="outline"
-            type="button"
-            onClick={signInWithGoogle}
-            disabled={isGoogleProcessing || isProcessing}
-            className="w-full h-11 border-2 hover:bg-muted/50 transition-all"
-          >
-            {isGoogleProcessing ? (
-              <LoaderCircleIcon className="size-4 animate-spin mr-1" />
-            ) : (
-              <Icons.googleColorful className="size-5! opacity-100! mr-1" />
-            )}
-            {isGoogleProcessing ? 'Signing in...' : 'Sign in with Google'}
-          </Button>
-        </div>
-
-        <div className="relative py-2">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-border/50" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase tracking-wider">
-            <span className="bg-card px-3 text-muted-foreground font-medium">or continue with</span>
-          </div>
-        </div>
-
-        {(error || googleError) && (
+        {error && (
           <Alert variant="destructive" className="border-destructive/50">
             <AlertIcon>
               <AlertCircle className="h-4 w-4" />
             </AlertIcon>
-            <AlertTitle className="text-sm">{error || googleError}</AlertTitle>
+            <AlertTitle className="text-sm">{error}</AlertTitle>
           </Alert>
         )}
 
@@ -498,38 +447,12 @@ export function SigninContent() {
             </p>
           </div>
 
-          <div className="flex flex-col gap-3.5">
-            <Button
-              variant="outline"
-              type="button"
-              onClick={signInWithGoogle}
-              disabled={isGoogleProcessing || isSendingOtp}
-              className="w-full h-11 border-2 hover:bg-muted/50 transition-all"
-            >
-              {isGoogleProcessing ? (
-                <LoaderCircleIcon className="size-4 animate-spin mr-1" />
-              ) : (
-                <Icons.googleColorful className="size-5! opacity-100! mr-1" />
-              )}
-              {isGoogleProcessing ? 'Signing in...' : 'Sign in with Google'}
-            </Button>
-          </div>
-
-          <div className="relative py-2">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border/50" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase tracking-wider">
-              <span className="bg-card px-3 text-muted-foreground font-medium">or continue with</span>
-            </div>
-          </div>
-
-          {(error || googleError || otpError) && (
+          {(error || otpError) && (
             <Alert variant="destructive" className="border-destructive/50">
               <AlertIcon>
                 <AlertCircle className="h-4 w-4" />
               </AlertIcon>
-              <AlertTitle className="text-sm">{error || googleError || otpError}</AlertTitle>
+              <AlertTitle className="text-sm">{error || otpError}</AlertTitle>
             </Alert>
           )}
 

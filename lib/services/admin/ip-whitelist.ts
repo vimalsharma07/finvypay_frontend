@@ -55,8 +55,11 @@ export interface IpWhitelistListResponse {
   message?: string;
 }
 
+/** API expects status ID: 1 = pending, 2 = approved, 3 = rejected */
+export type IpWhitelistStatusId = 1 | 2 | 3;
+
 export interface UpdateIpWhitelistStatusPayload {
-  status: 'approved' | 'pending' | 'rejected';
+  status: IpWhitelistStatusId;
 }
 
 export interface UpdateIpWhitelistPayload {

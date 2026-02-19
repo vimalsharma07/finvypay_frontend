@@ -3,7 +3,7 @@
 import { Fragment, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { format } from 'date-fns';
-import { FileText, ArrowLeft } from 'lucide-react';
+import { FileText, ArrowLeft, ExternalLink } from 'lucide-react';
 import { Toolbar, ToolbarHeading } from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -156,7 +156,7 @@ export default function UserSettlementDetailPage() {
       <Container>
         <div className="space-y-6">
           {/* Header Actions */}
-          <div className="flex justify-start items-center">
+          <div className="flex flex-wrap justify-start items-center gap-2">
             <Button
               variant="outline"
               onClick={() => router.push('/settlement/all')}
@@ -165,6 +165,16 @@ export default function UserSettlementDetailPage() {
               <ArrowLeft className="h-4 w-4" />
               Back to Settlements
             </Button>
+            {settlementData.pdfUrl && (
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={() => window.open(settlementData.pdfUrl!, '_blank', 'noopener,noreferrer')}
+              >
+                <ExternalLink className="h-4 w-4" />
+                View PDF
+              </Button>
+            )}
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">

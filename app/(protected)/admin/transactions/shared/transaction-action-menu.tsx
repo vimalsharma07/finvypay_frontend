@@ -1,21 +1,17 @@
 'use client';
 
-import { EllipsisVertical, DollarSign, Ban, ArrowLeftRight, Eye } from 'lucide-react';
+import { EllipsisVertical, DollarSign, Ban, ArrowLeftRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Transaction } from '@/lib/services/admin/transaction';
 
 interface TransactionActionMenuProps {
   transaction: Transaction;
-  onWebhookLogs?: (transaction: Transaction) => void;
-  onProviderLogs?: (transaction: Transaction) => void;
-  onTransactionLogs?: (transaction: Transaction) => void;
   onChargeback?: (transaction: Transaction) => void;
   onRefund?: (transaction: Transaction) => void;
   onSuspicious?: (transaction: Transaction) => void;
@@ -24,9 +20,6 @@ interface TransactionActionMenuProps {
 
 export function TransactionActionMenu({
   transaction,
-  onWebhookLogs,
-  onProviderLogs,
-  onTransactionLogs,
   onChargeback,
   onRefund,
   onSuspicious,
@@ -78,32 +71,8 @@ export function TransactionActionMenu({
                 </DropdownMenuItem>
               </>
             )}
-            <DropdownMenuSeparator />
           </>
         )}
-
-        {/* Active Log Actions */}
-        <DropdownMenuItem
-          onClick={() => onWebhookLogs?.(transaction)}
-          className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950"
-        >
-          <Eye className="mr-1 size-4 text-green-600" />
-          Webhook Logs
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => onProviderLogs?.(transaction)}
-          className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-950"
-        >
-          <Eye className="mr-1 size-4 text-orange-600" />
-          Provider Logs
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => onTransactionLogs?.(transaction)}
-          className="text-pink-600 hover:text-pink-700 hover:bg-pink-50 dark:hover:bg-pink-950"
-        >
-          <Eye className="mr-1 size-4 text-pink-600" />
-          Transaction Logs
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

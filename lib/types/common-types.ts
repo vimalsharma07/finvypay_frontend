@@ -11,6 +11,7 @@ export enum FieldTypes {
   input = 'input',
   select = 'select',
   switch = 'switch',
+  date = 'date',
   dateRange = 'dateRange',
   searchSelect = 'searchSelect',
   multiSelect = 'multiSelect',

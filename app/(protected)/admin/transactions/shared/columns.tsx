@@ -55,9 +55,6 @@ function TransactionIdCell({
  * Get transaction table columns
  */
 export function getTransactionColumns(
-  onWebhookLogs?: (transaction: Transaction) => void,
-  onProviderLogs?: (transaction: Transaction) => void,
-  onTransactionLogs?: (transaction: Transaction) => void,
   onViewDetails?: (transaction: Transaction) => void,
   showDisabledActions: boolean = true, // Default to true for production
   onChargeback?: (transaction: Transaction) => void,
@@ -111,6 +108,26 @@ export function getTransactionColumns(
       },
       size: 180, // Transaction IDs like "TXN-20251220-871A07"
       minSize: 150,
+      meta: {
+        headerClassName: 'text-left',
+        cellClassName: 'text-left',
+      },
+    },
+    {
+      id: 'acquirerName',
+      accessorKey: 'acquirerName',
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title="Acquirer" />
+      ),
+      cell: ({ row }) => {
+        const name = row.original.acquirerName;
+        const formatted = name
+          ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
+          : '—';
+        return <span className="font-medium">{formatted}</span>;
+      },
+      size: 120,
+      minSize: 100,
       meta: {
         headerClassName: 'text-left',
         cellClassName: 'text-left',
@@ -273,9 +290,6 @@ export function getTransactionColumns(
         cell: ({ row }) => (
           <TransactionActionMenu
             transaction={row.original}
-            onWebhookLogs={onWebhookLogs}
-            onProviderLogs={onProviderLogs}
-            onTransactionLogs={onTransactionLogs}
             onChargeback={onChargeback}
             onRefund={onRefund}
             onSuspicious={onSuspicious}

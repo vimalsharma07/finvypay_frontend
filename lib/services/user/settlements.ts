@@ -29,6 +29,7 @@ export interface UserSettlement {
   totalChargebackCount: number;
   isPaid: boolean;
   paidAt: string | null;
+  pdfUrl: string | null;
   createdAt: string;
 }
 
@@ -101,6 +102,7 @@ export interface UserSettlementDetail {
   totalChargebackCount: number;
   isPaid: boolean;
   paidAt: string | null;
+  pdfUrl: string | null;
   createdAt: string;
 }
 

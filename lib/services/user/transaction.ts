@@ -71,6 +71,19 @@ export interface TransactionListParams {
   profileId?: number; // Merchant Profile ID for filtering
   /** Search by transactionId, orderId, or email (partial match) */
   search?: string;
+  /** Advance filter params (merchant production & sandbox) */
+  merchant_profile_id?: string | number;
+  transactionId?: string;
+  orderId?: string;
+  email?: string;
+  connector?: string;
+  status?: string;
+  transactionDateStart?: string;
+  transactionDateEnd?: string;
+  cardBin?: string;
+  currency?: string;
+  country?: string;
+  message?: string;
 }
 
 export interface TransactionListMeta {

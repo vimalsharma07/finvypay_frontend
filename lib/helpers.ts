@@ -145,3 +145,96 @@ export function generateFilterQuery(filters: GenerateFilterInput) {
 
   return query;
 }
+
+/** Map advance filter keys to admin transaction API query param names (production & sandbox) */
+const ADMIN_TX_FILTER_TO_API: Record<string, string> = {
+  user_id: 'userId',
+  transaction_id: 'transactionId',
+  order_id: 'orderId',
+  email: 'email',
+  card_bin: 'cardBin',
+  connector: 'connector',
+  currency: 'currency',
+  status: 'status',
+  country: 'country',
+  transaction_date_start: 'transactionDateStart',
+  transaction_date_end: 'transactionDateEnd',
+  refund_date_start: 'refundDateStart',
+  refund_date_end: 'refundDateEnd',
+  chargeback_date_start: 'chargebackDateStart',
+  chargeback_date_end: 'chargebackDateEnd',
+  message: 'message',
+};
+
+/**
+ * Convert advance filter object to admin transaction API query params.
+ * Use after generateFilterQuery for admin production/sandbox transaction list.
+ * Single date fields (transaction_date, refund_date, chargeback_date) are sent as both Start and End for "on that day".
+ */
+export function mapAdminTransactionFiltersToApiParams(
+  filters: Record<string, string | number | boolean | undefined | null>
+): Record<string, string | number> {
+  const params: Record<string, string | number> = {};
+  Object.entries(filters || {}).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return;
+    // Single date fields: map to both Start and End (handled below)
+    if (key === 'transaction_date' || key === 'refund_date' || key === 'chargeback_date') {
+      return;
+    }
+    const apiKey = ADMIN_TX_FILTER_TO_API[key] ?? key;
+    params[apiKey] = typeof value === 'boolean' ? (value ? 1 : 0) : value;
+  });
+  // Single date -> same value for Start and End (filter on that day)
+  const dateMap: [string, string, string][] = [
+    ['transaction_date', 'transactionDateStart', 'transactionDateEnd'],
+    ['refund_date', 'refundDateStart', 'refundDateEnd'],
+    ['chargeback_date', 'chargebackDateStart', 'chargebackDateEnd'],
+  ];
+  dateMap.forEach(([filterKey, startKey, endKey]) => {
+    const v = filters[filterKey];
+    if (v && String(v).trim() !== '') {
+      const dateStr = String(v).trim();
+      params[startKey] = dateStr;
+      params[endKey] = dateStr;
+    }
+  });
+  return params;
+}
+
+/** Map advance filter keys to merchant transaction API query param names (production & sandbox) – per API spec */
+const MERCHANT_TX_FILTER_TO_API: Record<string, string> = {
+  transaction_id: 'transactionId',
+  order_id: 'orderId',
+  email: 'email',
+  card_bin: 'cardBin',
+  connector: 'connector',
+  currency: 'currency',
+  status: 'status',
+  country: 'country',
+  message: 'message',
+  merchant_profile_id: 'merchant_profile_id',
+};
+
+/**
+ * Convert advance filter object to merchant transaction API query params.
+ * Use after generateFilterQuery for merchant production/sandbox transaction list.
+ * Single date transaction_date is sent as transactionDateStart and transactionDateEnd (same day).
+ */
+export function mapMerchantTransactionFiltersToApiParams(
+  filters: Record<string, string | number | boolean | undefined | null>
+): Record<string, string | number> {
+  const params: Record<string, string | number> = {};
+  Object.entries(filters || {}).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return;
+    if (key === 'transaction_date') return; // handled below
+    const apiKey = MERCHANT_TX_FILTER_TO_API[key] ?? key;
+    params[apiKey] = typeof value === 'boolean' ? (value ? 1 : 0) : value;
+  });
+  const v = filters['transaction_date'];
+  if (v && String(v).trim() !== '') {
+    const dateStr = String(v).trim();
+    params['transactionDateStart'] = dateStr;
+    params['transactionDateEnd'] = dateStr;
+  }
+  return params;
+}

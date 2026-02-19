@@ -14,6 +14,7 @@ import {
   Transaction,
   TransactionListResponse,
 } from '@/lib/services/user/transaction';
+import { TRANSACTION_STATUS_FILTER_OPTIONS } from '@/lib/services/admin/transaction';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
   ColumnDef,
@@ -47,11 +48,10 @@ import {
   FiltersSchema,
   Option,
 } from '@/lib/types/common-types';
-import { generateFilterQuery } from '@/lib/helpers';
+import { generateFilterQuery, mapMerchantTransactionFiltersToApiParams } from '@/lib/helpers';
 import { getUserAcquirerAccounts } from '@/lib/services/user/acquirer-accounts';
 import { useCurrencies } from '@/lib/hooks/use-currencies';
 import { useCountries } from '@/lib/hooks/use-countries';
-import { getTimeZones } from '@/i18n/timezones';
 
 export default function SandboxTransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -82,11 +82,6 @@ export default function SandboxTransactionsPage() {
       })),
     [countries]
   );
-  const timeZoneOptions = useMemo(
-    () => getTimeZones().map((z) => ({ label: z.label, value: z.value })),
-    []
-  );
-
   // Pagination state
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
@@ -107,10 +102,12 @@ export default function SandboxTransactionsPage() {
     async (pageNum: number, pageLimit: number, activeFilters: FilterFields = {}) => {
       setLoading(true);
       try {
+        const filterQuery = generateFilterQuery(activeFilters);
+        const apiParams = mapMerchantTransactionFiltersToApiParams(filterQuery);
         const params = {
           page: pageNum,
           limit: pageLimit,
-          ...generateFilterQuery(activeFilters),
+          ...apiParams,
         };
 
         const response = await getSandboxTransactions(params);
@@ -212,8 +209,6 @@ export default function SandboxTransactionsPage() {
       { field: 'transaction_id', label: 'Transaction ID', type: FieldTypes.input },
       { field: 'order_id', label: 'Order ID', type: FieldTypes.input },
       { field: 'email', label: 'Email', type: FieldTypes.input },
-      { field: 'phone_number', label: 'Phone Number', type: FieldTypes.input },
-      { field: 'card_number', label: 'Card Number', type: FieldTypes.input },
       { field: 'card_bin', label: 'Card Bin', type: FieldTypes.input },
       {
         field: 'connector',
@@ -227,29 +222,13 @@ export default function SandboxTransactionsPage() {
         type: FieldTypes.searchSelect,
         options: currencyOptions,
       },
-      { field: 'amount_greater_than', label: 'Amount greater than', type: FieldTypes.input },
-      { field: 'amount_less_than', label: 'Amount less than', type: FieldTypes.input },
       {
         field: 'status',
         label: 'Status',
         type: FieldTypes.multiSelect,
-        options: [
-          'Success',
-          'Failed',
-          'Initialized',
-          'Pending',
-          'Redirect',
-          'Blocked',
-          'Abandoned',
-        ].map((label) => ({ label, value: label.toLowerCase() })),
-      },
-      {
-        field: 'card_type',
-        label: 'Card Type',
-        type: FieldTypes.select,
-        options: ['VISA', 'MASTER', 'DINNER CLUB', 'JCB'].map((label) => ({
-          label,
-          value: label,
+        options: TRANSACTION_STATUS_FILTER_OPTIONS.map((o) => ({
+          label: o.label,
+          value: String(o.value),
         })),
       },
       {
@@ -258,17 +237,10 @@ export default function SandboxTransactionsPage() {
         type: FieldTypes.searchSelect,
         options: countryOptions,
       },
-      { field: 'created_at', label: 'Created At', type: FieldTypes.dateRange },
-      { field: 'transaction_date', label: 'Transaction Date', type: FieldTypes.dateRange },
+      { field: 'transaction_date', label: 'Transaction Date', type: FieldTypes.date },
       { field: 'message', label: 'Message', type: FieldTypes.input },
-      {
-        field: 'time_zone',
-        label: 'Time Zone',
-        type: FieldTypes.searchSelect,
-        options: timeZoneOptions,
-      },
     ],
-    [connectorOptions, currencyOptions, countryOptions, timeZoneOptions]
+    [connectorOptions, currencyOptions, countryOptions]
   );
 
   const columns = useMemo<ColumnDef<Transaction>[]>(
