@@ -69,6 +69,8 @@ export interface Transaction {
 export interface TransactionListParams {
   page?: number;
   limit?: number;
+  /** Search by transactionId, orderId, or email (partial match) */
+  search?: string;
 }
 
 export interface TransactionListMeta {

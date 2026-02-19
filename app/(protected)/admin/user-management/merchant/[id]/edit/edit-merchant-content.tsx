@@ -103,10 +103,10 @@ export function EditMerchantContent() {
         // isDeleted: data.isDeleted,
       };
       
-      // Only include roleId if user is not MERCHANT category (backend will handle MERCHANT category)
-      // For MERCHANT category, backend will ignore roleId changes
-      if (user && user.role !== 'merchant') {
-        updatePayload.roleId = Number(data.roleId);
+      // Only include roleId if user is not MERCHANT category and we have a valid roleId
+      const roleIdNum = data.roleId ? Number(data.roleId) : 0;
+      if (user && user.role !== 'merchant' && roleIdNum > 0) {
+        updatePayload.roleId = roleIdNum;
       }
       
       const response = await updateUser(userId, updatePayload);
@@ -157,7 +157,23 @@ export function EditMerchantContent() {
   }
 
   if (!user) {
-    return null;
+    return (
+      <Card className="rounded-md">
+        <CardContent className="pt-6">
+          <div className="text-center space-y-4">
+            <p className="text-muted-foreground">
+              Failed to load merchant. It may not exist or you may not have permission to view it.
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => router.push('/admin/user-management/merchant')}
+            >
+              Back to merchants
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

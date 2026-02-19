@@ -53,10 +53,10 @@ export function MainLayout({ children }: { children: ReactNode }) {
     <>
       {!isMobile && <Sidebar />}
 
-      <div className="wrapper flex grow flex-col">
+      <div className="wrapper flex grow flex-col relative z-0">
         <Header />
 
-        <main className="grow pt-5" role="content">
+        <main className="grow pt-5 relative z-0" role="content">
           {children}
         </main>
 

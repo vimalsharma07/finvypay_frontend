@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState, useMemo } from 'react';
-import { format, startOfYear, endOfYear } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,11 +13,8 @@ import {
   AlertCircle,
   CheckCircle2,
   Clock,
-  Activity,
-  ArrowRight,
   Shield,
   Ticket,
-  BarChart3,
   XCircle,
   RefreshCw,
   Loader2,
@@ -62,7 +59,7 @@ export function UserDashboardContent({ dateRange: dateRangeProp }: UserDashboard
   const [dashboardLoading, setDashboardLoading] = useState(true);
   const [internalDateRange] = useState<DateRange | undefined>(() => {
     const today = new Date();
-    return { from: startOfYear(today), to: endOfYear(today) };
+    return { from: startOfMonth(today), to: endOfMonth(today) };
   });
   const dateRange = dateRangeProp ?? internalDateRange;
 
@@ -241,13 +238,13 @@ export function UserDashboardContent({ dateRange: dateRangeProp }: UserDashboard
     };
   }, [dashboardData]);
 
-  // Chart data for transaction statistics (pie + bar)
+  // Chart data for transaction statistics
   const transactionChartData = useMemo(() => {
     if (!dashboardData?.transactionStatistics) return null;
 
     const stats = dashboardData.transactionStatistics;
     return {
-      pie: {
+      distribution: {
         series: [
           stats.successCount,
           stats.declineCount,
@@ -256,68 +253,257 @@ export function UserDashboardContent({ dateRange: dateRangeProp }: UserDashboard
         ],
         labels: ['Success', 'Decline', 'Chargeback', 'Refund'],
       },
-      bar: {
-        categories: ['Success', 'Decline', 'Chargeback', 'Refund'],
-        data: [
-          stats.successCount,
-          stats.declineCount,
-          stats.chargebackCount,
-          stats.refundCount,
-        ],
-      },
     };
   }, [dashboardData]);
 
-  const pieChartOptions = useMemo(() => ({
-    chart: {
-      type: 'pie' as const,
-      toolbar: { show: false },
-    },
-    labels: transactionChartData?.pie.labels || [],
-    colors: ['#10b981', '#ef4444', '#f59e0b', '#3b82f6'],
-    legend: {
-      position: 'bottom' as const,
-    },
-    dataLabels: {
-      enabled: true,
-      formatter: (val: number) => `${val.toFixed(1)}%`,
-    },
-    tooltip: {
-      y: {
-        formatter: (val: number) => val.toLocaleString(),
-      },
-    },
-  }), [transactionChartData]);
+  // Transaction volume trend over time (from connectorTransactionsSummary grouped by date)
+  const transactionVolumeTrendData = useMemo(() => {
+    if (!dashboardData?.connectorTransactionsSummary || !Array.isArray(dashboardData.connectorTransactionsSummary)) return null;
+    
+    // Check if data is grouped by date (has 'date' field)
+    const firstItem = dashboardData.connectorTransactionsSummary[0];
+    if (!firstItem || !('date' in firstItem)) return null;
 
-  const barChartOptions = useMemo(() => ({
-    chart: {
-      type: 'bar' as const,
-      toolbar: { show: false },
-    },
-    plotOptions: {
-      bar: {
-        horizontal: false,
-        columnWidth: '55%',
-        distributed: true,
+    // Group by date and sum amounts
+    const dateMap = new Map<string, { count: number; amount: number }>();
+    
+    dashboardData.connectorTransactionsSummary.forEach((item: any) => {
+      const date = item.date;
+      if (date) {
+        const existing = dateMap.get(date) || { count: 0, amount: 0 };
+        dateMap.set(date, {
+          count: existing.count + (item.transaction_count || 0),
+          amount: existing.amount + (item.amount_in_usd || 0),
+        });
+      }
+    });
+
+    const sortedDates = Array.from(dateMap.keys()).sort();
+    
+    return {
+      dates: sortedDates,
+      volumes: sortedDates.map(date => dateMap.get(date)!.amount),
+      counts: sortedDates.map(date => dateMap.get(date)!.count),
+    };
+  }, [dashboardData]);
+
+  // Transaction distribution horizontal bar chart options
+  const transactionDistributionChartOptions = useMemo(() => {
+    if (!transactionChartData) return {};
+
+    const total = transactionChartData.distribution.series.reduce((a: number, b: number) => a + b, 0);
+    const percentages = transactionChartData.distribution.series.map((val: number) => 
+      total > 0 ? parseFloat(((val / total) * 100).toFixed(1)) : 0
+    );
+
+    return {
+      chart: {
+        type: 'bar' as const,
+        toolbar: { show: false },
+        fontFamily: 'inherit',
       },
-    },
-    dataLabels: {
-      enabled: true,
-      formatter: (val: number) => val.toLocaleString(),
-    },
-    xaxis: {
-      categories: transactionChartData?.bar.categories || [],
-    },
-    colors: ['#10b981', '#ef4444', '#f59e0b', '#3b82f6'],
-    legend: {
-      show: false,
-    },
-    tooltip: {
-      y: {
-        formatter: (val: number) => val.toLocaleString(),
+      plotOptions: {
+        bar: {
+          horizontal: true,
+          columnWidth: '75%',
+          borderRadius: 6,
+          borderRadiusApplication: 'end',
+          distributed: true,
+        },
       },
-    },
-  }), [transactionChartData]);
+      dataLabels: {
+        enabled: true,
+        formatter: (val: number, { dataPointIndex }: any) => {
+          const count = transactionChartData.distribution.series[dataPointIndex];
+          const percentage = percentages[dataPointIndex];
+          return `${count.toLocaleString()} (${percentage}%)`;
+        },
+        style: {
+          fontSize: '12px',
+          fontWeight: 600,
+          colors: ['#fff'],
+        },
+        offsetX: 10,
+        dropShadow: {
+          enabled: true,
+          top: 1,
+          left: 1,
+          blur: 2,
+          opacity: 0.3,
+        },
+      },
+      xaxis: {
+        categories: transactionChartData.distribution.labels,
+        labels: {
+          style: {
+            fontSize: '13px',
+            fontWeight: 500,
+          },
+        },
+        axisBorder: {
+          show: false,
+        },
+        axisTicks: {
+          show: false,
+        },
+      },
+      yaxis: {
+        labels: {
+          style: {
+            fontSize: '13px',
+            fontWeight: 500,
+          },
+        },
+        axisBorder: {
+          show: false,
+        },
+        axisTicks: {
+          show: false,
+        },
+      },
+      colors: ['#10b981', '#ef4444', '#f59e0b', '#3b82f6'],
+      legend: {
+        show: false,
+      },
+      tooltip: {
+        enabled: true,
+        y: {
+          formatter: (val: number, { dataPointIndex }: any) => {
+            const count = transactionChartData.distribution.series[dataPointIndex];
+            const percentage = percentages[dataPointIndex];
+            const label = transactionChartData.distribution.labels[dataPointIndex];
+            return `${label}: ${count.toLocaleString()} (${percentage}%)`;
+          },
+        },
+        style: {
+          fontSize: '13px',
+        },
+        theme: 'dark',
+      },
+      grid: {
+        borderColor: 'var(--color-border)',
+        strokeDashArray: 4,
+        xaxis: {
+          lines: {
+            show: true,
+          },
+        },
+        yaxis: {
+          lines: {
+            show: false,
+          },
+        },
+        padding: {
+          top: 0,
+          right: 10,
+          bottom: 0,
+          left: 0,
+        },
+      },
+      fill: {
+        opacity: 0.9,
+        type: 'gradient',
+        gradient: {
+          shade: 'light',
+          type: 'horizontal',
+          shadeIntensity: 0.3,
+          gradientToColors: undefined,
+          inverseColors: false,
+          opacityFrom: 0.9,
+          opacityTo: 0.7,
+          stops: [0, 50, 100],
+        },
+      },
+    };
+  }, [transactionChartData]);
+
+  // Combined transaction volume & count trend (dual-axis chart)
+  const transactionTrendChartOptions = useMemo(() => {
+    if (!transactionVolumeTrendData) return {};
+
+    return {
+      chart: {
+        type: 'line' as const,
+        toolbar: { show: false },
+        fontFamily: 'inherit',
+        zoom: { enabled: false },
+      },
+      dataLabels: { enabled: false },
+      stroke: {
+        curve: 'smooth' as const,
+        width: 3,
+      },
+      markers: {
+        size: 4,
+        hover: { size: 6 },
+      },
+      xaxis: {
+        categories: transactionVolumeTrendData.dates,
+        labels: {
+          style: { fontSize: '12px' },
+          rotate: -45,
+          rotateAlways: false,
+        },
+        axisBorder: { show: false },
+        axisTicks: { show: false },
+      },
+      yaxis: [
+        {
+          title: { text: 'Volume (USD)', style: { fontSize: '12px' } },
+          labels: {
+            formatter: (val: number) => `$${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+            style: { fontSize: '12px' },
+          },
+          axisBorder: { show: false },
+          axisTicks: { show: false },
+        },
+        {
+          opposite: true,
+          title: { text: 'Transaction Count', style: { fontSize: '12px' } },
+          labels: {
+            formatter: (val: number) => val.toLocaleString(),
+            style: { fontSize: '12px' },
+          },
+          axisBorder: { show: false },
+          axisTicks: { show: false },
+        },
+      ],
+      colors: ['#3b82f6', '#10b981'],
+      legend: {
+        show: true,
+        position: 'top' as const,
+        horizontalAlign: 'right' as const,
+        fontSize: '13px',
+      },
+      tooltip: {
+        enabled: true,
+        shared: true,
+        intersect: false,
+        y: {
+          formatter: (val: number, { seriesIndex, dataPointIndex }: any) => {
+            if (seriesIndex === 0) {
+              const count = transactionVolumeTrendData.counts[dataPointIndex];
+              return `Volume: $${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · Count: ${count.toLocaleString()}`;
+            }
+            return `${val.toLocaleString()} transactions`;
+          },
+        },
+        style: { fontSize: '13px' },
+        theme: 'dark',
+      },
+      grid: {
+        borderColor: 'var(--color-border)',
+        strokeDashArray: 4,
+        xaxis: { lines: { show: false } },
+        yaxis: { lines: { show: true } },
+        padding: { top: 10, right: 10, bottom: 0, left: 0 },
+      },
+      fill: {
+        type: 'gradient',
+        gradient: { shadeIntensity: 1, opacityFrom: 0.5, opacityTo: 0.15, stops: [0, 90, 100] },
+      },
+    };
+  }, [transactionVolumeTrendData]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -536,40 +722,65 @@ export function UserDashboardContent({ dateRange: dateRangeProp }: UserDashboard
         </Card>
       </div>
 
-      {/* Transaction Charts */}
-      {transactionChartData && (
-        <div className="grid gap-4 md:grid-cols-2 mt-5 lg:mt-7.5">
-          <Card>
-            <CardHeader>
-              <CardTitle>Transaction Distribution</CardTitle>
-              <CardDescription>Pie chart showing transaction types</CardDescription>
+      {/* Transaction Statistics Charts */}
+      <div className="grid gap-5 lg:gap-7.5 md:grid-cols-2 mt-5 lg:mt-7.5">
+        {/* Transaction Distribution by Status */}
+        {transactionChartData && (
+          <Card className="relative overflow-hidden border-border shadow-md hover:shadow-lg transition-all duration-300">
+            <CardHeader className="border-b border-border/50 bg-muted/30">
+              <CardTitle className="text-base font-semibold">Transaction Status Breakdown</CardTitle>
+              <CardDescription className="text-sm text-muted-foreground">
+                Current distribution of transactions by status type
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <DynamicApexChart
-                type="pie"
-                series={transactionChartData.pie.series}
-                options={pieChartOptions}
-                height={350}
-              />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Transaction Counts</CardTitle>
-              <CardDescription>Bar chart showing transaction volumes</CardDescription>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <DynamicApexChart
                 type="bar"
-                series={[{ name: 'Count', data: transactionChartData.bar.data }]}
-                options={barChartOptions}
-                height={350}
+                series={[{ name: 'Transactions', data: transactionChartData.distribution.series }]}
+                options={transactionDistributionChartOptions}
+                height={280}
               />
             </CardContent>
           </Card>
-        </div>
-      )}
+        )}
+
+        {/* Transaction Volume & Count Trend (combined) */}
+        {transactionVolumeTrendData && transactionVolumeTrendData.dates.length > 0 ? (
+          <Card className="relative overflow-hidden border-border shadow-md hover:shadow-lg transition-all duration-300">
+            <CardHeader className="border-b border-border/50 bg-muted/30">
+              <CardTitle className="text-base font-semibold">Transaction Volume & Count Trend</CardTitle>
+              <CardDescription className="text-sm text-muted-foreground">
+                Daily transaction volume (USD) and count over selected period
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <DynamicApexChart
+                type="line"
+                series={[
+                  { name: 'Volume (USD)', type: 'area', data: transactionVolumeTrendData.volumes },
+                  { name: 'Transaction Count', type: 'line', data: transactionVolumeTrendData.counts },
+                ]}
+                options={transactionTrendChartOptions}
+                height={300}
+              />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="relative overflow-hidden border-border shadow-md hover:shadow-lg transition-all duration-300">
+            <CardHeader className="border-b border-border/50 bg-muted/30">
+              <CardTitle className="text-base font-semibold">Transaction Volume & Count Trend</CardTitle>
+              <CardDescription className="text-sm text-muted-foreground">
+                Daily transaction volume (USD) and count over selected period
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="text-center py-16 text-muted-foreground text-sm">
+                No trend data available for the selected date range
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
       </>
       )}
 
@@ -642,73 +853,6 @@ export function UserDashboardContent({ dateRange: dateRangeProp }: UserDashboard
         </Card>
       </div>
 
-      {/* Quick Actions */}
-      <Card className="mt-5 lg:mt-7.5">
-        <CardHeader>
-          <CardTitle className="text-base font-semibold flex items-center gap-1">
-            <div className="p-2 rounded-lg bg-linear-to-br from-primary/20 to-primary/10">
-              <BarChart3 className="h-5 w-5 text-primary" />
-            </div>
-            <span className="bg-linear-to-r from-primary to-primary/70 bg-clip-text text-transparent">Quick Actions</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <a
-              href="/transactions"
-              className="group relative flex items-center gap-4 p-4 border-2 rounded-xl border-primary/20 bg-linear-to-br from-primary/5 via-primary/3 to-transparent hover:border-primary/50 hover:from-primary/10 hover:via-primary/5 hover:to-primary/3 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20"
-            >
-              <div className="p-3 rounded-lg bg-linear-to-br from-primary/20 to-primary/10 group-hover:from-primary/30 group-hover:to-primary/20 transition-all shadow-sm">
-                <Activity className="h-6 w-6 text-primary" />
-              </div>
-              <div className="flex-1 relative z-10">
-                <div className="font-semibold text-sm mb-1 text-primary group-hover:text-primary/90 transition-colors">View Transactions</div>
-                <div className="text-xs text-muted-foreground group-hover:text-foreground/70 transition-colors">See all transactions</div>
-              </div>
-              <ArrowRight className="h-4 w-4 text-primary/60 group-hover:text-primary group-hover:translate-x-1 transition-all relative z-10" />
-            </a>
-            <a
-              href="/risk-compliance/trusted-cards"
-              className="group relative flex items-center gap-4 p-4 border-2 rounded-xl border-(--color-info-alpha,var(--color-violet-200))/30 bg-linear-to-br from-(--color-info-soft,var(--color-violet-50))/50 via-(--color-info-soft,var(--color-violet-50))/30 to-transparent hover:border-(--color-info-accent,var(--color-violet-500))/50 hover:from-(--color-info-soft,var(--color-violet-50)) hover:via-(--color-info-soft,var(--color-violet-50))/50 hover:to-(--color-info-soft,var(--color-violet-50))/30 transition-all duration-300 hover:shadow-lg hover:shadow-(--color-info-accent,var(--color-violet-500))/20"
-            >
-              <div className="p-3 rounded-lg bg-linear-to-br from-(--color-info-accent,var(--color-violet-500))/20 to-(--color-info-accent,var(--color-violet-500))/10 group-hover:from-(--color-info-accent,var(--color-violet-500))/30 group-hover:to-(--color-info-accent,var(--color-violet-500))/20 transition-all shadow-sm">
-                <CreditCard className="h-6 w-6 text-(--color-info-accent,var(--color-violet-600))" />
-              </div>
-              <div className="flex-1 relative z-10">
-                <div className="font-semibold text-sm mb-1 text-(--color-info-accent,var(--color-violet-700)) group-hover:text-(--color-info-accent,var(--color-violet-600)) transition-colors">Manage Cards</div>
-                <div className="text-xs text-muted-foreground group-hover:text-(--color-info-accent,var(--color-violet-600))/70 transition-colors">Trusted cards</div>
-              </div>
-              <ArrowRight className="h-4 w-4 text-(--color-info-accent,var(--color-violet-500))/60 group-hover:text-(--color-info-accent,var(--color-violet-600)) group-hover:translate-x-1 transition-all relative z-10" />
-            </a>
-            <a
-              href="/risk-compliance/manage-risk"
-              className="group relative flex items-center gap-4 p-4 border-2 rounded-xl border-(--color-warning-alpha,var(--color-yellow-200))/30 bg-linear-to-br from-(--color-warning-soft,var(--color-yellow-50))/50 via-(--color-warning-soft,var(--color-yellow-50))/30 to-transparent hover:border-(--color-warning-accent,var(--color-yellow-500))/50 hover:from-(--color-warning-soft,var(--color-yellow-50)) hover:via-(--color-warning-soft,var(--color-yellow-50))/50 hover:to-(--color-warning-soft,var(--color-yellow-50))/30 transition-all duration-300 hover:shadow-lg hover:shadow-(--color-warning-accent,var(--color-yellow-500))/20"
-            >
-              <div className="p-3 rounded-lg bg-linear-to-br from-(--color-warning-accent,var(--color-yellow-500))/20 to-(--color-warning-accent,var(--color-yellow-500))/10 group-hover:from-(--color-warning-accent,var(--color-yellow-500))/30 group-hover:to-(--color-warning-accent,var(--color-yellow-500))/20 transition-all shadow-sm">
-                <Shield className="h-6 w-6 text-(--color-warning-accent,var(--color-yellow-600))" />
-              </div>
-              <div className="flex-1 relative z-10">
-                <div className="font-semibold text-sm mb-1 text-(--color-warning-accent,var(--color-yellow-700)) group-hover:text-(--color-warning-accent,var(--color-yellow-600)) transition-colors">Risk Management</div>
-                <div className="text-xs text-muted-foreground group-hover:text-(--color-warning-accent,var(--color-yellow-600))/70 transition-colors">Configure risks</div>
-              </div>
-              <ArrowRight className="h-4 w-4 text-(--color-warning-accent,var(--color-yellow-500))/60 group-hover:text-(--color-warning-accent,var(--color-yellow-600)) group-hover:translate-x-1 transition-all relative z-10" />
-            </a>
-            <a
-              href="/support"
-              className="group relative flex items-center gap-4 p-4 border-2 rounded-xl border-(--color-success-alpha,var(--color-green-200))/30 bg-linear-to-br from-(--color-success-soft,var(--color-green-50))/50 via-(--color-success-soft,var(--color-green-50))/30 to-transparent hover:border-(--color-success-accent,var(--color-green-500))/50 hover:from-(--color-success-soft,var(--color-green-50)) hover:via-(--color-success-soft,var(--color-green-50))/50 hover:to-(--color-success-soft,var(--color-green-50))/30 transition-all duration-300 hover:shadow-lg hover:shadow-(--color-success-accent,var(--color-green-500))/20"
-            >
-              <div className="p-3 rounded-lg bg-linear-to-br from-(--color-success-accent,var(--color-green-500))/20 to-(--color-success-accent,var(--color-green-500))/10 group-hover:from-(--color-success-accent,var(--color-green-500))/30 group-hover:to-(--color-success-accent,var(--color-green-500))/20 transition-all shadow-sm">
-                <Ticket className="h-6 w-6 text-(--color-success-accent,var(--color-green-600))" />
-              </div>
-              <div className="flex-1 relative z-10">
-                <div className="font-semibold text-sm mb-1 text-(--color-success-accent,var(--color-green-700)) group-hover:text-(--color-success-accent,var(--color-green-600)) transition-colors">Support</div>
-                <div className="text-xs text-muted-foreground group-hover:text-(--color-success-accent,var(--color-green-600))/70 transition-colors">View tickets</div>
-              </div>
-              <ArrowRight className="h-4 w-4 text-(--color-success-accent,var(--color-green-500))/60 group-hover:text-(--color-success-accent,var(--color-green-600)) group-hover:translate-x-1 transition-all relative z-10" />
-            </a>
-          </div>
-        </CardContent>
-      </Card>
     </Fragment>
   );
 }

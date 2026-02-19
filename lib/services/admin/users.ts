@@ -146,22 +146,29 @@ export async function getMerchantById(id: string): Promise<ApiResponse<Merchant>
     const response = await http.get(adminRoutes.users.getById(id)) as
       | {
           success: boolean;
-          data: Merchant;
+          data?: Merchant | null;
         }
       | Merchant;
     
     // Handle API response structure: { success: true, data: {...} }
     if (response && typeof response === 'object' && 'success' in response && 'data' in response) {
-      const apiResponse = response as { success: boolean; data: Merchant };
-      if (apiResponse.success && apiResponse.data) {
+      const apiResponse = response as { success: boolean; data?: Merchant | null };
+      if (apiResponse.success && apiResponse.data && typeof apiResponse.data === 'object') {
         return {
           status: 200,
           data: apiResponse.data,
         };
       }
+      // Success but missing or invalid data
+      if (apiResponse.success && !apiResponse.data) {
+        return {
+          status: 404,
+          error: 'Merchant not found',
+        };
+      }
     }
     
-    // Fallback: if response is directly the merchant data
+    // Fallback: if response is directly the merchant data (no wrapper)
     if (response && typeof response === 'object' && 'id' in response && !('success' in response)) {
       return {
         status: 200,
@@ -170,8 +177,8 @@ export async function getMerchantById(id: string): Promise<ApiResponse<Merchant>
     }
     
     return {
-      status: 200,
-      data: response as unknown as Merchant,
+      status: 404,
+      error: 'Merchant not found',
     };
   } catch (error) {
     if (error instanceof ApiError) {
@@ -237,10 +244,23 @@ export async function updateMerchant(
   payload: UpdateMerchantPayload
 ): Promise<ApiResponse<Merchant>> {
   try {
-    const data = await http.patch(adminRoutes.users.update(id), payload) as Merchant;
+    const response = await http.patch(adminRoutes.users.update(id), payload) as
+      | { success: boolean; data?: Merchant }
+      | Merchant;
+    // Backend returns { success: true, data: Merchant }
+    if (response && typeof response === 'object' && 'success' in response && 'data' in response) {
+      const wrapped = response as { success: boolean; data?: Merchant };
+      if (wrapped.success && wrapped.data) {
+        return { status: 200, data: wrapped.data };
+      }
+    }
+    // Direct merchant object (no wrapper)
+    if (response && typeof response === 'object' && 'id' in response && !('success' in response)) {
+      return { status: 200, data: response as unknown as Merchant };
+    }
     return {
       status: 200,
-      data,
+      data: response as unknown as Merchant,
     };
   } catch (error) {
     if (error instanceof ApiError) {

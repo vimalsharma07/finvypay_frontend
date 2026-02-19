@@ -12,7 +12,8 @@ import { Container } from '@/components/common/container';
 import { PageSkeleton } from '@/components/ui/skeletons';
 import { DateRangeFilter } from '@/components/ui/date-range-filter';
 import { DateRange } from 'react-day-picker';
-import { startOfYear, endOfYear } from 'date-fns';
+import { startOfMonth, endOfMonth } from 'date-fns';
+import { MerchantFilter } from './merchant-filter';
 
 // Dynamically import to avoid SSR issues with client-only code
 const AdminDashboardContent = dynamicImport(
@@ -25,7 +26,7 @@ const AdminDashboardContent = dynamicImport(
 
 const defaultDateRange = (): DateRange => {
   const today = new Date();
-  return { from: startOfYear(today), to: endOfYear(today) };
+  return { from: startOfMonth(today), to: endOfMonth(today) };
 };
 
 /**
@@ -35,6 +36,7 @@ const defaultDateRange = (): DateRange => {
  */
 export default function AdminDashboardPage() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(defaultDateRange);
+  const [selectedMerchantId, setSelectedMerchantId] = useState<string>('all');
 
   return (
     <Fragment>
@@ -46,6 +48,7 @@ export default function AdminDashboardPage() {
             icon={LayoutGrid}
           />
           <ToolbarActions>
+            <MerchantFilter value={selectedMerchantId} onChange={setSelectedMerchantId} />
             <DateRangeFilter
               value={dateRange}
               onChange={setDateRange}
@@ -57,7 +60,7 @@ export default function AdminDashboardPage() {
         </Toolbar>
       </Container>
       <Container>
-        <AdminDashboardContent dateRange={dateRange} />
+        <AdminDashboardContent dateRange={dateRange} merchantId={selectedMerchantId} />
       </Container>
     </Fragment>
   );
