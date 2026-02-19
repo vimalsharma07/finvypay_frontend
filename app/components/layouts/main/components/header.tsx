@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { SearchDialog } from '@/partials/dialogs/search/search-dialog';
+import { GlobalSearchDialog } from '@/partials/dialogs/search/global-search-dialog';
 import { NotificationsSheet } from '@/partials/topbar/notifications-sheet';
 import { AdminNotificationsSheet } from '@/partials/topbar/admin-notifications-sheet';
 import { MerchantNotificationsSheet } from '@/partials/topbar/merchant-notifications-sheet';
@@ -195,8 +196,16 @@ export function Header() {
           </div>
         )}
 
-        {/* Search Dialog - Desktop (controlled) */}
-        {!mobileMode && (
+        {/* Search Dialog: Admin/Merchant use global search (transactions ± merchants); others use legacy dialog. */}
+        {(isAdminPath || isMerchantRoute) && (
+          <GlobalSearchDialog
+            mode={isAdminPath ? 'admin' : 'merchant'}
+            open={isSearchDialogOpen}
+            onOpenChange={setIsSearchDialogOpen}
+            initialQuery={searchQuery}
+          />
+        )}
+        {!isAdminPath && !isMerchantRoute && (
           <SearchDialog
             open={isSearchDialogOpen}
             onOpenChange={setIsSearchDialogOpen}
@@ -205,8 +214,19 @@ export function Header() {
 
         {/* HeaderTopbar */}
         <div className="flex items-center gap-3 shrink-0 overflow-visible">
-          {/* Search Dialog - Mobile (on right side) */}
-          {mobileMode && (
+          {/* Search - Mobile: icon opens dialog (desktop uses inline input focus) */}
+          {mobileMode && (isAdminPath || isMerchantRoute) && (
+            <Button
+              variant="ghost"
+              mode="icon"
+              shape="circle"
+              className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary"
+              onClick={() => setIsSearchDialogOpen(true)}
+            >
+              <Search className="size-4.5!" />
+            </Button>
+          )}
+          {mobileMode && !isAdminPath && !isMerchantRoute && (
             <SearchDialog
               trigger={
                 <Button

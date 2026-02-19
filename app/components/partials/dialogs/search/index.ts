@@ -6,4 +6,5 @@ export * from './search-integrations';
 export * from './search-empty';
 export * from './search-users';
 export * from './search-no-results';
+export * from './global-search-dialog';
 export * from './types';

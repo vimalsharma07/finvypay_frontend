@@ -36,10 +36,10 @@ export const updateUserSchema = z.object({
     .string()
     .min(2, { message: 'Name must be at least 2 characters long.' })
     .min(1, { message: 'Name is required.' }),
+  // Optional for update: merchants have fixed role; when present must be valid positive number
   roleId: z
     .string()
-    .min(1, { message: 'Role is required.' })
-    .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+    .refine((val) => !val || (!isNaN(Number(val)) && Number(val) > 0), {
       message: 'Role ID must be a valid positive number',
     }),
   isBlocked: z.boolean().optional(),

@@ -69,6 +69,8 @@ export interface TransactionListParams {
   page?: number;
   limit?: number;
   profileId?: number; // Merchant Profile ID for filtering
+  /** Search by transactionId, orderId, or email (partial match) */
+  search?: string;
 }
 
 export interface TransactionListMeta {
