@@ -277,105 +277,8 @@ export function AdminDashboardContent({ dateRange: dateRangeProp, merchantId: me
     };
   }, [transactionChartData]);
 
-  // Transaction volume trend over time (area chart)
-  const transactionVolumeTrendOptions = useMemo(() => {
-    if (!transactionVolumeTrendData) return {};
-
-    return {
-      chart: {
-        type: 'area' as const,
-        toolbar: { show: false },
-        fontFamily: 'inherit',
-        zoom: {
-          enabled: false,
-        },
-      },
-      dataLabels: {
-        enabled: false,
-      },
-      stroke: {
-        curve: 'smooth' as const,
-        width: 3,
-      },
-      fill: {
-        type: 'gradient',
-        gradient: {
-          shadeIntensity: 1,
-          opacityFrom: 0.7,
-          opacityTo: 0.3,
-          stops: [0, 90, 100],
-        },
-      },
-      xaxis: {
-        categories: transactionVolumeTrendData.dates,
-        labels: {
-          style: {
-            fontSize: '12px',
-          },
-          rotate: -45,
-          rotateAlways: false,
-        },
-        axisBorder: {
-          show: false,
-        },
-        axisTicks: {
-          show: false,
-        },
-      },
-      yaxis: {
-        labels: {
-          formatter: (val: number) => `$${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
-          style: {
-            fontSize: '12px',
-          },
-        },
-        axisBorder: {
-          show: false,
-        },
-        axisTicks: {
-          show: false,
-        },
-      },
-      colors: ['#3b82f6'],
-      tooltip: {
-        enabled: true,
-        y: {
-          formatter: (val: number, { dataPointIndex }: any) => {
-            const date = transactionVolumeTrendData.dates[dataPointIndex];
-            const count = transactionVolumeTrendData.counts[dataPointIndex];
-            return `$${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}<br/>${count.toLocaleString()} transactions`;
-          },
-        },
-        style: {
-          fontSize: '13px',
-        },
-        theme: 'dark',
-      },
-      grid: {
-        borderColor: 'var(--color-border)',
-        strokeDashArray: 4,
-        xaxis: {
-          lines: {
-            show: false,
-          },
-        },
-        yaxis: {
-          lines: {
-            show: true,
-          },
-        },
-        padding: {
-          top: 0,
-          right: 0,
-          bottom: 0,
-          left: 0,
-        },
-      },
-    };
-  }, [transactionVolumeTrendData]);
-
-  // Transaction count trend over time (line chart)
-  const transactionCountTrendOptions = useMemo(() => {
+  // Combined transaction volume & count trend (dual-axis chart)
+  const transactionTrendChartOptions = useMemo(() => {
     if (!transactionVolumeTrendData) return {};
 
     return {
@@ -383,219 +286,84 @@ export function AdminDashboardContent({ dateRange: dateRangeProp, merchantId: me
         type: 'line' as const,
         toolbar: { show: false },
         fontFamily: 'inherit',
-        zoom: {
-          enabled: false,
-        },
+        zoom: { enabled: false },
       },
-      dataLabels: {
-        enabled: false,
-      },
+      dataLabels: { enabled: false },
       stroke: {
         curve: 'smooth' as const,
         width: 3,
       },
       markers: {
-        size: 5,
-        hover: {
-          size: 7,
-        },
+        size: 4,
+        hover: { size: 6 },
       },
       xaxis: {
         categories: transactionVolumeTrendData.dates,
         labels: {
-          style: {
-            fontSize: '12px',
-          },
+          style: { fontSize: '12px' },
           rotate: -45,
           rotateAlways: false,
         },
-        axisBorder: {
-          show: false,
-        },
-        axisTicks: {
-          show: false,
-        },
+        axisBorder: { show: false },
+        axisTicks: { show: false },
       },
-      yaxis: {
-        labels: {
-          formatter: (val: number) => val.toLocaleString(),
-          style: {
-            fontSize: '12px',
+      yaxis: [
+        {
+          title: { text: 'Volume (USD)', style: { fontSize: '12px' } },
+          labels: {
+            formatter: (val: number) => `$${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+            style: { fontSize: '12px' },
           },
+          axisBorder: { show: false },
+          axisTicks: { show: false },
         },
-        axisBorder: {
-          show: false,
+        {
+          opposite: true,
+          title: { text: 'Transaction Count', style: { fontSize: '12px' } },
+          labels: {
+            formatter: (val: number) => val.toLocaleString(),
+            style: { fontSize: '12px' },
+          },
+          axisBorder: { show: false },
+          axisTicks: { show: false },
         },
-        axisTicks: {
-          show: false,
-        },
+      ],
+      colors: ['#3b82f6', '#10b981'],
+      legend: {
+        show: true,
+        position: 'top' as const,
+        horizontalAlign: 'right' as const,
+        fontSize: '13px',
       },
-      colors: ['#10b981'],
       tooltip: {
         enabled: true,
+        shared: true,
+        intersect: false,
         y: {
-          formatter: (val: number, { dataPointIndex }: any) => {
-            const date = transactionVolumeTrendData.dates[dataPointIndex];
+          formatter: (val: number, { seriesIndex, dataPointIndex }: any) => {
+            if (seriesIndex === 0) {
+              const count = transactionVolumeTrendData.counts[dataPointIndex];
+              return `Volume: $${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · Count: ${count.toLocaleString()}`;
+            }
             return `${val.toLocaleString()} transactions`;
           },
         },
-        style: {
-          fontSize: '13px',
-        },
+        style: { fontSize: '13px' },
         theme: 'dark',
       },
       grid: {
         borderColor: 'var(--color-border)',
         strokeDashArray: 4,
-        xaxis: {
-          lines: {
-            show: false,
-          },
-        },
-        yaxis: {
-          lines: {
-            show: true,
-          },
-        },
-        padding: {
-          top: 0,
-          right: 0,
-          bottom: 0,
-          left: 0,
-        },
+        xaxis: { lines: { show: false } },
+        yaxis: { lines: { show: true } },
+        padding: { top: 10, right: 10, bottom: 0, left: 0 },
+      },
+      fill: {
+        type: 'gradient',
+        gradient: { shadeIntensity: 1, opacityFrom: 0.5, opacityTo: 0.15, stops: [0, 90, 100] },
       },
     };
   }, [transactionVolumeTrendData]);
-
-
-  // Acquirer-wise volumes chart data
-  const acquirerVolumesChartData = useMemo(() => {
-    if (!data?.acquirerWiseVolumes) {
-      return null;
-    }
-    
-    if (data.acquirerWiseVolumes.length === 0) {
-      return null;
-    }
-
-    const volumes = data.acquirerWiseVolumes;
-    return {
-      categories: volumes.map((v) => v.acquirerName),
-      amounts: volumes.map((v) => parseFloat(v.totalAmountUsd.toFixed(2))),
-    };
-  }, [data]);
-
-  // Acquirer volumes bar chart options
-  const acquirerVolumesChartOptions = useMemo(() => {
-    if (!acquirerVolumesChartData) return {};
-
-    return {
-      chart: {
-        type: 'bar' as const,
-        toolbar: { show: false },
-        fontFamily: 'inherit',
-      },
-      plotOptions: {
-        bar: {
-          horizontal: true,
-          columnWidth: '70%',
-          borderRadius: 6,
-          borderRadiusApplication: 'end',
-        },
-      },
-      dataLabels: {
-        enabled: true,
-        formatter: (val: number) => `$${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-        style: {
-          fontSize: '12px',
-          fontWeight: 600,
-          colors: ['#fff'],
-        },
-        offsetX: 10,
-        dropShadow: {
-          enabled: true,
-          top: 1,
-          left: 1,
-          blur: 2,
-          opacity: 0.3,
-        },
-      },
-      xaxis: {
-        categories: acquirerVolumesChartData.categories,
-        labels: {
-          style: {
-            fontSize: '13px',
-            fontWeight: 500,
-          },
-        },
-        axisBorder: {
-          show: false,
-        },
-        axisTicks: {
-          show: false,
-        },
-      },
-      yaxis: {
-        labels: {
-          formatter: (val: number) => `$${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
-          style: {
-            fontSize: '12px',
-          },
-        },
-        axisBorder: {
-          show: false,
-        },
-        axisTicks: {
-          show: false,
-        },
-      },
-      colors: ['#3b82f6'],
-      tooltip: {
-        enabled: true,
-        y: {
-          formatter: (val: number) => `$${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-        },
-        style: {
-          fontSize: '13px',
-        },
-        theme: 'dark',
-      },
-      grid: {
-        borderColor: 'var(--color-border)',
-        strokeDashArray: 4,
-        xaxis: {
-          lines: {
-            show: true,
-          },
-        },
-        yaxis: {
-          lines: {
-            show: false,
-          },
-        },
-        padding: {
-          top: 0,
-          right: 10,
-          bottom: 0,
-          left: 0,
-        },
-      },
-      fill: {
-        opacity: 0.9,
-        type: 'gradient',
-        gradient: {
-          shade: 'light',
-          type: 'horizontal',
-          shadeIntensity: 0.3,
-          gradientToColors: ['#2563eb'],
-          inverseColors: false,
-          opacityFrom: 0.9,
-          opacityTo: 0.7,
-          stops: [0, 50, 100],
-        },
-      },
-    };
-  }, [acquirerVolumesChartData]);
 
   return (
     <div className="space-y-6">
@@ -799,92 +567,118 @@ export function AdminDashboardContent({ dateRange: dateRangeProp, merchantId: me
               </Card>
             )}
 
-            {/* Transaction Volume Trend Over Time */}
+            {/* Transaction Volume & Count Trend (combined) */}
             {transactionVolumeTrendData && transactionVolumeTrendData.dates.length > 0 ? (
               <Card className="relative overflow-hidden border-border shadow-md hover:shadow-lg transition-all duration-300">
                 <CardHeader className="border-b border-border/50 bg-muted/30">
-                  <CardTitle className="text-base font-semibold">Transaction Volume Trend</CardTitle>
+                  <CardTitle className="text-base font-semibold">Transaction Volume & Count Trend</CardTitle>
                   <CardDescription className="text-sm text-muted-foreground">
-                    Daily transaction volume (USD) over selected period
+                    Daily transaction volume (USD) and count over selected period
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6">
                   <DynamicApexChart
-                    type="area"
-                    series={[{ name: 'Volume (USD)', data: transactionVolumeTrendData.volumes }]}
-                    options={transactionVolumeTrendOptions}
-                    height={280}
+                    type="line"
+                    series={[
+                      { name: 'Volume (USD)', type: 'area', data: transactionVolumeTrendData.volumes },
+                      { name: 'Transaction Count', type: 'line', data: transactionVolumeTrendData.counts },
+                    ]}
+                    options={transactionTrendChartOptions}
+                    height={300}
                   />
                 </CardContent>
               </Card>
             ) : (
               <Card className="relative overflow-hidden border-border shadow-md hover:shadow-lg transition-all duration-300">
                 <CardHeader className="border-b border-border/50 bg-muted/30">
-                  <CardTitle className="text-base font-semibold">Transaction Volume Trend</CardTitle>
+                  <CardTitle className="text-base font-semibold">Transaction Volume & Count Trend</CardTitle>
                   <CardDescription className="text-sm text-muted-foreground">
-                    Daily transaction volume (USD) over selected period
+                    Daily transaction volume (USD) and count over selected period
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6">
                   <div className="text-center py-16 text-muted-foreground text-sm">
-                    No volume trend data available for the selected date range
+                    No trend data available for the selected date range
                   </div>
                 </CardContent>
               </Card>
             )}
           </div>
 
-          {/* Transaction Count Trend Over Time */}
-          {transactionVolumeTrendData && transactionVolumeTrendData.dates.length > 0 && (
-            <Card className="relative overflow-hidden border-border shadow-md hover:shadow-lg transition-all duration-300">
-              <CardHeader className="border-b border-border/50 bg-muted/30">
-                <CardTitle className="text-base font-semibold">Transaction Count Trend</CardTitle>
-                <CardDescription className="text-sm text-muted-foreground">
-                  Daily transaction count trend over selected period
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <DynamicApexChart
-                  type="line"
-                  series={[{ name: 'Transaction Count', data: transactionVolumeTrendData.counts }]}
-                  options={transactionCountTrendOptions}
-                  height={300}
-                />
-              </CardContent>
-            </Card>
+          {/* Connector Performance - Success vs decline rates (acquirer names) */}
+          {data.connectorPerformance && data.connectorPerformance.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">Connector Performance</h2>
+                  <p className="text-sm text-muted-foreground">Success vs decline rates</p>
+                </div>
+                <Badge variant="secondary" className="rounded-full px-3 py-1 text-xs font-medium bg-muted text-muted-foreground">
+                  {data.connectorPerformance.length} connector{data.connectorPerformance.length !== 1 ? 's' : ''}
+                </Badge>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
+                {data.connectorPerformance.map((connector) => {
+                  const total = connector.success_count + connector.decline_count;
+                  const successWidth = total > 0 ? connector.success_percentage : 0;
+                  return (
+                    <Card
+                      key={connector.connector_name}
+                      className="overflow-hidden border border-border bg-card shadow-sm"
+                    >
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base font-semibold text-foreground">
+                          {connector.connector_name}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                              ${connector.success_amount_usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {connector.success_count} transaction{connector.success_count !== 1 ? 's' : ''}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                              ${connector.decline_amount_usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {connector.decline_count} transaction{connector.decline_count !== 1 ? 's' : ''}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex h-2 w-full overflow-hidden rounded-full">
+                            <div
+                              className="h-full rounded-l-full bg-emerald-500 transition-all"
+                              style={{ width: `${successWidth}%` }}
+                            />
+                            <div
+                              className="h-full rounded-r-full bg-red-500 transition-all"
+                              style={{ width: `${100 - successWidth}%` }}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                              Success {connector.success_percentage}%
+                            </span>
+                            <span className="flex items-center gap-1.5 text-red-600 dark:text-red-400">
+                              {connector.decline_percentage}% Decline
+                              <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                            </span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
           )}
-
-          {/* Acquirer-wise Transaction Volumes Chart */}
-          <Card className="relative overflow-hidden border-border shadow-md hover:shadow-lg transition-all duration-300">
-            <CardHeader className="border-b border-border/50 bg-muted/30">
-              <CardTitle className="text-base font-semibold">Acquirer-wise Transaction Volumes</CardTitle>
-              <CardDescription className="text-sm text-muted-foreground">
-                Total transaction volumes grouped by acquirer (USD)
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              {acquirerVolumesChartData && acquirerVolumesChartData.categories.length > 0 ? (
-                <DynamicApexChart
-                  type="bar"
-                  series={[{ name: 'Volume (USD)', data: acquirerVolumesChartData.amounts }]}
-                  options={acquirerVolumesChartOptions}
-                  height={Math.max(350, acquirerVolumesChartData.categories.length * 60)}
-                />
-              ) : data && Array.isArray(data.acquirerWiseVolumes) ? (
-                <div className="text-center py-16">
-                  <div className="text-muted-foreground text-sm">
-                    No transaction data available for the selected date range
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-16">
-                  <div className="text-muted-foreground text-sm">
-                    {loading ? 'Loading acquirer volumes data...' : 'No acquirer data available'}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
 
         </>
       )}

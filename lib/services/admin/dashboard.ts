@@ -37,18 +37,22 @@ export interface ConnectorTransactionsSummary {
   [key: string]: unknown;
 }
 
-export interface AcquirerWiseVolume {
-  acquirerName: string;
-  totalAmount: number;
-  totalAmountUsd: number;
-  transactionCount: number;
+/** Per-connector (acquirer) success vs decline for Connector Performance section */
+export interface ConnectorPerformanceItem {
+  connector_name: string;
+  success_amount_usd: number;
+  success_count: number;
+  decline_amount_usd: number;
+  decline_count: number;
+  success_percentage: number;
+  decline_percentage: number;
 }
 
 export interface DashboardData {
   userCounters: UserCounters;
   transactionStatistics: TransactionStatistics;
   connectorTransactionsSummary: ConnectorTransactionsSummary[];
-  acquirerWiseVolumes: AcquirerWiseVolume[];
+  connectorPerformance?: ConnectorPerformanceItem[];
 }
 
 export interface DashboardResponse {

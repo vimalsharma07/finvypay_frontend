@@ -417,105 +417,8 @@ export function UserDashboardContent({ dateRange: dateRangeProp }: UserDashboard
     };
   }, [transactionChartData]);
 
-  // Transaction volume trend over time (area chart)
-  const transactionVolumeTrendOptions = useMemo(() => {
-    if (!transactionVolumeTrendData) return {};
-
-    return {
-      chart: {
-        type: 'area' as const,
-        toolbar: { show: false },
-        fontFamily: 'inherit',
-        zoom: {
-          enabled: false,
-        },
-      },
-      dataLabels: {
-        enabled: false,
-      },
-      stroke: {
-        curve: 'smooth' as const,
-        width: 3,
-      },
-      fill: {
-        type: 'gradient',
-        gradient: {
-          shadeIntensity: 1,
-          opacityFrom: 0.7,
-          opacityTo: 0.3,
-          stops: [0, 90, 100],
-        },
-      },
-      xaxis: {
-        categories: transactionVolumeTrendData.dates,
-        labels: {
-          style: {
-            fontSize: '12px',
-          },
-          rotate: -45,
-          rotateAlways: false,
-        },
-        axisBorder: {
-          show: false,
-        },
-        axisTicks: {
-          show: false,
-        },
-      },
-      yaxis: {
-        labels: {
-          formatter: (val: number) => `$${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
-          style: {
-            fontSize: '12px',
-          },
-        },
-        axisBorder: {
-          show: false,
-        },
-        axisTicks: {
-          show: false,
-        },
-      },
-      colors: ['#3b82f6'],
-      tooltip: {
-        enabled: true,
-        y: {
-          formatter: (val: number, { dataPointIndex }: any) => {
-            const date = transactionVolumeTrendData.dates[dataPointIndex];
-            const count = transactionVolumeTrendData.counts[dataPointIndex];
-            return `$${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}<br/>${count.toLocaleString()} transactions`;
-          },
-        },
-        style: {
-          fontSize: '13px',
-        },
-        theme: 'dark',
-      },
-      grid: {
-        borderColor: 'var(--color-border)',
-        strokeDashArray: 4,
-        xaxis: {
-          lines: {
-            show: false,
-          },
-        },
-        yaxis: {
-          lines: {
-            show: true,
-          },
-        },
-        padding: {
-          top: 0,
-          right: 0,
-          bottom: 0,
-          left: 0,
-        },
-      },
-    };
-  }, [transactionVolumeTrendData]);
-
-  // Transaction count trend over time (line chart)
-  const transactionCountTrendOptions = useMemo(() => {
+  // Combined transaction volume & count trend (dual-axis chart)
+  const transactionTrendChartOptions = useMemo(() => {
     if (!transactionVolumeTrendData) return {};
 
     return {
@@ -523,86 +426,81 @@ export function UserDashboardContent({ dateRange: dateRangeProp }: UserDashboard
         type: 'line' as const,
         toolbar: { show: false },
         fontFamily: 'inherit',
-        zoom: {
-          enabled: false,
-        },
+        zoom: { enabled: false },
       },
-      dataLabels: {
-        enabled: false,
-      },
+      dataLabels: { enabled: false },
       stroke: {
         curve: 'smooth' as const,
         width: 3,
       },
       markers: {
-        size: 5,
-        hover: {
-          size: 7,
-        },
+        size: 4,
+        hover: { size: 6 },
       },
       xaxis: {
         categories: transactionVolumeTrendData.dates,
         labels: {
-          style: {
-            fontSize: '12px',
-          },
+          style: { fontSize: '12px' },
           rotate: -45,
           rotateAlways: false,
         },
-        axisBorder: {
-          show: false,
-        },
-        axisTicks: {
-          show: false,
-        },
+        axisBorder: { show: false },
+        axisTicks: { show: false },
       },
-      yaxis: {
-        labels: {
-          formatter: (val: number) => val.toLocaleString(),
-          style: {
-            fontSize: '12px',
+      yaxis: [
+        {
+          title: { text: 'Volume (USD)', style: { fontSize: '12px' } },
+          labels: {
+            formatter: (val: number) => `$${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+            style: { fontSize: '12px' },
           },
+          axisBorder: { show: false },
+          axisTicks: { show: false },
         },
-        axisBorder: {
-          show: false,
+        {
+          opposite: true,
+          title: { text: 'Transaction Count', style: { fontSize: '12px' } },
+          labels: {
+            formatter: (val: number) => val.toLocaleString(),
+            style: { fontSize: '12px' },
+          },
+          axisBorder: { show: false },
+          axisTicks: { show: false },
         },
-        axisTicks: {
-          show: false,
-        },
+      ],
+      colors: ['#3b82f6', '#10b981'],
+      legend: {
+        show: true,
+        position: 'top' as const,
+        horizontalAlign: 'right' as const,
+        fontSize: '13px',
       },
-      colors: ['#10b981'],
       tooltip: {
         enabled: true,
+        shared: true,
+        intersect: false,
         y: {
-          formatter: (val: number, { dataPointIndex }: any) => {
-            const date = transactionVolumeTrendData.dates[dataPointIndex];
+          formatter: (val: number, { seriesIndex, dataPointIndex }: any) => {
+            if (seriesIndex === 0) {
+              const count = transactionVolumeTrendData.counts[dataPointIndex];
+              return `Volume: $${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · Count: ${count.toLocaleString()}`;
+            }
             return `${val.toLocaleString()} transactions`;
           },
         },
-        style: {
-          fontSize: '13px',
-        },
+        style: { fontSize: '13px' },
         theme: 'dark',
       },
       grid: {
         borderColor: 'var(--color-border)',
         strokeDashArray: 4,
-        xaxis: {
-          lines: {
-            show: false,
-          },
-        },
-        yaxis: {
-          lines: {
-            show: true,
-          },
-        },
-        padding: {
-          top: 0,
-          right: 0,
-          bottom: 0,
-          left: 0,
-        },
+        xaxis: { lines: { show: false } },
+        yaxis: { lines: { show: true } },
+        padding: { top: 10, right: 10, bottom: 0, left: 0 },
+      },
+      fill: {
+        type: 'gradient',
+        gradient: { shadeIntensity: 1, opacityFrom: 0.5, opacityTo: 0.15, stops: [0, 90, 100] },
       },
     };
   }, [transactionVolumeTrendData]);
@@ -846,60 +744,43 @@ export function UserDashboardContent({ dateRange: dateRangeProp }: UserDashboard
           </Card>
         )}
 
-        {/* Transaction Volume Trend Over Time */}
+        {/* Transaction Volume & Count Trend (combined) */}
         {transactionVolumeTrendData && transactionVolumeTrendData.dates.length > 0 ? (
           <Card className="relative overflow-hidden border-border shadow-md hover:shadow-lg transition-all duration-300">
             <CardHeader className="border-b border-border/50 bg-muted/30">
-              <CardTitle className="text-base font-semibold">Transaction Volume Trend</CardTitle>
+              <CardTitle className="text-base font-semibold">Transaction Volume & Count Trend</CardTitle>
               <CardDescription className="text-sm text-muted-foreground">
-                Daily transaction volume (USD) over selected period
+                Daily transaction volume (USD) and count over selected period
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
               <DynamicApexChart
-                type="area"
-                series={[{ name: 'Volume (USD)', data: transactionVolumeTrendData.volumes }]}
-                options={transactionVolumeTrendOptions}
-                height={280}
+                type="line"
+                series={[
+                  { name: 'Volume (USD)', type: 'area', data: transactionVolumeTrendData.volumes },
+                  { name: 'Transaction Count', type: 'line', data: transactionVolumeTrendData.counts },
+                ]}
+                options={transactionTrendChartOptions}
+                height={300}
               />
             </CardContent>
           </Card>
         ) : (
           <Card className="relative overflow-hidden border-border shadow-md hover:shadow-lg transition-all duration-300">
             <CardHeader className="border-b border-border/50 bg-muted/30">
-              <CardTitle className="text-base font-semibold">Transaction Volume Trend</CardTitle>
+              <CardTitle className="text-base font-semibold">Transaction Volume & Count Trend</CardTitle>
               <CardDescription className="text-sm text-muted-foreground">
-                Daily transaction volume (USD) over selected period
+                Daily transaction volume (USD) and count over selected period
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="text-center py-16 text-muted-foreground text-sm">
-                No volume trend data available for the selected date range
+                No trend data available for the selected date range
               </div>
             </CardContent>
           </Card>
         )}
       </div>
-
-      {/* Transaction Count Trend Over Time */}
-      {transactionVolumeTrendData && transactionVolumeTrendData.dates.length > 0 && (
-        <Card className="relative overflow-hidden border-border shadow-md hover:shadow-lg transition-all duration-300 mt-5 lg:mt-7.5">
-          <CardHeader className="border-b border-border/50 bg-muted/30">
-            <CardTitle className="text-base font-semibold">Transaction Count Trend</CardTitle>
-            <CardDescription className="text-sm text-muted-foreground">
-              Daily transaction count trend over selected period
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <DynamicApexChart
-              type="line"
-              series={[{ name: 'Transaction Count', data: transactionVolumeTrendData.counts }]}
-              options={transactionCountTrendOptions}
-              height={300}
-            />
-          </CardContent>
-        </Card>
-      )}
       </>
       )}
 
