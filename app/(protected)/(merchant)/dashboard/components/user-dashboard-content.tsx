@@ -307,7 +307,7 @@ export function UserDashboardContent({ dateRange: dateRangeProp }: UserDashboard
           horizontal: true,
           columnWidth: '75%',
           borderRadius: 6,
-          borderRadiusApplication: 'end',
+          borderRadiusApplication: 'end' as const,
           distributed: true,
         },
       },
