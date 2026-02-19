@@ -116,6 +116,7 @@ export function getTransactionColumns(
         <DataGridColumnHeader column={column} title="Country" />
       ),
       cell: ({ row }) => {
+        const country = row.original.country ?? '';
         const getFlagEmoji = (code: string) => {
           if (!code || code.length !== 2) return '🌐';
           const codePoints = code.toUpperCase().split('').map((char) => 127397 + char.charCodeAt(0));
@@ -123,8 +124,8 @@ export function getTransactionColumns(
         };
         return (
           <div className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/50 px-2 py-0.5">
-            <span className="text-sm leading-none">{getFlagEmoji(row.original.country)}</span>
-            <span className="text-xs font-medium text-foreground tabular-nums">{row.original.country}</span>
+            <span className="text-sm leading-none">{getFlagEmoji(country)}</span>
+            <span className="text-xs font-medium text-foreground tabular-nums">{country || '—'}</span>
           </div>
         );
       },
