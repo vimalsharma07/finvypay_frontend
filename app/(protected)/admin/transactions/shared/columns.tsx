@@ -233,25 +233,10 @@ export function getTransactionColumns(
         <DataGridColumnHeader column={column} title="Transaction Date" />
       ),
       cell: ({ row }) => {
-        const fullDate = (() => {
-          try {
-            const date = new Date(row.original.transactionDate);
-            return date.toLocaleString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit',
-              timeZoneName: 'short',
-            });
-          } catch {
-            return row.original.transactionDate;
-          }
-        })();
+        const formatted = formatTransactionDate(row.original.transactionDate);
         return (
-          <div className="text-xs text-muted-foreground" title={fullDate}>
-            {formatTransactionDate(row.original.transactionDate)}
+          <div className="text-xs text-muted-foreground" title={formatted}>
+            {formatted}
           </div>
         );
       },

@@ -21,7 +21,6 @@ import {
   Hash, 
   Webhook,
   Calendar,
-  Clock,
   CheckCircle2,
   XCircle,
   Loader2,
@@ -75,26 +74,10 @@ export function TransactionDetailsDialog({
     }
   };
 
-  const formattedDate = useMemo(() => {
-    if (!transaction) return { date: '', time: '' };
-    try {
-      const date = new Date(transaction.transactionDate);
-      const dateStr = date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      });
-      const timeStr = date.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false,
-      });
-      return { date: dateStr, time: timeStr };
-    } catch {
-      return { date: '', time: '' };
-    }
-  }, [transaction]);
+  const transactionDateFormatted = useMemo(
+    () => (transaction ? formatTransactionDate(transaction.transactionDate) : ''),
+    [transaction]
+  );
 
   if (!transaction) return null;
 
@@ -152,9 +135,7 @@ export function TransactionDetailsDialog({
                 <div className="text-base font-semibold">{statusInfo?.label || 'Unknown'}</div>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Calendar className="size-3" />
-                  <span>{formattedDate.date}</span>
-                  <Clock className="size-3 ml-2" />
-                  <span>{formattedDate.time}</span>
+                  <span>{transactionDateFormatted}</span>
                 </div>
               </div>
             </div>
