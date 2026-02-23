@@ -3,6 +3,7 @@
  */
 
 import { Transaction } from '@/lib/services/user/transaction';
+import { DISPLAY_TIMEZONE } from '@/lib/constants/datetime';
 
 /**
  * Transaction status mapping (API sends numeric status)
@@ -27,7 +28,7 @@ export function formatTransactionStatus(status: number): {
 }
 
 /**
- * Format date string as "Jan 5, 2026, 01:53 AM (UTC)"
+ * Format date string as "Jan 5, 2026, 01:53 AM (UTC)" using global DISPLAY_TIMEZONE
  */
 export function formatTransactionDate(dateString: string): string {
   try {
@@ -39,9 +40,9 @@ export function formatTransactionDate(dateString: string): string {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true,
-      timeZone: 'UTC',
+      timeZone: DISPLAY_TIMEZONE,
     });
-    return `${formatted} (UTC)`;
+    return `${formatted} (${DISPLAY_TIMEZONE})`;
   } catch {
     return dateString;
   }
