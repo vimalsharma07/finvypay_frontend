@@ -3,6 +3,7 @@
  */
 
 import { Transaction } from '@/lib/services/admin/transaction';
+import { DISPLAY_TIMEZONE } from '@/lib/constants/datetime';
 
 /**
  * Transaction status mapping (API sends numeric status)
@@ -27,18 +28,21 @@ export function formatTransactionStatus(status: number): {
 }
 
 /**
- * Format date string to readable format
+ * Format date string as "Jan 5, 2026, 01:53 AM (UTC)" using global DISPLAY_TIMEZONE
  */
 export function formatTransactionDate(dateString: string): string {
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
+    const formatted = date.toLocaleString('en-US', {
       month: 'short',
       day: 'numeric',
+      year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
+      hour12: true,
+      timeZone: DISPLAY_TIMEZONE,
     });
+    return `${formatted} (${DISPLAY_TIMEZONE})`;
   } catch {
     return dateString;
   }
