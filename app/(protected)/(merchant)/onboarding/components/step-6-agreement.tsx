@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -170,6 +170,15 @@ export function Step6Agreement({ onboardingData, onNext, onBack, onUpdate }: Ste
     onNext();
   };
 
+  const personalizedAgreementHtml = useMemo(() => {
+    if (!agreement) return '';
+
+    const customerName = onboardingData?.onboarding?.name;
+    if (!customerName) return agreement.desc;
+
+    return agreement.desc.replace(/\{name\}/g, customerName);
+  }, [agreement, onboardingData]);
+
   if (loading) {
     return (
       <Card>
@@ -209,9 +218,10 @@ export function Step6Agreement({ onboardingData, onNext, onBack, onUpdate }: Ste
               <h3 className="text-lg font-semibold">{agreement.name}</h3>
             </div>
             <ScrollArea className="h-[300px] w-full rounded-md border p-4">
-              <div className="text-sm text-muted-foreground whitespace-pre-wrap">
-                {agreement.desc}
-              </div>
+              <div
+                className="text-sm text-muted-foreground whitespace-pre-wrap"
+                dangerouslySetInnerHTML={{ __html: personalizedAgreementHtml }}
+              />
             </ScrollArea>
           </div>
 

@@ -122,6 +122,16 @@ export default function SandboxTransactionsPage() {
             }
           },
           onError: (errorMessage) => {
+            const msg = errorMessage || '';
+            const isPrimaryMerchantMissing =
+              msg.includes('PRIMARY_MERCHANT_PROFILE_NOT_FOUND') ||
+              msg.includes('No primary merchant profile found for this user');
+
+            if (isPrimaryMerchantMissing) {
+              // Suppress toast for missing primary merchant profile
+              return;
+            }
+
             toast.error(errorMessage || 'Failed to fetch transactions');
           },
         });

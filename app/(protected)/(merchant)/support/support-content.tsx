@@ -97,8 +97,8 @@ export function SupportPageContent({
         handleApiResponse<SupportTicketListResponse>(response, {
           onSuccess: (data) => {
             if (data && data.success && data.data) {
-              setTickets(Array.isArray(data.data) ? data.data : []);
-              setMeta(data.meta);
+              setTickets(Array.isArray(data.data.items) ? data.data.items : []);
+              setMeta(data.data.meta ?? null);
             } else {
               toast.error('Failed to fetch support tickets - invalid response structure');
             }
