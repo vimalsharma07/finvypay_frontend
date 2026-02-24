@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const AGREEMENT_TYPES = ['user', 'merchant'] as const;
+const AGREEMENT_TYPES = ['user', 'affiliate'] as const;
 const AGREEMENT_STATUSES = ['active', 'inactive'] as const;
 
 /** Strip HTML tags for length validation (rich text content) */

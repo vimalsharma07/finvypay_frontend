@@ -35,7 +35,7 @@ import { toast } from 'sonner';
 
 const AGREEMENT_TYPES = [
   { value: 'user', label: 'User' },
-  { value: 'merchant', label: 'Merchant' },
+  { value: 'affiliate', label: 'Affiliate' },
 ] as const;
 
 const AGREEMENT_STATUSES = [
