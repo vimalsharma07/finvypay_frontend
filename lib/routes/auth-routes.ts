@@ -26,5 +26,7 @@ export const authRoutes = {
   profile: '/auth/profile',
   /** Admin profile (when role is ADMIN or SUPER_ADMIN) */
   adminProfile: '/admin/profile',
+  /** Merchant API credentials (test/live keys, encryption, webhook hash) */
+  apiCredentials: '/auth/api-credentials',
 } as const;
 

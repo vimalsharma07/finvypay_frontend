@@ -20,6 +20,7 @@ export function useMerchantNotifications() {
                           pathname?.startsWith('/payment-links') ||
                           pathname?.startsWith('/profile') ||
                           pathname?.startsWith('/rates') ||
+                          pathname?.startsWith('/config') ||
                           pathname?.startsWith('/wallet') ||
                           pathname?.startsWith('/settings') ||
                           pathname?.startsWith('/reports') ||
