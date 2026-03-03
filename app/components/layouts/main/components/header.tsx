@@ -62,6 +62,7 @@ export function Header() {
       '/profile',
       '/profile-selection',
       '/rates',
+      '/config',
       '/wallet',
       '/settings',
       '/reports',
