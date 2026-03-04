@@ -430,8 +430,11 @@ export async function apiFetch(
 
   // Handle 403 Forbidden - might be refresh token reuse
   if (response.status === 403) {
-    if (data?.message?.toLowerCase().includes('refresh') || 
-        data?.error?.toLowerCase().includes('reuse') ||
+    const msg = typeof data?.message === 'string' ? data.message : '';
+    const errVal = data?.error;
+    const errStr = typeof errVal === 'string' ? errVal : (typeof errVal?.message === 'string' ? errVal.message : '');
+    if (msg.toLowerCase().includes('refresh') ||
+        errStr.toLowerCase().includes('reuse') ||
         data?.reuseDetected) {
       const refreshHandler = await import('./api-refresh-handler');
       refreshHandler.clearAuthState();
