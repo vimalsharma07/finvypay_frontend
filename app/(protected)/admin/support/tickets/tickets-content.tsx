@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Container } from '@/components/common/container';
 import {
   getSupportTickets,
@@ -43,10 +44,12 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { TicketActionMenu } from './components/ticket-action-menu';
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
 import { SearchInput } from './components/search-input';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 
 export function SupportTicketsPageContent() {
+  const router = useRouter();
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<SupportTicketListResponse['data']['meta'] | null>(null);
@@ -127,6 +130,7 @@ export function SupportTicketsPageContent() {
     const searchLower = searchQuery.toLowerCase();
     return tickets.filter(
       (item) =>
+        String(item.id).toLowerCase().includes(searchLower) ||
         item.user?.name?.toLowerCase().includes(searchLower) ||
         item.user?.email?.toLowerCase().includes(searchLower) ||
         item.title?.toLowerCase().includes(searchLower) ||
@@ -146,7 +150,12 @@ export function SupportTicketsPageContent() {
   };
 
   const handleViewTicket = (ticket: SupportTicket) => {
-    toast.info(`View ticket: ${ticket.title}`);
+    if (!ticket?.id) {
+      toast.error('Unable to open ticket. Missing ticket ID.');
+      return;
+    }
+
+    router.push(`/admin/support/tickets/${ticket.id}`);
   };
 
   const handleReopenTicket = async () => {
@@ -201,9 +210,9 @@ export function SupportTicketsPageContent() {
 
   const getPriorityBadgeVariant = (priority: string): 'primary' | 'destructive' | 'secondary' | 'warning' | 'info' => {
     switch (priority) {
-      case 'URGENT':
-        return 'destructive';
       case 'HIGH':
+        return 'destructive';
+      case 'CRITICAL':
         return 'destructive';
       case 'MEDIUM':
         return 'primary';
@@ -231,6 +240,16 @@ export function SupportTicketsPageContent() {
 
   const columns = useMemo<ColumnDef<SupportTicket>[]>(
     () => [
+      {
+        id: 'ticketId',
+        accessorKey: 'id',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Ticket ID" />
+        ),
+        cell: ({ row }) => {
+          return <div className="font-mono text-xs text-muted-foreground">#{row.original.id}</div>;
+        },
+      },
       {
         id: 'userName',
         accessorFn: (row) => row.user?.name || '',
@@ -272,9 +291,17 @@ export function SupportTicketsPageContent() {
           <DataGridColumnHeader column={column} title="Priority" />
         ),
         cell: ({ row }) => {
+          const value = row.original.priority;
           return (
-            <Badge variant={getPriorityBadgeVariant(row.original.priority)}>
-              {row.original.priority}
+            <Badge
+              variant={getPriorityBadgeVariant(value)}
+              className="flex items-center gap-1"
+            >
+              {value === 'LOW' && <ArrowDownRight className="size-3.5" />}
+              {value === 'MEDIUM' && <Minus className="size-3.5" />}
+              {value === 'HIGH' && <ArrowUpRight className="size-3.5" />}
+              {value === 'CRITICAL' && <AlertTriangle className="size-3.5" />}
+              {value}
             </Badge>
           );
         },
@@ -316,7 +343,7 @@ export function SupportTicketsPageContent() {
         size: 100,
       },
     ],
-    []
+    [handleViewTicket, pagination, sorting, meta]
   );
 
   const table = useReactTable({

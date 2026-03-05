@@ -37,7 +37,7 @@ import { X, File, Plus } from 'lucide-react';
 const createTicketSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
   description: z.string().min(1, 'Description is required').max(1000, 'Description must be less than 1000 characters'),
-  priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT'], {
+  priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'], {
     required_error: 'Priority is required',
   }),
   file: z.any().optional(),
@@ -224,7 +224,7 @@ export function CreateTicketDialog({
                           <SelectItem value="LOW">Low</SelectItem>
                           <SelectItem value="MEDIUM">Medium</SelectItem>
                           <SelectItem value="HIGH">High</SelectItem>
-                          <SelectItem value="URGENT">Urgent</SelectItem>
+                          <SelectItem value="CRITICAL">Critical</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>

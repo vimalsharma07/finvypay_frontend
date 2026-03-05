@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ExternalLink } from 'lucide-react';
 import { useRoleBasedMenu } from '@/hooks/use-role-based-menu';
+import { useAdminOpenTicketCount } from '@/hooks/use-admin-open-ticket-count';
 import { MenuConfig, MenuItem } from '@/config/types';
 import { cn } from '@/lib/utils';
 import {
@@ -27,6 +28,7 @@ const isExternalUrl = (url: string): boolean => {
 export function SidebarMenu() {
   const pathname = usePathname();
   const menu = useRoleBasedMenu();
+  const { count: openTicketCount } = useAdminOpenTicketCount();
 
   // Memoize matchPath to prevent unnecessary re-renders
   const matchPath = useCallback(
@@ -236,7 +238,17 @@ export function SidebarMenu() {
               <ExternalLink className="shrink-0 size-3 text-muted-foreground" />
             </a>
           ) : (
-            <Link href={path}>{item.title}</Link>
+            <Link href={path} className="flex items-center gap-1 justify-between">
+              <span>{item.title}</span>
+              {path === '/admin/support/tickets' && typeof openTicketCount === 'number' && openTicketCount > 0 && (
+                <Badge
+                  variant="outline"
+                  className="ml-2 h-5 min-w-[1.25rem] px-1.5 text-[11px] flex items-center justify-center"
+                >
+                  {openTicketCount}
+                </Badge>
+              )}
+            </Link>
           )}
         </AccordionMenuItem>
       );

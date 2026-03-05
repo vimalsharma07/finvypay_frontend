@@ -21,7 +21,7 @@ export interface SupportTicket {
   user: SupportTicketUser;
   title: string;
   description: string;
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
   filePath: string | null;
   s3Id: string | null;
@@ -33,6 +33,8 @@ export interface SupportTicket {
 export interface SupportTicketListParams {
   page?: number;
   limit?: number;
+  status?: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 }
 
 export interface SupportTicketListMeta {
@@ -58,7 +60,7 @@ export interface SupportTicketListResponse {
 export interface UpdateSupportTicketPayload {
   title?: string;
   description?: string;
-  priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   status?: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
 }
 
@@ -93,12 +95,22 @@ export async function getSupportTickets(
 
 /**
  * Get support ticket by ID
+ * Unwraps API response { success, data } so callers receive the ticket object directly.
  */
 export async function getSupportTicketById(
   id: string | number
 ): Promise<ApiResponse<SupportTicket>> {
   try {
-    const data = await http.get(adminRoutes.supportTicket.getById(id)) as SupportTicket;
+    const response = await http.get(adminRoutes.supportTicket.getById(id)) as
+      | { success: boolean; data: SupportTicket }
+      | SupportTicket;
+    const data =
+      response &&
+      typeof response === 'object' &&
+      'success' in response &&
+      'data' in response
+        ? (response as { success: boolean; data: SupportTicket }).data
+        : (response as SupportTicket);
     return {
       status: 200,
       data,
@@ -149,11 +161,23 @@ export async function updateSupportTicket(
 }
 
 /**
- * Close support ticket
+ * Update support ticket status (admin, PATCH)
  */
-export async function closeSupportTicket(id: string | number): Promise<ApiResponse<SupportTicket>> {
+export async function updateSupportTicketStatus(
+  id: string | number,
+  status: 'OPEN' | 'IN_PROGRESS' | 'WAITING_FOR_USER' | 'RESOLVED' | 'CLOSED'
+): Promise<ApiResponse<SupportTicket>> {
   try {
-    const data = await http.put(adminRoutes.supportTicket.close(id)) as SupportTicket;
+    const response = await http.patch(
+      adminRoutes.supportTicket.update(id),
+      { status },
+    ) as { success?: boolean; data?: SupportTicket } | SupportTicket;
+
+    const data =
+      response && typeof response === 'object' && 'success' in response && 'data' in response
+        ? (response as { success?: boolean; data?: SupportTicket }).data as SupportTicket
+        : (response as SupportTicket);
+
     return {
       status: 200,
       data,
@@ -174,11 +198,56 @@ export async function closeSupportTicket(id: string | number): Promise<ApiRespon
 }
 
 /**
- * Reopen support ticket
+ * Close support ticket (admin)
+ * Uses PATCH /admin/support-ticket/:id with status=CLOSED
+ */
+export async function closeSupportTicket(id: string | number): Promise<ApiResponse<SupportTicket>> {
+  try {
+    const response = await http.patch(
+      adminRoutes.supportTicket.update(id),
+      { status: 'CLOSED' }
+    ) as { success?: boolean; data?: SupportTicket } | SupportTicket;
+
+    const data =
+      response && typeof response === 'object' && 'success' in response && 'data' in response
+        ? (response as { success?: boolean; data?: SupportTicket }).data as SupportTicket
+        : (response as SupportTicket);
+
+    return {
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Reopen support ticket (admin)
+ * Uses PATCH /admin/support-ticket/:id with status=OPEN
  */
 export async function reopenSupportTicket(id: string | number): Promise<ApiResponse<SupportTicket>> {
   try {
-    const data = await http.put(adminRoutes.supportTicket.reopen(id)) as SupportTicket;
+    const response = await http.patch(
+      adminRoutes.supportTicket.update(id),
+      { status: 'OPEN' }
+    ) as { success?: boolean; data?: SupportTicket } | SupportTicket;
+
+    const data =
+      response && typeof response === 'object' && 'success' in response && 'data' in response
+        ? (response as { success?: boolean; data?: SupportTicket }).data as SupportTicket
+        : (response as SupportTicket);
+
     return {
       status: 200,
       data,

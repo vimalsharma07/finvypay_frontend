@@ -11,14 +11,14 @@ import {
 import { Container } from '@/components/common/container';
 import {
   getSupportTicketById,
-  updateSupportTicket,
+  updateSupportTicketStatus,
   SupportTicket,
-} from '@/lib/services/user/support-ticket';
+} from '@/lib/services/admin/support-ticket';
 import {
-  getTicketReplies,
-  addTicketReply,
-  SupportTicketReply,
-} from '@/lib/services/user/support-ticket-reply';
+  getAdminTicketReplies,
+  addAdminTicketReply,
+  AdminSupportTicketReply,
+} from '@/lib/services/admin/support-ticket-reply';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -33,25 +33,26 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Calendar, Clock, ExternalLink, Image as ImageIcon, User, AlertTriangle, Send, ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
 
-export default function ViewTicketPage() {
+export default function AdminViewTicketPage() {
   const params = useParams();
   const router = useRouter();
   const ticketId = params?.id as string;
 
   const [ticket, setTicket] = useState<SupportTicket | null>(null);
   const [loading, setLoading] = useState(true);
-  const [replies, setReplies] = useState<SupportTicketReply[]>([]);
+  const [replies, setReplies] = useState<AdminSupportTicketReply[]>([]);
   const [repliesLoading, setRepliesLoading] = useState(false);
   const [sendingReply, setSendingReply] = useState(false);
   const [replyMessage, setReplyMessage] = useState('');
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
-  const merchantStatusOptions: Array<{
+  const adminStatusOptions: Array<{
     value: SupportTicket['status'];
     label: string;
   }> = [
     { value: 'OPEN', label: 'Open' },
     { value: 'RESOLVED', label: 'Resolved' },
+    { value: 'CLOSED', label: 'Closed' },
   ];
 
   const fetchTicket = useCallback(async () => {
@@ -62,23 +63,22 @@ export default function ViewTicketPage() {
       const response = await getSupportTicketById(ticketId);
       handleApiResponse<SupportTicket>(response, {
         onSuccess: (data) => {
-          // Data is already extracted in the service function
           if (data && typeof data === 'object' && 'id' in data) {
             setTicket(data);
           } else {
             toast.error('Failed to fetch ticket - invalid response structure');
-            router.push('/support');
+            router.push('/admin/support/tickets');
           }
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to fetch ticket');
-          router.push('/support');
+          router.push('/admin/support/tickets');
         },
       });
     } catch (error) {
       toast.error('An unexpected error occurred');
       console.error('Fetch ticket error:', error);
-      router.push('/support');
+      router.push('/admin/support/tickets');
     } finally {
       setLoading(false);
     }
@@ -92,8 +92,8 @@ export default function ViewTicketPage() {
     if (!ticketId) return;
     setRepliesLoading(true);
     try {
-      const response = await getTicketReplies(ticketId);
-      handleApiResponse<SupportTicketReply[]>(response, {
+      const response = await getAdminTicketReplies(ticketId);
+      handleApiResponse<AdminSupportTicketReply[]>(response, {
         onSuccess: (data) => {
           if (Array.isArray(data)) {
             setReplies(data);
@@ -114,7 +114,7 @@ export default function ViewTicketPage() {
     if (!ticket || ticket.status === newStatus) return;
     setUpdatingStatus(true);
     try {
-      const response = await updateSupportTicket(ticket.id, { status: newStatus });
+      const response = await updateSupportTicketStatus(ticket.id, newStatus);
       handleApiResponse<SupportTicket>(response, {
         onSuccess: (updated) => {
           setTicket((prev) =>
@@ -138,12 +138,12 @@ export default function ViewTicketPage() {
     if (!replyMessage.trim() || !ticketId) return;
     setSendingReply(true);
     try {
-      const response = await addTicketReply(ticketId, replyMessage.trim());
-      handleApiResponse<SupportTicketReply>(response, {
+      const response = await addAdminTicketReply(ticketId, replyMessage.trim());
+      handleApiResponse<AdminSupportTicketReply>(response, {
         onSuccess: (data) => {
-          const normalized: SupportTicketReply = {
+          const normalized: AdminSupportTicketReply = {
             ...data,
-            authorType: 'MERCHANT',
+            authorType: 'ADMIN',
             createdAt: data.createdAt || new Date().toISOString(),
           };
           setReplies((prev) => [...prev, normalized]);
@@ -264,9 +264,9 @@ export default function ViewTicketPage() {
             <CardContent className="pt-6">
               <div className="text-center py-12">
                 <p className="text-muted-foreground mb-4">Ticket not found</p>
-                <Button variant="outline" onClick={() => router.push('/support')}>
+                <Button variant="outline" onClick={() => router.push('/admin/support/tickets')}>
                   <ArrowLeft className="mr-1 size-4" />
-                  Back
+                  Back to Tickets
                 </Button>
               </div>
             </CardContent>
@@ -286,7 +286,7 @@ export default function ViewTicketPage() {
             icon={LifeBuoy}
           />
           <ToolbarActions>
-            <Button variant="outline" onClick={() => router.push('/support')}>
+            <Button variant="outline" onClick={() => router.push('/admin/support/tickets')}>
               <ArrowLeft className="mr-1 size-4" />
               Back
             </Button>
@@ -296,16 +296,12 @@ export default function ViewTicketPage() {
 
       <Container>
         <div className="space-y-6">
-          {/* Main Ticket Card */}
           <Card>
             <CardHeader>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="text-2xl">{ticket.title}</CardTitle>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                  <Badge
-                    variant={getPriorityBadgeVariant(ticket.priority)}
-                    className="text-sm flex items-center gap-1"
-                  >
+                  <Badge variant={getPriorityBadgeVariant(ticket.priority)} className="text-sm flex items-center gap-1">
                     {ticket.priority === 'LOW' && <ArrowDownRight className="size-3.5" />}
                     {ticket.priority === 'MEDIUM' && <Minus className="size-3.5" />}
                     {ticket.priority === 'HIGH' && <ArrowUpRight className="size-3.5" />}
@@ -317,11 +313,11 @@ export default function ViewTicketPage() {
                     onValueChange={handleStatusChange}
                     disabled={updatingStatus}
                   >
-                    <SelectTrigger size="sm" className="w-32 text-xs">
+                    <SelectTrigger size="sm" className="w-40 text-xs">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent>
-                      {merchantStatusOptions.map((opt) => (
+                      {adminStatusOptions.map((opt) => (
                         <SelectItem key={opt.value} value={opt.value}>
                           {opt.label}
                         </SelectItem>
@@ -335,7 +331,6 @@ export default function ViewTicketPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Left: User info + timeline */}
                 <div className="space-y-6">
-                  {/* User Information */}
                   <div className="space-y-3">
                     <h3 className="text-sm font-semibold text-foreground flex items-center gap-1">
                       <User className="size-4" />
@@ -353,7 +348,6 @@ export default function ViewTicketPage() {
                     </div>
                   </div>
 
-                  {/* Ticket Dates */}
                   <div className="space-y-3">
                     <h3 className="text-sm font-semibold text-foreground flex items-center gap-1">
                       <Calendar className="size-4" />
@@ -389,7 +383,6 @@ export default function ViewTicketPage() {
 
                 {/* Right: Description + attachment */}
                 <div className="space-y-6">
-                  {/* Description */}
                   <div className="space-y-2">
                     <h3 className="text-sm font-semibold text-foreground">Description</h3>
                     <div className="rounded-lg bg-muted/50 p-4 text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
@@ -397,7 +390,6 @@ export default function ViewTicketPage() {
                     </div>
                   </div>
 
-                  {/* Attached Image */}
                   {ticket.filePath && (
                     <div className="space-y-3">
                       <h3 className="text-sm font-semibold text-foreground flex items-center gap-1">
@@ -461,7 +453,6 @@ export default function ViewTicketPage() {
               </div>
             </CardContent>
           </Card>
-
           {/* Conversation */}
           <Card>
             <CardHeader>
@@ -479,8 +470,13 @@ export default function ViewTicketPage() {
                 )}
                 {!repliesLoading &&
                   replies.map((reply, index) => {
-                    const isOwn = reply.authorType === 'MERCHANT';
-                    const displayName = isOwn ? 'You' : 'Admin';
+                    const isOwn = reply.authorType === 'ADMIN';
+                    const merchantLabelBase =
+                      reply.user?.name || reply.user?.email || 'Merchant';
+                    const merchantLabel = reply.user?.email
+                      ? `${merchantLabelBase} (${reply.user.email})`
+                      : merchantLabelBase;
+                    const displayName = isOwn ? 'You' : merchantLabel;
                     const avatarLetter = (displayName || '?').charAt(0).toUpperCase();
 
                     return (
@@ -529,7 +525,7 @@ export default function ViewTicketPage() {
                 <h3 className="text-sm font-semibold text-foreground">Add a reply</h3>
                 <textarea
                   className="w-full min-h-[80px] rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  placeholder="Type your message to support..."
+                  placeholder="Type your message to the merchant..."
                   value={replyMessage}
                   onChange={(e) => setReplyMessage(e.target.value)}
                   disabled={sendingReply}

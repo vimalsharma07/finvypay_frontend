@@ -44,6 +44,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
 import { TicketActionMenu } from './components/ticket-action-menu';
 import { SearchInput } from './components/search-input';
 import { DynamicCreateTicketDialog, DynamicEditTicketDialog } from '@/components/dialogs';
@@ -189,7 +190,7 @@ export function SupportPageContent({
     id: string,
     title: string,
     description: string,
-    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
+    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
   ) => {
     setUpdating(true);
     try {
@@ -248,9 +249,9 @@ export function SupportPageContent({
 
   const getPriorityBadgeVariant = (priority: string): 'primary' | 'destructive' | 'secondary' | 'warning' | 'info' => {
     switch (priority) {
-      case 'URGENT':
-        return 'destructive';
       case 'HIGH':
+        return 'destructive';
+      case 'CRITICAL':
         return 'destructive';
       case 'MEDIUM':
         return 'primary';
@@ -278,6 +279,18 @@ export function SupportPageContent({
 
   const columns = useMemo<ColumnDef<SupportTicket>[]>(
     () => [
+      {
+        id: 'ticketId',
+        accessorKey: 'id',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Ticket ID" />
+        ),
+        cell: ({ row }) => {
+          return <div className="font-mono text-xs text-muted-foreground">#{row.original.id}</div>;
+        },
+        size: 90,
+        minSize: 80,
+      },
       {
         id: 'title',
         accessorKey: 'title',
@@ -313,9 +326,17 @@ export function SupportPageContent({
           <DataGridColumnHeader column={column} title="Priority" />
         ),
         cell: ({ row }) => {
+          const value = row.original.priority;
           return (
-            <Badge variant={getPriorityBadgeVariant(row.original.priority)}>
-              {row.original.priority}
+            <Badge
+              variant={getPriorityBadgeVariant(value)}
+              className="flex items-center gap-1"
+            >
+              {value === 'LOW' && <ArrowDownRight className="size-3.5" />}
+              {value === 'MEDIUM' && <Minus className="size-3.5" />}
+              {value === 'HIGH' && <ArrowUpRight className="size-3.5" />}
+              {value === 'CRITICAL' && <AlertTriangle className="size-3.5" />}
+              {value}
             </Badge>
           );
         },
