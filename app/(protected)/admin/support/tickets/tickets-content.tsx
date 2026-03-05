@@ -129,6 +129,7 @@ export function SupportTicketsPageContent() {
     const searchLower = searchQuery.toLowerCase();
     return tickets.filter(
       (item) =>
+        String(item.id).toLowerCase().includes(searchLower) ||
         item.user?.name?.toLowerCase().includes(searchLower) ||
         item.user?.email?.toLowerCase().includes(searchLower) ||
         item.title?.toLowerCase().includes(searchLower) ||
@@ -208,9 +209,9 @@ export function SupportTicketsPageContent() {
 
   const getPriorityBadgeVariant = (priority: string): 'primary' | 'destructive' | 'secondary' | 'warning' | 'info' => {
     switch (priority) {
-      case 'URGENT':
-        return 'destructive';
       case 'HIGH':
+        return 'destructive';
+      case 'CRITICAL':
         return 'destructive';
       case 'MEDIUM':
         return 'primary';
@@ -238,6 +239,16 @@ export function SupportTicketsPageContent() {
 
   const columns = useMemo<ColumnDef<SupportTicket>[]>(
     () => [
+      {
+        id: 'ticketId',
+        accessorKey: 'id',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Ticket ID" />
+        ),
+        cell: ({ row }) => {
+          return <div className="font-mono text-xs text-muted-foreground">#{row.original.id}</div>;
+        },
+      },
       {
         id: 'userName',
         accessorFn: (row) => row.user?.name || '',

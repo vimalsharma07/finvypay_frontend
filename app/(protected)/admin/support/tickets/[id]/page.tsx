@@ -13,6 +13,11 @@ import {
   getSupportTicketById,
   SupportTicket,
 } from '@/lib/services/admin/support-ticket';
+import {
+  getAdminTicketReplies,
+  addAdminTicketReply,
+  AdminSupportTicketReply,
+} from '@/lib/services/admin/support-ticket-reply';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -27,6 +32,10 @@ export default function AdminViewTicketPage() {
 
   const [ticket, setTicket] = useState<SupportTicket | null>(null);
   const [loading, setLoading] = useState(true);
+  const [replies, setReplies] = useState<AdminSupportTicketReply[]>([]);
+  const [repliesLoading, setRepliesLoading] = useState(false);
+  const [sendingReply, setSendingReply] = useState(false);
+  const [replyMessage, setReplyMessage] = useState('');
 
   const fetchTicket = useCallback(async () => {
     if (!ticketId) return;
@@ -61,12 +70,56 @@ export default function AdminViewTicketPage() {
     fetchTicket();
   }, [fetchTicket]);
 
+  const fetchReplies = useCallback(async () => {
+    if (!ticketId) return;
+    setRepliesLoading(true);
+    try {
+      const response = await getAdminTicketReplies(ticketId);
+      handleApiResponse<AdminSupportTicketReply[]>(response, {
+        onSuccess: (data) => {
+          if (Array.isArray(data)) {
+            setReplies(data);
+          }
+        },
+        silent: true,
+      });
+    } finally {
+      setRepliesLoading(false);
+    }
+  }, [ticketId]);
+
+  useEffect(() => {
+    fetchReplies();
+  }, [fetchReplies]);
+
+  const handleSendReply = async () => {
+    if (!replyMessage.trim() || !ticketId) return;
+    setSendingReply(true);
+    try {
+      const response = await addAdminTicketReply(ticketId, replyMessage.trim());
+      handleApiResponse<AdminSupportTicketReply>(response, {
+        onSuccess: (data) => {
+          setReplies((prev) => [...prev, data]);
+          setReplyMessage('');
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to send reply');
+        },
+      });
+    } catch (error) {
+      toast.error('An unexpected error occurred while sending reply');
+      console.error('Send reply error:', error);
+    } finally {
+      setSendingReply(false);
+    }
+  };
+
   const getPriorityBadgeVariant = (priority: string | undefined | null): 'primary' | 'destructive' | 'secondary' | 'warning' | 'info' => {
     if (!priority) return 'primary';
     switch (priority) {
-      case 'URGENT':
-        return 'destructive';
       case 'HIGH':
+        return 'destructive';
+      case 'CRITICAL':
         return 'destructive';
       case 'MEDIUM':
         return 'primary';
@@ -328,6 +381,65 @@ export default function AdminViewTicketPage() {
                       </div>
                     )}
                   </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          {/* Conversation */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Conversation</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3 max-h-80 overflow-y-auto rounded-md border bg-muted/40 p-3">
+                {repliesLoading && (
+                  <p className="text-sm text-muted-foreground">Loading conversation...</p>
+                )}
+                {!repliesLoading && replies.length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    No replies yet. Start the conversation below.
+                  </p>
+                )}
+                {!repliesLoading &&
+                  replies.map((reply, index) => (
+                    <div
+                      key={`${reply.id}-${index}`}
+                      className="rounded-md bg-background px-3 py-2 text-sm shadow-sm border"
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-medium">
+                          {reply.authorType === 'ADMIN'
+                            ? reply.user?.name || 'You'
+                            : reply.user?.name || 'Merchant'}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground">
+                          {formatDate(reply.createdAt)}
+                        </span>
+                      </div>
+                      <p className="whitespace-pre-wrap text-muted-foreground">
+                        {reply.message}
+                      </p>
+                    </div>
+                  ))}
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-foreground">Add a reply</h3>
+                <textarea
+                  className="w-full min-h-[80px] rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  placeholder="Type your message to the merchant..."
+                  value={replyMessage}
+                  onChange={(e) => setReplyMessage(e.target.value)}
+                  disabled={sendingReply}
+                />
+                <div className="flex justify-end">
+                  <Button
+                    size="sm"
+                    onClick={handleSendReply}
+                    disabled={sendingReply || !replyMessage.trim()}
+                  >
+                    {sendingReply ? 'Sending...' : 'Send Reply'}
+                  </Button>
                 </div>
               </div>
             </CardContent>

@@ -21,7 +21,7 @@ export interface SupportTicket {
   user: SupportTicketUser;
   title: string;
   description: string;
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
   filePath: string | null;
   s3Id: string | null;
@@ -58,14 +58,14 @@ export interface SupportTicketListResponse {
 export interface UpdateSupportTicketPayload {
   title?: string;
   description?: string;
-  priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   status?: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
 }
 
 export interface CreateSupportTicketPayload {
   title: string;
   description: string;
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   file?: File;
 }
 

@@ -189,7 +189,7 @@ export function SupportPageContent({
     id: string,
     title: string,
     description: string,
-    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
+    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
   ) => {
     setUpdating(true);
     try {
@@ -248,9 +248,9 @@ export function SupportPageContent({
 
   const getPriorityBadgeVariant = (priority: string): 'primary' | 'destructive' | 'secondary' | 'warning' | 'info' => {
     switch (priority) {
-      case 'URGENT':
-        return 'destructive';
       case 'HIGH':
+        return 'destructive';
+      case 'CRITICAL':
         return 'destructive';
       case 'MEDIUM':
         return 'primary';
@@ -278,6 +278,18 @@ export function SupportPageContent({
 
   const columns = useMemo<ColumnDef<SupportTicket>[]>(
     () => [
+      {
+        id: 'ticketId',
+        accessorKey: 'id',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Ticket ID" />
+        ),
+        cell: ({ row }) => {
+          return <div className="font-mono text-xs text-muted-foreground">#{row.original.id}</div>;
+        },
+        size: 90,
+        minSize: 80,
+      },
       {
         id: 'title',
         accessorKey: 'title',
