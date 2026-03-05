@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Container } from '@/components/common/container';
 import {
   getSupportTickets,
@@ -47,6 +48,7 @@ import { SearchInput } from './components/search-input';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 
 export function SupportTicketsPageContent() {
+  const router = useRouter();
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<SupportTicketListResponse['data']['meta'] | null>(null);
@@ -146,7 +148,12 @@ export function SupportTicketsPageContent() {
   };
 
   const handleViewTicket = (ticket: SupportTicket) => {
-    toast.info(`View ticket: ${ticket.title}`);
+    if (!ticket?.id) {
+      toast.error('Unable to open ticket. Missing ticket ID.');
+      return;
+    }
+
+    router.push(`/admin/support/tickets/${ticket.id}`);
   };
 
   const handleReopenTicket = async () => {
@@ -316,7 +323,7 @@ export function SupportTicketsPageContent() {
         size: 100,
       },
     ],
-    []
+    [handleViewTicket, pagination, sorting, meta]
   );
 
   const table = useReactTable({
