@@ -198,17 +198,15 @@ export default function AdminViewTicketPage() {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="space-y-2">
-                  <CardTitle className="text-2xl">{ticket.title}</CardTitle>
-                  <div className="flex items-center gap-3">
-                    <Badge variant={getPriorityBadgeVariant(ticket.priority)} className="text-sm">
-                      {ticket.priority || '-'}
-                    </Badge>
-                    <Badge variant={getStatusBadgeVariant(ticket.status)} className="text-sm">
-                      {formatStatus(ticket.status)}
-                    </Badge>
-                  </div>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <CardTitle className="text-2xl">{ticket.title}</CardTitle>
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                  <Badge variant={getPriorityBadgeVariant(ticket.priority)} className="text-sm">
+                    {ticket.priority || '-'}
+                  </Badge>
+                  <Badge variant={getStatusBadgeVariant(ticket.status)} className="text-sm">
+                    {formatStatus(ticket.status)}
+                  </Badge>
                 </div>
               </div>
             </CardHeader>

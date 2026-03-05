@@ -33,6 +33,8 @@ export interface SupportTicket {
 export interface SupportTicketListParams {
   page?: number;
   limit?: number;
+  status?: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 }
 
 export interface SupportTicketListMeta {
