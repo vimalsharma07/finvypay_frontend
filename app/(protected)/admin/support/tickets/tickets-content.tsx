@@ -44,6 +44,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { TicketActionMenu } from './components/ticket-action-menu';
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
 import { SearchInput } from './components/search-input';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 
@@ -290,9 +291,17 @@ export function SupportTicketsPageContent() {
           <DataGridColumnHeader column={column} title="Priority" />
         ),
         cell: ({ row }) => {
+          const value = row.original.priority;
           return (
-            <Badge variant={getPriorityBadgeVariant(row.original.priority)}>
-              {row.original.priority}
+            <Badge
+              variant={getPriorityBadgeVariant(value)}
+              className="flex items-center gap-1"
+            >
+              {value === 'LOW' && <ArrowDownRight className="size-3.5" />}
+              {value === 'MEDIUM' && <Minus className="size-3.5" />}
+              {value === 'HIGH' && <ArrowUpRight className="size-3.5" />}
+              {value === 'CRITICAL' && <AlertTriangle className="size-3.5" />}
+              {value}
             </Badge>
           );
         },

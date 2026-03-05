@@ -11,6 +11,7 @@ import {
 import { Container } from '@/components/common/container';
 import {
   getSupportTicketById,
+  updateSupportTicketStatus,
   SupportTicket,
 } from '@/lib/services/admin/support-ticket';
 import {
@@ -22,8 +23,15 @@ import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Calendar, Clock, ExternalLink, Image as ImageIcon, User } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, ExternalLink, Image as ImageIcon, User, AlertTriangle, Send, ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
 
 export default function AdminViewTicketPage() {
   const params = useParams();
@@ -36,6 +44,16 @@ export default function AdminViewTicketPage() {
   const [repliesLoading, setRepliesLoading] = useState(false);
   const [sendingReply, setSendingReply] = useState(false);
   const [replyMessage, setReplyMessage] = useState('');
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+
+  const adminStatusOptions: Array<{
+    value: SupportTicket['status'];
+    label: string;
+  }> = [
+    { value: 'OPEN', label: 'Open' },
+    { value: 'RESOLVED', label: 'Resolved' },
+    { value: 'CLOSED', label: 'Closed' },
+  ];
 
   const fetchTicket = useCallback(async () => {
     if (!ticketId) return;
@@ -91,6 +109,30 @@ export default function AdminViewTicketPage() {
   useEffect(() => {
     fetchReplies();
   }, [fetchReplies]);
+
+  const handleStatusChange = async (newStatus: SupportTicket['status']) => {
+    if (!ticket || ticket.status === newStatus) return;
+    setUpdatingStatus(true);
+    try {
+      const response = await updateSupportTicketStatus(ticket.id, newStatus);
+      handleApiResponse<SupportTicket>(response, {
+        onSuccess: (updated) => {
+          setTicket((prev) =>
+            prev ? { ...prev, status: updated.status } : prev,
+          );
+          toast.success(`Status updated to ${formatStatus(updated.status)}`);
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to update status');
+        },
+      });
+    } catch (error) {
+      toast.error('An unexpected error occurred while updating status');
+      console.error('Update status error:', error);
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
 
   const handleSendReply = async () => {
     if (!replyMessage.trim() || !ticketId) return;
@@ -246,7 +288,7 @@ export default function AdminViewTicketPage() {
           <ToolbarActions>
             <Button variant="outline" onClick={() => router.push('/admin/support/tickets')}>
               <ArrowLeft className="mr-1 size-4" />
-              Back to Tickets
+              Back
             </Button>
           </ToolbarActions>
         </Toolbar>
@@ -259,12 +301,29 @@ export default function AdminViewTicketPage() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="text-2xl">{ticket.title}</CardTitle>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                  <Badge variant={getPriorityBadgeVariant(ticket.priority)} className="text-sm">
+                  <Badge variant={getPriorityBadgeVariant(ticket.priority)} className="text-sm flex items-center gap-1">
+                    {ticket.priority === 'LOW' && <ArrowDownRight className="size-3.5" />}
+                    {ticket.priority === 'MEDIUM' && <Minus className="size-3.5" />}
+                    {ticket.priority === 'HIGH' && <ArrowUpRight className="size-3.5" />}
+                    {ticket.priority === 'CRITICAL' && <AlertTriangle className="size-3.5" />}
                     {ticket.priority || '-'}
                   </Badge>
-                  <Badge variant={getStatusBadgeVariant(ticket.status)} className="text-sm">
-                    {formatStatus(ticket.status)}
-                  </Badge>
+                  <Select
+                    value={ticket.status}
+                    onValueChange={handleStatusChange}
+                    disabled={updatingStatus}
+                  >
+                    <SelectTrigger size="sm" className="w-40 text-xs">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {adminStatusOptions.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </CardHeader>
@@ -477,6 +536,7 @@ export default function AdminViewTicketPage() {
                     onClick={handleSendReply}
                     disabled={sendingReply || !replyMessage.trim()}
                   >
+                    <Send className="mr-1 size-4" />
                     {sendingReply ? 'Sending...' : 'Send Reply'}
                   </Button>
                 </div>

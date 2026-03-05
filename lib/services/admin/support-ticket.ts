@@ -161,6 +161,43 @@ export async function updateSupportTicket(
 }
 
 /**
+ * Update support ticket status (admin, PATCH)
+ */
+export async function updateSupportTicketStatus(
+  id: string | number,
+  status: 'OPEN' | 'IN_PROGRESS' | 'WAITING_FOR_USER' | 'RESOLVED' | 'CLOSED'
+): Promise<ApiResponse<SupportTicket>> {
+  try {
+    const response = await http.patch(
+      adminRoutes.supportTicket.update(id),
+      { status },
+    ) as { success?: boolean; data?: SupportTicket } | SupportTicket;
+
+    const data =
+      response && typeof response === 'object' && 'success' in response && 'data' in response
+        ? (response as { success?: boolean; data?: SupportTicket }).data as SupportTicket
+        : (response as SupportTicket);
+
+    return {
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+        data: error.data,
+      };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
  * Close support ticket (admin)
  * Uses PATCH /admin/support-ticket/:id with status=CLOSED
  */
