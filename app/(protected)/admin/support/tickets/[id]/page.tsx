@@ -264,123 +264,127 @@ export default function AdminViewTicketPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-foreground">Description</h3>
-                <div className="rounded-lg bg-muted/50 p-4 text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                  {ticket.description || '-'}
-                </div>
-              </div>
-
-              {ticket.filePath && (
-                <div className="space-y-3">
-                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-1">
-                    <ImageIcon className="size-4" />
-                    Attachment
-                  </h3>
-                  {isImageFile(ticket.filePath) ? (
-                    <div className="relative rounded-lg border overflow-hidden bg-muted group">
-                      <div className="relative w-full max-w-3xl mx-auto">
-                        <div className="relative aspect-video w-full bg-muted/50 flex items-center justify-center">
-                          <img
-                            src={ticket.filePath}
-                            alt="Ticket attachment"
-                            className="max-h-full max-w-full object-contain"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                              const parent = target.parentElement;
-                              if (parent) {
-                                parent.innerHTML = '<div class="text-center p-8 text-muted-foreground">Failed to load image</div>';
-                              }
-                            }}
-                          />
-                        </div>
-                        <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            asChild
-                            className="backdrop-blur-sm bg-background/90 shadow-md"
-                          >
-                            <a
-                              href={ticket.filePath}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1"
-                            >
-                              <ExternalLink className="size-4" />
-                              Open Full Size
-                            </a>
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="rounded-lg border p-4 bg-muted/50">
-                      <a
-                        href={ticket.filePath}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                      >
-                        <ExternalLink className="size-4" />
-                        View Attachment
-                      </a>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className="border-t" />
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-1">
-                    <User className="size-4" />
-                    User Information
-                  </h3>
-                  <div className="space-y-2 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Name:</span>{' '}
-                      <span className="font-medium">{ticket.user?.name || '-'}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Email:</span>{' '}
-                      <span className="font-medium">{ticket.user?.email || '-'}</span>
+                {/* Left: User info + timeline */}
+                <div className="space-y-6">
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-semibold text-foreground flex items-center gap-1">
+                      <User className="size-4" />
+                      User Information
+                    </h3>
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Name:</span>{' '}
+                        <span className="font-medium">{ticket.user?.name || '-'}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Email:</span>{' '}
+                        <span className="font-medium">{ticket.user?.email || '-'}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="space-y-3">
-                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-1">
-                    <Calendar className="size-4" />
-                    Ticket Timeline
-                  </h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-start gap-2">
-                      <Clock className="size-4 mt-0.5 text-muted-foreground" />
-                      <div>
-                        <span className="text-muted-foreground">Created:</span>{' '}
-                        <span className="font-medium">{formatDate(ticket.createdAt)}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <Clock className="size-4 mt-0.5 text-muted-foreground" />
-                      <div>
-                        <span className="text-muted-foreground">Updated:</span>{' '}
-                        <span className="font-medium">{formatDate(ticket.updatedAt)}</span>
-                      </div>
-                    </div>
-                    {ticket.closedAt && (
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-semibold text-foreground flex items-center gap-1">
+                      <Calendar className="size-4" />
+                      Ticket Timeline
+                    </h3>
+                    <div className="space-y-2 text-sm">
                       <div className="flex items-start gap-2">
                         <Clock className="size-4 mt-0.5 text-muted-foreground" />
                         <div>
-                          <span className="text-muted-foreground">Closed:</span>{' '}
-                          <span className="font-medium">{formatDate(ticket.closedAt)}</span>
+                          <span className="text-muted-foreground">Created:</span>{' '}
+                          <span className="font-medium">{formatDate(ticket.createdAt)}</span>
                         </div>
                       </div>
-                    )}
+                      <div className="flex items-start gap-2">
+                        <Clock className="size-4 mt-0.5 text-muted-foreground" />
+                        <div>
+                          <span className="text-muted-foreground">Updated:</span>{' '}
+                          <span className="font-medium">{formatDate(ticket.updatedAt)}</span>
+                        </div>
+                      </div>
+                      {ticket.closedAt && (
+                        <div className="flex items-start gap-2">
+                          <Clock className="size-4 mt-0.5 text-muted-foreground" />
+                          <div>
+                            <span className="text-muted-foreground">Closed:</span>{' '}
+                            <span className="font-medium">{formatDate(ticket.closedAt)}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
+                </div>
+
+                {/* Right: Description + attachment */}
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold text-foreground">Description</h3>
+                    <div className="rounded-lg bg-muted/50 p-4 text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                      {ticket.description || '-'}
+                    </div>
+                  </div>
+
+                  {ticket.filePath && (
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-semibold text-foreground flex items-center gap-1">
+                        <ImageIcon className="size-4" />
+                        Attachment
+                      </h3>
+                      {isImageFile(ticket.filePath) ? (
+                        <div className="relative rounded-lg border overflow-hidden bg-muted group">
+                          <div className="relative w-full max-w-3xl mx-auto">
+                            <div className="relative aspect-video w-full bg-muted/50 flex items-center justify-center">
+                              <img
+                                src={ticket.filePath}
+                                alt="Ticket attachment"
+                                className="max-h-full max-w-full object-contain"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  const parent = target.parentElement;
+                                  if (parent) {
+                                    parent.innerHTML = '<div class="text-center p-8 text-muted-foreground">Failed to load image</div>';
+                                  }
+                                }}
+                              />
+                            </div>
+                            <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                asChild
+                                className="backdrop-blur-sm bg-background/90 shadow-md"
+                              >
+                                <a
+                                  href={ticket.filePath}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1"
+                                >
+                                  <ExternalLink className="size-4" />
+                                  Open Full Size
+                                </a>
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="rounded-lg border p-4 bg-muted/50">
+                          <a
+                            href={ticket.filePath}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                          >
+                            <ExternalLink className="size-4" />
+                            View Attachment
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>

@@ -17,12 +17,18 @@ export async function getTicketReplies(
   ticketId: string | number
 ): Promise<ApiResponse<SupportTicketReplyList>> {
   try {
-    const data = await http.get(
+    const response = await http.get(
       `${userSupportTicketRoutes.getById(ticketId)}/replies`
-    ) as SupportTicketReplyList;
+    ) as { success?: boolean; data?: SupportTicketReplyList } | SupportTicketReplyList;
+
+    const replies: SupportTicketReplyList =
+      response && typeof response === 'object' && 'success' in response && 'data' in response
+        ? (response as { success?: boolean; data?: SupportTicketReplyList }).data || []
+        : (Array.isArray(response) ? (response as SupportTicketReplyList) : []);
+
     return {
       status: 200,
-      data,
+      data: replies,
     };
   } catch (error) {
     if (error instanceof ApiError) {
@@ -44,13 +50,19 @@ export async function addTicketReply(
   message: string
 ): Promise<ApiResponse<SupportTicketReply>> {
   try {
-    const data = await http.post(
+    const response = await http.post(
       `${userSupportTicketRoutes.getById(ticketId)}/replies`,
       { message },
-    ) as SupportTicketReply;
+    ) as { success?: boolean; data?: SupportTicketReply } | SupportTicketReply;
+
+    const reply: SupportTicketReply =
+      response && typeof response === 'object' && 'success' in response && 'data' in response
+        ? (response as { success?: boolean; data?: SupportTicketReply }).data as SupportTicketReply
+        : (response as SupportTicketReply);
+
     return {
       status: 200,
-      data,
+      data: reply,
     };
   } catch (error) {
     if (error instanceof ApiError) {

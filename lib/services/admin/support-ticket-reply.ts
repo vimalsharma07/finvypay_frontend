@@ -19,12 +19,17 @@ export async function getAdminTicketReplies(
   ticketId: string | number
 ): Promise<ApiResponse<AdminSupportTicketReplyList>> {
   try {
-    const data = await http.get(
+    const response = await http.get(
       `${adminSupportTicketBase(ticketId)}/replies`
-    ) as AdminSupportTicketReplyList;
+    ) as { success?: boolean; data?: AdminSupportTicketReplyList } | AdminSupportTicketReplyList;
+
+    const replies: AdminSupportTicketReplyList =
+      response && typeof response === 'object' && 'success' in response && 'data' in response
+        ? (response as { success?: boolean; data?: AdminSupportTicketReplyList }).data || []
+        : (Array.isArray(response) ? (response as AdminSupportTicketReplyList) : []);
     return {
       status: 200,
-      data,
+      data: replies,
     };
   } catch (error) {
     if (error instanceof ApiError) {
@@ -46,13 +51,18 @@ export async function addAdminTicketReply(
   message: string
 ): Promise<ApiResponse<AdminSupportTicketReply>> {
   try {
-    const data = await http.post(
+    const response = await http.post(
       `${adminSupportTicketBase(ticketId)}/replies`,
       { message },
-    ) as AdminSupportTicketReply;
+    ) as { success?: boolean; data?: AdminSupportTicketReply } | AdminSupportTicketReply;
+
+    const reply: AdminSupportTicketReply =
+      response && typeof response === 'object' && 'success' in response && 'data' in response
+        ? (response as { success?: boolean; data?: AdminSupportTicketReply }).data as AdminSupportTicketReply
+        : (response as AdminSupportTicketReply);
     return {
       status: 200,
-      data,
+      data: reply,
     };
   } catch (error) {
     if (error instanceof ApiError) {
