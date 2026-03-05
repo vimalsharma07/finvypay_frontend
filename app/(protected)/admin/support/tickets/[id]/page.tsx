@@ -405,26 +405,56 @@ export default function AdminViewTicketPage() {
                   </p>
                 )}
                 {!repliesLoading &&
-                  replies.map((reply, index) => (
-                    <div
-                      key={`${reply.id}-${index}`}
-                      className="rounded-md bg-background px-3 py-2 text-sm shadow-sm border"
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium">
-                          {reply.authorType === 'ADMIN'
-                            ? reply.user?.name || 'You'
-                            : reply.user?.name || 'Merchant'}
-                        </span>
-                        <span className="text-[11px] text-muted-foreground">
-                          {formatDate(reply.createdAt)}
-                        </span>
+                  replies.map((reply, index) => {
+                    const isOwn = reply.authorType === 'ADMIN';
+                    const merchantLabelBase =
+                      reply.user?.name || reply.user?.email || 'Merchant';
+                    const merchantLabel = reply.user?.email
+                      ? `${merchantLabelBase} (${reply.user.email})`
+                      : merchantLabelBase;
+                    const displayName = isOwn ? 'You' : merchantLabel;
+                    const avatarLetter = (displayName || '?').charAt(0).toUpperCase();
+
+                    return (
+                      <div
+                        key={`${reply.id}-${index}`}
+                        className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div className={`flex max-w-[80%] items-start gap-2 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary shrink-0">
+                            {avatarLetter}
+                          </div>
+                          <div
+                            className={`rounded-2xl px-3 py-2 text-sm shadow-sm border ${
+                              isOwn
+                                ? 'bg-primary text-primary-foreground border-primary/60'
+                                : 'bg-background text-foreground border-border'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-3 mb-1">
+                              <span className="font-semibold text-xs">
+                                {displayName}
+                              </span>
+                              <span
+                                className={`text-[10px] ${
+                                  isOwn ? 'text-primary-foreground/80' : 'text-muted-foreground/80'
+                                }`}
+                              >
+                                {formatDate(reply.createdAt)}
+                              </span>
+                            </div>
+                            <p
+                              className={`whitespace-pre-wrap text-xs sm:text-sm ${
+                                isOwn ? 'text-primary-foreground' : 'text-muted-foreground'
+                              }`}
+                            >
+                              {reply.message}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                      <p className="whitespace-pre-wrap text-muted-foreground">
-                        {reply.message}
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
               </div>
 
               <div className="space-y-2">
