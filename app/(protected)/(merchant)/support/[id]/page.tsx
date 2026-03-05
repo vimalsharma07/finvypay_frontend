@@ -100,7 +100,12 @@ export default function ViewTicketPage() {
       const response = await addTicketReply(ticketId, replyMessage.trim());
       handleApiResponse<SupportTicketReply>(response, {
         onSuccess: (data) => {
-          setReplies((prev) => [...prev, data]);
+          const normalized: SupportTicketReply = {
+            ...data,
+            authorType: 'MERCHANT',
+            createdAt: data.createdAt || new Date().toISOString(),
+          };
+          setReplies((prev) => [...prev, normalized]);
           setReplyMessage('');
         },
         onError: (errorMessage) => {

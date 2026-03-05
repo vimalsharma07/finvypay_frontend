@@ -99,7 +99,12 @@ export default function AdminViewTicketPage() {
       const response = await addAdminTicketReply(ticketId, replyMessage.trim());
       handleApiResponse<AdminSupportTicketReply>(response, {
         onSuccess: (data) => {
-          setReplies((prev) => [...prev, data]);
+          const normalized: AdminSupportTicketReply = {
+            ...data,
+            authorType: 'ADMIN',
+            createdAt: data.createdAt || new Date().toISOString(),
+          };
+          setReplies((prev) => [...prev, normalized]);
           setReplyMessage('');
         },
         onError: (errorMessage) => {
