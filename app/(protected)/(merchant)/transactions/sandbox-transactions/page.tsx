@@ -113,10 +113,12 @@ export default function SandboxTransactionsPage() {
         const response = await getSandboxTransactions(params);
         handleApiResponse<TransactionListResponse>(response, {
           onSuccess: (data) => {
-            // New format: { success: true, data: [...], meta: {...} }
-            if (data && data.success && data.data) {
-              setTransactions(data.data);
-              setMeta(data.meta);
+            // Backend returns { data: [...], meta: {...} } (no success flag)
+            const list = data?.data;
+            const metaInfo = data?.meta;
+            if (data && list != null && Array.isArray(list)) {
+              setTransactions(list);
+              setMeta(metaInfo ?? null);
             } else {
               toast.error('Failed to fetch transactions - invalid response structure');
             }
