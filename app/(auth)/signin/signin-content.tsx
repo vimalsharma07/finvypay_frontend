@@ -22,7 +22,7 @@ import { Input } from '@/components/ui/input';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { LoaderCircleIcon } from 'lucide-react';
 import { getSigninSchema, SigninSchemaType } from '../forms/signin-schema';
-import { login, validateUser } from '@/lib/services/auth';
+import { login } from '@/lib/services/auth';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { ForgotPasswordDialog } from './components/forgot-password-dialog';
 import { useOtpSignin } from '@/hooks/use-otp-signin';
@@ -177,28 +177,41 @@ export function SigninContent() {
     }
   }, [otpSent, otpForm]);
 
+  // Detect device and OS for login API (e.g. "Chrome on Windows", "iOS 15.0")
+  function getDeviceAndOs(): { device: string; os: string } {
+    if (typeof navigator === 'undefined') return { device: 'Web', os: 'Unknown' };
+    const ua = navigator.userAgent;
+    let device = 'Web';
+    let os = 'Unknown';
+    if (/iPhone|iPad|iPod/.test(ua)) {
+      device = /iPhone/.test(ua) ? 'iPhone' : /iPad/.test(ua) ? 'iPad' : 'iPod';
+      const match = ua.match(/OS (\d+[._]\d+)/);
+      os = match ? `iOS ${match[1].replace('_', '.')}` : 'iOS';
+    } else if (/Android/.test(ua)) {
+      device = 'Android';
+      const match = ua.match(/Android (\d+[.\d]*)/);
+      os = match ? `Android ${match[1]}` : 'Android';
+    } else if (/Windows/.test(ua)) {
+      os = 'Windows';
+    } else if (/Mac OS/.test(ua)) {
+      os = 'macOS';
+    } else if (/Linux/.test(ua)) {
+      os = 'Linux';
+    }
+    return { device, os };
+  }
+
   async function onSubmit(values: SigninSchemaType) {
     setIsProcessing(true);
     setError(null);
 
     try {
-      // Step 1: Validate user credentials before login
-      const validationResponse = await validateUser({
-        email: values.email,
-        password: values.password,
-      });
-
-      if (!validationResponse.data?.success) {
-        const errorMessage = validationResponse.error || 'User validation failed. Please check your credentials.';
-        setError(errorMessage);
-        setIsProcessing(false);
-        return;
-      }
-
-      // Step 2: Proceed with login after successful validation
+      const { device, os } = getDeviceAndOs();
       const response = await login({
         email: values.email,
         password: values.password,
+        device,
+        os,
       });
 
       handleApiResponse(response, {
@@ -241,6 +254,7 @@ export function SigninContent() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
       setError(errorMessage);
+      setIsProcessing(false);
     }
   }
 
