@@ -81,20 +81,20 @@ export default function PaymentStatusPage() {
 
   return (
     <main className="min-h-screen w-full bg-muted/20 flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-xl">
-        <Card className="shadow-lg border bg-white">
-          <CardHeader className="space-y-3 items-center text-center">
-            <div className={`flex h-12 w-12 items-center justify-center rounded-full ${badgeTone}`}>
+      <div className="w-full max-w-xl mx-auto">
+        <Card className="shadow-lg border bg-white overflow-hidden">
+          <CardHeader className="flex flex-col justify-center text-center space-y-3 py-8 [&>*]:mx-auto">
+            <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${badgeTone}`}>
               <Icon className="h-6 w-6" />
             </div>
             <CardTitle className={`text-xl font-semibold ${titleTone}`}>
               {config.title}
             </CardTitle>
-            <p className="text-sm text-muted-foreground max-w-md">
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
               {message || config.description}
             </p>
           </CardHeader>
-          <CardContent className="space-y-4 text-center items-center flex flex-col">
+          <CardContent className="flex flex-col items-center justify-center space-y-4 text-center pb-8">
             {showAmount ? (
               <div className="text-2xl font-semibold text-foreground">
                 {currency ? `${currency} ` : ''}
@@ -110,13 +110,6 @@ export default function PaymentStatusPage() {
               <Link href="/">
                 <Button variant="outline">Go home</Button>
               </Link>
-              {statusKey !== 'success' ? (
-                <Button onClick={() => window.location.reload()}>Try again</Button>
-              ) : (
-                <Link href="/checkout">
-                  <Button variant="ghost">New payment</Button>
-                </Link>
-              )}
             </div>
           </CardContent>
         </Card>
