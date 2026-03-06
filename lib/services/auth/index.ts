@@ -17,10 +17,12 @@ export type { ApiResponse } from '../types';
 // TYPES & INTERFACES
 // ============================================
 
-// Login payload
+// Login payload (matches POST /auth/login: email, password, device, os)
 export interface LoginPayload {
   email: string;
   password: string;
+  device?: string;
+  os?: string;
 }
 
 // Register payload
