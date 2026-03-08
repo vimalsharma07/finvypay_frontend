@@ -1,13 +1,14 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
-import { Pencil, Eye, Plug, Route, Trash2, Percent, Shield, Lock, Copy } from 'lucide-react';
+import { Fragment, useEffect, useState, useRef } from 'react';
+import { Pencil, Eye, Plug, Route, Trash2, Percent, Shield, Lock, Copy, LogIn } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   getUsers,
   deleteUser,
   disableUser2Fa,
   updateUser,
+  impersonateUser,
   User,
   UserListResponse,
 } from '@/lib/services/admin/users';
@@ -68,6 +69,29 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
   
   // Use external filters prop
   const filters = externalFilters;
+
+  // Impersonate: pending auth for the new window (postMessage flow)
+  const impersonatePendingRef = useRef<{ type: string; payload: any } | null>(null);
+  const impersonatePopupRef = useRef<Window | null>(null);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== (typeof window !== 'undefined' ? window.location.origin : '')) return;
+      const { type } = event.data || {};
+      if (type !== 'impersonate-ready') return;
+      const pending = impersonatePendingRef.current;
+      if (!pending || !event.source) return;
+      try {
+        (event.source as Window).postMessage(pending, event.origin);
+      } finally {
+        impersonatePendingRef.current = null;
+      }
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('message', handleMessage);
+      return () => window.removeEventListener('message', handleMessage);
+    }
+  }, []);
 
   // Fetch users function
   const fetchUsers = async (
@@ -395,6 +419,40 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
     }
   };
 
+  // Login as User (impersonate): call API, open new window, pass auth via postMessage
+  const handleLoginAsUser = async (user: User) => {
+    impersonatePendingRef.current = null;
+    impersonatePopupRef.current = null;
+    try {
+      const response = await impersonateUser(user.id);
+      handleApiResponse(response, {
+        onSuccess: (data) => {
+          if (!data?.success || !data.data?.accessToken) {
+            toast.error('Invalid response from server. Cannot sign in as user.');
+            return;
+          }
+          const url = '/auth/impersonate-callback';
+          const popup = window.open(url, '_blank', 'width=520,height=400');
+          if (popup) {
+            impersonatePopupRef.current = popup;
+            impersonatePendingRef.current = { type: 'impersonate-auth', payload: data };
+            toast.success(`Opening new window to sign in as ${user.name || user.email}…`);
+          } else {
+            toast.error('Popup was blocked. Please allow popups for this site and try again.');
+          }
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to sign in as user.');
+        },
+        onUnauthorized: () => {
+          toast.error('Unauthorized. You do not have permission to impersonate users.');
+        },
+      });
+    } catch (err) {
+      toast.error('Failed to sign in as user.');
+    }
+  };
+
   // Define actions
   const actions: TableAction<User>[] = [
     {
@@ -406,6 +464,11 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
       label: 'View',
       icon: Eye,
       route: (row: User) => `/admin/user-management/merchant/${row.id}`,
+    },
+    {
+      label: 'Login as User',
+      icon: LogIn,
+      onClick: (row: User) => handleLoginAsUser(row),
     },
     {
       label: 'Assign Acquirer',

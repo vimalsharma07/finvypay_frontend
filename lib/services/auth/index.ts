@@ -142,6 +142,39 @@ function sanitizeAuthUser(user: any) {
   return rest;
 }
 
+/**
+ * Apply auth response (tokens + user data) to storage and in-memory token.
+ * Used by login and impersonate flows so session handling is identical.
+ * Call this in the window/context where the user should be signed in (e.g. new window for impersonate).
+ */
+export async function applyAuthResponse(response: AuthResponse): Promise<boolean> {
+  if (typeof window === 'undefined' || !response?.success || !response?.data?.accessToken) {
+    return false;
+  }
+  const data = response.data!;
+  let accessTokenValue: string;
+  let refreshTokenValue: string | undefined;
+
+  if (typeof data.accessToken === 'object' && data.accessToken !== null) {
+    accessTokenValue = (data.accessToken as any).accessToken || data.accessToken;
+    refreshTokenValue = (data.accessToken as any).refreshToken;
+  } else {
+    accessTokenValue = data.accessToken as string;
+    refreshTokenValue = data.refreshToken;
+  }
+
+  const { setAccessToken } = await import('../../api');
+  setAccessToken(accessTokenValue);
+  storeAuthData({
+    accessToken: accessTokenValue,
+    refreshToken: refreshTokenValue,
+    sessionId: data.sessionId,
+    tokenExpiry: data.tokenExpiry,
+    userData: sanitizeAuthUser(data),
+  });
+  return true;
+}
+
 export async function login(
   payload: LoginPayload
 ): Promise<ApiResponse<AuthResponse>> {
@@ -154,36 +187,8 @@ export async function login(
       }
     ) as AuthResponse;
 
-    // If login is successful, store auth data
     if (response?.success && response?.data?.accessToken) {
-      // Extract access token and refresh token (handle both string and object formats)
-      let accessTokenValue: string;
-      let refreshTokenValue: string | undefined;
-      
-      if (typeof response.data.accessToken === 'object' && response.data.accessToken !== null) {
-        // Nested structure: { accessToken: { accessToken: "...", refreshToken: "..." } }
-        accessTokenValue = (response.data.accessToken as any).accessToken || response.data.accessToken;
-        refreshTokenValue = (response.data.accessToken as any).refreshToken;
-      } else {
-        // Direct string or check for separate refreshToken field
-        accessTokenValue = response.data.accessToken as string;
-        refreshTokenValue = response.data.refreshToken;
-      }
-      
-      // Set access token in memory
-      if (typeof window !== 'undefined') {
-        const { setAccessToken } = await import('../../api');
-        setAccessToken(accessTokenValue);
-      }
-      
-      // Store both tokens in sessionStorage
-      storeAuthData({
-        accessToken: accessTokenValue,
-        refreshToken: refreshTokenValue,
-        sessionId: response.data.sessionId,
-        tokenExpiry: response.data.tokenExpiry,
-        userData: sanitizeAuthUser(response.data),
-      });
+      await applyAuthResponse(response);
     }
 
     return {
