@@ -14,8 +14,12 @@ import {
   FileText,
   AlertCircle,
   Eye,
+  Filter,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardHeading, CardTable, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DateRangeFilter } from '@/components/ui/date-range-filter';
@@ -27,6 +31,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
@@ -50,6 +59,9 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  // Advanced filter: ID (transaction_id) – used for provider_logs
+  const [transactionIdFilter, setTransactionIdFilter] = useState('');
+  const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
 
   // Format date for API (YYYY-MM-DD)
   const formatDateForAPI = (date: Date | undefined): string => {
@@ -58,7 +70,13 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
   };
 
   // Fetch logs
-  const fetchLogs = async (pageNum: number, pageLimit: number, startDate?: string, endDate?: string) => {
+  const fetchLogs = async (
+    pageNum: number,
+    pageLimit: number,
+    startDate?: string,
+    endDate?: string,
+    transactionId?: string
+  ) => {
     setLoading(true);
     try {
       const response = await getAdminLogs({
@@ -67,6 +85,7 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
         limit: pageLimit,
         startDate,
         endDate,
+        ...(transactionId?.trim() ? { transaction_id: transactionId.trim() } : {}),
       });
       handleApiResponse(response, {
         onSuccess: (data) => {
@@ -95,16 +114,22 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
     }
   };
 
-  // Fetch logs - only pass dates when user has applied a date filter
+  // Fetch logs - pass date range and transaction_id (for provider_logs) when set
   useEffect(() => {
     const hasDateFilter = dateRange?.from && dateRange?.to;
     const startDate = hasDateFilter ? formatDateForAPI(dateRange.from) : undefined;
     const endDate = hasDateFilter ? formatDateForAPI(dateRange.to) : undefined;
-    fetchLogs(page, limit, startDate, endDate);
-  }, [page, limit, dateRange, logType]);
+    const txnId = (logType === 'provider_logs' || logType === 'txn_logs') && transactionIdFilter.trim() ? transactionIdFilter.trim() : undefined;
+    fetchLogs(page, limit, startDate, endDate, txnId);
+  }, [page, limit, dateRange, logType, transactionIdFilter]);
 
   const handleDateRangeChange = (range: DateRange | undefined) => {
     setDateRange(range);
+    setPage(1);
+  };
+
+  const handleClearTransactionIdFilter = () => {
+    setTransactionIdFilter('');
     setPage(1);
   };
 
@@ -440,19 +465,65 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
 
   return (
     <div className="space-y-6">
-      {/* Date range and count above table, right-aligned */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="text-sm text-muted-foreground">
-          {!loading && meta && <span>Showing {logs.length} of {meta.total} logs</span>}
+      {/* Date range, advanced filter (transaction_id), and count */}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="text-sm text-muted-foreground">
+            {!loading && meta && <span>Showing {logs.length} of {meta.total} logs</span>}
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            {(logType === 'provider_logs' || logType === 'txn_logs') && (
+              <Collapsible open={advancedFilterOpen} onOpenChange={setAdvancedFilterOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Filter className="h-4 w-4" />
+                    Advanced filter
+                    {transactionIdFilter.trim() ? (
+                      <Badge variant="secondary" className="ml-1 text-xs">1</Badge>
+                    ) : null}
+                    {advancedFilterOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="mt-2 p-4 rounded-lg border bg-muted/30 flex flex-wrap items-end gap-3">
+                    <div className="flex flex-col gap-1.5 min-w-[200px]">
+                      <label htmlFor="filter-transaction-id" className="text-sm font-medium text-muted-foreground">
+                        ID (transaction_id)
+                      </label>
+                      <Input
+                        id="filter-transaction-id"
+                        placeholder="e.g. ejndejde"
+                        value={transactionIdFilter}
+                        onChange={(e) => {
+                          setTransactionIdFilter(e.target.value);
+                          setPage(1);
+                        }}
+                        className="font-mono h-8"
+                        variant="sm"
+                      />
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleClearTransactionIdFilter}
+                      disabled={!transactionIdFilter.trim()}
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            )}
+            <DateRangeFilter
+              value={dateRange}
+              onChange={handleDateRangeChange}
+              placeholder="Pick a date range"
+              numberOfMonths={2}
+              triggerClassName="w-[280px]"
+              size="sm"
+            />
+          </div>
         </div>
-        <DateRangeFilter
-          value={dateRange}
-          onChange={handleDateRangeChange}
-          placeholder="Pick a date range"
-          numberOfMonths={2}
-          triggerClassName="w-[280px]"
-          size="sm"
-        />
       </div>
       {loading ? (
         <div className="flex items-center justify-center py-20">
