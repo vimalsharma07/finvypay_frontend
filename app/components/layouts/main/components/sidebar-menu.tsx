@@ -28,7 +28,8 @@ const isExternalUrl = (url: string): boolean => {
 export function SidebarMenu() {
   const pathname = usePathname();
   const menu = useRoleBasedMenu();
-  const { count: openTicketCount } = useAdminOpenTicketCount();
+  const isAdminPath = pathname.startsWith('/admin');
+  const { count: openTicketCount } = isAdminPath ? useAdminOpenTicketCount() : { count: null };
 
   // Memoize matchPath to prevent unnecessary re-renders
   const matchPath = useCallback(
@@ -240,7 +241,7 @@ export function SidebarMenu() {
           ) : (
             <Link href={path} className="flex items-center gap-1 justify-between">
               <span>{item.title}</span>
-              {path === '/admin/support/tickets' && typeof openTicketCount === 'number' && openTicketCount > 0 && (
+              {isAdminPath && path === '/admin/support/tickets' && typeof openTicketCount === 'number' && openTicketCount > 0 && (
                 <Badge
                   variant="outline"
                   className="ml-2 h-5 min-w-[1.25rem] px-1.5 text-[11px] flex items-center justify-center"

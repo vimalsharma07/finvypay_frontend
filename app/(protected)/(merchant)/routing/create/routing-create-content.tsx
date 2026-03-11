@@ -129,12 +129,19 @@ export function RoutingCreateContent() {
     }
   }, [profileId, setValue]);
 
-  // Fetch acquirer accounts
+  // Fetch acquirer accounts for the current merchant profile
   useEffect(() => {
     const fetchAcquirerAccounts = async () => {
+      if (!profileId) {
+        setAcquirerAccounts([]);
+        setAcquirerOptions([]);
+        return;
+      }
       setLoadingAcquirers(true);
       try {
-        const response = await getUserAcquirerAccounts();
+        const response = await getUserAcquirerAccounts({
+          merchantProfileId: profileId,
+        });
 
         handleApiResponse(response, {
           onSuccess: (data) => {
@@ -161,7 +168,7 @@ export function RoutingCreateContent() {
     };
 
     fetchAcquirerAccounts();
-  }, []);
+  }, [profileId]);
 
   const onSubmit = async (data: CreateRoutingFormData): Promise<void> => {
     try {
