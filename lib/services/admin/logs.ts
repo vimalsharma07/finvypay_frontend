@@ -88,6 +88,8 @@ export interface LogListParams {
   limit: number;
   startDate?: string;
   endDate?: string;
+  /** Filter by transaction_id (e.g. for provider_logs) */
+  transaction_id?: string;
 }
 
 /**
@@ -105,7 +107,8 @@ export async function getAdminLogs(
       params.page,
       params.limit,
       params.startDate,
-      params.endDate
+      params.endDate,
+      params.transaction_id
     );
     const data = await http.get(endpoint) as LogListResponse;
 

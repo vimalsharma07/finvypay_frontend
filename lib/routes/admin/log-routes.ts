@@ -8,7 +8,14 @@ import { getBaseUrl } from '../config/base-url';
 const BASE_URL = getBaseUrl();
 
 export const adminLogRoutes = {
-  logs: (type: string, page: number, limit: number, startDate?: string, endDate?: string) => {
+  logs: (
+    type: string,
+    page: number,
+    limit: number,
+    startDate?: string,
+    endDate?: string,
+    transactionId?: string
+  ) => {
     const params = new URLSearchParams({
       type,
       page: String(page),
@@ -16,6 +23,7 @@ export const adminLogRoutes = {
     });
     if (startDate) params.append('start_date', startDate);
     if (endDate) params.append('end_date', endDate);
+    if (transactionId?.trim()) params.append('transaction_id', transactionId.trim());
     return `${BASE_URL}/admin/logs?${params.toString()}`;
   },
 } as const;
