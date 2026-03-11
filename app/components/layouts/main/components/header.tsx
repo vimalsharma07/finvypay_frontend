@@ -33,6 +33,7 @@ import { Container } from '@/components/common/container';
 import { Breadcrumb } from './breadcrumb';
 import { SidebarMenu } from './sidebar-menu';
 import { useAuth } from '@/hooks/use-auth';
+import { getMerchantProfiles, type MerchantProfileListResponse } from '@/lib/services/user/merchant-profile';
 
 export function Header() {
   const [isSidebarSheetOpen, setIsSidebarSheetOpen] = useState(false);
@@ -81,6 +82,8 @@ export function Header() {
   const scrollPosition = useScrollPosition();
   const headerSticky: boolean = scrollPosition > 0;
 
+  const [merchantProfileLabel, setMerchantProfileLabel] = useState<string | null>(null);
+
   // Prefer full user payload (fallback to localStorage if store user is trimmed)
   const fullUser = useMemo(() => {
     if (user?.merchantProfiles || user?.industry) return user;
@@ -93,7 +96,38 @@ export function Header() {
     }
   }, [user]);
 
+  // Load merchant profile label from /merchant/profile/merchant-profiles when on merchant routes
+  useEffect(() => {
+    const loadProfiles = async () => {
+      try {
+        const resp = await getMerchantProfiles();
+        if (resp.status === 200) {
+          const payload = resp.data as MerchantProfileListResponse | undefined;
+          if (payload?.success && Array.isArray(payload.data) && payload.data.length > 0) {
+            const list = payload.data;
+            const primary = list.find((p) => p.isPrimary) ?? list[0];
+            const label = (primary as any).industryName || primary.merchantProfileName;
+            if (label) {
+              setMerchantProfileLabel(label);
+            }
+          } else {
+            setMerchantProfileLabel(null);
+          }
+        }
+      } catch {
+        // Silently ignore; fallback to user data
+        setMerchantProfileLabel(null);
+      }
+    };
+    if (isMerchantRoute) {
+      loadProfiles();
+    } else {
+      setMerchantProfileLabel(null);
+    }
+  }, [isMerchantRoute, pathname]);
+
   const merchantLabel = useMemo(() => {
+    if (merchantProfileLabel) return merchantProfileLabel;
     const profiles = fullUser?.merchantProfiles;
     if (profiles?.length) {
       const primary = profiles.find((p: any) => p?.isPrimary) ?? profiles[0];
@@ -105,7 +139,7 @@ export function Header() {
       );
     }
     return fullUser?.industry?.name || null;
-  }, [fullUser]);
+  }, [fullUser, merchantProfileLabel]);
 
   // Close sheet when route changes
   useEffect(() => {

@@ -23,6 +23,12 @@ import {
   UserAcquirerAccountListResponse,
   UserAcquirerAccountListMeta,
 } from '@/lib/services/user/acquirer-accounts';
+import { useAuth } from '@/hooks/use-auth';
+import {
+  getUserProfileId,
+  getMerchantProfiles,
+  type MerchantProfileListResponse,
+} from '@/lib/services/user/merchant-profile';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -79,6 +85,7 @@ function RatesDialog({
 
 export default function UserAcquirerAccountsPage() {
   const router = useRouter();
+  const { user } = useAuth();
 
   const [isClient, setIsClient] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -88,8 +95,10 @@ export default function UserAcquirerAccountsPage() {
   const [limit, setLimit] = useState(10);
   const [ratesDialogOpen, setRatesDialogOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<UserAcquirerAccount | null>(null);
+  const [profileId, setProfileId] = useState<string | null>(null);
+  const [profilesLoading, setProfilesLoading] = useState(true);
 
-  const isTableLoading = loading;
+  const isTableLoading = loading || profilesLoading;
 
   useEffect(() => {
     setIsClient(true);
@@ -97,13 +106,20 @@ export default function UserAcquirerAccountsPage() {
 
   const fetchAccounts = async (
     pageNum: number,
-    pageLimit: number
+    pageLimit: number,
+    currentProfileId?: string | null,
   ) => {
+    if (!currentProfileId) {
+      setAccounts([]);
+      setMeta(null);
+      return;
+    }
     setLoading(true);
     try {
       const params: any = {
         page: pageNum,
         limit: pageLimit,
+        merchantProfileId: currentProfileId,
       };
 
       const response = await getUserAcquirerAccounts(params);
@@ -137,9 +153,48 @@ export default function UserAcquirerAccountsPage() {
     }
   };
 
+  // Resolve current merchant profile ID
   useEffect(() => {
-    fetchAccounts(page, limit);
-  }, [page, limit]);
+    const resolveProfile = async () => {
+      setProfilesLoading(true);
+      try {
+        const id = getUserProfileId(null, user);
+        if (id) {
+          setProfileId(id);
+          return;
+        }
+
+        const response = await getMerchantProfiles();
+        handleApiResponse<MerchantProfileListResponse>(response, {
+          onSuccess: (payload) => {
+            if (!payload?.success || !payload.data) return;
+            const list = Array.isArray(payload.data) ? payload.data : [];
+            if (list.length > 0) {
+              const primary = list.find((p: any) => p.isPrimary);
+              const nextId = (primary?.id ?? list[0]?.id)?.toString() || null;
+              if (nextId) setProfileId(nextId);
+            }
+          },
+          silent: true,
+        });
+      } catch {
+        // ignore
+      } finally {
+        setProfilesLoading(false);
+      }
+    };
+
+    resolveProfile();
+  }, [user]);
+
+  useEffect(() => {
+    if (profileId) {
+      fetchAccounts(page, limit, profileId);
+    } else {
+      setAccounts([]);
+      setMeta(null);
+    }
+  }, [page, limit, profileId]);
 
   const headers: TableHeader<UserAcquirerAccount>[] = useMemo(
     () => [

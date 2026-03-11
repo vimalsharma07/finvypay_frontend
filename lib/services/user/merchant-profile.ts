@@ -26,6 +26,11 @@ export interface MerchantProfileListResponse {
   message?: string;
 }
 
+export interface SetPrimaryProfileResponse {
+  success: boolean;
+  message?: string;
+}
+
 /**
  * Get all merchant profiles for the authenticated user
  */
@@ -56,6 +61,34 @@ export async function getPrimaryMerchantProfile(): Promise<ApiResponse<MerchantP
     return {
       status: 200,
       data: data as MerchantProfile,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status || 500,
+        error: error.message,
+      };
+    }
+    throw error;
+  }
+}
+
+/**
+ * Set a merchant profile as primary for the authenticated user
+ * 
+ * @param profileId - ID of the merchant profile to set as primary
+ */
+export async function setPrimaryMerchantProfile(
+  profileId: string | number
+): Promise<ApiResponse<SetPrimaryProfileResponse>> {
+  try {
+    const data = await http.put(
+      `/merchant/profile/merchant-profiles/${profileId}/primary`,
+      undefined,
+    );
+    return {
+      status: 200,
+      data: data as SetPrimaryProfileResponse,
     };
   } catch (error) {
     if (error instanceof ApiError) {

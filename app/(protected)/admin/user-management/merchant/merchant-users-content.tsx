@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState, useRef } from 'react';
-import { Pencil, Eye, Plug, Route, Trash2, Percent, Shield, Lock, Copy, LogIn } from 'lucide-react';
+import { Pencil, Eye, Plug, Route, Trash2, Percent, Shield, Lock, Copy, LogIn, IdCard } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   getUsers,
@@ -32,6 +32,21 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { getUserConnectors, MerchantAcquirerAccount } from '@/lib/services/admin/connectors';
 import { getMerchantProfiles } from '@/lib/services/admin/merchant-acquirer-account';
+import { getIndustries, type Industry } from '@/lib/services/admin/industries';
+import {
+  getMerchantProfilesForUser,
+  createMerchantProfileForUser,
+  type AdminMerchantProfile,
+} from '@/lib/services/admin/merchant-profiles';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 interface MerchantUsersPageContentProps {
   filters?: Record<string, string>;
@@ -66,6 +81,18 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
   const [updatingBinEnabled, setUpdatingBinEnabled] = useState(false);
   const [binEnabled, setBinEnabled] = useState<boolean | null>(null);
   const [otpCopied, setOtpCopied] = useState(false);
+
+  // Merchant profile dialog state
+  const [merchantProfileDialogOpen, setMerchantProfileDialogOpen] = useState(false);
+  const [userForProfiles, setUserForProfiles] = useState<User | null>(null);
+  const [profiles, setProfiles] = useState<AdminMerchantProfile[]>([]);
+  const [profilesLoading, setProfilesLoading] = useState(false);
+  const [industries, setIndustries] = useState<Industry[]>([]);
+  const [industriesLoading, setIndustriesLoading] = useState(false);
+  const [creatingProfile, setCreatingProfile] = useState(false);
+  const [profileName, setProfileName] = useState('');
+  const [selectedIndustryId, setSelectedIndustryId] = useState<string>('');
+  const [isPrimaryProfile, setIsPrimaryProfile] = useState(false);
   
   // Use external filters prop
   const filters = externalFilters;
@@ -419,6 +446,110 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
     }
   };
 
+  // Fetch merchant profiles for selected user
+  const fetchMerchantProfilesForUser = async (userId: string) => {
+    setProfilesLoading(true);
+    try {
+      const response = await getMerchantProfilesForUser(userId);
+      handleApiResponse(response, {
+        onSuccess: (data) => {
+          if (data?.success && Array.isArray(data.data)) {
+            setProfiles(data.data);
+          } else {
+            setProfiles([]);
+          }
+        },
+        onError: (message) => {
+          toast.error(message || 'Failed to load merchant profiles');
+          setProfiles([]);
+        },
+      });
+    } catch (error) {
+      console.error('Fetch merchant profiles error:', error);
+      toast.error('An unexpected error occurred while loading merchant profiles');
+      setProfiles([]);
+    } finally {
+      setProfilesLoading(false);
+    }
+  };
+
+  // Fetch industries for select
+  const fetchIndustries = async () => {
+    setIndustriesLoading(true);
+    try {
+      const response = await getIndustries({ page: 1, limit: 1000 });
+      handleApiResponse(response, {
+        onSuccess: (data) => {
+          // Industries API returns: { success: true, data: Industry[], meta: {...} }
+          if (data?.success && Array.isArray(data.data)) {
+            setIndustries(data.data);
+          } else {
+            setIndustries([]);
+          }
+        },
+        onError: (message) => {
+          toast.error(message || 'Failed to load industries');
+          setIndustries([]);
+        },
+      });
+    } catch (error) {
+      console.error('Fetch industries error:', error);
+      toast.error('An unexpected error occurred while loading industries');
+      setIndustries([]);
+    } finally {
+      setIndustriesLoading(false);
+    }
+  };
+
+  const handleOpenMerchantProfiles = (user: User) => {
+    setUserForProfiles(user);
+    setMerchantProfileDialogOpen(true);
+    setProfileName('');
+    setSelectedIndustryId('');
+    setIsPrimaryProfile(false);
+    fetchMerchantProfilesForUser(user.id);
+    fetchIndustries();
+  };
+
+  const handleCreateMerchantProfile = async () => {
+    if (!userForProfiles) return;
+    if (!profileName.trim()) {
+      toast.error('Profile name is required');
+      return;
+    }
+    if (!selectedIndustryId) {
+      toast.error('Industry is required');
+      return;
+    }
+
+    setCreatingProfile(true);
+    try {
+      const payload = {
+        merchantProfileName: profileName.trim(),
+        industryId: Number(selectedIndustryId),
+        isPrimary: isPrimaryProfile,
+      };
+      const response = await createMerchantProfileForUser(userForProfiles.id, payload);
+      handleApiResponse(response, {
+        onSuccess: (created) => {
+          toast.success('Merchant profile created successfully');
+          setProfiles((prev) => [...prev, created]);
+          setProfileName('');
+          setSelectedIndustryId('');
+          setIsPrimaryProfile(false);
+        },
+        onError: (message) => {
+          toast.error(message || 'Failed to create merchant profile');
+        },
+      });
+    } catch (error) {
+      console.error('Create merchant profile error:', error);
+      toast.error('An unexpected error occurred while creating merchant profile');
+    } finally {
+      setCreatingProfile(false);
+    }
+  };
+
   // Login as User (impersonate): call API, open new window, pass auth via postMessage
   const handleLoginAsUser = async (user: User) => {
     impersonatePendingRef.current = null;
@@ -486,6 +617,12 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
       label: 'Assign Rate',
       icon: Percent,
       route: (row: User) => `/admin/user-management/merchant/assign-rates/${row.id}`,
+      separator: true,
+    },
+    {
+      label: 'Merchant Profile',
+      icon: IdCard,
+      onClick: (row: User) => handleOpenMerchantProfiles(row),
       separator: true,
     },
     {
@@ -564,6 +701,148 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
           setUserToDelete(null);
         }}
       />
+
+      {/* Merchant Profiles Dialog */}
+      <Dialog open={merchantProfileDialogOpen} onOpenChange={setMerchantProfileDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader className="pb-2">
+            <div className="flex items-start gap-3">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <IdCard className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <DialogTitle className="text-base font-semibold">
+                  Merchant Profiles
+                </DialogTitle>
+                <DialogDescription className="text-sm">
+                  View and create merchant profiles (industry mappings) for{' '}
+                  <span className="font-medium text-foreground">
+                    {userForProfiles?.name || userForProfiles?.email || 'selected merchant'}
+                  </span>
+                  .
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Existing profiles list */}
+            <div className="space-y-3">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Existing Profiles
+              </p>
+              <div className="rounded-lg border bg-background p-3 max-h-72 overflow-auto space-y-2">
+                {profilesLoading ? (
+                  <div className="py-6 text-center text-sm text-muted-foreground">
+                    Loading profiles...
+                  </div>
+                ) : profiles.length === 0 ? (
+                  <div className="py-6 text-center text-sm text-muted-foreground">
+                    No profiles found for this merchant.
+                  </div>
+                ) : (
+                  profiles.map((profile) => {
+                    const rawIndustryName = (profile as any).industryName;
+                    const industryName =
+                      profile.industry?.name ||
+                      rawIndustryName ||
+                      industries.find((i) => String(i.id) === String(profile.industryId))?.name ||
+                      'N/A';
+                    return (
+                      <div
+                        key={profile.id}
+                        className="rounded-md border bg-muted/40 px-3 py-2 text-sm flex flex-col gap-0.5"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-medium text-foreground">
+                            {profile.merchantProfileName}
+                          </span>
+                          {profile.isPrimary && (
+                            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase text-emerald-700">
+                              Primary
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Industry: <span className="font-medium text-foreground">{industryName}</span>
+                        </p>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Create profile form */}
+            <div className="space-y-3">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Create New Profile
+              </p>
+              <div className="space-y-3 rounded-lg border bg-background p-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="profile-name">Profile name</Label>
+                  <Input
+                    id="profile-name"
+                    placeholder="e.g. Gaming Profile"
+                    value={profileName}
+                    onChange={(e) => setProfileName(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="industry-select">Industry</Label>
+                  <Select
+                    value={selectedIndustryId}
+                    onValueChange={(val) => setSelectedIndustryId(val)}
+                  >
+                    <SelectTrigger id="industry-select">
+                      <SelectValue
+                        placeholder={
+                          industriesLoading ? 'Loading industries...' : 'Select industry'
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {industries.map((industry) => (
+                        <SelectItem key={industry.id} value={String(industry.id)}>
+                          {industry.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <Checkbox
+                    id="primary-profile"
+                    checked={isPrimaryProfile}
+                    onCheckedChange={(checked) =>
+                      setIsPrimaryProfile(Boolean(checked))
+                    }
+                  />
+                  <Label
+                    htmlFor="primary-profile"
+                    className="text-sm text-muted-foreground"
+                  >
+                    Mark as primary profile
+                  </Label>
+                </div>
+
+                <div className="pt-2 flex justify-end">
+                  <Button
+                    variant="primary"
+                    size="md"
+                    onClick={handleCreateMerchantProfile}
+                    disabled={creatingProfile}
+                  >
+                    {creatingProfile ? 'Creating...' : 'Create Profile'}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Reset 2FA Confirmation Dialog */}
       <ConfirmComp

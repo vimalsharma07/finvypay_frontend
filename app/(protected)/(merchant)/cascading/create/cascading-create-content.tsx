@@ -117,11 +117,19 @@ export function CascadingCreateContent() {
     if (profileId) setValue('merchantProfileId', parseInt(profileId));
   }, [profileId, setValue]);
 
+  // Fetch acquirer accounts for the current merchant profile
   useEffect(() => {
     const fetchAcquirerAccounts = async () => {
+      if (!profileId) {
+        setAcquirerAccounts([]);
+        setAcquirerOptions([]);
+        return;
+      }
       setLoadingAcquirers(true);
       try {
-        const response = await getUserAcquirerAccounts();
+        const response = await getUserAcquirerAccounts({
+          merchantProfileId: profileId,
+        });
         handleApiResponse(response, {
           onSuccess: (data) => {
             const accounts = Array.isArray(data.data)
@@ -145,7 +153,7 @@ export function CascadingCreateContent() {
       }
     };
     fetchAcquirerAccounts();
-  }, []);
+  }, [profileId]);
 
   const onSubmit = async (data: CreateCascadingFormData): Promise<void> => {
     try {
