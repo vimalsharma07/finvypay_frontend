@@ -8,5 +8,6 @@ export const userTransactionRoutes = {
   sandbox: `/merchant/transaction/sandbox`,
   getProductionById: (id: string | number) => `/merchant/transaction/production/${id}`,
   getSandboxById: (id: string | number) => `/merchant/transaction/sandbox/${id}`,
+  exportProduction: `/merchant/transaction/export/production`,
 } as const;
 
