@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { Fragment, useCallback, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { CreditCard, Filter } from 'lucide-react';
 import {
@@ -11,6 +11,10 @@ import {
 import { Container } from '@/components/common/container';
 import { Button } from '@/components/ui/button';
 import { PageSkeleton } from '@/components/ui/skeletons';
+import { ExportTransactionsDialog } from '@/app/(protected)/admin/transactions/shared/export-transactions-dialog';
+import { exportProductionTransactions } from '@/lib/services/user/transaction';
+import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import { toast } from 'sonner';
 
 const TransactionsPageContent = dynamic(
   () => import('./transactions-content').then(mod => ({ default: mod.TransactionsPageContent })),
@@ -23,6 +27,27 @@ const TransactionsPageContent = dynamic(
 export default function TransactionsPage() {
   const [filterOpen, setFilterOpen] = useState(false);
 
+  const handleExportTransactions = useCallback(
+    async ({ startDate, endDate }: { startDate: string; endDate: string }) => {
+      const response = await exportProductionTransactions({ startDate, endDate });
+      handleApiResponse(response, {
+        onSuccess: (data) => {
+          if (data?.success && data.url) {
+            if (typeof window !== 'undefined') {
+              window.open(data.url, '_blank', 'noopener,noreferrer');
+            }
+          } else {
+            toast.error(data?.message || 'Export URL not available');
+          }
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to export transactions');
+        },
+      });
+    },
+    []
+  );
+
   return (
     <Fragment>
       <Container>
@@ -33,6 +58,7 @@ export default function TransactionsPage() {
             icon={CreditCard}
           />
           <ToolbarActions>
+            <ExportTransactionsDialog onExport={handleExportTransactions} />
             <Button
               variant="outline"
               size="sm"

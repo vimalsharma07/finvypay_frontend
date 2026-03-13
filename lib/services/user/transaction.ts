@@ -106,6 +106,19 @@ export interface TransactionListResponse {
   message?: string;
 }
 
+export interface ExportTransactionsParams {
+  startDate: string;
+  endDate: string;
+  merchantProfileId?: string | number;
+}
+
+export interface ExportTransactionsResponse {
+  success: boolean;
+  url?: string;
+  key?: string;
+  message?: string;
+}
+
 /**
  * Get production transactions (with pagination)
  */
@@ -162,6 +175,45 @@ export async function getSandboxTransactions(
     return {
       status: 0,
       error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Export merchant production transactions as a file (CSV) for a given date range.
+ * Returns a signed URL that can be opened in the browser to download the file.
+ */
+export async function exportProductionTransactions(
+  params: ExportTransactionsParams
+): Promise<ApiResponse<ExportTransactionsResponse>> {
+  try {
+    const query: Record<string, string> = {
+      startDate: params.startDate,
+      endDate: params.endDate,
+    };
+
+    if (params.merchantProfileId !== undefined && params.merchantProfileId !== null) {
+      query.merchant_profile_id = String(params.merchantProfileId);
+    }
+
+    const data = await http.get(userTransactionRoutes.exportProduction, {
+      query,
+    }) as ExportTransactionsResponse;
+
+    return {
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+      };
+    }
+    return {
+      status: 500,
+      error: 'An unexpected error occurred',
     };
   }
 }
