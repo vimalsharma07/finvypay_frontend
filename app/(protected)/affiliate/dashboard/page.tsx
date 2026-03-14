@@ -1,22 +1,47 @@
 'use client';
 
-import dynamicImport from 'next/dynamic';
-
-// Dynamically import to avoid SSR issues with client-only code
-const DashboardPage = dynamicImport(
-  () => import('@/app/(protected)/components/dashboard').then(mod => ({ default: mod.DashboardPage })),
-  { ssr: false }
-);
-
-// Force dynamic rendering to prevent SSR issues
-export const dynamic = 'force-dynamic';
+import { Fragment, useState } from 'react';
+import { LayoutGrid } from 'lucide-react';
+import {
+  Toolbar,
+  ToolbarHeading,
+  ToolbarActions,
+} from '@/layouts/main/components/toolbar';
+import { Container } from '@/components/common/container';
+import { DateRangeFilter } from '@/components/ui/date-range-filter';
+import { DateRange } from 'react-day-picker';
+import { AffiliateDashboardContent } from './components';
 
 /**
  * Affiliate Dashboard Page
- * 
- * Uses the original dashboard content - only the sidebar menu changes based on role
+ * Overview of referred merchants' transaction statistics.
+ * Default: no date filter applied. Optional date range in toolbar.
  */
 export default function AffiliateDashboardPage() {
-  return <DashboardPage />;
-}
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
+  return (
+    <Fragment>
+      <Container>
+        <Toolbar>
+          <ToolbarHeading
+            title="Dashboard"
+            description="Overview of referred merchants' transaction statistics, success and decline rates, and connector performance"
+            icon={LayoutGrid}
+          />
+          <ToolbarActions>
+            <DateRangeFilter
+              value={dateRange}
+              onChange={setDateRange}
+              placeholder="Select from and to date (optional)"
+              numberOfMonths={2}
+            />
+          </ToolbarActions>
+        </Toolbar>
+      </Container>
+      <Container>
+        <AffiliateDashboardContent dateRange={dateRange} />
+      </Container>
+    </Fragment>
+  );
+}

@@ -47,6 +47,7 @@ export function Header() {
   const { user } = useAuth();
   const isUserPath = pathname.startsWith('/user');
   const isAdminPath = pathname.startsWith('/admin');
+  const isAffiliatePath = pathname.startsWith('/affiliate');
   
   // Check if current path is a merchant route (dashboard, transactions, etc.)
   const isMerchantRoute = useMemo(() => {
@@ -231,16 +232,16 @@ export function Header() {
           </div>
         )}
 
-        {/* Search Dialog: Admin/Merchant use global search (transactions ± merchants); others use legacy dialog. */}
-        {(isAdminPath || isMerchantRoute) && (
+        {/* Search Dialog: Admin/Merchant/Affiliate use global search (blank for affiliate); others use legacy dialog. */}
+        {(isAdminPath || isMerchantRoute || isAffiliatePath) && (
           <GlobalSearchDialog
-            mode={isAdminPath ? 'admin' : 'merchant'}
+            mode={isAdminPath ? 'admin' : isMerchantRoute ? 'merchant' : 'affiliate'}
             open={isSearchDialogOpen}
             onOpenChange={setIsSearchDialogOpen}
             initialQuery={searchQuery}
           />
         )}
-        {!isAdminPath && !isMerchantRoute && (
+        {!isAdminPath && !isMerchantRoute && !isAffiliatePath && (
           <SearchDialog
             open={isSearchDialogOpen}
             onOpenChange={setIsSearchDialogOpen}
@@ -250,7 +251,7 @@ export function Header() {
         {/* HeaderTopbar */}
         <div className="flex items-center gap-3 shrink-0 overflow-visible">
           {/* Search - Mobile: icon opens dialog (desktop uses inline input focus) */}
-          {mobileMode && (isAdminPath || isMerchantRoute) && (
+          {mobileMode && (isAdminPath || isMerchantRoute || isAffiliatePath) && (
             <Button
               variant="ghost"
               mode="icon"
@@ -261,7 +262,7 @@ export function Header() {
               <Search className="size-4.5!" />
             </Button>
           )}
-          {mobileMode && !isAdminPath && !isMerchantRoute && (
+          {mobileMode && !isAdminPath && !isMerchantRoute && !isAffiliatePath && (
             <SearchDialog
               trigger={
                 <Button
@@ -350,6 +351,14 @@ export function Header() {
                 }
               />
             </>
+          ) : isAffiliatePath ? (
+            <UserDropdownMenu
+              trigger={
+                <div className="size-9 rounded-full border-2 border-primary/60 bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold uppercase cursor-pointer">
+                  {user?.email?.[0]?.toUpperCase() || 'U'}
+                </div>
+              }
+            />
           ) : isUserPath ? (
             <>
               <NotificationsSheet

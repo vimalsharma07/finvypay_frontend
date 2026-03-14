@@ -301,4 +301,144 @@ export async function getApplicationDetail(
   }
 }
 
+// --- Affiliate application types and APIs ---
+
+export interface AffiliateApplicationUser {
+  id: string;
+  email: string | null;
+  name: string | null;
+  role: string | null;
+  kycStatus: string | null;
+  profileStep: number | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface AffiliateApplicationAgreement {
+  id: string;
+  name: string;
+  type: string;
+  desc: string;
+  status: string;
+}
+
+export interface AffiliateApplication {
+  id: string;
+  userId: string;
+  user: AffiliateApplicationUser;
+  rpName: string;
+  phoneCountryCode: string;
+  phoneNumber: string;
+  email: string;
+  country: string;
+  poiPath: string | null;
+  poaPath: string | null;
+  agreementId: string;
+  agreement: AffiliateApplicationAgreement | null;
+  signedAgreementPath: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AffiliateApplicationCountResponseBody {
+  success: boolean;
+  data: { count: number };
+  message?: string;
+}
+
+export interface AffiliateApplicationListResponse {
+  success: boolean;
+  data: AffiliateApplication[];
+  message?: string;
+}
+
+export interface AffiliateApplicationDetailResponse {
+  success: boolean;
+  data: AffiliateApplication;
+  message?: string;
+}
+
+export interface AffiliateApplicationApproveResponse {
+  success: boolean;
+  data?: unknown;
+  message?: string;
+}
+
+export async function getAffiliateApplicationCount(): Promise<
+  ApiResponse<AffiliateApplicationCountResponseBody>
+> {
+  try {
+    const response = await http.get(
+      adminRoutes.applications.affiliateCount
+    ) as AffiliateApplicationCountResponseBody;
+    return { status: 200, data: response };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return { status: error.status, error: error.message, data: error.data };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+export async function getAffiliatePendingApplications(): Promise<
+  ApiResponse<AffiliateApplicationListResponse>
+> {
+  try {
+    const response = await http.get(
+      adminRoutes.applications.affiliatePending
+    ) as AffiliateApplicationListResponse;
+    return { status: 200, data: response };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return { status: error.status, error: error.message, data: error.data };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+export async function getAffiliateApplicationById(
+  id: string | number
+): Promise<ApiResponse<AffiliateApplicationDetailResponse>> {
+  try {
+    const response = await http.get(
+      adminRoutes.applications.affiliateById(id)
+    ) as AffiliateApplicationDetailResponse;
+    return { status: 200, data: response };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return { status: error.status, error: error.message, data: error.data };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+export async function approveAffiliateApplication(
+  id: string | number
+): Promise<ApiResponse<AffiliateApplicationApproveResponse>> {
+  try {
+    const response = await http.post(
+      adminRoutes.applications.affiliateApprove(id)
+    ) as AffiliateApplicationApproveResponse;
+    return { status: 200, data: response };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return { status: error.status, error: error.message, data: error.data };
+    }
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
 

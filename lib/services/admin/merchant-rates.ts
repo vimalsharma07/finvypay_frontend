@@ -19,6 +19,10 @@ export interface MerchantRates {
   refundFee: number;
   minTxnAmount?: number;
   maxTxnAmount?: number;
+  /** Optional: Referral Partner (Affiliate) ID */
+  referralPartnerId?: number | string | null;
+  /** Optional: Referral Partner (Affiliate) Commission */
+  referralPartnerCommission?: number | null;
 }
 
 export async function getMerchantRates(

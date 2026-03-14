@@ -13,6 +13,8 @@ export enum FieldTypes {
   switch = 'switch',
   date = 'date',
   dateRange = 'dateRange',
+  /** Same date range UI as dashboard (DateRangeFilter with calendar + Clear/Apply). Stores start_date, end_date (yyyy-MM-dd) when field is created_at. */
+  dateRangeFilter = 'dateRangeFilter',
   searchSelect = 'searchSelect',
   multiSelect = 'multiSelect',
 }

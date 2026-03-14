@@ -9,11 +9,13 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { SearchSelect } from '@/components/ui/molecules/SearchSelect';
 import { Percent } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import { Toolbar, ToolbarHeading, ToolbarActions } from '@/layouts/main/components/toolbar';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { getMerchantRates, upsertMerchantRates, type MerchantRates } from '@/lib/services/admin/merchant-rates';
+import { getMerchants, type Merchant } from '@/lib/services/admin/users';
 import { toast } from 'sonner';
 
 const ratesSchema = z.object({
@@ -29,6 +31,8 @@ const ratesSchema = z.object({
   refundFee: z.number({ invalid_type_error: 'Refund fee is required' }).min(0),
   minTxnAmount: z.number({ invalid_type_error: 'Min transaction amount is required' }).min(0),
   maxTxnAmount: z.number({ invalid_type_error: 'Max transaction amount is required' }).min(0),
+  referralPartnerId: z.union([z.number(), z.string()]).nullable().optional(),
+  referralPartnerCommission: z.number().min(0).nullable().optional(),
 });
 
 type RatesFormData = z.infer<typeof ratesSchema>;
@@ -39,6 +43,7 @@ export default function AssignRatesPage() {
   const merchantId = useMemo(() => Number(params?.id), [params]);
 
   const [loading, setLoading] = useState(true);
+  const [affiliates, setAffiliates] = useState<Merchant[]>([]);
 
   const form = useForm<RatesFormData>({
     resolver: zodResolver(ratesSchema),
@@ -55,9 +60,36 @@ export default function AssignRatesPage() {
       refundFee: undefined as any,
       minTxnAmount: undefined as any,
       maxTxnAmount: undefined as any,
+      referralPartnerId: null,
+      referralPartnerCommission: null,
     },
     mode: 'onChange',
   });
+
+  // Fetch affiliates (RPs) for the Affiliate dropdown
+  useEffect(() => {
+    const fetchAffiliates = async () => {
+      try {
+        const response = await getMerchants({
+          page: 1,
+          limit: 500,
+          role: 'affiliate',
+          sortBy: 'createdAt',
+          sortOrder: 'DESC',
+        });
+        handleApiResponse(response, {
+          onSuccess: (data) => {
+            if (data?.data && Array.isArray(data.data)) {
+              setAffiliates(data.data);
+            }
+          },
+        });
+      } catch (error) {
+        console.error('Failed to fetch affiliates:', error);
+      }
+    };
+    fetchAffiliates();
+  }, []);
 
   // Fetch existing rates
   useEffect(() => {
@@ -73,6 +105,7 @@ export default function AssignRatesPage() {
           onSuccess: (data) => {
             if (data?.data) {
               const rates = data.data as MerchantRates;
+              const rpId = rates.referralPartnerId;
               form.reset({
                 defaultMdr: Number(rates.defaultMdr ?? 0),
                 visaMdr: Number(rates.visaMdr ?? 0),
@@ -86,9 +119,11 @@ export default function AssignRatesPage() {
                 refundFee: Number(rates.refundFee ?? 0),
                 minTxnAmount: Number(rates.minTxnAmount ?? 0),
                 maxTxnAmount: Number(rates.maxTxnAmount ?? 0),
+                referralPartnerId: rpId != null && rpId !== '' ? rpId : null,
+                referralPartnerCommission:
+                  rates.referralPartnerCommission != null ? Number(rates.referralPartnerCommission) : null,
               });
             } else {
-              // No rates found; keep defaults
               form.reset({
                 defaultMdr: undefined as any,
                 visaMdr: undefined as any,
@@ -102,6 +137,8 @@ export default function AssignRatesPage() {
                 refundFee: undefined as any,
                 minTxnAmount: undefined as any,
                 maxTxnAmount: undefined as any,
+                referralPartnerId: null,
+                referralPartnerCommission: null,
               });
             }
           },
@@ -125,9 +162,32 @@ export default function AssignRatesPage() {
 
     try {
       setLoading(true);
+      const rpId = values.referralPartnerId;
+      const rpIdNumber =
+        rpId !== undefined && rpId !== null && rpId !== ''
+          ? (typeof rpId === 'string' ? parseInt(rpId, 10) : rpId)
+          : null;
+      const rpCommission =
+        values.referralPartnerCommission !== undefined && values.referralPartnerCommission !== null
+          ? Number(values.referralPartnerCommission)
+          : null;
+
       const payload: MerchantRates = {
         merchantId,
-        ...values,
+        defaultMdr: values.defaultMdr,
+        visaMdr: values.visaMdr,
+        masterMdr: values.masterMdr,
+        rollingReserve: values.rollingReserve,
+        successTransactionFee: values.successTransactionFee,
+        declinedTransactionFee: values.declinedTransactionFee,
+        chargebackFee: values.chargebackFee,
+        flaggedFee: values.flaggedFee,
+        setupFee: values.setupFee,
+        refundFee: values.refundFee,
+        minTxnAmount: values.minTxnAmount,
+        maxTxnAmount: values.maxTxnAmount,
+        referralPartnerId: rpIdNumber,
+        referralPartnerCommission: rpCommission,
       };
       const response = await upsertMerchantRates(payload);
       handleApiResponse(response, {
@@ -236,6 +296,70 @@ export default function AssignRatesPage() {
                 {numberField('refundFee', 'Refund Fee (amount)', '0.01')}
                 {numberField('minTxnAmount', 'Min Transaction Amount', '0.01')}
                 {numberField('maxTxnAmount', 'Max Transaction Amount', '0.01')}
+                <FormField
+                  control={form.control}
+                  name="referralPartnerId"
+                  render={({ field }) => {
+                    const selectValue =
+                      field.value !== null && field.value !== undefined && field.value !== ''
+                        ? String(field.value)
+                        : '__none__';
+                    const affiliateOptions = [
+                      { label: 'None', value: '__none__' },
+                      ...affiliates.map((a) => ({
+                        label: String(a.name || a.email || a.id),
+                        value: String(a.id),
+                      })),
+                    ];
+                    return (
+                      <FormItem>
+                        <FormLabel>Affiliate (optional)</FormLabel>
+                        <FormControl>
+                          <SearchSelect
+                            options={affiliateOptions}
+                            value={selectValue}
+                            onChange={(val) =>
+                              field.onChange(val === '__none__' ? null : val)
+                            }
+                            placeholder="Search or select Affiliate"
+                            valueToShow="label"
+                            valueToSet="value"
+                            maxHeight="320px"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
+                <FormField
+                  control={form.control}
+                  name="referralPartnerCommission"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Affiliate Commission (optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min={0}
+                          value={field.value ?? ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === '') {
+                              field.onChange(null);
+                              return;
+                            }
+                            const parsed = Number(val);
+                            if (!Number.isNaN(parsed)) field.onChange(parsed);
+                          }}
+                          placeholder="Enter commission"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
               <div className="flex justify-end pt-2">
