@@ -34,7 +34,7 @@ function formatAmount(amount: string | number | null | undefined): string {
 }
 
 export interface GlobalSearchDialogProps {
-  mode: 'admin' | 'merchant';
+  mode: 'admin' | 'merchant' | 'affiliate';
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialQuery?: string;
@@ -65,6 +65,13 @@ export function GlobalSearchDialog({
       }
       setLoading(true);
       setHasSearched(true);
+
+      if (mode === 'affiliate') {
+        setLoading(false);
+        setTransactions([]);
+        setMerchants([]);
+        return;
+      }
 
       const searchParams = { search: trimmed, limit: SEARCH_LIMIT };
 
@@ -154,7 +161,9 @@ export function GlobalSearchDialog({
   const placeholder =
     mode === 'admin'
       ? 'Search transactions and merchants...'
-      : 'Search transactions...';
+      : mode === 'affiliate'
+        ? 'Search...'
+        : 'Search transactions...';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -183,7 +192,9 @@ export function GlobalSearchDialog({
 
           {!loading && noResults && (
             <div className="py-12 text-center text-muted-foreground text-sm">
-              No transactions or merchants found for &quot;{query.trim()}&quot;
+              {mode === 'affiliate'
+                ? `No results for "${query.trim()}"`
+                : `No transactions or merchants found for "${query.trim()}"`}
             </div>
           )}
 
@@ -253,7 +264,9 @@ export function GlobalSearchDialog({
 
           {!loading && !noResults && !query.trim() && (
             <div className="py-12 text-center text-muted-foreground text-sm">
-              Type to search {mode === 'admin' ? 'transactions and merchants' : 'transactions'}
+              {mode === 'affiliate'
+                ? ''
+                : `Type to search ${mode === 'admin' ? 'transactions and merchants' : 'transactions'}`}
             </div>
           )}
         </DialogBody>

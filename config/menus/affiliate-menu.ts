@@ -25,24 +25,20 @@ export const AFFILIATE_MENU: MenuConfig = [
     icon: CreditCard,
     children: [
       { title: 'All Transactions', path: '/affiliate/transactions' },
-      { title: 'Pending', path: '/affiliate/transactions/pending' },
-      { title: 'Completed', path: '/affiliate/transactions/completed' },
-      { title: 'Failed', path: '/affiliate/transactions/failed' },
+      
     ],
   },
   {
-    title: 'Report',
+    title: 'Settlement Report',
     icon: FileText,
-    children: [
-      { title: 'Transaction Report', path: '/affiliate/reports/transactions' },
-      { title: 'Financial Report', path: '/affiliate/reports/financial' },
-      { title: 'User Report', path: '/affiliate/reports/users' },
-    ],
+    path: '/affiliate/reports/settlement',
   },
   {
     title: 'Settings',
     icon: Settings,
-    path: '/affiliate/settings',
+    children: [
+      { title: 'Profile', path: '/affiliate/profile' },
+    ],
   },
 ];
 

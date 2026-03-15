@@ -31,12 +31,23 @@ function isAdminRole(roleSlug: string | null): boolean {
   return r === 'admin' || r === 'super_admin';
 }
 
+function isAffiliateRole(roleSlug: string | null): boolean {
+  if (!roleSlug) return false;
+  return roleSlug.toLowerCase() === 'affiliate';
+}
+
+function getProfileHref(roleSlug: string | null): string {
+  if (isAdminRole(roleSlug)) return '/admin/profile';
+  if (isAffiliateRole(roleSlug)) return '/affiliate/profile';
+  return '/profile';
+}
+
 export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
   const roleSlug = getRoleSlug(user?.role);
   const showProBadge = roleSlug ? !APP_ROLES.includes(roleSlug.toLowerCase()) : true;
-  const profileHref = isAdminRole(roleSlug) ? '/admin/profile' : '/profile';
+  const profileHref = getProfileHref(roleSlug);
 
   const handleThemeToggle = (checked: boolean) => {
     setTheme(checked ? 'dark' : 'light');

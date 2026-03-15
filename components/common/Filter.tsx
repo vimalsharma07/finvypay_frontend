@@ -30,8 +30,11 @@ import {
 } from "@/lib/types/common-types";
 import { generateFilterQuery, formatDate } from "@/lib/helpers";
 import { DateRangePicker, SingleDatePicker } from "@/components/ui/molecules/DatePicker";
+import { DateRangeFilter } from "@/components/ui/date-range-filter";
 import { SearchSelect } from "@/components/ui/molecules/SearchSelect";
 import { MultiSelect } from "./MultiSelect";
+import { format } from "date-fns";
+import type { DateRange as PickerDateRange } from "react-day-picker";
 
 type FilterValue = string | number | boolean | string[] | number[] | null;
 
@@ -187,6 +190,41 @@ export function Filter({
     }
     return null;
   };
+
+  /** Value for DateRangeFilter (react-day-picker: from/to) from start_date/end_date (created_at) */
+  const getDateRangeFilterValue = (field: string): PickerDateRange | undefined => {
+    if (field !== "created_at") return undefined;
+    const start = filterValues["start_date" as keyof FilterFields] as string | undefined;
+    const end = filterValues["end_date" as keyof FilterFields] as string | undefined;
+    if (!start || !end) return undefined;
+    const from = new Date(start);
+    const to = new Date(end);
+    if (isNaN(from.getTime()) || isNaN(to.getTime())) return undefined;
+    return { from, to };
+  };
+
+  const handleDateRangeFilterChange = useCallback(
+    (field: keyof FilterFields, range: PickerDateRange | undefined) => {
+      if (field !== "created_at") return;
+      if (range?.from && range?.to) {
+        const start_date = format(range.from, "yyyy-MM-dd");
+        const end_date = format(range.to, "yyyy-MM-dd");
+        setFilterValues((prev: FilterFields) => ({
+          ...prev,
+          start_date,
+          end_date,
+        }));
+      } else {
+        setFilterValues((prev: FilterFields) => {
+          const next = { ...prev };
+          delete next["start_date" as keyof FilterFields];
+          delete next["end_date" as keyof FilterFields];
+          return next;
+        });
+      }
+    },
+    []
+  );
 
   const handleSingleDateChange = useCallback(
     (field: keyof FilterFields, value: string | null) => {
@@ -389,6 +427,24 @@ export function Filter({
                           range
                         )
                       }
+                    />
+                  </div>
+                )}
+
+                {filter.type === FieldTypes.dateRangeFilter && (
+                  <div>
+                    <DateRangeFilter
+                      value={getDateRangeFilterValue(filter.field)}
+                      onChange={(range) =>
+                        handleDateRangeFilterChange(
+                          filter.field as keyof FilterFields,
+                          range
+                        )
+                      }
+                      placeholder="Select from and to date"
+                      numberOfMonths={2}
+                      size="sm"
+                      triggerClassName="w-full min-w-0"
                     />
                   </div>
                 )}

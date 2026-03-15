@@ -238,3 +238,29 @@ export function mapMerchantTransactionFiltersToApiParams(
   }
   return params;
 }
+
+/** Affiliate RP merchant transactions API accepts only these query params for filters */
+const AFFILIATE_TX_FILTER_TO_API: Record<string, string> = {
+  transaction_id: 'transactionId',
+  start_date: 'startDate',
+  end_date: 'endDate',
+  merchant_id: 'merchant_id',
+  status: 'status',
+};
+
+/**
+ * Convert advance filter object to affiliate RP merchant transaction API query params.
+ * Only sends keys accepted by GET /affiliate/transactions/rp-merchants: transactionId, startDate, endDate, merchant_id, status.
+ */
+export function mapAffiliateTransactionFiltersToApiParams(
+  filters: Record<string, string | number | boolean | undefined | null>
+): Record<string, string | number> {
+  const params: Record<string, string | number> = {};
+  Object.entries(filters || {}).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return;
+    const apiKey = AFFILIATE_TX_FILTER_TO_API[key];
+    if (!apiKey) return;
+    params[apiKey] = typeof value === 'boolean' ? (value ? 1 : 0) : value;
+  });
+  return params;
+}

@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ClipboardList, Clock3, ArrowRight } from 'lucide-react';
+import { ClipboardList, Clock3, ArrowRight, Users } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -11,7 +11,11 @@ import { Container } from '@/components/common/container';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
-import { getApplicationCounts, ApplicationCounts } from '@/lib/services/admin/applications';
+import {
+  getApplicationCounts,
+  getAffiliateApplicationCount,
+  ApplicationCounts,
+} from '@/lib/services/admin/applications';
 import { toast } from 'sonner';
 
 const cardsConfig = [
@@ -29,18 +33,29 @@ const cardsConfig = [
     href: '/admin/acquirers/requests',
     icon: Clock3,
   },
+  {
+    key: 'affiliate' as const,
+    title: 'Affiliate Applications (Pending)',
+    description: 'Affiliate onboarding applications awaiting approval',
+    href: '/admin/applications/affiliate',
+    icon: Users,
+  },
 ];
 
 export default function AdminApplicationsPage() {
   const [counts, setCounts] = useState<ApplicationCounts | null>(null);
+  const [affiliateCount, setAffiliateCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCounts = async () => {
       setLoading(true);
       try {
-        const response = await getApplicationCounts();
-        handleApiResponse(response, {
+        const [mainRes, affiliateRes] = await Promise.all([
+          getApplicationCounts(),
+          getAffiliateApplicationCount(),
+        ]);
+        handleApiResponse(mainRes, {
           onSuccess: (data) => {
             if (data && data.success && data.data) {
               setCounts(data.data);
@@ -50,6 +65,14 @@ export default function AdminApplicationsPage() {
           },
           onError: (errorMessage) => {
             toast.error(errorMessage || 'Failed to load application counts');
+          },
+          silent: true,
+        });
+        handleApiResponse(affiliateRes, {
+          onSuccess: (body) => {
+            if (body?.data?.count != null && typeof body.data.count === 'number') {
+              setAffiliateCount(body.data.count);
+            }
           },
           silent: true,
         });
@@ -77,10 +100,13 @@ export default function AdminApplicationsPage() {
       </Container>
 
       <Container>
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {cardsConfig.map((card) => {
             const Icon = card.icon;
-            const value = counts?.[card.key] ?? 0;
+            const value =
+              card.key === 'affiliate'
+                ? affiliateCount
+                : (counts?.[card.key] ?? 0);
 
             return (
               <Link key={card.key} href={card.href} className="group">
