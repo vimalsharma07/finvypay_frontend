@@ -24,6 +24,7 @@ export default function AffiliateOnboardingPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [affiliateName, setAffiliateName] = useState<string>('');
 
   useEffect(() => {
     let cancelled = false;
@@ -58,7 +59,10 @@ export default function AffiliateOnboardingPage() {
     };
   }, [router]);
 
-  const handleStep1Next = () => setCurrentStep(2);
+  const handleStep1Next = (name?: string) => {
+    if (name) setAffiliateName(name);
+    setCurrentStep(2);
+  };
   const handleStep2Next = () => {
     router.replace('/affiliate/dashboard');
   };
@@ -101,7 +105,7 @@ export default function AffiliateOnboardingPage() {
           <div className="lg:col-span-2">
             {currentStep === 1 && <Step1Details onNext={handleStep1Next} />}
             {currentStep === 2 && (
-              <Step2Agreement onNext={handleStep2Next} />
+              <Step2Agreement affiliateName={affiliateName} onNext={handleStep2Next} />
             )}
             {currentStep === 3 && (
               <div className="text-center py-12 text-muted-foreground">

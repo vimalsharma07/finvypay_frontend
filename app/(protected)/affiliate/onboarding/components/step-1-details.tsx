@@ -59,7 +59,8 @@ const step1Schema = z
 type Step1FormValues = z.infer<typeof step1Schema>;
 
 interface Step1DetailsProps {
-  onNext: () => void;
+  /** Called when step 1 succeeds; pass affiliate name for use in step 2 agreement. */
+  onNext: (affiliateName?: string) => void;
 }
 
 export function Step1Details({ onNext }: Step1DetailsProps) {
@@ -164,7 +165,7 @@ export function Step1Details({ onNext }: Step1DetailsProps) {
       handleApiResponse(response, {
         onSuccess: () => {
           toast.success('Step 1 submitted successfully');
-          onNext();
+          onNext(values.rpName);
         },
         onError: (msg) => toast.error(msg || 'Failed to submit'),
         onValidationError: (_, messages) =>
