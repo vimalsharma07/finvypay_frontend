@@ -29,7 +29,6 @@ import {
 } from '@/app/(protected)/components/table-comp';
 
 const DATE_FMT = 'yyyy-MM-dd';
-const DATE_TIME_FMT = 'yyyy-MM-dd HH:mm';
 
 /** Row type aligned with admin settlement list (same fields for table) */
 interface AffiliateSettlementRow {
@@ -60,11 +59,6 @@ const formatCurrency = (amount: string | null | undefined) => {
   }).format(num);
 };
 
-const formatNumber = (num: number | null | undefined) => {
-  if (num === null || num === undefined) return '—';
-  return num.toLocaleString();
-};
-
 export default function AffiliateReportsSettlementPage() {
   const [data] = useState<AffiliateSettlementRow[]>([]);
   const [sorting, setSorting] = useState<SortingState>([
@@ -83,20 +77,6 @@ export default function AffiliateReportsSettlementPage() {
           <DataGridColumnHeader column={column} title="Invoice Number" />
         ),
         cell: ({ row }) => row.original.invoiceNumber || '—',
-      },
-      {
-        accessorKey: 'userName',
-        header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="User" />
-        ),
-        cell: ({ row }) => (
-          <div className="flex flex-col">
-            <span className="font-medium">{row.original.userName || '—'}</span>
-            <span className="text-xs text-muted-foreground">
-              {row.original.userEmail || '—'}
-            </span>
-          </div>
-        ),
       },
       {
         accessorKey: 'settlementDate',
@@ -165,23 +145,6 @@ export default function AffiliateReportsSettlementPage() {
           </Badge>
         ),
       },
-      {
-        accessorKey: 'totalSuccessCount',
-        header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Success" />
-        ),
-        cell: ({ row }) => formatNumber(row.original.totalSuccessCount),
-      },
-      {
-        accessorKey: 'createdAt',
-        header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Created" />
-        ),
-        cell: ({ row }) =>
-          row.original.createdAt
-            ? format(new Date(row.original.createdAt), DATE_TIME_FMT)
-            : '—',
-      },
     ],
     []
   );
@@ -203,7 +166,7 @@ export default function AffiliateReportsSettlementPage() {
         <Toolbar>
           <ToolbarHeading
             title="Settlement Report"
-            description="View settlement records for your referred merchants"
+            description="View your settlement records"
             icon={FileText}
           />
         </Toolbar>
