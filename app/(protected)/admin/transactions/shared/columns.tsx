@@ -71,6 +71,43 @@ export function getTransactionColumns(
       cell: ({ row }) => {
         const fullName = `${row.original.firstName} ${row.original.lastName}`.trim();
         const initials = `${row.original.firstName?.[0] || ''}${row.original.lastName?.[0] || ''}`.toUpperCase();
+
+        // API may return `cardType` as either number (1/2) or string (e.g. "VISA").
+        const rawCardType = row.original.cardType as unknown;
+        const cardTypeLabel: string | null =
+          rawCardType == null
+            ? null
+            : typeof rawCardType === 'string'
+              ? rawCardType.toUpperCase()
+              : rawCardType === 1
+                ? 'Credit'
+                : rawCardType === 2
+                  ? 'Debit'
+                  : `Type ${rawCardType}`;
+
+        const cardTypeBadgeClassName = (() => {
+          const label = cardTypeLabel ?? '';
+          const upper = label.toUpperCase();
+
+          if (upper.includes('VISA')) {
+            return 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-900';
+          }
+          // API sometimes returns "MASTER" (not "MASTERCARD")
+          if (upper.includes('MASTERCARD') || upper.includes('MASTER')) {
+            return 'text-orange-700 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-900';
+          }
+          if (upper.includes('AMEX') || upper.includes('AMERICAN EXPRESS')) {
+            return 'text-primary bg-primary/10 border-primary/30 dark:bg-primary/15 dark:border-primary/40';
+          }
+          // Fallback
+          return 'text-muted-foreground bg-muted/40 border-border';
+        })();
+
+        const cardFlowLabel = row.original.isCardWl ? 'STD' : 'FTD';
+        const cardFlowBadgeClassName = row.original.isCardWl
+          ? 'text-green-700 dark:text-green-500 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-900'
+          : 'text-amber-700 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900';
+
         return (
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
@@ -81,6 +118,30 @@ export function getTransactionColumns(
               {row.original.email && (
                 <div className="truncate text-xs text-muted-foreground">{row.original.email}</div>
               )}
+
+              <div className="mt-1 flex flex-wrap gap-2">
+                {cardTypeLabel && (
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      'inline-flex h-5 items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+                      cardTypeBadgeClassName
+                    )}
+                  >
+                    {cardTypeLabel}
+                  </Badge>
+                )}
+
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    'inline-flex h-5 items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+                    cardFlowBadgeClassName
+                  )}
+                >
+                  {cardFlowLabel}
+                </Badge>
+              </div>
             </div>
           </div>
         );
