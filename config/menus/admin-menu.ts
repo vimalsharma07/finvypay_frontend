@@ -9,6 +9,7 @@ import {
   LayoutGrid,
   LifeBuoy,
   Plug,
+  Route,
   ScrollText,
   ShieldCheck,
   ShieldUser,
@@ -75,6 +76,17 @@ const BASE_ADMIN_MENU: MenuConfig = [
     path: '/admin/acquirers',
     permissionModule: 'Acquirer Management', // Explicit permission module mapping
     requirePermission: true,
+  },
+  {
+    title: 'Routing & Cascading',
+    icon: Route,
+    permissionModule: 'Routing',
+    requirePermission: true,
+    hidden: true, // Temporarily hidden from nav; pages under /admin/global-routing etc. remain available by URL
+    children: [
+      { title: 'Global Routing', path: '/admin/global-routing', submodule: 'Global Routing' },
+      { title: 'Global Cascading', path: '/admin/global-cascading', submodule: 'Global Cascading' },
+    ],
   },
   {
     title: 'Applications & Requests',
@@ -199,14 +211,14 @@ const BASE_ADMIN_MENU: MenuConfig = [
 export function getAdminMenu(): MenuConfig {
   // Filter menu items based on permissions
   // Dashboard is always shown, other items are filtered by module access
-  return filterMenuByPermissions(BASE_ADMIN_MENU);
+  return filterMenuByPermissions(BASE_ADMIN_MENU).filter((item) => !item.hidden);
 }
 
 /**
  * Admin menu (for backward compatibility)
  * This will be filtered automatically when used via getMenuByRole
  */
-export const ADMIN_MENU: MenuConfig = BASE_ADMIN_MENU;
+export const ADMIN_MENU: MenuConfig = BASE_ADMIN_MENU.filter((item) => !item.hidden);
 
 export default ADMIN_MENU;
 

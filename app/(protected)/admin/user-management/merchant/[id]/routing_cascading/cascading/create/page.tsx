@@ -37,6 +37,7 @@ import {
   createUserCascading,
   CascadingConfigEntry,
 } from '@/lib/services/admin/cascading';
+import { formatConnectorLabel } from '@/lib/utils/connector-display';
 import type { Option } from '@/lib/types/common-types';
 
 const CASCADING_TYPES = [
@@ -158,7 +159,7 @@ export default function CascadingCreatePage() {
             setConnectors(list);
             const options = list.map((conn: MerchantAcquirerAccount) => ({
               value: conn.id.toString(),
-              label: conn.name || `Connector ${conn.id}`,
+              label: formatConnectorLabel(conn),
             }));
             setConnectorOptions(options);
             if (options.length > 0) {

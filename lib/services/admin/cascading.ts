@@ -273,12 +273,16 @@ export async function updateUserCascadingPriority(
   userProfileId?: number
 ): Promise<ApiResponse<{ success: boolean; message: string }>> {
   try {
-    const data = await http.put(`${getBaseUrl(userId)}/priority`, {
-      body: {
-        cascading_priority_list: cascadingPriorityList,
-        user_profile_id: userProfileId,
-      },
-    }) as { success: boolean; message: string };
+    const payload: Record<string, unknown> = {
+      cascading_priority_list: cascadingPriorityList.map(({ id, priority }) => ({
+        id: typeof id === 'string' ? parseInt(id, 10) : id,
+        priority,
+      })),
+    };
+    if (userProfileId !== undefined) {
+      payload.user_profile_id = userProfileId;
+    }
+    const data = await http.put(`${getBaseUrl(userId)}/priority`, payload) as { success: boolean; message: string };
     return {
       status: 200,
       data,

@@ -5,6 +5,7 @@ export const ROUTE_CONDITION_CATEGORY_MAP = {
   BIN_COUNTRY: 'bin_country',
   BIN_NUMBER: 'bin_number',
   CARD_TYPE: 'card_type',
+  CARD_BRAND: 'card_brand',
   CARD_WL_FT: 'card_wl_ft',
 } as const;
 
@@ -16,6 +17,8 @@ export const ROUTE_CONDITION_OPERATOR_MAP = {
   LESS_THAN: '<',
   GREATER_THAN_OR_EQUALS: '>=',
   LESS_THAN_OR_EQUALS: '<=',
+  BETWEEN: 'between',
+  NOT_BETWEEN: 'not_between',
 } as const;
 
 export const ROUTE_CONDITION_CATEGORIES = [
@@ -25,12 +28,21 @@ export const ROUTE_CONDITION_CATEGORIES = [
   { label: 'Bin Country', value: ROUTE_CONDITION_CATEGORY_MAP.BIN_COUNTRY },
   { label: 'Bin Number', value: ROUTE_CONDITION_CATEGORY_MAP.BIN_NUMBER },
   { label: 'Card Type', value: ROUTE_CONDITION_CATEGORY_MAP.CARD_TYPE },
+  { label: 'Card Brand', value: ROUTE_CONDITION_CATEGORY_MAP.CARD_BRAND },
   { label: 'Card WL/FT', value: ROUTE_CONDITION_CATEGORY_MAP.CARD_WL_FT },
 ];
 
+export type ConditionOperatorInputType =
+  | 'input'
+  | 'search-select'
+  | 'multi-select'
+  | 'multi-input'
+  | 'select'
+  | 'range';
+
 export const CONDITION_OPERATOR_MAP: Record<
   string,
-  { label: string; value: string; inputType: 'input' | 'search-select' | 'multi-select' | 'multi-input' | 'select' }[]
+  { label: string; value: string; inputType: ConditionOperatorInputType }[]
 > = {
   amount: [
     { label: '=', value: ROUTE_CONDITION_OPERATOR_MAP.EQUALS, inputType: 'input' },
@@ -38,6 +50,8 @@ export const CONDITION_OPERATOR_MAP: Record<
     { label: '<', value: ROUTE_CONDITION_OPERATOR_MAP.LESS_THAN, inputType: 'input' },
     { label: '>=', value: ROUTE_CONDITION_OPERATOR_MAP.GREATER_THAN_OR_EQUALS, inputType: 'input' },
     { label: '<=', value: ROUTE_CONDITION_OPERATOR_MAP.LESS_THAN_OR_EQUALS, inputType: 'input' },
+    { label: 'Between', value: ROUTE_CONDITION_OPERATOR_MAP.BETWEEN, inputType: 'range' },
+    { label: 'Not between', value: ROUTE_CONDITION_OPERATOR_MAP.NOT_BETWEEN, inputType: 'range' },
   ],
   currency: [
     { label: '=', value: ROUTE_CONDITION_OPERATOR_MAP.EQUALS, inputType: 'search-select' },
@@ -63,14 +77,34 @@ export const CONDITION_OPERATOR_MAP: Record<
     { label: '=', value: ROUTE_CONDITION_OPERATOR_MAP.EQUALS, inputType: 'select' },
     { label: 'In (...)', value: ROUTE_CONDITION_OPERATOR_MAP.IN, inputType: 'multi-select' },
   ],
+  card_brand: [
+    { label: '=', value: ROUTE_CONDITION_OPERATOR_MAP.EQUALS, inputType: 'select' },
+    { label: 'In (...)', value: ROUTE_CONDITION_OPERATOR_MAP.IN, inputType: 'multi-select' },
+    { label: 'Not In (...)', value: ROUTE_CONDITION_OPERATOR_MAP.NOT_IN, inputType: 'multi-select' },
+  ],
   card_wl_ft: [
     { label: '=', value: ROUTE_CONDITION_OPERATOR_MAP.EQUALS, inputType: 'select' },
   ],
 };
 
+/** Card type options for routing conditions (values match backend cardType: 1=VISA, 2=MASTER, etc.) */
 export const CARD_TYPE_OPTIONS = [
   { label: 'VISA', value: '1' },
-  { label: 'MASTERCARD', value: '2' },
+  { label: 'Mastercard', value: '2' },
+  { label: 'Amex', value: '3' },
+  { label: 'Discover', value: '4' },
+  { label: 'Diners Club', value: '5' },
+  { label: 'JCB', value: '6' },
+];
+
+/** Card brand options for routing conditions (values match backend CardBrand enum) */
+export const CARD_BRAND_OPTIONS = [
+  { label: 'VISA', value: 'VISA' },
+  { label: 'Mastercard', value: 'MASTER' },
+  { label: 'Amex', value: 'AMEX' },
+  { label: 'Discover', value: 'DISCOVER' },
+  { label: 'Diners Club', value: 'DINNER_CLUB' },
+  { label: 'JCB', value: 'JCB' },
 ];
 
 export const CARD_WL_FT_OPTIONS = [

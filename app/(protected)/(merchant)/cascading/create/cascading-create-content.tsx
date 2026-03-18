@@ -33,6 +33,7 @@ import {
   createCascadingSchema,
   CreateCascadingFormData,
 } from '@/lib/validations/routing-validation';
+import { formatConnectorLabel } from '@/lib/utils/connector-display';
 import type { Option } from '@/lib/types/common-types';
 import { useAuth } from '@/hooks/use-auth';
 import { getUserProfileId } from '@/lib/services/user/merchant-profile';
@@ -138,7 +139,7 @@ export function CascadingCreateContent() {
             setAcquirerAccounts(accounts);
             const options = accounts.map((account: UserAcquirerAccount) => ({
               value: account.id.toString(),
-              label: `${account.name} (${account.acquirerAccount?.name || 'Unknown'} - ${account.currencyCode || 'N/A'})`,
+              label: formatConnectorLabel(account),
             }));
             setAcquirerOptions(options);
           },

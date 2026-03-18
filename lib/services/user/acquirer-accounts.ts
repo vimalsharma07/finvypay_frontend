@@ -5,6 +5,7 @@ import type { ApiResponse } from '../types';
 
 export interface UserAcquirerAccount {
   id: string;
+  customName?: string | null;
   merchantProfileId?: string;
   merchantProfile?: {
     id: string;
@@ -53,6 +54,23 @@ export async function getUserAcquirerAccounts(
     const data = await http.get(getBaseUrl(), {
       query: params as Record<string, string | number | boolean | null | undefined>,
     }) as UserAcquirerAccountListResponse;
+    return { status: 200, data };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return { status: error.status, error: error.message, data: error.data };
+    }
+    throw error;
+  }
+}
+
+export async function updateAcquirerAccountCustomName(
+  id: string | number,
+  customName: string | null
+): Promise<ApiResponse<{ success: boolean; data: { id: number; customName: string | null }; message?: string }>> {
+  try {
+    const data = await http.put(`${getBaseUrl()}/${id}/name`, {
+      customName: customName || null,
+    }) as { success: boolean; data: { id: number; customName: string | null }; message?: string };
     return { status: 200, data };
   } catch (error) {
     if (error instanceof ApiError) {

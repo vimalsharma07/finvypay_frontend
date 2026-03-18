@@ -40,6 +40,7 @@ import {
   type MerchantProfile,
 } from '@/lib/services/admin/merchant-acquirer-account';
 import type { Option } from '@/lib/types/common-types';
+import { formatConnectorLabel } from '@/lib/utils/connector-display';
 
 export default function RoutingPage() {
   const params = useParams();
@@ -191,12 +192,24 @@ export default function RoutingPage() {
             {item.view_route || '-'}
           </div>
         );
-      case 'merchantConnector':
+      case 'merchantConnector': {
+        const mc = item.merchantConnector;
+        const connectorId =
+          mc?.id ?? (item as { connector_id?: string }).connector_id;
+        if (!mc?.name && !connectorId) {
+          return <div className="text-sm">Not Assigned</div>;
+        }
         return (
           <div className="text-sm">
-            {item.merchantConnector?.name || 'Not Assigned'}
+            {formatConnectorLabel({
+              id: connectorId ?? '',
+              name: mc?.name ?? `Connector ${connectorId}`,
+              customName: mc?.customName ?? mc?.custom_name,
+              custom_name: mc?.custom_name,
+            })}
           </div>
         );
+      }
       case 'routing_for':
         return (
           <Badge variant="outline" className="capitalize">

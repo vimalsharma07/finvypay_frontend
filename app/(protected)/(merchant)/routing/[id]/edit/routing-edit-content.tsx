@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useTransition } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Trash2, ArrowLeft } from 'lucide-react';
 import { Container } from '@/components/common/container';
@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -23,6 +24,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { SearchSelect } from '@/components/ui/molecules/SearchSelect';
+import { MultiSelect } from '@/components/common/MultiSelect';
 import { ContentLoader } from '@/components/common/content-loader';
 import { toast } from 'sonner';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
@@ -40,29 +42,28 @@ import {
   CreateRoutingFormData,
 } from '@/lib/validations/routing-validation';
 import type { Option } from '@/lib/types/common-types';
+import { fetchListOfCurrencies, fetchListOfCountries } from '@/lib/fetch/fetch-options';
+import {
+  ROUTE_CONDITION_CATEGORIES,
+  CONDITION_OPERATOR_MAP,
+  CARD_TYPE_OPTIONS,
+  CARD_BRAND_OPTIONS,
+  CARD_WL_FT_OPTIONS,
+} from '@/lib/constants/routing';
+import type { ConditionOperatorInputType } from '@/lib/constants/routing';
+import {
+  serializeRoutingConfig,
+  parseRoutingConfig,
+  leafConditionToFormRow,
+  type RoutingLeafCondition,
+} from '@/lib/utils/routing-config';
+import { formatConnectorLabel } from '@/lib/utils/connector-display';
 
 const ROUTING_TYPES = [
   { value: 'CARD', label: 'Card Payments' },
   { value: 'BANK_TRANSFER', label: 'Bank Transfer' },
   { value: 'CRYPTO', label: 'Cryptocurrency' },
   { value: 'WALLET', label: 'Digital Wallet' },
-];
-
-const OPERATORS = [
-  { value: '>=', label: 'Greater than or equal (>=)' },
-  { value: '<=', label: 'Less than or equal (<=)' },
-  { value: '>', label: 'Greater than (>)' },
-  { value: '<', label: 'Less than (<)' },
-  { value: '==', label: 'Equal (==)' },
-  { value: '!=', label: 'Not equal (!=)' },
-];
-
-const CONFIG_CATEGORIES = [
-  { value: 'amount', label: 'Transaction Amount' },
-  { value: 'currency', label: 'Currency' },
-  { value: 'country', label: 'Country' },
-  { value: 'card_type', label: 'Card Type' },
-  { value: 'payment_method', label: 'Payment Method' },
 ];
 
 export function RoutingEditContent() {
@@ -76,6 +77,9 @@ export function RoutingEditContent() {
   const [acquirerAccounts, setAcquirerAccounts] = useState<UserAcquirerAccount[]>([]);
   const [acquirerOptions, setAcquirerOptions] = useState<Option[]>([]);
   const [loadingAcquirers, setLoadingAcquirers] = useState(true);
+  const [currencyOptions, setCurrencyOptions] = useState<Option[]>([]);
+  const [countryOptions, setCountryOptions] = useState<Option[]>([]);
+  const [combineMode, setCombineMode] = useState<'AND' | 'OR'>('AND');
 
   const {
     register,
@@ -104,6 +108,7 @@ export function RoutingEditContent() {
   });
 
   const watchedSplitEnable = watch('splitEnable');
+  const [, startTransition] = useTransition();
 
   // Fetch routing data and acquirer accounts
   useEffect(() => {
@@ -133,21 +138,37 @@ export function RoutingEditContent() {
                 ? parseInt(routing.connectorId.toString())
                 : undefined;
 
-              // Pre-populate form with existing data
+              const { combineMode: parsedMode, leaves } = parseRoutingConfig(routing.config);
+              const configItems =
+                leaves.length > 0
+                  ? leaves.map((leaf) => {
+                      const row = leafConditionToFormRow(leaf);
+                      let category = row.category || 'amount';
+                      if (category === 'country_customer') category = 'country';
+                      if (category === 'country_issuer') category = 'bin_country';
+                      const ops = CONDITION_OPERATOR_MAP[category] || [];
+                      const rawOp = row.operator || '>=';
+                      const validOperator = ops.some((o) => o.value === rawOp)
+                        ? rawOp
+                        : ops[0]?.value || '==';
+                      return {
+                        category,
+                        operator: validOperator,
+                        value: row.value as string | number | string[] | [number, number],
+                      };
+                    })
+                  : [{ category: 'amount', operator: '>=', value: '' }];
+
+              setCombineMode(parsedMode);
+
               reset({
                 name: routing.name || '',
-                routingFor: routing.routingFor || 'CARD',
+                routingFor: (routing.routingFor || 'CARD') as CreateRoutingFormData['routingFor'],
                 merchantProfileId: routing.merchantProfileId
                   ? parseInt(routing.merchantProfileId.toString())
                   : 0,
                 merchantAcquirerAccountId: connectorId,
-                config: routing.config && Array.isArray(routing.config) && routing.config.length > 0
-                  ? routing.config.map((item: any) => ({
-                      category: item.category || 'amount',
-                      operator: item.operator || '>=',
-                      value: item.value?.toString() || '',
-                    }))
-                  : [{ category: 'amount', operator: '>=', value: '' }],
+                config: configItems as CreateRoutingFormData['config'],
                 splitEnable: routing.splitEnable || false,
               });
             } else {
@@ -172,7 +193,7 @@ export function RoutingEditContent() {
 
             const options = accounts.map((account: UserAcquirerAccount) => ({
               value: account.id.toString(),
-              label: `${account.name} (${account.acquirerAccount?.name || 'Unknown'} - ${account.currencyCode || 'N/A'})`,
+              label: formatConnectorLabel(account),
             }));
             setAcquirerOptions(options);
           },
@@ -192,6 +213,243 @@ export function RoutingEditContent() {
     fetchData();
   }, [routingId, router, reset]);
 
+  // Fetch currencies and countries for condition select
+  useEffect(() => {
+    const loadCurrencies = async () => {
+      try {
+        const currencies = await fetchListOfCurrencies();
+        setCurrencyOptions(
+          currencies.map((c: { label?: string; code?: string; value?: string | number | null }) => ({
+            label: c.label || c.code || String(c.value ?? ''),
+            value: String(c.value ?? c.code ?? ''),
+          })),
+        );
+      } catch {
+        // swallow
+      }
+    };
+    const loadCountries = async () => {
+      try {
+        const countries = await fetchListOfCountries();
+        setCountryOptions(countries);
+      } catch {
+        // swallow
+      }
+    };
+    loadCurrencies();
+    loadCountries();
+  }, []);
+
+  const getInputType = (category: string, operator: string): ConditionOperatorInputType => {
+    const operators = CONDITION_OPERATOR_MAP[category] || [];
+    return (operators.find((op) => op.value === operator)?.inputType || 'input') as ConditionOperatorInputType;
+  };
+
+  const normalizeConfigValue = (item: {
+    category: string;
+    operator: string;
+    value: string | number | string[] | [number, number] | [string, string];
+  }) => {
+    if (item.operator === 'between' || item.operator === 'not_between') {
+      const v = item.value;
+      if (Array.isArray(v) && v.length === 2) {
+        return [Number(v[0]), Number(v[1])] as [number, number];
+      }
+    }
+    const inputType = getInputType(item.category, item.operator);
+    const rawValue = item.value;
+    const strVal = Array.isArray(rawValue) ? rawValue.join(',') : String(rawValue ?? '');
+
+    if (inputType === 'multi-select' || inputType === 'multi-input') {
+      return strVal.split(',').map((v) => v.trim()).filter(Boolean);
+    }
+    if (item.category === 'amount') {
+      const num = Number(rawValue);
+      return Number.isNaN(num) ? rawValue : num;
+    }
+    return rawValue;
+  };
+
+  const handleConfigCategoryChange = (index: number, category: string) => {
+    const currentCategory = watch(`config.${index}.category`);
+    if (currentCategory === category) return;
+    const ops = CONDITION_OPERATOR_MAP[category] || [];
+    const firstOp = ops[0]?.value || '==';
+    setValue(`config.${index}.category`, category);
+    setValue(`config.${index}.operator`, firstOp as any);
+    setValue(`config.${index}.value`, '');
+  };
+
+  const handleConfigOperatorChange = (index: number, operator: string) => {
+    const category = watch(`config.${index}.category`) || 'amount';
+    const prev = watch(`config.${index}.operator`);
+    if (prev === operator) return;
+    setValue(`config.${index}.operator`, operator as any);
+    const nextType = getInputType(category, operator);
+    const prevType = getInputType(category, prev);
+    if (nextType === 'range') {
+      setValue(`config.${index}.value`, [0, 0] as any);
+    } else if (prevType === 'range') {
+      setValue(`config.${index}.value`, '');
+    }
+  };
+
+  const renderConfigValueInput = (index: number) => {
+    const category = watch(`config.${index}.category`);
+    const operator = watch(`config.${index}.operator`);
+    const value = watch(`config.${index}.value`);
+    const inputType = getInputType(category, operator);
+    const strValue = Array.isArray(value) ? value.join(',') : String(value ?? '');
+
+    if (inputType === 'range') {
+      const raw = watch(`config.${index}.value`);
+      let min = 0;
+      let max = 0;
+      if (Array.isArray(raw) && raw.length === 2) {
+        min = Number(raw[0]) || 0;
+        max = Number(raw[1]) || 0;
+      }
+      return (
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
+          <Input
+            type="number"
+            className="min-w-0"
+            placeholder="Min"
+            value={min === 0 && max === 0 ? '' : min}
+            onChange={(e) => {
+              const n = parseFloat(e.target.value);
+              const hi = Array.isArray(raw) && raw.length === 2 ? Number(raw[1]) || 0 : max;
+              setValue(`config.${index}.value`, [Number.isNaN(n) ? 0 : n, hi] as any);
+            }}
+          />
+          <span className="text-muted-foreground text-sm shrink-0">to</span>
+          <Input
+            type="number"
+            className="min-w-0"
+            placeholder="Max"
+            value={min === 0 && max === 0 ? '' : max}
+            onChange={(e) => {
+              const n = parseFloat(e.target.value);
+              const lo = Array.isArray(raw) && raw.length === 2 ? Number(raw[0]) || 0 : min;
+              setValue(`config.${index}.value`, [lo, Number.isNaN(n) ? 0 : n] as any);
+            }}
+          />
+        </div>
+      );
+    }
+
+    if (inputType === 'search-select') {
+      const options =
+        category === 'currency' ? currencyOptions
+          : category === 'country' || category === 'bin_country' ? countryOptions
+          : [];
+      if (!options?.length) {
+        return (
+          <Input
+            placeholder="Enter value"
+            value={strValue}
+            onChange={(e) => setValue(`config.${index}.value`, e.target.value)}
+          />
+        );
+      }
+      return (
+        <SearchSelect
+          options={options}
+          value={strValue}
+          onChange={(val) => setValue(`config.${index}.value`, val)}
+          placeholder="Select value"
+        />
+      );
+    }
+
+    if (inputType === 'select') {
+      const options =
+        category === 'card_type' ? CARD_TYPE_OPTIONS
+          : category === 'card_brand' ? CARD_BRAND_OPTIONS
+          : category === 'card_wl_ft' ? CARD_WL_FT_OPTIONS
+          : [];
+      if (!options?.length) {
+        return (
+          <Input
+            placeholder="Enter value"
+            value={strValue}
+            onChange={(e) => setValue(`config.${index}.value`, e.target.value)}
+          />
+        );
+      }
+      const validValue = options.some((o) => String(o.value) === strValue) ? strValue : '';
+      return (
+        <Controller
+          name={`config.${index}.value`}
+          control={control}
+          render={({ field }) => (
+            <Select value={validValue} onValueChange={field.onChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select value" />
+              </SelectTrigger>
+              <SelectContent>
+                {options.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
+      );
+    }
+
+    if (inputType === 'multi-input') {
+      return (
+        <Textarea
+          placeholder="Comma separated values"
+          value={strValue}
+          onChange={(e) => setValue(`config.${index}.value`, e.target.value)}
+        />
+      );
+    }
+
+    if (inputType === 'multi-select') {
+      const options =
+        category === 'currency' ? currencyOptions
+          : category === 'card_type' ? CARD_TYPE_OPTIONS
+          : category === 'card_brand' ? CARD_BRAND_OPTIONS
+          : category === 'country' || category === 'bin_country' ? countryOptions
+          : [];
+      if (!options?.length) {
+        return (
+          <Textarea
+            placeholder="Comma separated values"
+            value={strValue}
+            onChange={(e) => setValue(`config.${index}.value`, e.target.value)}
+          />
+        );
+      }
+      const selectedValues = strValue ? strValue.split(',').map((v) => v.trim()).filter(Boolean) : [];
+      return (
+        <MultiSelect
+          options={options}
+          selected={selectedValues}
+          onChange={(selected) => {
+            startTransition(() => {
+              setValue(`config.${index}.value`, selected.join(','), { shouldValidate: false });
+            });
+          }}
+          placeholder="Select one or more values"
+        />
+      );
+    }
+
+    return (
+      <Input
+        placeholder="Enter value"
+        value={strValue}
+        onChange={(e) => setValue(`config.${index}.value`, e.target.value)}
+      />
+    );
+  };
+
   const onSubmit = async (data: CreateRoutingFormData): Promise<void> => {
     if (!routingId) {
       toast.error('Routing ID is missing');
@@ -200,27 +458,32 @@ export function RoutingEditContent() {
 
     try {
       setIsLoading(true);
-      console.log('Updating routing data:', data);
-
       // Ensure all required fields are present and valid
       if (!data.routingFor || !data.merchantAcquirerAccountId || !data.config?.length) {
         toast.error('Please fill in all required fields');
         return;
       }
 
-      // Convert config values to appropriate types and exclude merchantProfileId
       const { merchantProfileId, ...updatePayload } = data;
+      const leaves: RoutingLeafCondition[] = data.config.map((item) => {
+        const ops = CONDITION_OPERATOR_MAP[item.category] || [];
+        const validOperator = ops.some((o) => o.value === item.operator)
+          ? item.operator
+          : ops[0]?.value || '==';
+        return {
+          category: item.category,
+          operator: validOperator,
+          value: normalizeConfigValue(item),
+        };
+      });
+      const finalConfig = serializeRoutingConfig(leaves, combineMode);
+
       const processedData = {
         ...updatePayload,
-        config: data.config.map(item => ({
-          ...item,
-          value: item.category === 'amount' && typeof item.value === 'string'
-            ? parseFloat(item.value) || item.value
-            : item.value
-        }))
+        config: finalConfig as (typeof data)['config'],
       };
 
-      const response = await updateUserMerchantRouting(routingId, processedData);
+      const response = await updateUserMerchantRouting(routingId, processedData as any);
 
       handleApiResponse(response, {
         onSuccess: () => {
@@ -318,21 +581,25 @@ export function RoutingEditContent() {
                   <Label htmlFor="routingFor" className="text-sm font-medium">
                     Routing Type <span className="text-red-500">*</span>
                   </Label>
-                  <Select
-                    onValueChange={(value) => setValue('routingFor', value as any)}
-                    value={watch('routingFor')}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select routing type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ROUTING_TYPES.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Controller
+                    name="routingFor"
+                    control={control}
+                    defaultValue="CARD"
+                    render={({ field }) => (
+                      <Select value={field.value || 'CARD'} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select routing type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ROUTING_TYPES.map((type) => (
+                            <SelectItem key={type.value} value={type.value}>
+                              {type.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                   {errors.routingFor && (
                     <p className="text-red-500 text-xs">{errors.routingFor.message}</p>
                   )}
@@ -373,6 +640,26 @@ export function RoutingEditContent() {
 
             {/* Configuration Rules */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <div className="mb-4 rounded-lg border p-4 bg-muted/30">
+                <div className="space-y-2 max-w-md">
+                  <Label className="text-sm font-medium">How conditions combine</Label>
+                  <Select
+                    value={combineMode}
+                    onValueChange={(v) => setCombineMode(v as 'AND' | 'OR')}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="AND">All must match (AND)</SelectItem>
+                      <SelectItem value="OR">Any one matches (OR)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    AND requires every row to match. OR matches when any row matches (sent as a single OR group to the API).
+                  </p>
+                </div>
+              </div>
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold">Configuration Rules</h3>
                 <Button
@@ -412,57 +699,69 @@ export function RoutingEditContent() {
                         <Label className="text-sm font-medium">
                           Category <span className="text-red-500">*</span>
                         </Label>
-                        <Select
-                          onValueChange={(value) =>
-                            setValue(`config.${index}.category`, value)
-                          }
-                          value={watch(`config.${index}.category`)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {CONFIG_CATEGORIES.map((category) => (
-                              <SelectItem key={category.value} value={category.value}>
-                                {category.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Controller
+                          name={`config.${index}.category`}
+                          control={control}
+                          render={({ field }) => (
+                            <Select
+                              value={field.value || 'amount'}
+                              onValueChange={(value) => handleConfigCategoryChange(index, value)}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {ROUTE_CONDITION_CATEGORIES.map((cat) => (
+                                  <SelectItem key={cat.value} value={cat.value}>
+                                    {cat.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
                       </div>
 
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">
                           Operator <span className="text-red-500">*</span>
                         </Label>
-                        <Select
-                          onValueChange={(value) =>
-                            setValue(`config.${index}.operator`, value as any)
-                          }
-                          value={watch(`config.${index}.operator`)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select operator" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {OPERATORS.map((operator) => (
-                              <SelectItem key={operator.value} value={operator.value}>
-                                {operator.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Controller
+                          name={`config.${index}.operator`}
+                          control={control}
+                          render={({ field }) => {
+                            const category = watch(`config.${index}.category`) || 'amount';
+                            const operators = CONDITION_OPERATOR_MAP[category] || [];
+                            const validOperator = operators.some((o) => o.value === field.value)
+                              ? field.value
+                              : operators[0]?.value || '==';
+                            return (
+                              <Select
+                                key={`operator-${index}-${category}`}
+                                value={validOperator}
+                                onValueChange={(value) => handleConfigOperatorChange(index, value)}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select operator" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {operators.map((op) => (
+                                    <SelectItem key={op.value} value={op.value}>
+                                      {op.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            );
+                          }}
+                        />
                       </div>
 
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">
                           Value <span className="text-red-500">*</span>
                         </Label>
-                        <Input
-                          {...register(`config.${index}.value`)}
-                          placeholder="Enter value"
-                          className="w-full"
-                        />
+                        {renderConfigValueInput(index)}
                       </div>
                     </div>
 

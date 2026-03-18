@@ -13,6 +13,7 @@ export interface RouteRule {
   name: string;
   view_route: string;
   connector_id: string | null;
+  connectorId?: string | null;
   status: boolean;
   is_cascade: boolean;
   priority: number;
@@ -25,6 +26,8 @@ export interface RouteRule {
   merchantConnector?: {
     id: string;
     name: string;
+    customName?: string | null;
+    custom_name?: string | null;
   };
   createdAt?: string;
   updatedAt?: string;
@@ -277,12 +280,16 @@ export async function updateUserRoutingPriority(
   userProfileId?: number
 ): Promise<ApiResponse<{ success: boolean; message: string }>> {
   try {
-    const data = await http.put(`${getBaseUrl(userId)}/priority`, {
-      body: {
-        route_priority_list: routePriorityList,
-        user_profile_id: userProfileId,
-      },
-    }) as { success: boolean; message: string };
+    const payload: Record<string, unknown> = {
+      route_priority_list: routePriorityList.map(({ id, priority }) => ({
+        id: typeof id === 'string' ? parseInt(id, 10) : id,
+        priority,
+      })),
+    };
+    if (userProfileId !== undefined) {
+      payload.user_profile_id = userProfileId;
+    }
+    const data = await http.put(`${getBaseUrl(userId)}/priority`, payload) as { success: boolean; message: string };
     return {
       status: 200,
       data,

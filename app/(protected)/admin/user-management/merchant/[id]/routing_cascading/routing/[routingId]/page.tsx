@@ -21,6 +21,7 @@ import {
   type RouteRule,
 } from '@/lib/services/admin/routing';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import { formatConnectorLabel } from '@/lib/utils/connector-display';
 
 type NormalizedRoute = {
   name: string;
@@ -56,7 +57,16 @@ function normalizeRoute(route?: RouteRule | null): NormalizedRoute | null {
     isSuccessTransaction:
       route.is_success_transaction ?? (route as any).isSuccessTransaction,
     config: Array.isArray(route.config) ? route.config : [],
-    connectorName: route.merchantConnector?.name,
+    connectorName: route.merchantConnector
+      ? formatConnectorLabel({
+          id: route.merchantConnector.id,
+          name: route.merchantConnector.name,
+          customName:
+            route.merchantConnector.customName ??
+            (route as any).merchantConnector?.custom_name,
+          custom_name: (route as any).merchantConnector?.custom_name,
+        })
+      : undefined,
     connectorDescription: (route as any).merchantConnector?.description,
     currencyCode: (route as any).merchantConnector?.currencyCode,
   };
