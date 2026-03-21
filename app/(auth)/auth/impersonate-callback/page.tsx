@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { applyAuthResponse, type AuthResponse } from '@/lib/services/auth';
 import { fetchAndStorePermissions } from '@/lib/utils/auth-helpers';
-import { getRedirectPathByRole } from '@/lib/utils/menu-utils';
 import { LoaderCircle, AlertCircle } from 'lucide-react';
 
 const IMPERSONATE_READY = 'impersonate-ready';
@@ -27,6 +26,8 @@ export default function ImpersonateCallbackPage() {
 
       setStatus('applying');
       try {
+        // Ensure this popup uses isolated/tab-scoped auth persistence.
+        sessionStorage.setItem('impersonation_window', '1');
         const ok = await applyAuthResponse(payload as AuthResponse);
         if (!ok) {
           setStatus('error');
@@ -35,8 +36,7 @@ export default function ImpersonateCallbackPage() {
         }
         await fetchAndStorePermissions();
         setStatus('done');
-        const path = getRedirectPathByRole();
-        window.location.href = path || '/dashboard';
+        window.location.href = '/dashboard';
       } catch (err) {
         setStatus('error');
         setErrorMessage(err instanceof Error ? err.message : 'Failed to sign in as user.');

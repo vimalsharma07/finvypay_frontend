@@ -10,6 +10,16 @@ const AUTH_KEYS = {
   USER_PROFILE: 'user_profile',
 } as const;
 
+function isImpersonationWindow(): boolean {
+  if (typeof window === 'undefined') return false;
+  return sessionStorage.getItem('impersonation_window') === '1';
+}
+
+function getUserDataStorage(): Storage {
+  if (typeof window === 'undefined') return localStorage;
+  return isImpersonationWindow() ? sessionStorage : localStorage;
+}
+
 /**
  * Store authentication tokens and user data
  * Tokens are stored in sessionStorage for security (cleared on tab close)
@@ -40,9 +50,11 @@ export function storeAuthData(data: {
       sessionStorage.setItem(AUTH_KEYS.TOKEN_EXPIRY, data.tokenExpiry);
     }
 
-    // Store user data in localStorage (persists across page reloads)
+    // Store user data in window-scoped storage:
+    // normal tabs -> localStorage, impersonation popup -> sessionStorage.
     if (data.userData) {
-      localStorage.setItem(AUTH_KEYS.USER, JSON.stringify(data.userData));
+      const userStorage = getUserDataStorage();
+      userStorage.setItem(AUTH_KEYS.USER, JSON.stringify(data.userData));
       
       // Store user profile (without sensitive data)
       const userProfile = {
@@ -58,7 +70,7 @@ export function storeAuthData(data: {
         createdAt: data.userData.createdAt,
         updatedAt: data.userData.updatedAt,
       };
-      localStorage.setItem(AUTH_KEYS.USER_PROFILE, JSON.stringify(userProfile));
+      userStorage.setItem(AUTH_KEYS.USER_PROFILE, JSON.stringify(userProfile));
     }
   } catch (error) {
     console.error('Failed to store auth data:', error);
@@ -121,9 +133,9 @@ export function getUser(): any | null {
       }
     }
     
-    // Fallback to localStorage (for backward compatibility)
-    // Note: This should match where storeAuthData stores the user (line 45)
-    const user = localStorage.getItem(AUTH_KEYS.USER);
+    // Fallback to window-scoped storage.
+    const userStorage = getUserDataStorage();
+    const user = userStorage.getItem(AUTH_KEYS.USER);
     return user ? JSON.parse(user) : null;
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
@@ -139,7 +151,8 @@ export function getUser(): any | null {
 export function getUserProfile(): any | null {
   if (typeof window === 'undefined') return null;
   try {
-    const profile = localStorage.getItem(AUTH_KEYS.USER_PROFILE);
+    const userStorage = getUserDataStorage();
+    const profile = userStorage.getItem(AUTH_KEYS.USER_PROFILE);
     return profile ? JSON.parse(profile) : null;
   } catch {
     return null;
@@ -182,9 +195,10 @@ export function clearAuthData(): void {
     sessionStorage.removeItem(AUTH_KEYS.SESSION_ID);
     sessionStorage.removeItem(AUTH_KEYS.TOKEN_EXPIRY);
     
-    // Clear user data from localStorage
-    localStorage.removeItem(AUTH_KEYS.USER);
-    localStorage.removeItem(AUTH_KEYS.USER_PROFILE);
+    // Clear user data from current window's storage context only.
+    const userStorage = getUserDataStorage();
+    userStorage.removeItem(AUTH_KEYS.USER);
+    userStorage.removeItem(AUTH_KEYS.USER_PROFILE);
   } catch (error) {
     console.error('Failed to clear auth data:', error);
   }

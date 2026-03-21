@@ -7,7 +7,7 @@
  */
 
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 // Permission type based on API response
 export interface Permission {
@@ -236,6 +236,13 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage', // localStorage key
+      storage: createJSONStorage(() => {
+        if (typeof window === 'undefined') return localStorage;
+        const isImpersonationWindow =
+          window.sessionStorage.getItem('impersonation_window') === '1' ||
+          window.location.pathname.startsWith('/auth/impersonate-callback');
+        return isImpersonationWindow ? sessionStorage : localStorage;
+      }),
       // Only persist user and permissions, not loading states
       partialize: (state) => ({
         user: state.user,

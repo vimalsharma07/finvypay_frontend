@@ -903,20 +903,23 @@ export async function getProfile(): Promise<ApiResponse<any>> {
     // Handle nested response structure: {success: true, data: {...}} or direct user object
     const userData = response?.data || response;
     
-    // Update localStorage and Zustand store with the profile data
+    // Update storage and Zustand store with the profile data
     if (typeof window !== 'undefined' && userData) {
       try {
-        const storedUser = localStorage.getItem('user');
+        const isImpersonationWindow =
+          window.sessionStorage.getItem('impersonation_window') === '1';
+        const storage = isImpersonationWindow ? window.sessionStorage : window.localStorage;
+        const storedUser = storage.getItem('user');
         let updatedUser;
         if (storedUser) {
           const existingUserData = JSON.parse(storedUser);
           // Merge the profile data with existing user data
           updatedUser = { ...existingUserData, ...userData };
-          localStorage.setItem('user', JSON.stringify(updatedUser));
+          storage.setItem('user', JSON.stringify(updatedUser));
         } else {
           // If no user data exists, store the profile directly
           updatedUser = userData;
-          localStorage.setItem('user', JSON.stringify(userData));
+          storage.setItem('user', JSON.stringify(userData));
         }
         
         // Also update Zustand store if available
