@@ -29,11 +29,27 @@ function dataUrlToFile(dataUrl: string, filename: string): File {
   return new File([u8arr], filename, { type: mime });
 }
 
+const AFFILIATE_NAME_PLACEHOLDER = '[Affiliate Name / Company Name]';
+/** Matches [Today's Date] – straight (') or curly (') apostrophe, optional spaces. */
+const TODAYS_DATE_REGEX = /\[Today\s*['\u2019\u2018]\s*s\s+Date\]/gi;
+
+function getTodayUtcFormatted(): string {
+  const now = new Date();
+  return now.toLocaleDateString('en-US', {
+    timeZone: 'UTC',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
 interface Step2AgreementProps {
+  /** Name from step 1; replaces [Affiliate Name / Company Name] in agreement text. */
+  affiliateName?: string;
   onNext: () => void;
 }
 
-export function Step2Agreement({ onNext }: Step2AgreementProps) {
+export function Step2Agreement({ affiliateName, onNext }: Step2AgreementProps) {
   const [agreement, setAgreement] = useState<{
     id: string;
     name: string;
@@ -120,10 +136,15 @@ export function Step2Agreement({ onNext }: Step2AgreementProps) {
     onNext();
   };
 
-  const agreementHtml = useMemo(
-    () => (agreement?.desc ?? ''),
-    [agreement]
-  );
+  const agreementHtml = useMemo(() => {
+    const raw = agreement?.desc ?? '';
+    const name = (affiliateName || 'Affiliate').trim();
+    const todayUtc = getTodayUtcFormatted();
+    const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return raw
+      .replace(new RegExp(escapeRegex(AFFILIATE_NAME_PLACEHOLDER), 'g'), name)
+      .replace(TODAYS_DATE_REGEX, todayUtc);
+  }, [agreement?.desc, affiliateName]);
 
   if (loading) {
     return (
