@@ -38,7 +38,7 @@ export interface UserRouteRule {
   config: Array<{
     category: string;
     operator: string;
-    value: string | number;
+    value: string | number | string[] | [number, number] | [string, string];
   }>;
   splitEnable: boolean;
   splitConfig?: any;
@@ -145,7 +145,7 @@ export async function createUserMerchantRouting(
     config: Array<{
       category: string;
       operator: string;
-      value: string | number;
+      value: string | number | string[] | [number, number] | [string, string];
     }>;
     splitEnable: boolean;
   }
@@ -205,7 +205,7 @@ export async function updateUserMerchantRouting(
     config: Array<{
       category: string;
       operator: string;
-      value: string | number;
+      value: string | number | string[] | [number, number] | [string, string];
     }>;
     splitEnable: boolean;
   }

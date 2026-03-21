@@ -8,6 +8,7 @@ import { adminRoutes } from '../routes/routes';
 import { getAcquirers } from '../services/admin/acquirers';
 import { getAcquirerAccounts } from '../services/admin/acquirer-accounts';
 import { getCurrencies } from '../services/admin/currency';
+import { getCountries } from '../services/admin/countries';
 import { handleApiResponse } from '../utils/api-response-handler';
 import type { Option } from '../types/common-types';
 
@@ -121,6 +122,40 @@ export async function fetchListOfCurrencies(token?: string): Promise<Option[]> {
     return currencies;
   } catch (error) {
     console.error('Error fetching currency options:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch country options for dropdowns (ISO 2-letter code as value)
+ */
+export async function fetchListOfCountries(token?: string): Promise<Option[]> {
+  try {
+    const response = await getCountries({
+      page: 1,
+      limit: 1000,
+      sortBy: 'countryName',
+      sortOrder: 'ASC',
+    });
+    let countries: Option[] = [];
+
+    handleApiResponse(response, {
+      onSuccess: (data) => {
+        // CountryListResponse: { success, data: { data: Country[], meta } }
+        const raw = (data as any)?.data?.data ?? (data as any)?.data ?? [];
+        const list = Array.isArray(raw) ? raw : [];
+        countries = list
+          .map((c: { isoTwo?: string; countryName?: string }) => ({
+            value: c.isoTwo || '',
+            label: c.countryName || c.isoTwo || '',
+          }))
+          .filter((o: Option) => o.value);
+      },
+    });
+
+    return countries;
+  } catch (error) {
+    console.error('Error fetching country options:', error);
     return [];
   }
 }

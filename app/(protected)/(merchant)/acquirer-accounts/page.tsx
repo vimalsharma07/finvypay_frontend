@@ -1,8 +1,7 @@
 'use client';
 
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Cpu, DollarSign } from 'lucide-react';
+import { Cpu, DollarSign, Pencil } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
   Toolbar,
@@ -19,6 +18,7 @@ import { toast } from 'sonner';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
   getUserAcquirerAccounts,
+  updateAcquirerAccountCustomName,
   UserAcquirerAccount,
   UserAcquirerAccountListResponse,
   UserAcquirerAccountListMeta,
@@ -38,6 +38,16 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogBody,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 function RatesDialog({
   open,
@@ -83,8 +93,86 @@ function RatesDialog({
   );
 }
 
+function RenameDialog({
+  open,
+  onOpenChange,
+  account,
+  onSuccess,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  account: UserAcquirerAccount | null;
+  onSuccess: () => void;
+}) {
+  const [customName, setCustomName] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (account) {
+      setCustomName(account.customName ?? '');
+    }
+  }, [account, open]);
+
+  const handleSave = async () => {
+    if (!account) return;
+    setSaving(true);
+    try {
+      const response = await updateAcquirerAccountCustomName(
+        account.id,
+        customName.trim() || null,
+      );
+      handleApiResponse(response, {
+        onSuccess: () => {
+          toast.success('Name updated successfully');
+          onOpenChange(false);
+          onSuccess();
+        },
+        onError: (msg) => toast.error(msg || 'Failed to update name'),
+      });
+    } catch {
+      toast.error('An unexpected error occurred');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Rename Acquirer Account</DialogTitle>
+        </DialogHeader>
+        <DialogBody>
+          <p className="text-sm text-muted-foreground mb-3">
+            Set a name to easily identify this connector (e.g. &quot;2D MC&quot;, &quot;Trusted Visa&quot;).
+          </p>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Name</label>
+            <Input
+              value={customName}
+              onChange={(e) => setCustomName(e.target.value)}
+              placeholder={account?.name || 'e.g. 2D MC, Trusted Visa'}
+              maxLength={191}
+            />
+            <p className="text-xs text-muted-foreground">
+              System name: {account?.name || '-'}
+            </p>
+          </div>
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? 'Saving...' : 'Save'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function UserAcquirerAccountsPage() {
-  const router = useRouter();
   const { user } = useAuth();
 
   const [isClient, setIsClient] = useState(false);
@@ -94,6 +182,7 @@ export default function UserAcquirerAccountsPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [ratesDialogOpen, setRatesDialogOpen] = useState(false);
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<UserAcquirerAccount | null>(null);
   const [profileId, setProfileId] = useState<string | null>(null);
   const [profilesLoading, setProfilesLoading] = useState(true);
@@ -198,7 +287,8 @@ export default function UserAcquirerAccountsPage() {
 
   const headers: TableHeader<UserAcquirerAccount>[] = useMemo(
     () => [
-      { key: 'name', label: 'Name', sortable: false },
+      { key: 'customName', label: 'Name', sortable: false },
+      { key: 'name', label: 'Connector', sortable: false },
       { key: 'terminalId', label: 'Terminal ID', sortable: false },
       { key: 'industryName', label: 'Industry', sortable: false },
       { key: 'currency', label: 'Currency', sortable: false },
@@ -210,8 +300,14 @@ export default function UserAcquirerAccountsPage() {
 
   const renderCell = (item: UserAcquirerAccount, key: keyof UserAcquirerAccount | string) => {
     switch (key) {
+      case 'customName':
+        return (
+          <div className="font-medium">
+            {item.customName?.trim() || <span className="text-muted-foreground">—</span>}
+          </div>
+        );
       case 'name':
-        return <div className="font-medium">{item.name}</div>;
+        return <div className="text-sm">{item.name}</div>;
       case 'terminalId':
         return <div className="text-sm">{item.terminalId || '-'}</div>;
       case 'industryName':
@@ -236,7 +332,19 @@ export default function UserAcquirerAccountsPage() {
     }
   };
 
+  const refreshAccounts = () => {
+    if (profileId) fetchAccounts(page, limit, profileId);
+  };
+
   const actions: TableAction<UserAcquirerAccount>[] = [
+    {
+      label: 'Rename',
+      icon: Pencil,
+      onClick: (row: UserAcquirerAccount) => {
+        setSelectedAccount(row);
+        setRenameDialogOpen(true);
+      },
+    },
     {
       label: 'View Rates',
       icon: DollarSign,
@@ -270,7 +378,7 @@ export default function UserAcquirerAccountsPage() {
           actions={actions}
           enableCheckbox={false}
           searchPlaceholder="Search acquirer accounts..."
-          searchKeys={['name', 'terminalId']}
+          searchKeys={['customName', 'name', 'terminalId']}
           getRowId={(row: UserAcquirerAccount) => String(row.id)}
           pagination={{
             pageSize: limit,
@@ -291,6 +399,12 @@ export default function UserAcquirerAccountsPage() {
         open={ratesDialogOpen}
         onOpenChange={setRatesDialogOpen}
         account={selectedAccount}
+      />
+      <RenameDialog
+        open={renameDialogOpen}
+        onOpenChange={setRenameDialogOpen}
+        account={selectedAccount}
+        onSuccess={refreshAccounts}
       />
     </Fragment>
   );

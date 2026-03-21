@@ -22,7 +22,9 @@ export default function CreateAcquirerAccountPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const userId = params.id as string;
-  const returnUrl = `/admin/user-management/merchant/${userId}/acquirer-accounts`;
+  const returnUrl =
+    searchParams?.get('returnUrl') ||
+    `/admin/user-management/merchant/${userId}/acquirer-accounts`;
   const userProfileId = searchParams?.get('userProfileId') || '';
 
   const handleSubmit = async (data: any) => {

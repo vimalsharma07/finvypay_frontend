@@ -38,21 +38,22 @@ import {
 } from '@/lib/services/admin/connectors';
 import { createUserRouting } from '@/lib/services/admin/routing';
 import type { Option } from '@/lib/types/common-types';
-import { fetchListOfCurrencies } from '@/lib/fetch/fetch-options';
+import { fetchListOfCurrencies, fetchListOfCountries } from '@/lib/fetch/fetch-options';
 import {
   ROUTE_CONDITION_CATEGORIES,
   CONDITION_OPERATOR_MAP,
   CARD_TYPE_OPTIONS,
+  CARD_BRAND_OPTIONS,
   CARD_WL_FT_OPTIONS,
   PAYMENT_METHOD_OPTIONS,
 } from '@/lib/constants/routing';
-
-type ConditionInputType =
-  | 'input'
-  | 'search-select'
-  | 'multi-select'
-  | 'multi-input'
-  | 'select';
+import type { ConditionOperatorInputType } from '@/lib/constants/routing';
+import { formatConnectorLabel } from '@/lib/utils/connector-display';
+import { MultiSelect } from '@/components/common/MultiSelect';
+import {
+  serializeRoutingConfig,
+  type RoutingLeafCondition,
+} from '@/lib/utils/routing-config';
 
 type Condition = {
   category: string;
@@ -84,7 +85,9 @@ export default function RoutingCreatePage() {
   ]);
 
   const [currencyOptions, setCurrencyOptions] = useState<Option[]>([]);
+  const [countryOptions, setCountryOptions] = useState<Option[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [combineMode, setCombineMode] = useState<'AND' | 'OR'>('AND');
 
   const backUrl = useMemo(
     () =>
@@ -149,6 +152,19 @@ export default function RoutingCreatePage() {
     loadCurrencies();
   }, []);
 
+  // Fetch countries for condition select
+  useEffect(() => {
+    const loadCountries = async () => {
+      try {
+        const countries = await fetchListOfCountries();
+        setCountryOptions(countries);
+      } catch (error) {
+        // swallow; not critical
+      }
+    };
+    loadCountries();
+  }, []);
+
   // Fetch connectors when profile changes
   useEffect(() => {
     const loadConnectors = async () => {
@@ -167,7 +183,7 @@ export default function RoutingCreatePage() {
             setConnectors(list);
             const options = list.map((conn: MerchantAcquirerAccount) => ({
               value: conn.id.toString(),
-              label: conn.name || `Connector ${conn.id}`,
+              label: formatConnectorLabel(conn),
             }));
             setConnectorOptions(options);
             setSelectedConnectorId(options[0]?.value || '');
@@ -186,6 +202,11 @@ export default function RoutingCreatePage() {
     loadConnectors();
   }, [userId, selectedProfileId]);
 
+  const getInputType = (category: string, operator: string): ConditionOperatorInputType => {
+    const operators = CONDITION_OPERATOR_MAP[category] || [];
+    return (operators.find((op) => op.value === operator)?.inputType || 'input') as ConditionOperatorInputType;
+  };
+
   const handleConditionChange = (
     index: number,
     field: keyof Condition,
@@ -193,15 +214,24 @@ export default function RoutingCreatePage() {
   ) => {
     setConditions((prev) => {
       const updated = [...prev];
-      updated[index] = { ...updated[index], [field]: value };
-
-      // Reset operator/value when category changes
       if (field === 'category') {
+        updated[index] = { ...updated[index], category: value };
         const operators = CONDITION_OPERATOR_MAP[value] || [];
         updated[index].operator = operators[0]?.value || '';
         updated[index].value = '';
+      } else if (field === 'operator') {
+        const prevOp = updated[index].operator;
+        updated[index] = { ...updated[index], operator: value };
+        const nextType = getInputType(updated[index].category, value);
+        const prevType = getInputType(updated[index].category, prevOp);
+        if (nextType === 'range') {
+          updated[index].value = '0,0';
+        } else if (prevType === 'range') {
+          updated[index].value = '';
+        }
+      } else {
+        updated[index] = { ...updated[index], [field]: value };
       }
-
       return updated;
     });
   };
@@ -214,17 +244,39 @@ export default function RoutingCreatePage() {
     setConditions((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const getInputType = (category: string, operator: string): ConditionInputType => {
-    const operators = CONDITION_OPERATOR_MAP[category] || [];
-    return operators.find((op) => op.value === operator)?.inputType || 'input';
-  };
-
   const renderValueInput = (condition: Condition, idx: number) => {
     const inputType = getInputType(condition.category, condition.operator);
 
+    if (inputType === 'range') {
+      const parts = condition.value.split(',').map((x) => x.trim());
+      const a = parts[0] ?? '';
+      const b = parts[1] ?? '';
+      return (
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
+          <Input
+            type="number"
+            placeholder="Min"
+            value={a}
+            onChange={(e) => handleConditionChange(idx, 'value', `${e.target.value},${b}`)}
+          />
+          <span className="text-muted-foreground text-sm">to</span>
+          <Input
+            type="number"
+            placeholder="Max"
+            value={b}
+            onChange={(e) => handleConditionChange(idx, 'value', `${a},${e.target.value}`)}
+          />
+        </div>
+      );
+    }
+
     if (inputType === 'search-select') {
       const options =
-        condition.category === 'currency' ? currencyOptions : [];
+        condition.category === 'currency'
+          ? currencyOptions
+          : condition.category === 'country' || condition.category === 'bin_country'
+            ? countryOptions
+            : [];
 
       if (!options || options.length === 0) {
         return (
@@ -250,13 +302,19 @@ export default function RoutingCreatePage() {
       const options =
         condition.category === 'card_type'
           ? CARD_TYPE_OPTIONS
+          : condition.category === 'card_brand'
+            ? CARD_BRAND_OPTIONS
           : condition.category === 'card_wl_ft'
             ? CARD_WL_FT_OPTIONS
             : [];
 
+      const validValue = options.some((o) => String(o.value) === condition.value)
+        ? condition.value
+        : '';
+
       return (
         <Select
-          value={condition.value}
+          value={validValue}
           onValueChange={(val) => handleConditionChange(idx, 'value', val)}
         >
           <SelectTrigger>
@@ -273,12 +331,53 @@ export default function RoutingCreatePage() {
       );
     }
 
-    if (inputType === 'multi-select' || inputType === 'multi-input') {
+    if (inputType === 'multi-input') {
       return (
         <Textarea
           placeholder="Comma separated values"
           value={condition.value}
           onChange={(e) => handleConditionChange(idx, 'value', e.target.value)}
+        />
+      );
+    }
+
+    if (inputType === 'multi-select') {
+      const options =
+        condition.category === 'currency'
+          ? currencyOptions
+          : condition.category === 'card_type'
+            ? CARD_TYPE_OPTIONS
+          : condition.category === 'card_brand'
+            ? CARD_BRAND_OPTIONS
+            : condition.category === 'country' || condition.category === 'bin_country'
+              ? countryOptions
+              : [];
+
+      if (!options || options.length === 0) {
+        return (
+          <Textarea
+            placeholder="Comma separated values"
+            value={condition.value}
+            onChange={(e) => handleConditionChange(idx, 'value', e.target.value)}
+          />
+        );
+      }
+
+      const selectedValues = condition.value
+        ? String(condition.value)
+            .split(',')
+            .map((v) => v.trim())
+            .filter(Boolean)
+        : [];
+
+      return (
+        <MultiSelect
+          options={options}
+          selected={selectedValues}
+          onChange={(selected) =>
+            handleConditionChange(idx, 'value', selected.join(','))
+          }
+          placeholder="Select one or more values"
         />
       );
     }
@@ -294,7 +393,13 @@ export default function RoutingCreatePage() {
 
   const normalizeConditionValue = (
     condition: Condition,
-  ): string | number | string[] => {
+  ): string | number | string[] | [number, number] => {
+    if (condition.operator === 'between' || condition.operator === 'not_between') {
+      const parts = condition.value.split(',').map((v) => v.trim()).filter(Boolean);
+      if (parts.length === 2) {
+        return [Number(parts[0]), Number(parts[1])];
+      }
+    }
     const inputType = getInputType(condition.category, condition.operator);
     if (inputType === 'multi-select' || inputType === 'multi-input') {
       return condition.value
@@ -328,21 +433,36 @@ export default function RoutingCreatePage() {
       toast.error('Connector is required');
       return;
     }
-    if (conditions.some((c) => !c.category || !c.operator || !`${c.value}`.trim())) {
+    if (
+      conditions.some((c) => {
+        if (!c.category || !c.operator) return true;
+        if (getInputType(c.category, c.operator) === 'range') {
+          const parts = c.value.split(',').map((x) => x.trim()).filter(Boolean);
+          return (
+            parts.length !== 2 ||
+            parts.some((p) => p === '' || Number.isNaN(Number(p)))
+          );
+        }
+        return !`${c.value}`.trim();
+      })
+    ) {
       toast.error('All conditions must be filled');
       return;
     }
+
+    const leaves: RoutingLeafCondition[] = conditions.map((c) => ({
+      category: c.category,
+      operator: c.operator,
+      value: normalizeConditionValue(c),
+    }));
+    const config = serializeRoutingConfig(leaves, combineMode);
 
     const payload = {
       name,
       routingFor,
       merchantProfileId: Number(selectedProfileId),
       merchantAcquirerAccountId: Number(selectedConnectorId),
-      config: conditions.map((c) => ({
-        category: c.category,
-        operator: c.operator,
-        value: normalizeConditionValue(c),
-      })),
+      config,
       splitEnable,
     };
 
@@ -484,6 +604,26 @@ export default function RoutingCreatePage() {
               </Button>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="rounded-lg border p-4 bg-muted/30 max-w-md">
+                <div className="space-y-2">
+                  <Label>How conditions combine</Label>
+                  <Select
+                    value={combineMode}
+                    onValueChange={(v) => setCombineMode(v as 'AND' | 'OR')}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="AND">All must match (AND)</SelectItem>
+                      <SelectItem value="OR">Any one matches (OR)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    OR sends a single OR group to the API so any listed row can match.
+                  </p>
+                </div>
+              </div>
               {conditions.map((condition, idx) => {
                 const operators = CONDITION_OPERATOR_MAP[condition.category] || [];
                 return (

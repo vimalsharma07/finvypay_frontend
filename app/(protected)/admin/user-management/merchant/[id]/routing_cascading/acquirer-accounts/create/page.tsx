@@ -37,18 +37,18 @@ export default function CreateAcquirerAccountPage() {
       handleApiResponse(response, {
         onSuccess: (data) => {
           if (data && data.message) {
-            toast.success(data.message || 'Payment channel created successfully');
+            toast.success(data.message || 'Acquirer account created successfully');
           } else {
-            toast.success('Payment channel created successfully');
+            toast.success('Acquirer account created successfully');
           }
           router.push(returnUrl);
         },
         onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to create payment channel');
+          toast.error(errorMessage || 'Failed to create acquirer account');
         },
       });
     } catch (error) {
-      console.error('Create payment channel error:', error);
+      console.error('Create acquirer account error:', error);
       toast.error('An unexpected error occurred');
     }
   };
@@ -58,8 +58,8 @@ export default function CreateAcquirerAccountPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Add Payment Channel"
-            description="Create a new payment channel gateway connector with configuration settings and credentials for this merchant"
+            title="Add Acquirer Account"
+            description="Create a new payment gateway acquirer account with connection settings and credentials for this merchant user"
             icon={Cpu}
           />
           <ToolbarActions>

@@ -10,7 +10,7 @@ import {
   ToolbarActions,
 } from '@/layouts/main/components/toolbar';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Route, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Route, BarChart3, Landmark } from 'lucide-react';
 
 interface RoutingCascadingLayoutProps {
   children: ReactNode;
@@ -24,8 +24,16 @@ export default function RoutingCascadingLayout({
   const userId = params.id as string;
 
   const basePath = `/admin/user-management/merchant/${userId}/routing_cascading`;
+  const isAcquirerAccounts = pathname?.includes('/routing_cascading/acquirer-accounts');
   const isCascading = pathname?.includes('/routing_cascading/cascading');
-  const isRouting = pathname?.includes('/routing_cascading/routing') && !isCascading;
+  const isRouting = pathname?.includes('/routing_cascading/routing') && !pathname?.includes('/cascading');
+
+  const tabClass = (active: boolean) =>
+    `flex items-center gap-1 px-4 py-2 border-b-2 transition-colors ${
+      active
+        ? 'border-primary text-primary font-medium'
+        : 'border-transparent text-muted-foreground hover:text-foreground'
+    }`;
 
   return (
     <>
@@ -33,7 +41,7 @@ export default function RoutingCascadingLayout({
         <Toolbar>
           <ToolbarHeading
             title="Routing & Cascading"
-            description="Manage payment routing rules and cascading configurations to optimize transaction processing across multiple acquirers"
+            description="Manage acquirer accounts, payment routing rules, and cascading configurations to optimize transaction processing"
             icon={Route}
           />
           <ToolbarActions>
@@ -47,26 +55,16 @@ export default function RoutingCascadingLayout({
         </Toolbar>
       </Container>
       <Container>
-        <div className="flex gap-4 border-b border-border">
-          <Link
-            href={`${basePath}/routing`}
-            className={`flex items-center gap-1 px-4 py-2 border-b-2 transition-colors ${
-              isRouting
-                ? 'border-primary text-primary font-medium'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
-            }`}
-          >
+        <div className="flex flex-wrap gap-2 border-b border-border">
+          <Link href={`${basePath}/acquirer-accounts`} className={tabClass(isAcquirerAccounts)}>
+            <Landmark className="h-4 w-4" />
+            Acquirer Accounts
+          </Link>
+          <Link href={`${basePath}/routing`} className={tabClass(isRouting)}>
             <Route className="h-4 w-4" />
             Routing
           </Link>
-          <Link
-            href={`${basePath}/cascading`}
-            className={`flex items-center gap-1 px-4 py-2 border-b-2 transition-colors ${
-              isCascading
-                ? 'border-primary text-primary font-medium'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
-            }`}
-          >
+          <Link href={`${basePath}/cascading`} className={tabClass(isCascading)}>
             <BarChart3 className="h-4 w-4" />
             Cascading
           </Link>

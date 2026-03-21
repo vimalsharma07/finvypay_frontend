@@ -23,8 +23,18 @@ export function MultiSelect({
   placeholder = 'Select...',
 }: MultiSelectProps) {
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
 
   const selectedSet = useMemo(() => new Set(selected ?? []), [selected]);
+
+  const filteredOptions = useMemo(() => {
+    if (!search.trim()) return options;
+    const q = search.toLowerCase();
+    return options.filter(
+      (o) =>
+        String(o.label).toLowerCase().includes(q) || String(o.value).toLowerCase().includes(q)
+    );
+  }, [options, search]);
 
   const toggle = (value: string) => {
     const next = new Set(selectedSet);
@@ -41,7 +51,13 @@ export function MultiSelect({
     .filter(Boolean);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (!o) setSearch('');
+      }}
+    >
       <PopoverTrigger asChild>
         <Button variant="outline" className="w-full justify-between text-xs md:text-sm">
           <div className="flex flex-wrap gap-1 items-center">
@@ -55,22 +71,27 @@ export function MultiSelect({
           <span className="text-muted-foreground text-xs">▼</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0 w-64">
-        <Command>
-          <CommandInput placeholder="Search..." />
+      <PopoverContent className="p-0 w-64" onOpenAutoFocus={(e) => e.preventDefault()}>
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder="Search..."
+            value={search}
+            onValueChange={setSearch}
+          />
           <CommandList>
             <CommandEmpty>No option found.</CommandEmpty>
             <CommandGroup>
               <ScrollArea className="max-h-56">
-                {options.map((option) => (
+                {filteredOptions.map((option) => (
                   <CommandItem
                     key={String(option.value)}
-                    value={String(option.label)}
+                    value={String(option.value)}
+                    className="cursor-pointer data-[disabled=true]:!pointer-events-auto data-[disabled=true]:!opacity-100"
                     onSelect={() => toggle(String(option.value))}
                   >
                     <Checkbox
                       checked={selectedSet.has(String(option.value))}
-                      className=""
+                      className="pointer-events-none"
                       aria-label={String(option.label)}
                     />
                     {option.label}

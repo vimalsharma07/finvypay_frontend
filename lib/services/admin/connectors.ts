@@ -15,6 +15,7 @@ export interface MerchantAcquirerAccount {
   acquirerId: number | null;
   acquirerAccountId: number | null;
   name: string;
+  customName?: string | null;
   terminalId: string | null;
   description: string | null;
   status: number; // 0 = rejected, 1 = approved, 2 = pending, 3 = rates assigned

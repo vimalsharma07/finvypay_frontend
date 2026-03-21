@@ -9,6 +9,8 @@ export interface MenuItem {
   heading?: string;
   children?: MenuConfig;
   disabled?: boolean;
+  /** When true, item is omitted from the sidebar (routes and code stay in place). */
+  hidden?: boolean;
   collapse?: boolean;
   collapseTitle?: string;
   expandTitle?: string;
