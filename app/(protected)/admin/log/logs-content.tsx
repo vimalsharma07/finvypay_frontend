@@ -108,6 +108,9 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
         startDate,
         endDate,
         ...(transactionId?.trim() ? { transaction_id: transactionId.trim() } : {}),
+        ...(logType === 'webhook_logs' || logType === 'txn_logs'
+          ? { payment_mode: 'production' }
+          : {}),
       });
       handleApiResponse(response, {
         onSuccess: (data) => {

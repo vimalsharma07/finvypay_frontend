@@ -59,7 +59,9 @@ export function getTransactionColumns(
   showDisabledActions: boolean = true, // Default to true for production
   onChargeback?: (transaction: Transaction) => void,
   onRefund?: (transaction: Transaction) => void,
-  onSuspicious?: (transaction: Transaction) => void
+  onSuspicious?: (transaction: Transaction) => void,
+  onResendWebhook?: (transaction: Transaction) => void,
+  resendingWebhookTransactionId?: string | null
 ): ColumnDef<Transaction>[] {
   return [
     {
@@ -339,6 +341,8 @@ export function getTransactionColumns(
             onChargeback={onChargeback}
             onRefund={onRefund}
             onSuspicious={onSuspicious}
+            onResendWebhook={onResendWebhook}
+            resendingWebhookTransactionId={resendingWebhookTransactionId}
             showDisabledActions={showDisabledActions}
           />
         ),
