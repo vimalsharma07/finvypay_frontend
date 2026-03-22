@@ -7,6 +7,7 @@
 
 import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
+import type { AdminReportQueryExtras } from '../../routes/admin/report-routes';
 import type { ApiResponse } from '../types';
 
 // Merchant Turnover Report types (for backward compatibility)
@@ -49,10 +50,11 @@ export interface GenericReportResponse {
 export async function getReport(
   type: string,
   startDate: string,
-  endDate: string
+  endDate: string,
+  extras?: AdminReportQueryExtras
 ): Promise<ApiResponse<GenericReportResponse>> {
   try {
-    const endpoint = adminRoutes.reports.reportByType(type, startDate, endDate);
+    const endpoint = adminRoutes.reports.reportByType(type, startDate, endDate, extras);
     const data = (await http.get(endpoint)) as GenericReportResponse;
 
     return {
