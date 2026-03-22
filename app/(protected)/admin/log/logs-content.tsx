@@ -45,6 +45,26 @@ import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 
+/** API log fields may be strings or structured objects (e.g. cron/job errors as `{ name, message, stack }`). */
+function stringifyLogField(value: unknown): string | null {
+  if (value == null || value === '') return null;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (typeof value === 'object') {
+    const o = value as Record<string, unknown>;
+    if (typeof o.message === 'string' && o.message.trim()) {
+      const name = typeof o.name === 'string' ? o.name : '';
+      return name ? `${name}: ${o.message}` : o.message;
+    }
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return String(value);
+    }
+  }
+  return String(value);
+}
+
 interface LogsContentProps {
   logType: LogType;
   logTypeLabel: string;
@@ -59,9 +79,11 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
-  // Advanced filter: ID (transaction_id) – used for provider_logs
+  // Advanced filter: ID (transaction_id) – provider, transaction, and webhook logs
   const [transactionIdFilter, setTransactionIdFilter] = useState('');
   const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
+  const supportsTransactionIdFilter =
+    logType === 'provider_logs' || logType === 'txn_logs' || logType === 'webhook_logs';
 
   // Format date for API (YYYY-MM-DD)
   const formatDateForAPI = (date: Date | undefined): string => {
@@ -114,12 +136,15 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
     }
   };
 
-  // Fetch logs - pass date range and transaction_id (for provider_logs) when set
+  // Fetch logs - pass date range and transaction_id when supported and set
   useEffect(() => {
     const hasDateFilter = dateRange?.from && dateRange?.to;
     const startDate = hasDateFilter ? formatDateForAPI(dateRange.from) : undefined;
     const endDate = hasDateFilter ? formatDateForAPI(dateRange.to) : undefined;
-    const txnId = (logType === 'provider_logs' || logType === 'txn_logs') && transactionIdFilter.trim() ? transactionIdFilter.trim() : undefined;
+    const txnId =
+      supportsTransactionIdFilter && transactionIdFilter.trim()
+        ? transactionIdFilter.trim()
+        : undefined;
     fetchLogs(page, limit, startDate, endDate, txnId);
   }, [page, limit, dateRange, logType, transactionIdFilter]);
 
@@ -172,7 +197,14 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
   };
 
   const getErrorMessage = (log: LogEntry): string | null => {
-    return log.errorMessage || log.error || null;
+    if (log.errorMessage != null) {
+      const s = stringifyLogField(log.errorMessage);
+      if (s) return s;
+    }
+    if (log.error != null) {
+      return stringifyLogField(log.error);
+    }
+    return null;
   };
 
   const getErrorContext = (log: LogEntry): Record<string, any> | null => {
@@ -239,7 +271,9 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
     }
   };
 
-  const getTypeBadge = (type: string) => {
+  const getTypeBadge = (type: unknown) => {
+    const label = stringifyLogField(type);
+    if (!label) return <span className="text-muted-foreground">—</span>;
     const typeColors: Record<string, string> = {
       API: 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
       WEBHOOK: 'bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300',
@@ -248,17 +282,20 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
       REFUND: 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
     };
     return (
-      <Badge variant="outline" className={typeColors[type] || 'bg-gray-50 text-gray-700 dark:bg-gray-950 dark:text-gray-300'}>
-        {type}
+      <Badge variant="outline" className={typeColors[label] || 'bg-gray-50 text-gray-700 dark:bg-gray-950 dark:text-gray-300'}>
+        <span className="truncate max-w-[200px] inline-block align-bottom" title={label}>
+          {label}
+        </span>
       </Badge>
     );
   };
 
   const getEventBadge = (event: string | null | undefined) => {
-    if (!event) return <span className="text-muted-foreground">—</span>;
+    const text = event == null ? null : stringifyLogField(event);
+    if (!text) return <span className="text-muted-foreground">—</span>;
     return (
-      <Badge variant="outline" className="bg-slate-50 text-slate-700 dark:bg-slate-950 dark:text-slate-300 font-mono text-xs inline-flex max-w-full min-w-0" title={event}>
-        <span className="truncate">{event}</span>
+      <Badge variant="outline" className="bg-slate-50 text-slate-700 dark:bg-slate-950 dark:text-slate-300 font-mono text-xs inline-flex max-w-full min-w-0" title={text}>
+        <span className="truncate">{text}</span>
       </Badge>
     );
   };
@@ -296,7 +333,10 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
           id: 'type',
           accessorKey: 'type',
           header: ({ column }) => <DataGridColumnHeader column={column} title="Type" />,
-          cell: ({ row }) => (row.original.type ? getTypeBadge(row.original.type) : <span className="text-muted-foreground">—</span>),
+          cell: ({ row }) =>
+            row.original.type != null && row.original.type !== ''
+              ? getTypeBadge(row.original.type)
+              : <span className="text-muted-foreground">—</span>,
           enableSorting: false,
           size: 140,
         });
@@ -472,7 +512,7 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
             {!loading && meta && <span>Showing {logs.length} of {meta.total} logs</span>}
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            {(logType === 'provider_logs' || logType === 'txn_logs') && (
+            {supportsTransactionIdFilter && (
               <Collapsible open={advancedFilterOpen} onOpenChange={setAdvancedFilterOpen}>
                 <CollapsibleTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-2">
@@ -597,7 +637,7 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
                     <p className="font-mono text-sm">{getOrderId(selectedLog)}</p>
                   </div>
                 )}
-                {selectedLog.type && (
+                {selectedLog.type != null && selectedLog.type !== '' && (
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Type</label>
                     <div className="mt-1">{getTypeBadge(selectedLog.type)}</div>
@@ -634,14 +674,10 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
                     </p>
                   </div>
                 )}
-                {selectedLog.event && (
+                {selectedLog.event != null && selectedLog.event !== '' && (
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Event</label>
-                    <div className="mt-1">
-                      <Badge variant="outline" className="bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300 font-mono text-xs">
-                        {selectedLog.event}
-                      </Badge>
-                    </div>
+                    <div className="mt-1">{getEventBadge(selectedLog.event)}</div>
                   </div>
                 )}
                 {/* Provider log fields */}
