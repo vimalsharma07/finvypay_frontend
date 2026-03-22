@@ -1,8 +1,8 @@
 'use client';
 
-import { use } from 'react';
+import { use, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, Filter } from 'lucide-react';
 import {
   Toolbar,
   ToolbarHeading,
@@ -10,6 +10,7 @@ import {
 } from '@/layouts/main/components/toolbar';
 import { Container } from '@/components/common/container';
 import { PageSkeleton } from '@/components/ui/skeletons';
+import { Button } from '@/components/ui/button';
 import {
   ADMIN_REPORT_BY_SLUG,
   VALID_REPORT_SLUGS,
@@ -32,6 +33,7 @@ interface ReportPageProps {
 
 export default function ReportPage({ params }: ReportPageProps) {
   const { type } = use(params);
+  const [filterOpen, setFilterOpen] = useState(false);
   const config = ADMIN_REPORT_BY_SLUG[type];
 
   if (!config || !VALID_REPORT_SLUGS.has(type)) {
@@ -56,11 +58,25 @@ export default function ReportPage({ params }: ReportPageProps) {
             description={config.description}
             icon={BarChart3}
           />
-          <ToolbarActions />
+          <ToolbarActions>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => setFilterOpen(true)}
+            >
+              <Filter className="h-4 w-4" />
+              Advanced Filter
+            </Button>
+          </ToolbarActions>
         </Toolbar>
       </Container>
       <Container>
-        <ReportContent config={config} />
+        <ReportContent
+          config={config}
+          filterOpen={filterOpen}
+          setFilterOpen={setFilterOpen}
+        />
       </Container>
     </div>
   );

@@ -489,6 +489,7 @@ export function Filter({
                         )
                       }
                       placeholder={`Select ${filter.label}...`}
+                      size={filter.multiSelectSize ?? 'default'}
                     />
                   </div>
                 )}

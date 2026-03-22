@@ -27,6 +27,8 @@ export interface FiltersSchema {
   options?: Option[];
   valueToShow?: 'label' | 'value';
   valueToSet?: 'label' | 'value';
+  /** When type is multiSelect: wider popover + scrollable list (e.g. long merchant lists) */
+  multiSelectSize?: 'default' | 'comfortable';
 }
 
 export type FilterFields = Record<string, any>;
