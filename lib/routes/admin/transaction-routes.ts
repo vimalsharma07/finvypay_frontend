@@ -9,4 +9,7 @@ export const adminTransactionRoutes = {
   chargeback: (transactionId: string | number) => `/transactions/${transactionId}/chargeback`,
   refund: (transactionId: string | number) => `/transactions/${transactionId}/refund`,
   suspicious: (transactionId: string | number) => `/transactions/${transactionId}/suspicious`,
+  /** Public transaction id (e.g. TXN-...) */
+  resendWebhook: (transactionId: string) =>
+    `/admin/transaction/${encodeURIComponent(transactionId)}/resend-webhook`,
 } as const;

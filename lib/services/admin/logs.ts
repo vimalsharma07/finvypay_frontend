@@ -90,6 +90,8 @@ export interface LogListParams {
   endDate?: string;
   /** Filter by transaction_id (provider, transaction, and webhook logs) */
   transaction_id?: string;
+  /** e.g. `production` — used by transaction & webhook log APIs to scope live vs sandbox */
+  payment_mode?: string;
 }
 
 /**
@@ -108,7 +110,8 @@ export async function getAdminLogs(
       params.limit,
       params.startDate,
       params.endDate,
-      params.transaction_id
+      params.transaction_id,
+      params.payment_mode
     );
     const data = await http.get(endpoint) as LogListResponse;
 

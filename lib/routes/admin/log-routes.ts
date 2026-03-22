@@ -14,7 +14,8 @@ export const adminLogRoutes = {
     limit: number,
     startDate?: string,
     endDate?: string,
-    transactionId?: string
+    transactionId?: string,
+    paymentMode?: string
   ) => {
     const params = new URLSearchParams({
       type,
@@ -24,6 +25,7 @@ export const adminLogRoutes = {
     if (startDate) params.append('start_date', startDate);
     if (endDate) params.append('end_date', endDate);
     if (transactionId?.trim()) params.append('transaction_id', transactionId.trim());
+    if (paymentMode?.trim()) params.append('payment_mode', paymentMode.trim());
     return `${BASE_URL}/admin/logs?${params.toString()}`;
   },
 } as const;

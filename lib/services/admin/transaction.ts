@@ -296,3 +296,33 @@ export async function markSuspicious(
   }
 }
 
+/**
+ * Resend merchant webhook for a production transaction (admin).
+ * Uses public transaction id (e.g. TXN-20240101-ABC123).
+ */
+export async function resendTransactionWebhook(
+  transactionId: string
+): Promise<ApiResponse<TransactionActionResponse>> {
+  try {
+    const data = await http.post(
+      adminRoutes.transactions.resendWebhook(transactionId),
+      {}
+    ) as TransactionActionResponse;
+    return {
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        status: error.status,
+        error: error.message,
+      };
+    }
+    return {
+      status: 500,
+      error: 'An unexpected error occurred',
+    };
+  }
+}
+

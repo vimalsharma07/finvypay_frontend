@@ -7,6 +7,7 @@ import {
   processChargeback,
   processRefund,
   markSuspicious,
+  resendTransactionWebhook,
   Transaction,
   TransactionListResponse,
   TRANSACTION_STATUS_FILTER_OPTIONS,
@@ -73,6 +74,7 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
   const [processingChargeback, setProcessingChargeback] = useState(false);
   const [processingRefund, setProcessingRefund] = useState(false);
   const [processingSuspicious, setProcessingSuspicious] = useState(false);
+  const [resendingWebhookTransactionId, setResendingWebhookTransactionId] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterFields>({});
   const [internalFilterOpen, setInternalFilterOpen] = useState(false);
   
@@ -239,6 +241,39 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
     setSuspiciousDialogOpen(true);
   }, []);
 
+  const handleResendWebhook = useCallback(async (transaction: Transaction) => {
+    const tid = transaction.transactionId?.trim();
+    if (!tid) {
+      toast.error('Missing transaction ID');
+      return;
+    }
+    setResendingWebhookTransactionId(tid);
+    try {
+      const response = await resendTransactionWebhook(tid);
+      handleApiResponse(response, {
+        onSuccess: (data) => {
+          const msg =
+            data &&
+            typeof data === 'object' &&
+            'message' in data &&
+            data.message != null &&
+            String(data.message).trim()
+              ? String(data.message)
+              : 'Webhook resent successfully';
+          toast.success(msg);
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to resend webhook');
+        },
+      });
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+      console.error('Resend webhook error:', error);
+    } finally {
+      setResendingWebhookTransactionId(null);
+    }
+  }, []);
+
   const handleApplyFilters = useCallback(
     (appliedFilters: FilterFields) => {
       setFilters(appliedFilters);
@@ -380,9 +415,18 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
         true,
         handleChargeback,
         handleRefund,
-        handleSuspicious
+        handleSuspicious,
+        handleResendWebhook,
+        resendingWebhookTransactionId
       ),
-    [handleViewDetails, handleChargeback, handleRefund, handleSuspicious]
+    [
+      handleViewDetails,
+      handleChargeback,
+      handleRefund,
+      handleSuspicious,
+      handleResendWebhook,
+      resendingWebhookTransactionId,
+    ]
   );
 
   const table = useReactTable({

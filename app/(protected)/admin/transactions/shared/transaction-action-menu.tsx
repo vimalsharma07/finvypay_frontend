@@ -1,11 +1,12 @@
 'use client';
 
-import { EllipsisVertical, DollarSign, Ban, ArrowLeftRight } from 'lucide-react';
+import { EllipsisVertical, DollarSign, Ban, ArrowLeftRight, Webhook } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Transaction } from '@/lib/services/admin/transaction';
@@ -15,6 +16,9 @@ interface TransactionActionMenuProps {
   onChargeback?: (transaction: Transaction) => void;
   onRefund?: (transaction: Transaction) => void;
   onSuspicious?: (transaction: Transaction) => void;
+  /** Production admin only: POST /admin/transaction/:transactionId/resend-webhook */
+  onResendWebhook?: (transaction: Transaction) => void;
+  resendingWebhookTransactionId?: string | null;
   showDisabledActions?: boolean; // Control visibility of refund, chargeback, suspicious
 }
 
@@ -23,6 +27,8 @@ export function TransactionActionMenu({
   onChargeback,
   onRefund,
   onSuspicious,
+  onResendWebhook,
+  resendingWebhookTransactionId = null,
   showDisabledActions = true, // Default to true for production transactions
 }: TransactionActionMenuProps) {
   // Check if transaction is successful (status === 1 means Success)
@@ -36,7 +42,7 @@ export function TransactionActionMenu({
           <EllipsisVertical className="size-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent side="bottom" align="end" className="w-[180px]">
+      <DropdownMenuContent side="bottom" align="end" className="w-[200px]">
         {/* Action Options - Show active for successful transactions, disabled for others */}
         {showDisabledActions && (
           <>
@@ -71,6 +77,21 @@ export function TransactionActionMenu({
                 </DropdownMenuItem>
               </>
             )}
+          </>
+        )}
+        {onResendWebhook && (
+          <>
+            {showDisabledActions && <DropdownMenuSeparator />}
+            <DropdownMenuItem
+              disabled={
+                !transaction.transactionId ||
+                resendingWebhookTransactionId === transaction.transactionId
+              }
+              onClick={() => onResendWebhook(transaction)}
+            >
+              <Webhook className="mr-1 size-4" />
+              Resend webhook
+            </DropdownMenuItem>
           </>
         )}
       </DropdownMenuContent>
