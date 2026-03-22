@@ -49,7 +49,7 @@ import {
   Option,
 } from '@/lib/types/common-types';
 import { generateFilterQuery, mapAdminTransactionFiltersToApiParams } from '@/lib/helpers';
-import { getMerchants } from '@/lib/services/admin/users';
+import { getAllMerchantsPaginated } from '@/lib/services/admin/users';
 import { getUserConnectors } from '@/lib/services/admin/connectors';
 import { useCurrencies } from '@/lib/hooks/use-currencies';
 import { useCountries } from '@/lib/hooks/use-countries';
@@ -161,17 +161,18 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
   useEffect(() => {
     const loadOptions = async () => {
       try {
-        const [usersRes, connectorsRes] = await Promise.all([
-          getMerchants({ page: 1, limit: 1000 }),
+        const [merchants, connectorsRes] = await Promise.all([
+          getAllMerchantsPaginated(),
           getUserConnectors(),
         ]);
 
-        if (usersRes.data && Array.isArray(usersRes.data.data)) {
-          const mappedUsers = usersRes.data.data.map((user) => ({
-            label: user.name || user.email || user.id,
-            value: String(user.id),
-          }));
-          setUserOptions(mappedUsers);
+        if (Array.isArray(merchants)) {
+          setUserOptions(
+            merchants.map((user) => ({
+              label: user.name || user.email || user.id,
+              value: String(user.id),
+            }))
+          );
         }
 
         if (connectorsRes.data?.data?.data) {
@@ -248,7 +249,13 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
 
   const filterSchema: FiltersSchema[] = useMemo(
     () => [
-      { field: 'user_id', label: 'Merchant', type: FieldTypes.multiSelect, options: userOptions },
+      {
+        field: 'user_id',
+        label: 'Merchant',
+        type: FieldTypes.multiSelect,
+        options: userOptions,
+        multiSelectSize: 'comfortable',
+      },
       { field: 'transaction_id', label: 'Transaction ID', type: FieldTypes.input },
       { field: 'order_id', label: 'Order ID', type: FieldTypes.input },
       { field: 'email', label: 'Email', type: FieldTypes.input },

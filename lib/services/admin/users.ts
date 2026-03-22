@@ -138,6 +138,54 @@ export async function getUsers(
   return getMerchants(params as MerchantListParams) as Promise<ApiResponse<UserListResponse>>;
 }
 
+const MERCHANT_FILTER_PAGE_SIZE = 100;
+/** Avoid infinite loops if API meta is wrong */
+const MERCHANT_FILTER_MAX_PAGES = 1000;
+
+export type MerchantFilterFetchParams = Omit<MerchantListParams, 'page' | 'limit'>;
+
+/**
+ * Load every merchant for admin dropdowns (Advanced Filter, etc.).
+ * Backend defaults (e.g. limit=20) only return one page — this walks all pages.
+ * Matches admin user-management query: role, sortBy, sortOrder.
+ */
+export async function getAllMerchantsPaginated(
+  baseParams?: MerchantFilterFetchParams
+): Promise<Merchant[]> {
+  const defaults: MerchantFilterFetchParams = {
+    role: 'merchant',
+    sortBy: 'createdAt',
+    sortOrder: 'DESC',
+  };
+  const paramsBase = { ...defaults, ...baseParams };
+
+  const all: Merchant[] = [];
+  let page = 1;
+
+  while (page <= MERCHANT_FILTER_MAX_PAGES) {
+    const res = await getMerchants({
+      ...paramsBase,
+      page,
+      limit: MERCHANT_FILTER_PAGE_SIZE,
+    });
+
+    if (res.status !== 200 || !res.data?.success || !Array.isArray(res.data.data)) {
+      break;
+    }
+
+    all.push(...res.data.data);
+
+    const meta = res.data.meta;
+    const totalPages = meta?.totalPages ?? 1;
+    if (page >= totalPages || res.data.data.length === 0) {
+      break;
+    }
+    page += 1;
+  }
+
+  return all;
+}
+
 /**
  * 2. Get merchant by ID
  */

@@ -6,14 +6,16 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Option } from '@/lib/types/common-types';
+import { cn } from '@/lib/utils';
 
 interface MultiSelectProps {
   options: Option[];
   selected: string[];
   onChange: (selected: string[]) => void;
   placeholder?: string;
+  /** Wider dropdown + scrollable list (e.g. merchant filter with many rows) */
+  size?: 'default' | 'comfortable';
 }
 
 export function MultiSelect({
@@ -21,6 +23,7 @@ export function MultiSelect({
   selected,
   onChange,
   placeholder = 'Select...',
+  size = 'default',
 }: MultiSelectProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -71,33 +74,41 @@ export function MultiSelect({
           <span className="text-muted-foreground text-xs">▼</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0 w-64" onOpenAutoFocus={(e) => e.preventDefault()}>
-        <Command shouldFilter={false}>
+      <PopoverContent
+        className={cn('p-0', size === 'comfortable' ? 'w-[min(100vw-2rem,22rem)]' : 'w-64')}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
+        <Command shouldFilter={false} className="max-h-none">
           <CommandInput
             placeholder="Search..."
             value={search}
             onValueChange={setSearch}
           />
-          <CommandList>
-            <CommandEmpty>No option found.</CommandEmpty>
-            <CommandGroup>
-              <ScrollArea className="max-h-56">
-                {filteredOptions.map((option) => (
-                  <CommandItem
-                    key={String(option.value)}
-                    value={String(option.value)}
-                    className="cursor-pointer data-[disabled=true]:!pointer-events-auto data-[disabled=true]:!opacity-100"
-                    onSelect={() => toggle(String(option.value))}
-                  >
-                    <Checkbox
-                      checked={selectedSet.has(String(option.value))}
-                      className="pointer-events-none"
-                      aria-label={String(option.label)}
-                    />
-                    {option.label}
-                  </CommandItem>
-                ))}
-              </ScrollArea>
+          {/* Single scroll container: nested ScrollArea broke height + hid scrollbar */}
+          <CommandList
+            className={cn(
+              'overflow-x-hidden overscroll-contain p-0',
+              /* kt-scrollable-* from css/components/scrollable.css — visible, styled scrollbar */
+              size === 'comfortable' ? 'kt-scrollable-y max-h-[min(55vh,22rem)]' : 'kt-scrollable-y-auto max-h-[min(45vh,16rem)]',
+            )}
+          >
+            <CommandEmpty className="py-6">No option found.</CommandEmpty>
+            <CommandGroup className="overflow-visible p-1.5">
+              {filteredOptions.map((option) => (
+                <CommandItem
+                  key={String(option.value)}
+                  value={String(option.value)}
+                  className="cursor-pointer data-[disabled=true]:!pointer-events-auto data-[disabled=true]:!opacity-100"
+                  onSelect={() => toggle(String(option.value))}
+                >
+                  <Checkbox
+                    checked={selectedSet.has(String(option.value))}
+                    className="pointer-events-none"
+                    aria-label={String(option.label)}
+                  />
+                  <span className="truncate text-left">{option.label}</span>
+                </CommandItem>
+              ))}
             </CommandGroup>
           </CommandList>
         </Command>
