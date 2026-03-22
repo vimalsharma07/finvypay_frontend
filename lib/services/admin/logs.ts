@@ -13,7 +13,6 @@ export type LogType =
   | 'txn_logs'
   | 'webhook_logs'
   | 'provider_logs'
-  | 'dispute_logs'
   | 'app_error_logs'
   | 'job_error_logs'
   | 'cron_error_logs'
@@ -32,7 +31,8 @@ export interface LogEntry {
   payload?: Record<string, any> | null;
   response?: Record<string, any> | null;
   webhook?: Record<string, any> | null;
-  error?: string | null;
+  /** Plain string or structured error (e.g. `{ name, message, stack }`) from some log APIs */
+  error?: string | Record<string, unknown> | null;
   createdAt?: string;
   created_at?: string; // API format
   updatedAt?: string;
@@ -88,7 +88,7 @@ export interface LogListParams {
   limit: number;
   startDate?: string;
   endDate?: string;
-  /** Filter by transaction_id (e.g. for provider_logs) */
+  /** Filter by transaction_id (provider, transaction, and webhook logs) */
   transaction_id?: string;
 }
 

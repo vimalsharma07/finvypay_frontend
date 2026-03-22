@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Save } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -46,8 +46,6 @@ import { toast } from 'sonner';
 
 // Form validation schema
 const formSchema = z.object({
-  acquirerId: z.number().min(1, 'Acquirer is required'),
-  acquirerAccountId: z.number().min(1, 'Acquirer account is required'),
   name: z.string().min(1, 'Name is required').max(255, 'Name must be less than 255 characters'),
   description: z.string().optional(),
   status: z.number().min(0).max(3),
@@ -80,8 +78,6 @@ export function EditMerchantAcquirerAccountContent() {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      acquirerId: 0,
-      acquirerAccountId: 0,
       name: '',
       description: '',
       status: 0,
@@ -114,8 +110,6 @@ export function EditMerchantAcquirerAccountContent() {
               setAccount(data.data);
 
               form.reset({
-                acquirerId: data.data.acquirerId,
-                acquirerAccountId: data.data.acquirerAccountId,
                 name: data.data.name,
                 description: data.data.description || '',
                 status: data.data.status,
@@ -158,9 +152,9 @@ export function EditMerchantAcquirerAccountContent() {
     setSaving(true);
     try {
       const payload: UpdateMerchantAcquirerAccountPayload = {
-        acquirerId: data.acquirerId,
-        acquirerAccountId: data.acquirerAccountId,
-        name: data.name,
+        acquirerId: account.acquirerId,
+        acquirerAccountId: account.acquirerAccountId,
+        name: account.name,
         description: data.description || '',
         status: data.status,
         isActive: data.isActive,
@@ -252,52 +246,6 @@ export function EditMerchantAcquirerAccountContent() {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="acquirerId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Acquirer ID</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="Enter acquirer ID"
-                            {...field}
-                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          The ID of the acquirer this account belongs to
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="acquirerAccountId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Acquirer Account ID</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="Enter acquirer account ID"
-                            {...field}
-                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          The ID of the acquirer account in the gateway
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
                 <FormField
                   control={form.control}
                   name="name"
@@ -307,11 +255,13 @@ export function EditMerchantAcquirerAccountContent() {
                       <FormControl>
                         <Input
                           placeholder="Enter account name"
+                          disabled
+                          className="bg-muted"
                           {...field}
                         />
                       </FormControl>
                       <FormDescription>
-                        A descriptive name for this acquirer account
+                        Account name cannot be changed here
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -683,6 +633,14 @@ export function EditMerchantAcquirerAccountContent() {
               <div>
                 <span className="font-medium text-muted-foreground">Acquirer:</span>
                 <p>{account.acquirer.acquirerName}</p>
+              </div>
+              <div>
+                <span className="font-medium text-muted-foreground">Acquirer ID:</span>
+                <p className="font-mono">{account.acquirerId}</p>
+              </div>
+              <div>
+                <span className="font-medium text-muted-foreground">Acquirer Account ID:</span>
+                <p className="font-mono">{account.acquirerAccountId}</p>
               </div>
             </div>
           </CardContent>
