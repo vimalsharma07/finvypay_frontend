@@ -11,6 +11,7 @@ import { Container } from '@/components/common/container';
 import { Button } from '@/components/ui/button';
 import {
   getSandboxTransactions,
+  resendTransactionWebhook,
   Transaction,
   TransactionListResponse,
   TRANSACTION_STATUS_FILTER_OPTIONS,
@@ -60,6 +61,7 @@ export default function SandboxTransactionsPage() {
   const [meta, setMeta] = useState<TransactionListResponse['data']['meta'] | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [resendingWebhookTransactionId, setResendingWebhookTransactionId] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterFields>({});
   const [filterOpen, setFilterOpen] = useState(false);
 
@@ -208,6 +210,39 @@ export default function SandboxTransactionsPage() {
     setDetailsDialogOpen(true);
   }, []);
 
+  const handleResendWebhook = useCallback(async (transaction: Transaction) => {
+    const tid = transaction.transactionId?.trim();
+    if (!tid) {
+      toast.error('Missing transaction ID');
+      return;
+    }
+    setResendingWebhookTransactionId(tid);
+    try {
+      const response = await resendTransactionWebhook(tid, true);
+      handleApiResponse(response, {
+        onSuccess: (data) => {
+          const msg =
+            data &&
+            typeof data === 'object' &&
+            'message' in data &&
+            data.message != null &&
+            String(data.message).trim()
+              ? String(data.message)
+              : 'Sandbox webhook resent successfully';
+          toast.success(msg);
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to resend sandbox webhook');
+        },
+      });
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+      console.error('Resend sandbox webhook error:', error);
+    } finally {
+      setResendingWebhookTransactionId(null);
+    }
+  }, []);
+
   const handleApplyFilters = useCallback(
     (appliedFilters: FilterFields) => {
       setFilters(appliedFilters);
@@ -268,9 +303,14 @@ export default function SandboxTransactionsPage() {
     () =>
       getTransactionColumns(
         handleViewDetails,
-        false // Hide disabled actions (refund, chargeback, suspicious) for sandbox
+        false, // Hide disabled actions (refund, chargeback, suspicious) for sandbox
+        undefined,
+        undefined,
+        undefined,
+        handleResendWebhook,
+        resendingWebhookTransactionId
       ),
-    [handleViewDetails]
+    [handleViewDetails, handleResendWebhook, resendingWebhookTransactionId]
   );
 
   const table = useReactTable({
