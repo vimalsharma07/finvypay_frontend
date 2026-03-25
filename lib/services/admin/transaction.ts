@@ -301,11 +301,12 @@ export async function markSuspicious(
  * Uses public transaction id (e.g. TXN-20240101-ABC123).
  */
 export async function resendTransactionWebhook(
-  transactionId: string
+  transactionId: string,
+  sandbox: boolean = false
 ): Promise<ApiResponse<TransactionActionResponse>> {
   try {
     const data = await http.post(
-      adminRoutes.transactions.resendWebhook(transactionId),
+      adminRoutes.transactions.resendWebhook(transactionId, sandbox),
       {}
     ) as TransactionActionResponse;
     return {

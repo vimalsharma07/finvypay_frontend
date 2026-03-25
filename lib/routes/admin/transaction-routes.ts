@@ -10,6 +10,6 @@ export const adminTransactionRoutes = {
   refund: (transactionId: string | number) => `/transactions/${transactionId}/refund`,
   suspicious: (transactionId: string | number) => `/transactions/${transactionId}/suspicious`,
   /** Public transaction id (e.g. TXN-...) */
-  resendWebhook: (transactionId: string) =>
-    `/admin/transaction/${encodeURIComponent(transactionId)}/resend-webhook`,
+  resendWebhook: (transactionId: string, sandbox: boolean = false) =>
+    `/admin/transaction/${encodeURIComponent(transactionId)}/resend-webhook${sandbox ? '?sandbox=true' : ''}`,
 } as const;
