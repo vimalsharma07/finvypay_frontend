@@ -24,6 +24,13 @@ import {
 } from '@/lib/services/user/routing';
 import type { TableAction } from '../../components/table-comp';
 import { useAuth } from '@/hooks/use-auth';
+import { SearchSelect } from '@/components/ui/molecules/SearchSelect';
+import { ContentLoader } from '@/components/common/content-loader';
+import type { Option } from '@/lib/types/common-types';
+import {
+  getMerchantProfiles,
+  type MerchantProfileListResponse,
+} from '@/lib/services/user/merchant-profile';
 
 export function UserRoutingPageContent() {
   const router = useRouter();
@@ -31,6 +38,7 @@ export function UserRoutingPageContent() {
   const [profileList, setProfileList] = useState<
     Array<{ id: number | string; merchantProfileName?: string; industry?: { name?: string }; isPrimary?: boolean }>
   >([]);
+  const [profileOptions, setProfileOptions] = useState<Option[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [routes, setRoutes] = useState<UserRouteRule[]>([]);
@@ -123,16 +131,48 @@ export function UserRoutingPageContent() {
     }
   }, [user]);
 
+  // Fetch merchant profiles from API (same source as header badge)
   useEffect(() => {
-    setProfilesLoading(true);
+    const loadProfiles = async () => {
+      setProfilesLoading(true);
+      try {
+        const resp = await getMerchantProfiles();
+        if (resp.status === 200) {
+          const payload = resp.data as MerchantProfileListResponse | undefined;
+          if (payload?.success && Array.isArray(payload.data)) {
+            setProfileList(payload.data as any[]);
+          }
+        }
+      } catch {
+        // ignore and fall back to user/localStorage
+      } finally {
+        setProfilesLoading(false);
+      }
+    };
+    loadProfiles();
+  }, []);
+
+  useEffect(() => {
+    const options: Option[] = profileList
+      .map((p) => ({
+        value: p?.id?.toString?.() ?? String(p?.id ?? ''),
+        label:
+          (p as any)?.industryName ||
+          p?.industry?.name ||
+          p?.merchantProfileName ||
+          (p?.id != null ? `Profile ${p.id}` : 'Profile'),
+      }))
+      .filter((o) => Boolean(o.value));
+    setProfileOptions(options);
+
     if (!selectedProfileId && profileList.length > 0) {
       const primary = profileList.find((p) => p.isPrimary);
       const nextProfileId = (primary?.id ?? profileList[0]?.id)?.toString() || '';
       if (nextProfileId) {
         setSelectedProfileId(nextProfileId);
+        setPage(1);
       }
     }
-    setProfilesLoading(false);
   }, [profileList, selectedProfileId]);
 
   const headers: TableHeader<UserRouteRule>[] = useMemo(() => [
@@ -247,6 +287,34 @@ export function UserRoutingPageContent() {
   return (
     <Fragment>
       <Container>
+        <div className="flex flex-col gap-3 mb-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-semibold text-foreground">Merchant Profile (Industry)</p>
+              <p className="text-xs text-muted-foreground">
+                Select an industry to load routing rules scoped to that profile.
+              </p>
+            </div>
+            <div className="w-full md:w-80">
+              {profilesLoading ? (
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <ContentLoader />
+                  <span>Loading profiles...</span>
+                </div>
+              ) : (
+                <SearchSelect
+                  options={profileOptions}
+                  value={selectedProfileId}
+                  onChange={(val) => {
+                    setSelectedProfileId(val);
+                    setPage(1);
+                  }}
+                  placeholder="Select profile (industry)"
+                />
+              )}
+            </div>
+          </div>
+        </div>
         <TableComp
           data={routes}
           headers={headers}
