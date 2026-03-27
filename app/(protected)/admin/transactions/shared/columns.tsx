@@ -230,21 +230,34 @@ export function getTransactionColumns(
           const codePoints = code.toUpperCase().split('').map((char) => 127397 + char.charCodeAt(0));
           return String.fromCodePoint(...codePoints);
         };
+        const tooltipLabel = countryName || countryCode || '—';
         return (
-          <div className="flex min-w-0 items-center gap-1.5 text-sm">
-            <span className="text-base leading-none">{getFlagEmoji(countryCode)}</span>
+          <div className="flex min-w-0 items-center">
             {countryCode ? (
-              <span className="truncate font-medium text-foreground">
-                {countryName || countryCode} - {countryCode}
-              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    tabIndex={0}
+                    className="inline-flex max-w-full cursor-default items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 text-xs font-semibold text-foreground shadow-sm transition-colors hover:bg-muted"
+                  >
+                    <span className="text-[15px] leading-none" aria-hidden>
+                      {getFlagEmoji(countryCode)}
+                    </span>
+                    <span className="font-mono tracking-tight">{countryCode}</span>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs">
+                  {tooltipLabel}
+                </TooltipContent>
+              </Tooltip>
             ) : (
               <span className="text-muted-foreground">—</span>
             )}
           </div>
         );
       },
-      size: 180, // Country name + code
-      minSize: 150,
+      size: 100,
+      minSize: 88,
       meta: {
         headerClassName: 'text-left',
         cellClassName: 'text-left',
@@ -267,7 +280,7 @@ export function getTransactionColumns(
           ? 'text-amber-700 dark:text-amber-500'
           : 'text-foreground';
         return (
-          <div className={cn('font-semibold tabular-nums', amountColor)}>
+          <div className={cn('text-center font-semibold tabular-nums', amountColor)}>
             {formatTransactionAmount(row.original.amountInUsd)}
           </div>
         );
@@ -275,8 +288,8 @@ export function getTransactionColumns(
       size: 140, // Currency formatted amounts
       minSize: 120,
       meta: {
-        headerClassName: 'text-left',
-        cellClassName: 'text-left',
+        headerClassName: 'text-center',
+        cellClassName: 'text-center',
       },
     },
     {
@@ -307,7 +320,10 @@ export function getTransactionColumns(
                 <Badge
                   variant="outline"
                   size="sm"
-                  className={cn('inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-medium', config.className)}
+                  className={cn(
+                    'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-medium shadow-sm',
+                    config.className
+                  )}
                 >
                   <Icon className="h-3 w-3" />
                   <span>{config.label}</span>
