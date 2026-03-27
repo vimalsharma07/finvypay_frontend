@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Transaction } from '@/lib/services/admin/transaction';
 import { formatTransactionStatus, formatTransactionDate } from './utils';
+import { formatCardTypeDisplay } from '@/lib/utils/format-card-type';
 import {
   User,
   CreditCard,
@@ -222,18 +223,7 @@ export function TransactionDetailsDialog({
                         : null
                     }
                   />
-                  <InfoField
-                    label="Card Type"
-                    value={
-                      transaction.cardType !== null
-                        ? transaction.cardType === 1
-                          ? 'Credit'
-                          : transaction.cardType === 2
-                            ? 'Debit'
-                            : `Type ${transaction.cardType}`
-                        : null
-                    }
-                  />
+                  <InfoField label="Card Type" value={formatCardTypeDisplay(transaction.cardType)} />
                   <InfoField label="Card Bin" value={transaction.cardBin} />
                   <InfoField
                     label="Is Card Whitelisted"
@@ -248,7 +238,6 @@ export function TransactionDetailsDialog({
                   <InfoField label="Transaction ID" value={transaction.transactionId} />
                   <InfoField label="Order ID" value={transaction.orderId} />
                   <InfoField label="Gateway ID" value={transaction.gatewayId} />
-                  <InfoField label="User ID" value={transaction.userId} />
                   <InfoField label="Merchant User" value={transaction.user?.name} />
                   <InfoField label="Merchant Email" value={transaction.user?.email} />
                   <InfoField label="Amount" value={`${transaction.amount} ${transaction.currency}`} />
@@ -263,14 +252,8 @@ export function TransactionDetailsDialog({
                   />
                   <InfoField label="Message" value={transaction.message} />
                   <InfoField label="Risk Blocked" value={transaction.riskBlocked ? 'Yes' : 'No'} />
-                  <InfoField 
-                    label="Merchant Profile ID" 
-                    value={transaction.merchantProfileId || transaction.profileId} 
-                  />
-                  <InfoField label="Terminal ID" value={transaction.terminalId} />
                   <InfoField label="Profile ID (Legacy)" value={transaction.profileId} />
                   <InfoField label="Connector ID" value={transaction.connectorId} />
-                  <InfoField label="Request API" value={transaction.requestApi} />
                 </div>
               </TabsContent>
 
@@ -279,18 +262,7 @@ export function TransactionDetailsDialog({
                 <div className="grid grid-cols-2 gap-4">
                   <InfoField label="Card Bin" value={transaction.cardBin} />
                   <InfoField label="Card Number" value={transaction.cardNumber} />
-                  <InfoField
-                    label="Card Type"
-                    value={
-                      transaction.cardType !== null
-                        ? transaction.cardType === 1
-                          ? 'Credit'
-                          : transaction.cardType === 2
-                            ? 'Debit'
-                            : `Type ${transaction.cardType}`
-                        : null
-                    }
-                  />
+                  <InfoField label="Card Type" value={formatCardTypeDisplay(transaction.cardType)} />
                   <InfoField
                     label="Card Expiry"
                     value={

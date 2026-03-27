@@ -17,6 +17,7 @@ import { CheckCircle2, Clock, XCircle, AlertCircle, Copy, Check } from 'lucide-r
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { formatCardTypeDisplay } from '@/lib/utils/format-card-type';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 function getCountryDisplayName(code: string) {
@@ -30,16 +31,17 @@ function getCountryDisplayName(code: string) {
 }
 
 // Transaction ID Cell Component
-function TransactionIdCell({ 
-  transactionId, 
-  onViewDetails 
-}: { 
-  transactionId: string; 
+function TransactionIdCell({
+  transactionId,
+  onViewDetails,
+}: {
+  transactionId: string;
   onViewDetails?: () => void;
 }) {
   const [copied, setCopied] = useState(false);
   const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     try {
       await navigator.clipboard.writeText(transactionId);
       setCopied(true);
@@ -50,15 +52,31 @@ function TransactionIdCell({
     }
   };
   return (
-    <button
-      onClick={onViewDetails}
-      onDoubleClick={handleCopy}
-      className="group flex items-center gap-1 font-mono text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-    >
-      <span>{transactionId}</span>
-      <Copy className={cn("h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity", copied && "hidden")} />
-      {copied && <Check className="h-3.5 w-3.5 text-green-600" />}
-    </button>
+    <div className="group flex max-w-full items-center gap-0.5">
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onViewDetails?.();
+        }}
+        className="min-w-0 truncate text-left font-mono text-sm font-medium text-primary transition-colors hover:text-primary/80"
+      >
+        {transactionId}
+      </button>
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="inline-flex shrink-0 rounded p-0.5 text-muted-foreground opacity-70 transition-colors hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
+        aria-label="Copy transaction ID"
+        title="Copy transaction ID"
+      >
+        {copied ? (
+          <Check className="h-3.5 w-3.5 text-green-600" />
+        ) : (
+          <Copy className="h-3.5 w-3.5" />
+        )}
+      </button>
+    </div>
   );
 }
 
@@ -86,18 +104,7 @@ export function getTransactionColumns(
         const fullName = `${row.original.firstName} ${row.original.lastName}`.trim();
         const initials = `${row.original.firstName?.[0] || ''}${row.original.lastName?.[0] || ''}`.toUpperCase();
 
-        // API may return `cardType` as either number (1/2) or string (e.g. "VISA").
-        const rawCardType = row.original.cardType as unknown;
-        const cardTypeLabel: string | null =
-          rawCardType == null
-            ? null
-            : typeof rawCardType === 'string'
-              ? rawCardType.toUpperCase()
-              : rawCardType === 1
-                ? 'Credit'
-                : rawCardType === 2
-                  ? 'Debit'
-                  : `Type ${rawCardType}`;
+        const cardTypeLabel = formatCardTypeDisplay(row.original.cardType);
 
         const cardTypeBadgeClassName = (() => {
           const label = cardTypeLabel ?? '';
