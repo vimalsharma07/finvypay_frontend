@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, CheckCircle2, Info, Loader2, XCircle } from 'lucide-react';
-import { postProductionPaymentStatus } from '@/lib/services/user/production-payment-status';
+import { getProductionPaymentStatus } from '@/lib/services/user/production-payment-status';
 
 type DisplayStatus = 'loading' | 'success' | 'failed' | 'declined' | 'unknown' | 'missing_id' | 'error';
 
@@ -75,7 +75,7 @@ export function PaymentStatusContent() {
 
       setDisplay('loading');
       try {
-        const res = await postProductionPaymentStatus(transactionId);
+        const res = await getProductionPaymentStatus(transactionId);
         const inferred = inferSuccessFromStatusResponse(res);
         const msg =
           res?.message ||
