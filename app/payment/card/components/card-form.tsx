@@ -167,6 +167,7 @@ export function CardForm() {
         address: searchParams.get('address') || '',
         city: searchParams.get('city') || '',
         state: searchParams.get('state') || '',
+        zip: searchParams.get('zip') || '',
         country: 'US', // Default country
         email: searchParams.get('email') || '',
       };
@@ -203,30 +204,33 @@ export function CardForm() {
       const isSuccess = response.success === true && response.status === 'SUCCESS';
 
       if (isSuccess && response.data) {
-        // Extract payment data from response
         const paymentData = response.data;
         const amount = paymentData.amount || paymentLinkData?.amount || '';
         const currency = paymentData.currency || paymentLinkData?.currency || '';
+        const transactionId =
+          paymentData.transactionId ??
+          paymentData.transaction_id ??
+          paymentData.id ??
+          '';
 
         toast.success('Payment processed successfully!', {
           description: 'Your payment has been completed.',
         });
 
-        // Redirect to payment page with success status and data
         const queryParams = new URLSearchParams({
           status: 'success',
+          ...(transactionId && { transactionId: String(transactionId) }),
           ...(amount && { amount: String(amount) }),
           ...(currency && { currency: String(currency) }),
         });
 
-        router.push(`/payment?${queryParams.toString()}`);
+        router.push(`/payment/status?${queryParams.toString()}`);
       } else {
         toast.error('Payment failed', {
           description: response.message || 'Please check your card details and try again.',
         });
 
-        // Redirect to payment page with failed status
-        router.push('/payment?status=failed');
+        router.push('/payment/status?status=failed');
       }
     } catch (error: any) {
       console.error('Payment processing error:', error);
@@ -234,8 +238,7 @@ export function CardForm() {
         description: error?.message || 'Please try again or contact support.',
       });
 
-      // Redirect to payment page with failed status
-      router.push('/payment?status=failed');
+      router.push('/payment/status?status=failed');
     } finally {
       setProcessing(false);
     }
