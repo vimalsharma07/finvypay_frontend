@@ -99,7 +99,7 @@ export function getTransactionColumns(
       id: 'user',
       accessorFn: (row) => `${row.firstName} ${row.lastName}`,
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="User" />
+        <DataGridColumnHeader column={column} title="Card Holder" />
       ),
       cell: ({ row }) => {
         const fullName = `${row.original.firstName} ${row.original.lastName}`.trim();
@@ -367,7 +367,7 @@ export function getTransactionColumns(
       id: 'merchantUser',
       accessorFn: (row) => row.user?.name || '',
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Merchant User" />
+        <DataGridColumnHeader column={column} title="Merchant" />
       ),
       cell: ({ row }) => {
         const profileName = row.original.merchantProfileName?.trim();
