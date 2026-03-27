@@ -17,6 +17,7 @@ import { CheckCircle2, Clock, XCircle, AlertCircle, Copy, Check } from 'lucide-r
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Transaction ID Cell Component
 function TransactionIdCell({ 
@@ -260,6 +261,8 @@ export function getTransactionColumns(
       ),
       cell: ({ row }) => {
         const status = row.original.status;
+        const message = row.original.message?.trim();
+        const messageTooltip = message && message.length > 0 ? message : 'No message available';
         // PENDING=0, SUCCESS=1, FAILED=2, BLOCKED=3, ABANDONED=4, REDIRECTED=5
         const statusConfig = {
           0: { label: 'Pending', icon: Clock, className: 'text-amber-700 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900' },
@@ -272,14 +275,23 @@ export function getTransactionColumns(
         const config = statusConfig[status as keyof typeof statusConfig] || { label: `Status ${status}`, icon: AlertCircle, className: '' };
         const Icon = config.icon;
         return (
-          <Badge
-            variant="outline"
-            size="sm"
-            className={cn('inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-medium', config.className)}
-          >
-            <Icon className="h-3 w-3" />
-            <span>{config.label}</span>
-          </Badge>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex cursor-help">
+                <Badge
+                  variant="outline"
+                  size="sm"
+                  className={cn('inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-medium', config.className)}
+                >
+                  <Icon className="h-3 w-3" />
+                  <span>{config.label}</span>
+                </Badge>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[360px] break-words">
+              {messageTooltip}
+            </TooltipContent>
+          </Tooltip>
         );
       },
       size: 110, // Status badges
