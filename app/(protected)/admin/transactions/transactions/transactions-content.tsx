@@ -35,6 +35,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { SearchInput } from '../shared/search-input';
 import { getTransactionColumns } from '../shared/columns';
+import { TransactionLogsDialog } from '../shared/transaction-logs-dialog';
 import { filterTransactions } from '../shared/utils';
 import {
   DynamicTransactionDetailsDialog,
@@ -70,6 +71,7 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
   const [chargebackDialogOpen, setChargebackDialogOpen] = useState(false);
   const [refundDialogOpen, setRefundDialogOpen] = useState(false);
   const [suspiciousDialogOpen, setSuspiciousDialogOpen] = useState(false);
+  const [logsDialogOpen, setLogsDialogOpen] = useState(false);
   const [transactionForAction, setTransactionForAction] = useState<Transaction | null>(null);
   const [processingChargeback, setProcessingChargeback] = useState(false);
   const [processingRefund, setProcessingRefund] = useState(false);
@@ -240,6 +242,19 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
     setTransactionForAction(transaction);
     setSuspiciousDialogOpen(true);
   }, []);
+
+  const handleViewLogs = useCallback((transaction: Transaction) => {
+    setTransactionForAction(transaction);
+    setLogsDialogOpen(true);
+  }, []);
+
+  const handleViewLogsFromDetails = useCallback(
+    (transaction: Transaction) => {
+      handleViewLogs(transaction);
+      setDetailsDialogOpen(false);
+    },
+    [handleViewLogs]
+  );
 
   const handleResendWebhook = useCallback(async (transaction: Transaction) => {
     const tid = transaction.transactionId?.trim();
@@ -416,6 +431,7 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
         handleChargeback,
         handleRefund,
         handleSuspicious,
+        handleViewLogs,
         handleResendWebhook,
         resendingWebhookTransactionId
       ),
@@ -424,6 +440,7 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
       handleChargeback,
       handleRefund,
       handleSuspicious,
+      handleViewLogs,
       handleResendWebhook,
       resendingWebhookTransactionId,
     ]
@@ -492,6 +509,12 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
         open={detailsDialogOpen}
         onOpenChange={setDetailsDialogOpen}
         transaction={selectedTransaction}
+        onResendWebhook={handleResendWebhook}
+        isResendingWebhook={
+          !!selectedTransaction?.transactionId &&
+          resendingWebhookTransactionId === selectedTransaction.transactionId
+        }
+        onViewLogs={handleViewLogsFromDetails}
       />
 
       <DynamicChargebackDialog
@@ -516,6 +539,13 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
         transaction={transactionForAction}
         onSubmit={handleSuspiciousSubmit}
         isSubmitting={processingSuspicious}
+      />
+
+      <TransactionLogsDialog
+        open={logsDialogOpen}
+        onOpenChange={setLogsDialogOpen}
+        transaction={transactionForAction}
+        paymentMode="production"
       />
 
       <Filter

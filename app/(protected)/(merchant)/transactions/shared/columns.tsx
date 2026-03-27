@@ -17,18 +17,32 @@ import { CheckCircle2, Clock, XCircle, AlertCircle, Copy, Check } from 'lucide-r
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { formatCardTypeDisplay } from '@/lib/utils/format-card-type';
+import { formatPaymentSourceDisplay } from '@/lib/utils/format-payment-source';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+
+function getCountryDisplayName(code: string) {
+  const normalizedCode = code?.trim().toUpperCase();
+  if (!normalizedCode || normalizedCode.length !== 2) return null;
+  try {
+    return new Intl.DisplayNames(['en'], { type: 'region' }).of(normalizedCode) ?? null;
+  } catch {
+    return null;
+  }
+}
 
 // Transaction ID Cell Component
-function TransactionIdCell({ 
-  transactionId, 
-  onViewDetails 
-}: { 
-  transactionId: string; 
+function TransactionIdCell({
+  transactionId,
+  onViewDetails,
+}: {
+  transactionId: string;
   onViewDetails?: () => void;
 }) {
   const [copied, setCopied] = useState(false);
   const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     try {
       await navigator.clipboard.writeText(transactionId);
       setCopied(true);
@@ -39,15 +53,31 @@ function TransactionIdCell({
     }
   };
   return (
-    <button
-      onClick={onViewDetails}
-      onDoubleClick={handleCopy}
-      className="group flex items-center gap-1 font-mono text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-    >
-      <span>{transactionId}</span>
-      <Copy className={cn("h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity", copied && "hidden")} />
-      {copied && <Check className="h-3.5 w-3.5 text-green-600" />}
-    </button>
+    <div className="group flex max-w-full items-center gap-0.5">
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onViewDetails?.();
+        }}
+        className="min-w-0 truncate text-left font-mono text-sm font-medium text-primary transition-colors hover:text-primary/80"
+      >
+        {transactionId}
+      </button>
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="inline-flex shrink-0 rounded p-0.5 text-muted-foreground opacity-70 transition-colors hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
+        aria-label="Copy transaction ID"
+        title="Copy transaction ID"
+      >
+        {copied ? (
+          <Check className="h-3.5 w-3.5 text-green-600" />
+        ) : (
+          <Copy className="h-3.5 w-3.5" />
+        )}
+      </button>
+    </div>
   );
 }
 
@@ -62,24 +92,13 @@ export function getTransactionColumns(
       id: 'user',
       accessorFn: (row) => `${row.firstName} ${row.lastName}`,
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="User" />
+        <DataGridColumnHeader column={column} title="Card Holder" />
       ),
       cell: ({ row }) => {
         const fullName = `${row.original.firstName} ${row.original.lastName}`.trim();
         const initials = `${row.original.firstName?.[0] || ''}${row.original.lastName?.[0] || ''}`.toUpperCase();
 
-        // API may return `cardType` as a string (e.g. "VISA", "MASTER", "AMEX") or a number.
-        const rawCardType = row.original.cardType as unknown;
-        const cardTypeLabel: string | null =
-          rawCardType == null
-            ? null
-            : typeof rawCardType === 'string'
-              ? rawCardType.toUpperCase()
-              : rawCardType === 1
-                ? 'Credit'
-                : rawCardType === 2
-                  ? 'Debit'
-                  : `Type ${rawCardType}`;
+        const cardTypeLabel = formatCardTypeDisplay(row.original.cardType);
 
         const cardTypeBadgeClassName = (() => {
           const label = cardTypeLabel ?? '';
@@ -98,6 +117,20 @@ export function getTransactionColumns(
           return 'text-muted-foreground bg-muted/40 border-border';
         })();
 
+        const cardFlowLabel = row.original.isCardWl ? 'STD' : 'FTD';
+        const cardFlowBadgeClassName = row.original.isCardWl
+          ? 'text-green-700 dark:text-green-500 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-900'
+          : 'text-amber-700 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900';
+
+        const paymentSourceLabel = formatPaymentSourceDisplay(row.original.paymentSource);
+        const paymentSourceKey = String(row.original.paymentSource ?? 'api').toLowerCase();
+        const paymentSourceBadgeClassName =
+          paymentSourceKey === 'payment_link'
+            ? 'text-violet-700 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/30 border-violet-200 dark:border-violet-900'
+            : paymentSourceKey === 'api' || paymentSourceKey === ''
+              ? 'text-sky-700 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/30 border-sky-200 dark:border-sky-900'
+              : 'text-muted-foreground bg-muted/40 border-border';
+
         return (
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
@@ -109,8 +142,8 @@ export function getTransactionColumns(
                 <div className="truncate text-xs text-muted-foreground">{row.original.email}</div>
               )}
 
-              {cardTypeLabel && (
-                <div className="mt-1 flex flex-wrap gap-2">
+              <div className="mt-1 flex flex-wrap gap-2">
+                {cardTypeLabel && (
                   <Badge
                     variant="outline"
                     className={cn(
@@ -120,8 +153,28 @@ export function getTransactionColumns(
                   >
                     {cardTypeLabel}
                   </Badge>
-                </div>
-              )}
+                )}
+
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    'inline-flex h-5 items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+                    cardFlowBadgeClassName
+                  )}
+                >
+                  {cardFlowLabel}
+                </Badge>
+
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    'inline-flex h-5 items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+                    paymentSourceBadgeClassName
+                  )}
+                >
+                  {paymentSourceLabel}
+                </Badge>
+              </div>
             </div>
           </div>
         );
@@ -162,20 +215,41 @@ export function getTransactionColumns(
       ),
       cell: ({ row }) => {
         const country = row.original.country ?? '';
+        const countryCode = country.trim().toUpperCase();
+        const countryName = getCountryDisplayName(countryCode);
         const getFlagEmoji = (code: string) => {
           if (!code || code.length !== 2) return '🌐';
           const codePoints = code.toUpperCase().split('').map((char) => 127397 + char.charCodeAt(0));
           return String.fromCodePoint(...codePoints);
         };
+        const tooltipLabel = countryName || countryCode || '—';
         return (
-          <div className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/50 px-2 py-0.5">
-            <span className="text-sm leading-none">{getFlagEmoji(country)}</span>
-            <span className="text-xs font-medium text-foreground tabular-nums">{country || '—'}</span>
+          <div className="flex min-w-0 items-center">
+            {countryCode ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    tabIndex={0}
+                    className="inline-flex max-w-full cursor-default items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 text-xs font-semibold text-foreground shadow-sm transition-colors hover:bg-muted"
+                  >
+                    <span className="text-[15px] leading-none" aria-hidden>
+                      {getFlagEmoji(countryCode)}
+                    </span>
+                    <span className="font-mono tracking-tight">{countryCode}</span>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs">
+                  {tooltipLabel}
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <span className="text-muted-foreground">—</span>
+            )}
           </div>
         );
       },
-      size: 90,
-      minSize: 80,
+      size: 100,
+      minSize: 88,
       meta: {
         headerClassName: 'text-left',
         cellClassName: 'text-left',
@@ -198,7 +272,7 @@ export function getTransactionColumns(
           ? 'text-amber-700 dark:text-amber-500'
           : 'text-foreground';
         return (
-          <div className={cn('font-semibold tabular-nums', amountColor)}>
+          <div className={cn('text-left font-semibold tabular-nums', amountColor)}>
             {formatTransactionAmount(row.original.amountInUsd)}
           </div>
         );
@@ -218,6 +292,8 @@ export function getTransactionColumns(
       ),
       cell: ({ row }) => {
         const status = row.original.status;
+        const message = row.original.message?.trim();
+        const messageTooltip = message && message.length > 0 ? message : 'No message available';
         // PENDING=0, SUCCESS=1, FAILED=2, BLOCKED=3, ABANDONED=4, REDIRECTED=5
         const statusConfig = {
           0: { label: 'Pending', icon: Clock, className: 'text-amber-700 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900' },
@@ -230,14 +306,26 @@ export function getTransactionColumns(
         const config = statusConfig[status as keyof typeof statusConfig] || { label: `Status ${status}`, icon: AlertCircle, className: '' };
         const Icon = config.icon;
         return (
-          <Badge
-            variant="outline"
-            size="sm"
-            className={cn('inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-medium', config.className)}
-          >
-            <Icon className="h-3 w-3" />
-            <span>{config.label}</span>
-          </Badge>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex cursor-help">
+                <Badge
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-medium shadow-sm',
+                    config.className
+                  )}
+                >
+                  <Icon className="h-3 w-3" />
+                  <span>{config.label}</span>
+                </Badge>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[360px] break-words">
+              {messageTooltip}
+            </TooltipContent>
+          </Tooltip>
         );
       },
       size: 110,

@@ -14,11 +14,13 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Transaction } from '@/lib/services/admin/transaction';
 import { formatTransactionStatus, formatTransactionDate } from './utils';
-import { 
-  User, 
-  CreditCard, 
-  Info, 
-  Hash, 
+import { formatCardTypeDisplay } from '@/lib/utils/format-card-type';
+import { formatTransactionTypeDisplay } from '@/lib/utils/format-transaction-type';
+import {
+  User,
+  CreditCard,
+  Info,
+  Hash,
   Webhook,
   Calendar,
   CheckCircle2,
@@ -27,13 +29,19 @@ import {
   AlertCircle,
   RotateCcw,
   Copy,
-  Check
+  Check,
+  FileText,
+  X,
 } from 'lucide-react';
 
 interface TransactionDetailsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   transaction: Transaction | null;
+  onResendWebhook?: (transaction: Transaction) => void;
+  isResendingWebhook?: boolean;
+  /** Opens transaction logs (e.g. Transaction Logs dialog). */
+  onViewLogs?: (transaction: Transaction) => void;
 }
 
 interface InfoFieldProps {
@@ -55,6 +63,9 @@ export function TransactionDetailsDialog({
   open,
   onOpenChange,
   transaction,
+  onResendWebhook,
+  isResendingWebhook = false,
+  onViewLogs,
 }: TransactionDetailsDialogProps) {
   const [copied, setCopied] = useState(false);
   
@@ -87,21 +98,22 @@ export function TransactionDetailsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-7xl max-h-[95vh] overflow-hidden flex flex-col p-0">
         <DialogHeader className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-background to-muted/20 mb-0">
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex flex-wrap items-center gap-3">
             <DialogTitle className="text-2xl font-bold">Transaction Details</DialogTitle>
             {transaction.transactionId && (
               <div className="flex items-center gap-1">
-                <Hash className="size-4 text-muted-foreground" />
+                <Hash className="size-4 shrink-0 text-muted-foreground" />
                 <span className="text-sm font-mono text-muted-foreground">{transaction.transactionId}</span>
                 <button
+                  type="button"
                   onClick={handleCopyTransactionId}
-                  className="p-1 rounded-md hover:bg-muted transition-colors group"
+                  className="group rounded-md p-1 transition-colors hover:bg-muted"
                   title="Copy Transaction ID"
                 >
                   {copied ? (
                     <Check className="size-3.5 text-primary" />
                   ) : (
-                    <Copy className="size-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                    <Copy className="size-3.5 text-muted-foreground transition-colors group-hover:text-foreground" />
                   )}
                 </button>
               </div>
@@ -133,6 +145,9 @@ export function TransactionDetailsDialog({
               </Badge>
               <div className="flex flex-col gap-1">
                 <div className="text-base font-semibold">{statusInfo?.label || 'Unknown'}</div>
+                <div className="max-w-[420px] break-words text-sm text-muted-foreground">
+                  <span className="font-semibold">Message:</span> {transaction.message?.trim() || '-'}
+                </div>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Calendar className="size-3" />
                   <span>{transactionDateFormatted}</span>
@@ -209,18 +224,7 @@ export function TransactionDetailsDialog({
                         : null
                     }
                   />
-                  <InfoField
-                    label="Card Type"
-                    value={
-                      transaction.cardType !== null
-                        ? transaction.cardType === 1
-                          ? 'Credit'
-                          : transaction.cardType === 2
-                            ? 'Debit'
-                            : `Type ${transaction.cardType}`
-                        : null
-                    }
-                  />
+                  <InfoField label="Card Type" value={formatCardTypeDisplay(transaction.cardType)} />
                   <InfoField label="Card Bin" value={transaction.cardBin} />
                   <InfoField
                     label="Is Card Whitelisted"
@@ -235,29 +239,15 @@ export function TransactionDetailsDialog({
                   <InfoField label="Transaction ID" value={transaction.transactionId} />
                   <InfoField label="Order ID" value={transaction.orderId} />
                   <InfoField label="Gateway ID" value={transaction.gatewayId} />
-                  <InfoField label="User ID" value={transaction.userId} />
                   <InfoField label="Merchant User" value={transaction.user?.name} />
                   <InfoField label="Merchant Email" value={transaction.user?.email} />
                   <InfoField label="Amount" value={`${transaction.amount} ${transaction.currency}`} />
                   <InfoField label="Amount (USD)" value={`$${parseFloat(transaction.amountInUsd).toFixed(2)}`} />
-                  <InfoField
-                    label="Transaction Type"
-                    value={
-                      transaction.transactionType !== null
-                        ? `Type ${transaction.transactionType}`
-                        : null
-                    }
-                  />
+                  <InfoField label="Transaction Type" value={formatTransactionTypeDisplay(transaction.transactionType)} />
                   <InfoField label="Message" value={transaction.message} />
                   <InfoField label="Risk Blocked" value={transaction.riskBlocked ? 'Yes' : 'No'} />
-                  <InfoField 
-                    label="Merchant Profile ID" 
-                    value={transaction.merchantProfileId || transaction.profileId} 
-                  />
-                  <InfoField label="Terminal ID" value={transaction.terminalId} />
                   <InfoField label="Profile ID (Legacy)" value={transaction.profileId} />
                   <InfoField label="Connector ID" value={transaction.connectorId} />
-                  <InfoField label="Request API" value={transaction.requestApi} />
                 </div>
               </TabsContent>
 
@@ -266,18 +256,7 @@ export function TransactionDetailsDialog({
                 <div className="grid grid-cols-2 gap-4">
                   <InfoField label="Card Bin" value={transaction.cardBin} />
                   <InfoField label="Card Number" value={transaction.cardNumber} />
-                  <InfoField
-                    label="Card Type"
-                    value={
-                      transaction.cardType !== null
-                        ? transaction.cardType === 1
-                          ? 'Credit'
-                          : transaction.cardType === 2
-                            ? 'Debit'
-                            : `Type ${transaction.cardType}`
-                        : null
-                    }
-                  />
+                  <InfoField label="Card Type" value={formatCardTypeDisplay(transaction.cardType)} />
                   <InfoField
                     label="Card Expiry"
                     value={
@@ -322,8 +301,39 @@ export function TransactionDetailsDialog({
           </Tabs>
         </DialogBody>
 
-        <DialogFooter className="px-6 pb-6 border-t pt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="flex flex-row flex-wrap items-center justify-between gap-3 border-t px-6 pb-6 pt-4 sm:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            {onViewLogs && (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!transaction.transactionId}
+                onClick={() => onViewLogs(transaction)}
+                className="gap-1.5"
+              >
+                <FileText className="size-4" />
+                Logs
+              </Button>
+            )}
+            {onResendWebhook && (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!transaction.transactionId || isResendingWebhook}
+                onClick={() => onResendWebhook(transaction)}
+                className="gap-1.5"
+              >
+                {isResendingWebhook ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Webhook className="size-4" />
+                )}
+                Resend webhook
+              </Button>
+            )}
+          </div>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="gap-1.5">
+            <X className="size-4" />
             Close
           </Button>
         </DialogFooter>
