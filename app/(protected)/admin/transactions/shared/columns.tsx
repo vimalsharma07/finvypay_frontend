@@ -300,7 +300,7 @@ export function getTransactionColumns(
           ? 'text-amber-700 dark:text-amber-500'
           : 'text-foreground';
         return (
-          <div className={cn('text-center font-semibold tabular-nums', amountColor)}>
+          <div className={cn('text-left font-semibold tabular-nums', amountColor)}>
             {formatTransactionAmount(row.original.amountInUsd)}
           </div>
         );
@@ -308,8 +308,8 @@ export function getTransactionColumns(
       size: 140, // Currency formatted amounts
       minSize: 120,
       meta: {
-        headerClassName: 'text-center',
-        cellClassName: 'text-center',
+        headerClassName: 'text-left',
+        cellClassName: 'text-left',
       },
     },
     {
