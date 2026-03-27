@@ -40,6 +40,8 @@ export interface Transaction {
   transactionId: string;
   userId: string;
   merchantProfileId: string | null;
+  /** Merchant profile label (e.g. igaming, peptide) for the profile used on this transaction */
+  merchantProfileName?: string | null;
   profileId: string | null;
   connectorId: string | null;
   gatewayId: string;

@@ -391,44 +391,50 @@ export function getTransactionColumns(
         <DataGridColumnHeader column={column} title="Merchant User" />
       ),
       cell: ({ row }) => {
+        const profileName = row.original.merchantProfileName?.trim();
         return (
-          <div className="font-medium text-foreground">
-            {row.original.user?.name || '-'}
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <div className="font-medium text-foreground">{row.original.user?.name || '-'}</div>
+            {profileName ? (
+              <div className="truncate text-xs text-muted-foreground" title={profileName}>
+                {profileName}
+              </div>
+            ) : null}
           </div>
         );
       },
-      size: 160, // Merchant user names
-      minSize: 140,
+      size: 180,
+      minSize: 150,
       meta: {
         headerClassName: 'text-left',
         cellClassName: 'text-left',
       },
     },
-      {
-        id: 'actions',
-        header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Action" />
-        ),
-        cell: ({ row }) => (
-          <TransactionActionMenu
-            transaction={row.original}
-            onChargeback={onChargeback}
-            onRefund={onRefund}
-            onSuspicious={onSuspicious}
-            onViewLogs={onViewLogs}
-            onResendWebhook={onResendWebhook}
-            resendingWebhookTransactionId={resendingWebhookTransactionId}
-            showDisabledActions={showDisabledActions}
-          />
-        ),
-        enableSorting: false,
-        size: 80, // Three dots button
-        minSize: 70,
-        meta: {
-          headerClassName: 'text-left',
-          cellClassName: 'text-left',
-        },
+    {
+      id: 'actions',
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title="Action" />
+      ),
+      cell: ({ row }) => (
+        <TransactionActionMenu
+          transaction={row.original}
+          onChargeback={onChargeback}
+          onRefund={onRefund}
+          onSuspicious={onSuspicious}
+          onViewLogs={onViewLogs}
+          onResendWebhook={onResendWebhook}
+          resendingWebhookTransactionId={resendingWebhookTransactionId}
+          showDisabledActions={showDisabledActions}
+        />
+      ),
+      enableSorting: false,
+      size: 80, // Three dots button
+      minSize: 70,
+      meta: {
+        headerClassName: 'text-left',
+        cellClassName: 'text-left',
       },
+    },
   ];
 }
 
