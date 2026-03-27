@@ -22,6 +22,8 @@ export interface Transaction {
   merchantProfileId: string | null;
   acquirerId: string | null;
   gatewayId: string;
+  /** Backend PaymentSource enum string, e.g. api | payment_link */
+  paymentSource?: string | null;
   orderId: string;
   firstName: string;
   lastName: string;

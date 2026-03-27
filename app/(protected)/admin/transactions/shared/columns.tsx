@@ -18,6 +18,7 @@ import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { formatCardTypeDisplay } from '@/lib/utils/format-card-type';
+import { formatPaymentSourceDisplay } from '@/lib/utils/format-payment-source';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 function getCountryDisplayName(code: string) {
@@ -129,6 +130,15 @@ export function getTransactionColumns(
           ? 'text-green-700 dark:text-green-500 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-900'
           : 'text-amber-700 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900';
 
+        const paymentSourceLabel = formatPaymentSourceDisplay(row.original.paymentSource);
+        const paymentSourceKey = String(row.original.paymentSource ?? 'api').toLowerCase();
+        const paymentSourceBadgeClassName =
+          paymentSourceKey === 'payment_link'
+            ? 'text-violet-700 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/30 border-violet-200 dark:border-violet-900'
+            : paymentSourceKey === 'api' || paymentSourceKey === ''
+              ? 'text-sky-700 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/30 border-sky-200 dark:border-sky-900'
+              : 'text-muted-foreground bg-muted/40 border-border';
+
         return (
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
@@ -161,6 +171,16 @@ export function getTransactionColumns(
                   )}
                 >
                   {cardFlowLabel}
+                </Badge>
+
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    'inline-flex h-5 items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+                    paymentSourceBadgeClassName
+                  )}
+                >
+                  {paymentSourceLabel}
                 </Badge>
               </div>
             </div>
