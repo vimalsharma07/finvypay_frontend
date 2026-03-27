@@ -14,11 +14,11 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Transaction } from '@/lib/services/admin/transaction';
 import { formatTransactionStatus, formatTransactionDate } from './utils';
-import { 
-  User, 
-  CreditCard, 
-  Info, 
-  Hash, 
+import {
+  User,
+  CreditCard,
+  Info,
+  Hash,
   Webhook,
   Calendar,
   CheckCircle2,
@@ -27,7 +27,9 @@ import {
   AlertCircle,
   RotateCcw,
   Copy,
-  Check
+  Check,
+  FileText,
+  X,
 } from 'lucide-react';
 
 interface TransactionDetailsDialogProps {
@@ -36,6 +38,8 @@ interface TransactionDetailsDialogProps {
   transaction: Transaction | null;
   onResendWebhook?: (transaction: Transaction) => void;
   isResendingWebhook?: boolean;
+  /** Opens transaction logs (e.g. Transaction Logs dialog). */
+  onViewLogs?: (transaction: Transaction) => void;
 }
 
 interface InfoFieldProps {
@@ -59,6 +63,7 @@ export function TransactionDetailsDialog({
   transaction,
   onResendWebhook,
   isResendingWebhook = false,
+  onViewLogs,
 }: TransactionDetailsDialogProps) {
   const [copied, setCopied] = useState(false);
   
@@ -91,21 +96,22 @@ export function TransactionDetailsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-7xl max-h-[95vh] overflow-hidden flex flex-col p-0">
         <DialogHeader className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-background to-muted/20 mb-0">
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex flex-wrap items-center gap-3">
             <DialogTitle className="text-2xl font-bold">Transaction Details</DialogTitle>
             {transaction.transactionId && (
               <div className="flex items-center gap-1">
-                <Hash className="size-4 text-muted-foreground" />
+                <Hash className="size-4 shrink-0 text-muted-foreground" />
                 <span className="text-sm font-mono text-muted-foreground">{transaction.transactionId}</span>
                 <button
+                  type="button"
                   onClick={handleCopyTransactionId}
-                  className="p-1 rounded-md hover:bg-muted transition-colors group"
+                  className="group rounded-md p-1 transition-colors hover:bg-muted"
                   title="Copy Transaction ID"
                 >
                   {copied ? (
                     <Check className="size-3.5 text-primary" />
                   ) : (
-                    <Copy className="size-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                    <Copy className="size-3.5 text-muted-foreground transition-colors group-hover:text-foreground" />
                   )}
                 </button>
               </div>
@@ -329,22 +335,39 @@ export function TransactionDetailsDialog({
           </Tabs>
         </DialogBody>
 
-        <DialogFooter className="px-6 pb-6 border-t pt-4">
-          {onResendWebhook && (
-            <Button
-              variant="outline"
-              onClick={() => onResendWebhook(transaction)}
-              disabled={!transaction.transactionId || isResendingWebhook}
-            >
-              {isResendingWebhook ? (
-                <Loader2 className="mr-2 size-4 animate-spin" />
-              ) : (
-                <Webhook className="mr-2 size-4" />
-              )}
-              Resend webhook
-            </Button>
-          )}
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="flex flex-row flex-wrap items-center justify-between gap-3 border-t px-6 pb-6 pt-4 sm:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            {onViewLogs && (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!transaction.transactionId}
+                onClick={() => onViewLogs(transaction)}
+                className="gap-1.5"
+              >
+                <FileText className="size-4" />
+                Logs
+              </Button>
+            )}
+            {onResendWebhook && (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!transaction.transactionId || isResendingWebhook}
+                onClick={() => onResendWebhook(transaction)}
+                className="gap-1.5"
+              >
+                {isResendingWebhook ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Webhook className="size-4" />
+                )}
+                Resend webhook
+              </Button>
+            )}
+          </div>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="gap-1.5">
+            <X className="size-4" />
             Close
           </Button>
         </DialogFooter>

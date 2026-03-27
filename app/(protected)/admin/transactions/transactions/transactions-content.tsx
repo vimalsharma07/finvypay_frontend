@@ -248,6 +248,14 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
     setLogsDialogOpen(true);
   }, []);
 
+  const handleViewLogsFromDetails = useCallback(
+    (transaction: Transaction) => {
+      handleViewLogs(transaction);
+      setDetailsDialogOpen(false);
+    },
+    [handleViewLogs]
+  );
+
   const handleResendWebhook = useCallback(async (transaction: Transaction) => {
     const tid = transaction.transactionId?.trim();
     if (!tid) {
@@ -506,6 +514,7 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
           !!selectedTransaction?.transactionId &&
           resendingWebhookTransactionId === selectedTransaction.transactionId
         }
+        onViewLogs={handleViewLogsFromDetails}
       />
 
       <DynamicChargebackDialog

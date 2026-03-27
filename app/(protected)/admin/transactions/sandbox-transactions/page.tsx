@@ -251,6 +251,14 @@ export default function SandboxTransactionsPage() {
     setLogsDialogOpen(true);
   }, []);
 
+  const handleViewLogsFromDetails = useCallback(
+    (transaction: Transaction) => {
+      handleViewLogs(transaction);
+      setDetailsDialogOpen(false);
+    },
+    [handleViewLogs]
+  );
+
   const handleApplyFilters = useCallback(
     (appliedFilters: FilterFields) => {
       setFilters(appliedFilters);
@@ -441,6 +449,7 @@ export default function SandboxTransactionsPage() {
           !!selectedTransaction?.transactionId &&
           resendingWebhookTransactionId === selectedTransaction.transactionId
         }
+        onViewLogs={handleViewLogsFromDetails}
       />
 
       <TransactionLogsDialog

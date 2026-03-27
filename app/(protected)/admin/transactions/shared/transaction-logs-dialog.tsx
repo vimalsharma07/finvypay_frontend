@@ -12,11 +12,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, FileText, Webhook, Server } from 'lucide-react';
+import { Loader2, FileText, Webhook, Server, Send } from 'lucide-react';
 import { getAdminLogs, type LogEntry, type LogType } from '@/lib/services/admin/logs';
-import { Transaction } from '@/lib/services/admin/transaction';
+import { resendTransactionWebhook, Transaction } from '@/lib/services/admin/transaction';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import { TransactionLogEntryDetail } from './transaction-log-entry-detail';
 
 type TransactionLogTab = 'txn_logs' | 'webhook_logs' | 'provider_logs';
@@ -51,6 +52,7 @@ export function TransactionLogsDialog({
     webhook_logs: [],
     provider_logs: [],
   });
+  const [isResendingWebhook, setIsResendingWebhook] = useState(false);
   const requestSeqRef = useRef(0);
 
   const transactionId = transaction?.transactionId?.trim() || '';
@@ -136,6 +138,39 @@ export function TransactionLogsDialog({
     [open, transactionId, internalTransactionId, orderId, gatewayId, paymentMode, fetchByTransactionId]
   );
 
+  const handleResendWebhook = useCallback(async () => {
+    if (!transactionId) {
+      toast.error('Missing transaction ID');
+      return;
+    }
+    setIsResendingWebhook(true);
+    try {
+      const response = await resendTransactionWebhook(transactionId, paymentMode === 'sandbox');
+      handleApiResponse(response, {
+        onSuccess: (data) => {
+          const msg =
+            data &&
+            typeof data === 'object' &&
+            'message' in data &&
+            data.message != null &&
+            String(data.message).trim()
+              ? String(data.message)
+              : 'Webhook resent successfully';
+          toast.success(msg);
+          void loadTabLogs('webhook_logs');
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to resend webhook');
+        },
+      });
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+      console.error('Resend webhook error:', error);
+    } finally {
+      setIsResendingWebhook(false);
+    }
+  }, [transactionId, paymentMode, loadTabLogs]);
+
   useEffect(() => {
     loadTabLogs(activeTab);
   }, [activeTab, loadTabLogs]);
@@ -177,9 +212,28 @@ export function TransactionLogsDialog({
                 return (
                   <TabsContent key={tabKey} value={tabKey} className="mt-0 h-full">
                     <div className="flex h-full flex-col">
-                      <div className="flex items-center justify-between border-b px-4 py-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3">
                         <h3 className="font-semibold">{tabTitle}</h3>
-                        <Badge variant="outline">{tabLogs.length} entries</Badge>
+                        <div className="flex flex-wrap items-center gap-2">
+                          {tabKey === 'webhook_logs' && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="gap-1.5"
+                              disabled={!transactionId || isResendingWebhook}
+                              onClick={() => void handleResendWebhook()}
+                            >
+                              {isResendingWebhook ? (
+                                <Loader2 className="size-3.5 animate-spin" />
+                              ) : (
+                                <Send className="size-3.5" />
+                              )}
+                              Resend webhook
+                            </Button>
+                          )}
+                          <Badge variant="outline">{tabLogs.length} entries</Badge>
+                        </div>
                       </div>
                       <ScrollArea className="min-w-0 flex-1 p-4" viewportClassName="min-w-0">
                         {tabLoading ? (
