@@ -42,6 +42,8 @@ export interface Transaction {
   merchantProfileId: string | null;
   /** Merchant profile label (e.g. igaming, peptide) for the profile used on this transaction */
   merchantProfileName?: string | null;
+  /** Industry name from the merchant profile (e.g. iGaming, Peptide) */
+  industryName?: string | null;
   profileId: string | null;
   connectorId: string | null;
   gatewayId: string;

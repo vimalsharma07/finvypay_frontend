@@ -364,6 +364,49 @@ export function getTransactionColumns(
       },
     },
     {
+      id: 'merchantUser',
+      accessorFn: (row) => row.user?.name || '',
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title="Merchant User" />
+      ),
+      cell: ({ row }) => {
+        const profileName = row.original.merchantProfileName?.trim();
+        const industryName = row.original.industryName?.trim();
+        const industryBadgeClassName =
+          'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900';
+        return (
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <div className="font-medium text-foreground">{row.original.user?.name || '-'}</div>
+            {profileName ? (
+              <div className="truncate text-xs text-muted-foreground" title={profileName}>
+                {profileName}
+              </div>
+            ) : null}
+            {industryName ? (
+              <div className="mt-1 flex flex-wrap gap-2">
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    'inline-flex h-5 max-w-full items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+                    industryBadgeClassName
+                  )}
+                  title={industryName}
+                >
+                  <span className="truncate">{industryName}</span>
+                </Badge>
+              </div>
+            ) : null}
+          </div>
+        );
+      },
+      size: 180,
+      minSize: 150,
+      meta: {
+        headerClassName: 'text-left',
+        cellClassName: 'text-left',
+      },
+    },
+    {
       id: 'transactionDate',
       accessorKey: 'transactionDate',
       header: ({ column }) => (
@@ -379,32 +422,6 @@ export function getTransactionColumns(
       },
       size: 180, // Formatted date/time
       minSize: 160,
-      meta: {
-        headerClassName: 'text-left',
-        cellClassName: 'text-left',
-      },
-    },
-    {
-      id: 'merchantUser',
-      accessorFn: (row) => row.user?.name || '',
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Merchant User" />
-      ),
-      cell: ({ row }) => {
-        const profileName = row.original.merchantProfileName?.trim();
-        return (
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <div className="font-medium text-foreground">{row.original.user?.name || '-'}</div>
-            {profileName ? (
-              <div className="truncate text-xs text-muted-foreground" title={profileName}>
-                {profileName}
-              </div>
-            ) : null}
-          </div>
-        );
-      },
-      size: 180,
-      minSize: 150,
       meta: {
         headerClassName: 'text-left',
         cellClassName: 'text-left',
