@@ -40,6 +40,7 @@ import { toast } from 'sonner';
 import { SearchInput } from '../shared/search-input';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 import { getTransactionColumns } from '../shared/columns';
+import { TransactionLogsDialog } from '../shared/transaction-logs-dialog';
 import { filterTransactions } from '../shared/utils';
 import { TransactionDetailsDialog } from '../shared/transaction-details-dialog';
 import { Filter as FilterComponent } from '@/components/common/Filter';
@@ -61,6 +62,8 @@ export default function SandboxTransactionsPage() {
   const [meta, setMeta] = useState<TransactionListResponse['data']['meta'] | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [logsDialogOpen, setLogsDialogOpen] = useState(false);
+  const [transactionForLogs, setTransactionForLogs] = useState<Transaction | null>(null);
   const [resendingWebhookTransactionId, setResendingWebhookTransactionId] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterFields>({});
   const [filterOpen, setFilterOpen] = useState(false);
@@ -243,6 +246,11 @@ export default function SandboxTransactionsPage() {
     }
   }, []);
 
+  const handleViewLogs = useCallback((transaction: Transaction) => {
+    setTransactionForLogs(transaction);
+    setLogsDialogOpen(true);
+  }, []);
+
   const handleApplyFilters = useCallback(
     (appliedFilters: FilterFields) => {
       setFilters(appliedFilters);
@@ -307,10 +315,11 @@ export default function SandboxTransactionsPage() {
         undefined,
         undefined,
         undefined,
+        handleViewLogs,
         handleResendWebhook,
         resendingWebhookTransactionId
       ),
-    [handleViewDetails, handleResendWebhook, resendingWebhookTransactionId]
+    [handleViewDetails, handleViewLogs, handleResendWebhook, resendingWebhookTransactionId]
   );
 
   const table = useReactTable({
@@ -432,6 +441,13 @@ export default function SandboxTransactionsPage() {
           !!selectedTransaction?.transactionId &&
           resendingWebhookTransactionId === selectedTransaction.transactionId
         }
+      />
+
+      <TransactionLogsDialog
+        open={logsDialogOpen}
+        onOpenChange={setLogsDialogOpen}
+        transaction={transactionForLogs}
+        paymentMode="sandbox"
       />
 
       <FilterComponent

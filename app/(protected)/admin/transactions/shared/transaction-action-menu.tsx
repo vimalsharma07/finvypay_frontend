@@ -1,6 +1,6 @@
 'use client';
 
-import { EllipsisVertical, DollarSign, Ban, ArrowLeftRight, Webhook } from 'lucide-react';
+import { EllipsisVertical, DollarSign, Ban, ArrowLeftRight, Webhook, Logs } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -18,6 +18,7 @@ interface TransactionActionMenuProps {
   onSuspicious?: (transaction: Transaction) => void;
   /** Production admin only: POST /admin/transaction/:transactionId/resend-webhook */
   onResendWebhook?: (transaction: Transaction) => void;
+  onViewLogs?: (transaction: Transaction) => void;
   resendingWebhookTransactionId?: string | null;
   showDisabledActions?: boolean; // Control visibility of refund, chargeback, suspicious
 }
@@ -28,6 +29,7 @@ export function TransactionActionMenu({
   onRefund,
   onSuspicious,
   onResendWebhook,
+  onViewLogs,
   resendingWebhookTransactionId = null,
   showDisabledActions = true, // Default to true for production transactions
 }: TransactionActionMenuProps) {
@@ -91,6 +93,15 @@ export function TransactionActionMenu({
             >
               <Webhook className="mr-1 size-4" />
               Resend webhook
+            </DropdownMenuItem>
+          </>
+        )}
+        {onViewLogs && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => onViewLogs(transaction)}>
+              <Logs className="mr-1 size-4" />
+              Logs
             </DropdownMenuItem>
           </>
         )}

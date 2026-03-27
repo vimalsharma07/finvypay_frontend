@@ -71,6 +71,7 @@ export function getTransactionColumns(
   onChargeback?: (transaction: Transaction) => void,
   onRefund?: (transaction: Transaction) => void,
   onSuspicious?: (transaction: Transaction) => void,
+  onViewLogs?: (transaction: Transaction) => void,
   onResendWebhook?: (transaction: Transaction) => void,
   resendingWebhookTransactionId?: string | null
 ): ColumnDef<Transaction>[] {
@@ -371,6 +372,7 @@ export function getTransactionColumns(
             onChargeback={onChargeback}
             onRefund={onRefund}
             onSuspicious={onSuspicious}
+            onViewLogs={onViewLogs}
             onResendWebhook={onResendWebhook}
             resendingWebhookTransactionId={resendingWebhookTransactionId}
             showDisabledActions={showDisabledActions}
