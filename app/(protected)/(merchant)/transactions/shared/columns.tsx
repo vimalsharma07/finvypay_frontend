@@ -19,6 +19,16 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
+function getCountryDisplayName(code: string) {
+  const normalizedCode = code?.trim().toUpperCase();
+  if (!normalizedCode || normalizedCode.length !== 2) return null;
+  try {
+    return new Intl.DisplayNames(['en'], { type: 'region' }).of(normalizedCode) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 // Transaction ID Cell Component
 function TransactionIdCell({ 
   transactionId, 
@@ -163,20 +173,28 @@ export function getTransactionColumns(
       ),
       cell: ({ row }) => {
         const country = row.original.country ?? '';
+        const countryCode = country.trim().toUpperCase();
+        const countryName = getCountryDisplayName(countryCode);
         const getFlagEmoji = (code: string) => {
           if (!code || code.length !== 2) return '🌐';
           const codePoints = code.toUpperCase().split('').map((char) => 127397 + char.charCodeAt(0));
           return String.fromCodePoint(...codePoints);
         };
         return (
-          <div className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/50 px-2 py-0.5">
-            <span className="text-sm leading-none">{getFlagEmoji(country)}</span>
-            <span className="text-xs font-medium text-foreground tabular-nums">{country || '—'}</span>
+          <div className="flex min-w-0 items-center gap-1.5 text-sm">
+            <span className="text-base leading-none">{getFlagEmoji(countryCode)}</span>
+            {countryCode ? (
+              <span className="truncate font-medium text-foreground">
+                {countryName || countryCode} - {countryCode}
+              </span>
+            ) : (
+              <span className="text-muted-foreground">—</span>
+            )}
           </div>
         );
       },
-      size: 90,
-      minSize: 80,
+      size: 180,
+      minSize: 150,
       meta: {
         headerClassName: 'text-left',
         cellClassName: 'text-left',
