@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Transaction } from '@/lib/services/admin/transaction';
 import { formatTransactionStatus, formatTransactionDate } from './utils';
 import { formatCardTypeDisplay } from '@/lib/utils/format-card-type';
+import { formatTransactionTypeDisplay } from '@/lib/utils/format-transaction-type';
 import {
   User,
   CreditCard,
@@ -242,14 +243,7 @@ export function TransactionDetailsDialog({
                   <InfoField label="Merchant Email" value={transaction.user?.email} />
                   <InfoField label="Amount" value={`${transaction.amount} ${transaction.currency}`} />
                   <InfoField label="Amount (USD)" value={`$${parseFloat(transaction.amountInUsd).toFixed(2)}`} />
-                  <InfoField
-                    label="Transaction Type"
-                    value={
-                      transaction.transactionType !== null
-                        ? `Type ${transaction.transactionType}`
-                        : null
-                    }
-                  />
+                  <InfoField label="Transaction Type" value={formatTransactionTypeDisplay(transaction.transactionType)} />
                   <InfoField label="Message" value={transaction.message} />
                   <InfoField label="Risk Blocked" value={transaction.riskBlocked ? 'Yes' : 'No'} />
                   <InfoField label="Profile ID (Legacy)" value={transaction.profileId} />
