@@ -427,6 +427,11 @@ export default function SandboxTransactionsPage() {
         open={detailsDialogOpen}
         onOpenChange={setDetailsDialogOpen}
         transaction={selectedTransaction}
+        onResendWebhook={handleResendWebhook}
+        isResendingWebhook={
+          !!selectedTransaction?.transactionId &&
+          resendingWebhookTransactionId === selectedTransaction.transactionId
+        }
       />
 
       <FilterComponent

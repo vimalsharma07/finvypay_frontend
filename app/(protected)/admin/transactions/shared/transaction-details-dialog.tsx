@@ -34,6 +34,8 @@ interface TransactionDetailsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   transaction: Transaction | null;
+  onResendWebhook?: (transaction: Transaction) => void;
+  isResendingWebhook?: boolean;
 }
 
 interface InfoFieldProps {
@@ -55,6 +57,8 @@ export function TransactionDetailsDialog({
   open,
   onOpenChange,
   transaction,
+  onResendWebhook,
+  isResendingWebhook = false,
 }: TransactionDetailsDialogProps) {
   const [copied, setCopied] = useState(false);
   
@@ -326,6 +330,20 @@ export function TransactionDetailsDialog({
         </DialogBody>
 
         <DialogFooter className="px-6 pb-6 border-t pt-4">
+          {onResendWebhook && (
+            <Button
+              variant="outline"
+              onClick={() => onResendWebhook(transaction)}
+              disabled={!transaction.transactionId || isResendingWebhook}
+            >
+              {isResendingWebhook ? (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              ) : (
+                <Webhook className="mr-2 size-4" />
+              )}
+              Resend webhook
+            </Button>
+          )}
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Close
           </Button>

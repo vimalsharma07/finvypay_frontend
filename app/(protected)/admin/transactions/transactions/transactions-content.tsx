@@ -492,6 +492,11 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
         open={detailsDialogOpen}
         onOpenChange={setDetailsDialogOpen}
         transaction={selectedTransaction}
+        onResendWebhook={handleResendWebhook}
+        isResendingWebhook={
+          !!selectedTransaction?.transactionId &&
+          resendingWebhookTransactionId === selectedTransaction.transactionId
+        }
       />
 
       <DynamicChargebackDialog
