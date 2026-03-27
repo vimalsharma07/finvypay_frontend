@@ -133,6 +133,9 @@ export function TransactionDetailsDialog({
               </Badge>
               <div className="flex flex-col gap-1">
                 <div className="text-base font-semibold">{statusInfo?.label || 'Unknown'}</div>
+                <div className="max-w-[420px] break-words text-sm text-muted-foreground">
+                  <span className="font-semibold">Message:</span> {transaction.message?.trim() || '-'}
+                </div>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Calendar className="size-3" />
                   <span>{transactionDateFormatted}</span>
