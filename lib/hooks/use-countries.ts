@@ -8,7 +8,6 @@ let cachedCountries: Country[] | null = null;
 let pendingRequest: Promise<Country[]> | null = null;
 
 const COUNTRIES_QUERY = {
-  page: 1,
   limit: 1000,
   sortBy: 'countryName',
   sortOrder: 'ASC' as const,

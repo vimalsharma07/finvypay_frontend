@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { DEFAULT_LIST_PAGE_SIZE, LIST_PAGE_SIZE_OPTIONS } from '@/lib/types/pagination';
 
 interface DataGridPaginationProps {
   sizes?: number[];
@@ -23,7 +24,7 @@ function DataGridPagination(props: DataGridPaginationProps) {
   const { table, recordCount, isLoading } = useDataGrid();
 
   const defaultProps: Partial<DataGridPaginationProps> = {
-    sizes: [5, 10, 25, 50, 100],
+    sizes: [...LIST_PAGE_SIZE_OPTIONS],
     sizesLabel: 'Show',
     sizesDescription: 'per page',
     sizesSkeleton: <Skeleton className="h-8 w-44" />,
@@ -37,8 +38,16 @@ function DataGridPagination(props: DataGridPaginationProps) {
 
   const btnBaseClasses = 'size-7 p-0 text-sm';
   const btnArrowClasses = btnBaseClasses + ' rtl:transform rtl:rotate-180';
+  const navEdgeClass =
+    'h-8 px-2 gap-1 text-sm font-normal text-muted-foreground hover:text-foreground';
   const pageIndex = table.getState().pagination.pageIndex;
   const pageSize = table.getState().pagination.pageSize;
+  const baseSizes = mergedProps?.sizes?.length
+    ? mergedProps.sizes
+    : [...LIST_PAGE_SIZE_OPTIONS];
+  const sizesForSelect = baseSizes.includes(pageSize)
+    ? baseSizes
+    : [...baseSizes, pageSize].sort((a, b) => a - b);
   const from = pageIndex * pageSize + 1;
   const to = Math.min((pageIndex + 1) * pageSize, recordCount);
   const pageCount = table.getPageCount();
@@ -133,7 +142,9 @@ function DataGridPagination(props: DataGridPaginationProps) {
           mergedProps?.sizesSkeleton
         ) : (
           <>
-            <div className="text-sm text-muted-foreground">Rows per page</div>
+            <div className="text-sm text-muted-foreground">
+              {mergedProps?.sizesLabel ?? 'Show'}
+            </div>
             <Select
               value={`${pageSize}`}
               indicatorPosition="right"
@@ -143,16 +154,19 @@ function DataGridPagination(props: DataGridPaginationProps) {
               }}
             >
               <SelectTrigger className="w-fit" size="sm">
-                <SelectValue placeholder={`${pageSize}`} />
+                <SelectValue placeholder={`${DEFAULT_LIST_PAGE_SIZE}`} />
               </SelectTrigger>
               <SelectContent side="top" className="min-w-[50px]">
-                {mergedProps?.sizes?.map((size: number) => (
+                {sizesForSelect.map((size: number) => (
                   <SelectItem key={size} value={`${size}`}>
                     {size}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            <span className="text-sm text-muted-foreground">
+              {mergedProps?.sizesDescription ?? 'per page'}
+            </span>
           </>
         )}
       </div>
@@ -162,36 +176,36 @@ function DataGridPagination(props: DataGridPaginationProps) {
         ) : (
           <>
             <div className="text-sm text-muted-foreground text-nowrap order-2 sm:order-1">{paginationInfo}</div>
-            {pageCount > 1 && (
-              <div className="flex items-center space-x-1 order-1 sm:order-2">
+            {recordCount > 0 && (
+              <div className="flex flex-wrap items-center justify-center gap-1 order-1 sm:order-2">
                 <Button
                   size="sm"
-                  mode="icon"
                   variant="ghost"
-                  className={btnArrowClasses}
+                  className={cn(navEdgeClass, 'rtl:transform rtl:rotate-180')}
                   onClick={() => table.previousPage()}
                   disabled={!table.getCanPreviousPage()}
                 >
-                  <span className="sr-only">Go to previous page</span>
-                  <ChevronLeftIcon className="size-4" />
+                  <ChevronLeftIcon className="size-4 shrink-0" />
+                  Previous
                 </Button>
 
-                {renderEllipsisPrevButton()}
-
-                {renderPageButtons()}
-
-                {renderEllipsisNextButton()}
+                {pageCount > 1 && (
+                  <>
+                    {renderEllipsisPrevButton()}
+                    {renderPageButtons()}
+                    {renderEllipsisNextButton()}
+                  </>
+                )}
 
                 <Button
                   size="sm"
-                  mode="icon"
                   variant="ghost"
-                  className={btnArrowClasses}
+                  className={cn(navEdgeClass, 'rtl:transform rtl:rotate-180')}
                   onClick={() => table.nextPage()}
                   disabled={!table.getCanNextPage()}
                 >
-                  <span className="sr-only">Go to next page</span>
-                  <ChevronRightIcon className="size-4" />
+                  Next
+                  <ChevronRightIcon className="size-4 shrink-0" />
                 </Button>
               </div>
             )}

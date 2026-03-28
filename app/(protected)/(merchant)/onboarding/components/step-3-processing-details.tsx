@@ -85,7 +85,6 @@ export function Step3ProcessingDetails({
       try {
         // Fetch industries
         const industriesResponse = await getIndustries({
-          page: 1,
           limit: 1000,
           sortBy: 'name',
           sortOrder: 'ASC',

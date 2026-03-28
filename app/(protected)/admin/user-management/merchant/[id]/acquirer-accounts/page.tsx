@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Cpu, Eye, Pencil, Trash2, XCircle } from 'lucide-react';
 import { Container } from '@/components/common/container';
@@ -44,6 +44,7 @@ import {
 import {
   getUserConnectors,
   MerchantAcquirerAccount,
+  MerchantAcquirerAccountListMeta,
   MerchantAcquirerAccountListResponse,
 } from '@/lib/services/admin/connectors';
 import { softDeleteMerchantAcquirerAccount, rejectMerchantAcquirerAccount, RejectMerchantAcquirerAccountPayload, togglePrimaryMerchantAcquirerAccount, toggleActiveMerchantAcquirerAccount } from '@/lib/services/admin/acquirer-accounts';
@@ -53,6 +54,7 @@ import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { SearchSelect } from '@/components/ui/molecules/SearchSelect';
 import type { Option } from '@/lib/types/common-types';
 import Link from 'next/link';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
 
 function getInitials(name: string | null | undefined): string {
   if (!name?.trim()) return '–';
@@ -67,11 +69,10 @@ export default function AcquirerAccountsPage() {
   const userId = params.id as string;
   const [loading, setLoading] = useState(true);
   const [connectors, setConnectors] = useState<MerchantAcquirerAccount[]>([]);
-  const [meta, setMeta] = useState<
-    MerchantAcquirerAccountListResponse['data']['meta'] | null
-  >(null);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [meta, setMeta] = useState<MerchantAcquirerAccountListMeta | null>(null);
+  const [limit, setLimit] = useState(20);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
   const [sortBy, setSortBy] = useState<string>('createdAt');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -105,34 +106,32 @@ export default function AcquirerAccountsPage() {
     fetchMerchantUser();
   }, [userId]);
 
-  // Fetch connectors
-  const fetchConnectors = async (
-    pageNum: number,
+  const fetchConnectors = useCallback(async (
+    cursor: string | undefined,
     pageLimit: number,
-    profileId?: string,
+    profileId: string | undefined,
+    sortField: string,
+    sortDir: 'ASC' | 'DESC',
   ) => {
     setLoading(true);
     try {
-      const params: any = {
-        page: pageNum,
+      const params: Record<string, string | number | undefined> = {
         limit: pageLimit,
-        userId: userId,
+        userId: Number(userId),
+        sortBy: sortField,
+        sortOrder: sortDir,
       };
-
-      // Add merchantProfileId if provided
-      if (profileId) {
-        params.merchantProfileId = profileId;
-      }
+      if (cursor) params.cursor = cursor;
+      if (profileId) params.merchantProfileId = Number(profileId);
 
       const response = await getUserConnectors(params);
 
       handleApiResponse<MerchantAcquirerAccountListResponse>(response, {
         onSuccess: (data) => {
-          if (data.success) {
-            // New format: { success: true, data: [...], meta: {...} }
-            setConnectors(data.data);
-            setMeta(data.meta);
-          }
+          if (!data?.success) return;
+          const list = Array.isArray(data.data) ? data.data : [];
+          setConnectors(list);
+          setMeta(data.meta ?? null);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to load acquirer accounts');
@@ -144,7 +143,7 @@ export default function AcquirerAccountsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
 
   // Fetch merchant profiles
   const fetchProfiles = async () => {
@@ -191,12 +190,15 @@ export default function AcquirerAccountsPage() {
     }
   }, [userId]);
 
-  // Fetch connectors when page, limit, or selectedProfileId changes
+  useLayoutEffect(() => {
+    if (selectedProfileId) resetCursor();
+  }, [selectedProfileId, resetCursor]);
+
   useEffect(() => {
     if (userId && selectedProfileId) {
-      fetchConnectors(page, limit, selectedProfileId);
+      fetchConnectors(requestCursor, limit, selectedProfileId, sortBy, sortOrder);
     }
-  }, [userId, page, limit, selectedProfileId]);
+  }, [userId, requestCursor, limit, selectedProfileId, sortBy, sortOrder, fetchConnectors]);
 
   // Define table headers
   const headers: TableHeader<MerchantAcquirerAccount>[] = [
@@ -298,7 +300,7 @@ export default function AcquirerAccountsPage() {
                   onSuccess: () => {
                     toast.success('Acquirer account set as primary successfully');
                     // Refetch data to get updated state (backend will have updated previous primary)
-                    fetchConnectors(page, limit, selectedProfileId);
+                    fetchConnectors(requestCursor, limit, selectedProfileId, sortBy, sortOrder);
                   },
                   onError: (errorMessage) => {
                     toast.error(errorMessage || 'Failed to update primary status');
@@ -340,7 +342,7 @@ export default function AcquirerAccountsPage() {
                     );
                     // Refetch data to get updated state
                     if (selectedProfileId) {
-                      fetchConnectors(page, limit, selectedProfileId);
+                      fetchConnectors(requestCursor, limit, selectedProfileId, sortBy, sortOrder);
                     }
                   },
                   onError: (errorMessage) => {
@@ -415,23 +417,24 @@ export default function AcquirerAccountsPage() {
     },
   ];
 
-  // Handle page change
-  const handlePageChange = (pageIndex: number) => {
-    setPage(pageIndex + 1);
-  };
-
-  // Handle page size change
   const handlePageSizeChange = (newPageSize: number) => {
     setLimit(newPageSize);
-    setPage(1);
+    resetCursor();
   };
 
-  // Handle sort change
   const handleSortChange = (newSortBy: string, newSortOrder: 'ASC' | 'DESC') => {
     setSortBy(newSortBy);
     setSortOrder(newSortOrder);
-    setPage(1);
+    resetCursor();
   };
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   // Handle reject acquirer account
   const handleRejectAcquirerAccount = async () => {
@@ -452,7 +455,7 @@ export default function AcquirerAccountsPage() {
           setRejectReason('');
           // Refetch with current selected profile
           if (selectedProfileId) {
-            fetchConnectors(page, limit, selectedProfileId);
+            fetchConnectors(requestCursor, limit, selectedProfileId, sortBy, sortOrder);
           }
         },
         onError: (errorMessage) => {
@@ -484,7 +487,7 @@ export default function AcquirerAccountsPage() {
           setAccountToDelete(null);
           // Refetch with current selected profile
           if (selectedProfileId) {
-            fetchConnectors(page, limit, selectedProfileId);
+            fetchConnectors(requestCursor, limit, selectedProfileId, sortBy, sortOrder);
           }
         },
         onError: (errorMessage) => {
@@ -554,7 +557,6 @@ export default function AcquirerAccountsPage() {
                   value={selectedProfileId}
                   onChange={(value) => {
                     setSelectedProfileId(value);
-                    setPage(1);
                   }}
                   placeholder={loadingProfiles ? 'Loading profiles...' : 'Select a profile'}
                   disabled={loadingProfiles || profileOptions.length === 0}
@@ -574,10 +576,13 @@ export default function AcquirerAccountsPage() {
           getRowId={(row: MerchantAcquirerAccount) => String(row.id)}
           pagination={{
             pageSize: limit,
-            pageIndex: page - 1,
-            totalCount: meta?.totalItems ?? 0,
-            onPageChange: handlePageChange,
             onPageSizeChange: handlePageSizeChange,
+          }}
+          cursorPagination={{
+            meta,
+            onNext: handleCursorNext,
+            onPrev: handleCursorPrev,
+            canGoPrev,
           }}
           sorting={{
             sortBy: sortBy,

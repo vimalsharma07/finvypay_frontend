@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Link2, Eye, Pencil, Trash2 } from 'lucide-react';
 import { Container } from '@/components/common/container';
@@ -21,12 +21,10 @@ import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import {
   getUserCascadings,
-  createUserCascading,
-  updateUserCascading,
   deleteUserCascading,
-  updateUserCascadingPriority,
   updateUserCascadingStatus,
   CascadingRule,
+  CascadingRuleListMeta,
   CascadingRuleListResponse,
 } from '@/lib/services/admin/cascading';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
@@ -38,17 +36,17 @@ import { SearchSelect } from '@/components/ui/molecules/SearchSelect';
 import { ContentLoader } from '@/components/common/content-loader';
 import type { Option } from '@/lib/types/common-types';
 import { ConfirmComp } from '../../../../../../components/confirm-comp';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
 
 export default function CascadingPage() {
   const params = useParams();
   const userId = params.id as string;
   const [loading, setLoading] = useState(true);
   const [cascadings, setCascadings] = useState<CascadingRule[]>([]);
-  const [meta, setMeta] = useState<
-    CascadingRuleListResponse['data']['meta'] | null
-  >(null);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [meta, setMeta] = useState<CascadingRuleListMeta | null>(null);
+  const [limit, setLimit] = useState(20);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
   const [sortBy, setSortBy] = useState<string>('priority');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('ASC');
   const [profiles, setProfiles] = useState<MerchantProfile[]>([]);
@@ -60,9 +58,8 @@ export default function CascadingPage() {
 
   const isTableLoading = loading || profilesLoading;
 
-  // Fetch cascading rules
-  const fetchCascadings = async (
-    pageNum: number,
+  const fetchCascadings = useCallback(async (
+    cursor: string | undefined,
     pageLimit: number,
     sortField: string,
     sortDir: 'ASC' | 'DESC',
@@ -70,22 +67,21 @@ export default function CascadingPage() {
   ) => {
     setLoading(true);
     try {
-      const params: any = {
-        page: pageNum,
+      const params: Record<string, string | number | undefined> = {
         limit: pageLimit,
         sortBy: sortField,
         sortOrder: sortDir,
       };
+      if (cursor) params.cursor = cursor;
 
       const response = await getUserCascadings(userId, params, profileId);
 
       handleApiResponse<CascadingRuleListResponse>(response, {
         onSuccess: (data) => {
-          if (data.success) {
-            // New format: { success: true, data: [...], meta: {...} }
-            setCascadings(data.data);
-            setMeta(data.meta);
-          }
+          if (!data?.success) return;
+          const list = Array.isArray(data.data) ? data.data : [];
+          setCascadings(list);
+          setMeta(data.meta ?? null);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to load cascading rules');
@@ -97,13 +93,17 @@ export default function CascadingPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useLayoutEffect(() => {
+    if (selectedProfileId) resetCursor();
+  }, [selectedProfileId, resetCursor]);
 
   useEffect(() => {
     if (userId && selectedProfileId) {
-      fetchCascadings(page, limit, sortBy, sortOrder, selectedProfileId);
+      fetchCascadings(requestCursor, limit, sortBy, sortOrder, selectedProfileId);
     }
-  }, [userId, page, limit, sortBy, sortOrder, selectedProfileId]);
+  }, [userId, requestCursor, limit, sortBy, sortOrder, selectedProfileId, fetchCascadings]);
 
   // Fetch merchant profiles (reuse routing pattern)
   useEffect(() => {
@@ -201,7 +201,7 @@ export default function CascadingPage() {
                 handleApiResponse(response, {
                   onSuccess: () => {
                     toast.success('Cascading status updated');
-                    fetchCascadings(page, limit, sortBy, sortOrder, selectedProfileId);
+                    fetchCascadings(requestCursor, limit, sortBy, sortOrder, selectedProfileId);
                   },
                   onError: (errorMessage) => {
                     toast.error(errorMessage || 'Failed to update status');
@@ -249,23 +249,24 @@ export default function CascadingPage() {
     },
   ];
 
-  // Handle page change
-  const handlePageChange = (pageIndex: number) => {
-    setPage(pageIndex + 1);
-  };
-
-  // Handle page size change
   const handlePageSizeChange = (newPageSize: number) => {
     setLimit(newPageSize);
-    setPage(1);
+    resetCursor();
   };
 
-  // Handle sort change
   const handleSortChange = (newSortBy: string, newSortOrder: 'ASC' | 'DESC') => {
     setSortBy(newSortBy);
     setSortOrder(newSortOrder);
-    setPage(1);
+    resetCursor();
   };
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   return (
     <Fragment>
@@ -311,7 +312,6 @@ export default function CascadingPage() {
                   value={selectedProfileId}
                   onChange={(val) => {
                     setSelectedProfileId(val);
-                    setPage(1);
                   }}
                   placeholder="Select profile (industry)"
                 />
@@ -331,10 +331,13 @@ export default function CascadingPage() {
           getRowId={(row: CascadingRule) => String(row.id)}
           pagination={{
             pageSize: limit,
-            pageIndex: page - 1,
-            totalCount: meta?.totalItems ?? 0,
-            onPageChange: handlePageChange,
             onPageSizeChange: handlePageSizeChange,
+          }}
+          cursorPagination={{
+            meta,
+            onNext: handleCursorNext,
+            onPrev: handleCursorPrev,
+            canGoPrev,
           }}
           sorting={{
             sortBy: sortBy,
@@ -364,7 +367,7 @@ export default function CascadingPage() {
             handleApiResponse(response, {
               onSuccess: () => {
                 toast.success('Cascading rule deleted successfully');
-                fetchCascadings(page, limit, sortBy, sortOrder, selectedProfileId);
+                fetchCascadings(requestCursor, limit, sortBy, sortOrder, selectedProfileId);
               },
               onError: (errorMessage) => {
                 toast.error(errorMessage || 'Failed to delete cascading rule');

@@ -15,7 +15,7 @@ import { Container } from '@/components/common/container';
 import { Toolbar, ToolbarHeading, ToolbarActions } from '@/layouts/main/components/toolbar';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { getMerchantRates, upsertMerchantRates, type MerchantRates } from '@/lib/services/admin/merchant-rates';
-import { getMerchants, type Merchant } from '@/lib/services/admin/users';
+import { getAllMerchantsPaginated, type Merchant } from '@/lib/services/admin/users';
 import { toast } from 'sonner';
 
 const ratesSchema = z.object({
@@ -70,20 +70,12 @@ export default function AssignRatesPage() {
   useEffect(() => {
     const fetchAffiliates = async () => {
       try {
-        const response = await getMerchants({
-          page: 1,
-          limit: 500,
+        const rows = await getAllMerchantsPaginated({
           role: 'affiliate',
           sortBy: 'createdAt',
           sortOrder: 'DESC',
         });
-        handleApiResponse(response, {
-          onSuccess: (data) => {
-            if (data?.data && Array.isArray(data.data)) {
-              setAffiliates(data.data);
-            }
-          },
-        });
+        setAffiliates(rows);
       } catch (error) {
         console.error('Failed to fetch affiliates:', error);
       }

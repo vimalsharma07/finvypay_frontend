@@ -8,7 +8,6 @@ let cachedCurrencies: Currency[] | null = null;
 let pendingRequest: Promise<Currency[]> | null = null;
 
 const CURRENCIES_QUERY = {
-  page: 1,
   limit: 1000,
   sortBy: 'code',
   sortOrder: 'ASC' as const,

@@ -27,7 +27,9 @@ import {
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridTable } from '@/components/ui/data-grid-table';
-import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardFooter, CardTable } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -49,8 +51,11 @@ const DATE_FMT = 'yyyy-MM-dd HH:mm';
 export default function AdminApplicationListPage() {
   const [data, setData] = useState<MerchantApplication[]>([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState<{ total: number; page: number; limit: number; totalPages: number } | null>(null);
+  const [meta, setMeta] = useState<CursorPaginationMeta | null>(null);
   const [actioningId, setActioningId] = useState<string | null>(null);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
+  const [limit, setLimit] = useState(20);
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -73,15 +78,15 @@ export default function AdminApplicationListPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const page = pagination.pageIndex + 1;
-      const limit = pagination.pageSize;
-
-      const response = await getMerchantApplications({ page, limit });
+      const response = await getMerchantApplications({
+        ...(requestCursor ? { cursor: requestCursor } : {}),
+        limit,
+      });
       handleApiResponse(response, {
         onSuccess: (res) => {
           if (res && res.success && res.data) {
             setData(res.data);
-            setMeta(res.meta);
+            setMeta(res.meta ?? null);
           } else {
             toast.error('Invalid response structure while loading applications');
           }
@@ -97,11 +102,23 @@ export default function AdminApplicationListPage() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.pageIndex, pagination.pageSize]);
+  }, [requestCursor, limit]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useEffect(() => {
+    setPagination((p) => ({ ...p, pageSize: limit }));
+  }, [limit]);
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   const handleChangeStatus = useCallback(
     async (userId: string, kycStatus: ApplicationKycStatus) => {
@@ -237,11 +254,20 @@ export default function AdminApplicationListPage() {
       pagination,
     },
     onSortingChange: setSorting,
-    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
-    pageCount: meta ? meta.totalPages : -1,
+    pageCount: 1,
+    onPaginationChange: (updater) => {
+      const newPagination = typeof updater === 'function' ? updater(pagination) : updater;
+      if (newPagination.pageSize !== pagination.pageSize) {
+        setLimit(newPagination.pageSize);
+        setPagination({ pageIndex: 0, pageSize: newPagination.pageSize });
+        resetCursor();
+      } else {
+        setPagination(newPagination);
+      }
+    },
   });
 
   return (
@@ -262,7 +288,7 @@ export default function AdminApplicationListPage() {
       <Container>
         <DataGrid 
           table={table} 
-          recordCount={meta?.total ?? data.length} 
+          recordCount={data.length}
           isLoading={loading}
           tableLayout={modernTableLayout}
           tableClassNames={modernTableClassNames}
@@ -275,7 +301,13 @@ export default function AdminApplicationListPage() {
               </ScrollArea>
             </CardTable>
             <CardFooter className={modernTableCardClasses.footer}>
-              <DataGridPagination />
+              <CursorDataGridPagination
+                meta={meta}
+                onNext={handleCursorNext}
+                onPrev={handleCursorPrev}
+                canGoPrev={canGoPrev}
+                rowCount={data.length}
+              />
             </CardFooter>
           </Card>
         </DataGrid>

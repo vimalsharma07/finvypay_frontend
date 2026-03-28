@@ -8,6 +8,8 @@
 import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
+import { normalizeToCursorListEnvelope } from '@/lib/utils/normalize-cursor-list';
 
 // Currency types matching the actual API response structure
 export interface Currency {
@@ -21,29 +23,16 @@ export interface Currency {
 }
 
 export interface CurrencyListParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
 }
 
-export interface CurrencyListMeta {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
-
-export interface CurrencyListData {
-  data: Currency[];
-  meta: CurrencyListMeta;
-}
-
 export interface CurrencyListResponse {
   success: boolean;
-  data: CurrencyListData;
+  data: Currency[];
+  meta: CursorPaginationMeta | null;
   message?: string;
 }
 
@@ -54,12 +43,17 @@ export async function getCurrencies(
   params?: CurrencyListParams
 ): Promise<ApiResponse<CurrencyListResponse>> {
   try {
-    const data = await http.get(adminRoutes.master.currency.list, {
+    const raw = await http.get(adminRoutes.master.currency.list, {
       query: params as Record<string, string | number | boolean | null | undefined>,
-    }) as CurrencyListResponse;
+    });
+    const normalized = normalizeToCursorListEnvelope<Currency>(raw);
     return {
       status: 200,
-      data,
+      data: {
+        success: normalized.success,
+        data: normalized.data,
+        meta: normalized.meta,
+      },
     };
   } catch (error) {
     if (error instanceof ApiError) {

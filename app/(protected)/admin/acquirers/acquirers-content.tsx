@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { Container } from '@/components/common/container';
 import {
   getAcquirers,
@@ -32,6 +32,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
+import { LIST_PAGE_SIZE_OPTIONS } from '@/lib/types/pagination';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const DEFAULT_ACQUIRER_ICON = '/media/app/finvypay.png';
 import { getIconUrl as getS3IconUrl } from '@/lib/s3-url';
@@ -56,39 +66,46 @@ export function AcquirersPageContent() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [acquirerToDelete, setAcquirerToDelete] = useState<Acquirer | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [meta, setMeta] = useState<AcquirerListResponse['data']['meta'] | null>(null);
+  const [meta, setMeta] = useState<CursorPaginationMeta | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [updatingStatus, setUpdatingStatus] = useState<Record<string | number, boolean>>({});
-  const [page, setPage] = useState(1);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
   const [limit, setLimit] = useState(20);
 
-  const fetchAcquirers = async (pageNum: number, pageLimit: number) => {
-    setLoading(true);
-    try {
-      const response = await getAcquirers({ page: pageNum, limit: pageLimit });
-      handleApiResponse<AcquirerListResponse>(response, {
-        onSuccess: (data) => {
-          if (data && data.success && data.data) {
-            setAcquirers(data.data);
-            setMeta(data.meta);
-          } else {
-            toast.error('Failed to fetch acquirers - invalid response structure');
-          }
-        },
-        onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to fetch acquirers');
-        },
-      });
-    } catch (error) {
-      toast.error('An unexpected error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchAcquirers = useCallback(
+    async (cursor: string | undefined, pageLimit: number) => {
+      setLoading(true);
+      try {
+        const response = await getAcquirers({
+          ...(cursor ? { cursor } : {}),
+          limit: pageLimit,
+        });
+        handleApiResponse<AcquirerListResponse>(response, {
+          onSuccess: (data) => {
+            if (data?.success && Array.isArray(data.data)) {
+              setAcquirers(data.data);
+              setMeta(data.meta ?? null);
+            } else {
+              toast.error('Failed to fetch acquirers - invalid response structure');
+            }
+          },
+          onError: (errorMessage) => {
+            toast.error(errorMessage || 'Failed to fetch acquirers');
+          },
+        });
+      } catch (error) {
+        toast.error('An unexpected error occurred');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
-    fetchAcquirers(page, limit);
-  }, [page, limit]);
+    fetchAcquirers(requestCursor, limit);
+  }, [fetchAcquirers, requestCursor, limit]);
 
   const handleDeleteAcquirer = async () => {
     if (!acquirerToDelete) return;
@@ -100,7 +117,7 @@ export function AcquirersPageContent() {
           toast.success('Acquirer deleted successfully!');
           setDeleteDialogOpen(false);
           setAcquirerToDelete(null);
-          fetchAcquirers(page, limit);
+          fetchAcquirers(requestCursor, limit);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to delete acquirer');
@@ -127,7 +144,7 @@ export function AcquirersPageContent() {
       handleApiResponse(response, {
         onSuccess: () => {
           toast.success(`Acquirer ${checked ? 'activated' : 'deactivated'} successfully!`);
-          fetchAcquirers(page, limit);
+          fetchAcquirers(requestCursor, limit);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to update acquirer status');
@@ -154,8 +171,8 @@ export function AcquirersPageContent() {
       )
     : acquirers;
 
-  const totalPages = meta?.totalPages || 1;
-  const currentPage = meta?.currentPage || 1;
+  const totalCount = meta?.totalCount ?? 0;
+  const canNext = meta?.hasNextPage === true;
 
   return (
     <Fragment>
@@ -286,36 +303,55 @@ export function AcquirersPageContent() {
                 );
               })}
             </div>
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-6 pt-6 border-t">
-                <div className="text-sm text-muted-foreground">
-                  Showing {((currentPage - 1) * limit) + 1} to {Math.min(currentPage * limit, meta?.totalItems || 0)} of {meta?.totalItems || 0} acquirers
-                </div>
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={currentPage === 1 || loading}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                    Previous
-                  </Button>
-                  <div className="text-sm text-muted-foreground">
-                    Page {currentPage} of {totalPages}
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages || loading}
-                  >
-                    Next
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
+            <div className="flex flex-wrap items-center justify-between gap-3 mt-6 pt-6 border-t">
+              <div className="text-sm text-muted-foreground">
+                Total: {totalCount.toLocaleString()} record{totalCount === 1 ? '' : 's'}
               </div>
-            )}
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>Show</span>
+                  <Select
+                    value={String(limit)}
+                    onValueChange={(v) => {
+                      setLimit(Number(v));
+                      resetCursor();
+                    }}
+                  >
+                    <SelectTrigger className="h-8 w-[4.5rem]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {LIST_PAGE_SIZE_OPTIONS.map((n) => (
+                        <SelectItem key={n} value={String(n)}>
+                          {n}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <span>per page</span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={goPrev}
+                  disabled={!canGoPrev || loading}
+                  className="gap-1"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => meta?.nextCursor && goNext(meta.nextCursor)}
+                  disabled={!canNext || loading}
+                  className="gap-1"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </>
         )}
       </Container>

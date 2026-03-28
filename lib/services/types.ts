@@ -9,18 +9,20 @@
  * - ERROR: { success: false, error: { code: <STRING>, message: <STRING>, details: <Object | null> } }
  */
 
+/** Cursor list meta (matches backend) */
+export interface StandardListMeta {
+  itemsPerPage: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  nextCursor: string | null;
+  totalCount: number;
+}
+
 // Standard API Response format
 export interface StandardApiResponse<T> {
   success: boolean;
   data?: T;
-  meta?: {
-    currentPage: number;
-    itemsPerPage: number;
-    totalItems: number;
-    totalPages: number;
-    hasPreviousPage: boolean;
-    hasNextPage: boolean;
-  } | null;
+  meta?: StandardListMeta | null;
   error?: {
     code: string;
     message: string;

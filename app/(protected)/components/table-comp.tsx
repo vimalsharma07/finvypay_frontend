@@ -26,6 +26,8 @@ import {
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 import {
   DataGridTable,
   DataGridTableRowSelect,
@@ -111,13 +113,20 @@ export interface TableCompProps<T> {
   searchPlaceholder?: string;
   searchKeys?: (keyof T | string)[];
   getRowId: (row: T) => string;
-  // Server-side pagination
+  // Server-side pagination (offset) or page size only when using cursorPagination
   pagination?: {
     pageSize?: number;
     pageIndex?: number;
     totalCount?: number;
     onPageChange?: (pageIndex: number) => void;
     onPageSizeChange?: (pageSize: number) => void;
+  };
+  /** When set, footer uses prev/next cursors instead of page numbers */
+  cursorPagination?: {
+    meta: CursorPaginationMeta | null;
+    onNext: () => void;
+    onPrev: () => void;
+    canGoPrev: boolean;
   };
   // Server-side sorting
   sorting?: {
@@ -196,11 +205,13 @@ export function TableComp<T extends Record<string, any>>({
   searchPlaceholder = 'Search...',
   searchKeys,
   getRowId,
-  pagination = { pageSize: 10 },
+  pagination = { pageSize: 20 },
+  cursorPagination,
   sorting: sortingConfig,
   onSearch,
   loading = false,
 }: TableCompProps<T>) {
+  const isCursorMode = Boolean(cursorPagination);
   // Server-side sorting state
   const [sorting, setSorting] = useState<SortingState>(() => {
     if (sortingConfig?.sortBy) {
@@ -217,7 +228,7 @@ export function TableComp<T extends Record<string, any>>({
   // Server-side pagination state
   const [paginationState, setPaginationState] = useState<PaginationState>({
     pageIndex: pagination.pageIndex ?? 0,
-    pageSize: pagination.pageSize || 10,
+    pageSize: pagination.pageSize || 20,
   });
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -397,12 +408,13 @@ export function TableComp<T extends Record<string, any>>({
     getCoreRowModel: getCoreRowModel(),
     // Only use client-side filtering if not using server-side
     getFilteredRowModel: getFilteredRowModel(),
-    // Disable client-side pagination if using server-side
-    manualPagination: !!pagination.onPageChange,
+    manualPagination: !!pagination.onPageChange || isCursorMode,
     manualSorting: !!sortingConfig?.onSortChange,
-    pageCount: pagination.totalCount
-      ? Math.ceil(pagination.totalCount / paginationState.pageSize)
-      : undefined,
+    pageCount: isCursorMode
+      ? 1
+      : pagination.totalCount
+        ? Math.ceil(pagination.totalCount / paginationState.pageSize)
+        : undefined,
     getPaginationRowModel: pagination.onPageChange ? undefined : getPaginationRowModel(),
     getSortedRowModel: sortingConfig?.onSortChange ? undefined : getSortedRowModel(),
     enableRowSelection: enableCheckbox,
@@ -417,8 +429,9 @@ export function TableComp<T extends Record<string, any>>({
     },
   });
 
-  // Use totalCount from pagination if provided (server-side), otherwise use filteredData length
-  const recordCount = pagination.totalCount ?? filteredData.length;
+  const recordCount = isCursorMode
+    ? filteredData.length
+    : (pagination.totalCount ?? filteredData.length);
 
   return (
     <DataGrid
@@ -471,7 +484,17 @@ export function TableComp<T extends Record<string, any>>({
           </ScrollArea>
         </CardTable>
         <CardFooter className={modernTableCardClasses.footer}>
-          <DataGridPagination />
+          {cursorPagination ? (
+            <CursorDataGridPagination
+              meta={cursorPagination.meta}
+              onNext={cursorPagination.onNext}
+              onPrev={cursorPagination.onPrev}
+              canGoPrev={cursorPagination.canGoPrev}
+              rowCount={filteredData.length}
+            />
+          ) : (
+            <DataGridPagination />
+          )}
         </CardFooter>
       </Card>
     </DataGrid>

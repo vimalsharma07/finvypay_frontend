@@ -145,7 +145,7 @@ export function CreateAcquirerAccountContent() {
       try {
         const [acquirerResponse, acquirersResponse] = await Promise.all([
           getAcquirerById(acquirerId),
-          getAcquirers({ page: 1, limit: 100 }),
+          getAcquirers({ limit: 100 }),
         ]);
 
         // Handle Selected Acquirer Data

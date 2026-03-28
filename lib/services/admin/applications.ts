@@ -5,6 +5,7 @@
  */
 
 import { http, ApiError } from '../../api';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
 
@@ -37,13 +38,6 @@ export interface MerchantApplication {
   industryName?: string | null;
 }
 
-export interface MerchantApplicationsMeta {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
-
 export interface RawMerchantApplication {
   id: string;
   email: string | null;
@@ -65,7 +59,7 @@ export interface RawMerchantApplication {
 export interface MerchantApplicationsResponse {
   success: boolean;
   data: RawMerchantApplication[];
-  meta: MerchantApplicationsMeta;
+  meta: CursorPaginationMeta;
   message?: string;
 }
 
@@ -146,8 +140,9 @@ export interface ApplicationDetailResponse {
 }
 
 export interface MerchantApplicationsParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
+  kycStatus?: string;
 }
 
 export type ApplicationKycStatus = 'approved' | 'rejected';
@@ -219,32 +214,48 @@ export async function changeApplicationStatus(
 /**
  * Get merchant applications (paginated)
  */
+function mapRawMerchantApplication(item: RawMerchantApplication): MerchantApplication {
+  const r = item as unknown as Record<string, unknown>;
+  return {
+    id: String(r.id),
+    email: (r.email as string | null) ?? null,
+    name: (r.name as string | null) ?? null,
+    kycStatus: (r.kycStatus ?? r.kycstatus) as string | null,
+    profileStep: (r.profileStep ?? r.profilestep) as number | null,
+    entityType: (r.entityType ?? r.entitytype) as string | null,
+    createdAt: (r.createdAt ?? r.createdat) as string | null,
+    updatedAt: (r.updatedAt ?? r.updatedat) as string | null,
+    onboardingId: (r.onboardingId ?? r.onboardingid) as string | null,
+    kycType: (r.kycType ?? r.kyctype) as string | null,
+    phoneNumber: (r.phoneNumber ?? r.phonenumber) as string | null,
+    registrationNumber:
+      (r.registrationNumber ?? r.registrationnumber) as string | null,
+    companyWebsite: (r.companyWebsite ?? r.companywebsite) as string | null,
+    processingCountryId:
+      (r.processingCountryId ?? r.processingcountryid) as string | null,
+    industryName: (r.industryName ?? r.industryname) as string | null,
+  };
+}
+
 export async function getMerchantApplications(
-  params: MerchantApplicationsParams = { page: 1, limit: 20 }
-): Promise<ApiResponse<{ success: boolean; data: MerchantApplication[]; meta: MerchantApplicationsMeta; message?: string }>> {
+  params: MerchantApplicationsParams = { limit: 20 }
+): Promise<
+  ApiResponse<{
+    success: boolean;
+    data: MerchantApplication[];
+    meta: CursorPaginationMeta | null;
+    message?: string;
+  }>
+> {
   try {
     const response = await http.get(adminRoutes.applications.merchants, {
       query: params as Record<string, string | number | boolean | null | undefined>,
     }) as MerchantApplicationsResponse;
 
     const normalizedData: MerchantApplication[] = Array.isArray(response.data)
-      ? response.data.map((item) => ({
-          id: item.id,
-          email: item.email,
-          name: item.name,
-          kycStatus: item.kycstatus,
-          profileStep: item.profilestep,
-          entityType: item.entitytype,
-          createdAt: item.createdat,
-          updatedAt: item.updatedat,
-          onboardingId: item.onboardingid,
-          kycType: item.kyctype,
-          phoneNumber: item.phonenumber,
-          registrationNumber: item.registrationnumber,
-          companyWebsite: item.companywebsite,
-          processingCountryId: item.processingcountryid,
-          industryName: item.industryname,
-        }))
+      ? response.data.map((item) =>
+          mapRawMerchantApplication(item as RawMerchantApplication),
+        )
       : [];
 
     return {
@@ -252,7 +263,7 @@ export async function getMerchantApplications(
       data: {
         success: response.success,
         data: normalizedData,
-        meta: response.meta,
+        meta: response.meta ?? null,
         message: response.message,
       },
     };
@@ -350,6 +361,7 @@ export interface AffiliateApplicationCountResponseBody {
 export interface AffiliateApplicationListResponse {
   success: boolean;
   data: AffiliateApplication[];
+  meta?: CursorPaginationMeta;
   message?: string;
 }
 
@@ -384,13 +396,20 @@ export async function getAffiliateApplicationCount(): Promise<
   }
 }
 
-export async function getAffiliatePendingApplications(): Promise<
-  ApiResponse<AffiliateApplicationListResponse>
-> {
+export interface AffiliatePendingApplicationsParams {
+  cursor?: string;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'ASC' | 'DESC';
+}
+
+export async function getAffiliatePendingApplications(
+  params?: AffiliatePendingApplicationsParams
+): Promise<ApiResponse<AffiliateApplicationListResponse>> {
   try {
-    const response = await http.get(
-      adminRoutes.applications.affiliatePending
-    ) as AffiliateApplicationListResponse;
+    const response = await http.get(adminRoutes.applications.affiliatePending, {
+      query: params as Record<string, string | number | undefined>,
+    }) as AffiliateApplicationListResponse;
     return { status: 200, data: response };
   } catch (error) {
     if (error instanceof ApiError) {

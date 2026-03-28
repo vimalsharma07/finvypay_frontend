@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { Container } from '@/components/common/container';
 import {
   getRoles,
@@ -14,7 +14,6 @@ import {
   ColumnDef,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   PaginationState,
   SortingState,
@@ -22,7 +21,7 @@ import {
 } from '@tanstack/react-table';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
-import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
   Card,
@@ -38,6 +37,8 @@ import { Search, X, Pencil, Trash2 } from 'lucide-react';
 import { TableActionMenu, TableActionMenuItem } from '@/app/(protected)/components/table-action-menu';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
 import { cn } from '@/lib/utils';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
+import { DEFAULT_LIST_PAGE_SIZE } from '@/lib/types/pagination';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,6 +53,7 @@ import { toast } from 'sonner';
 
 export function RolesPageContent() {
   const [roles, setRoles] = useState<Role[]>([]);
+  const [meta, setMeta] = useState<RoleListResponse['meta']>(null);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
@@ -59,36 +61,54 @@ export function RolesPageContent() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: DEFAULT_LIST_PAGE_SIZE,
   });
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const fetchRoles = async () => {
+  const fetchRoles = useCallback(async (
+    cursor: string | undefined,
+    pageLimit: number,
+    sortBy: string,
+    sortOrder: 'ASC' | 'DESC',
+  ) => {
     setLoading(true);
     try {
-      const response = await getRoles();
+      const response = await getRoles({
+        ...(cursor ? { cursor } : {}),
+        limit: pageLimit,
+        sortBy,
+        sortOrder,
+      });
       handleApiResponse<RoleListResponse>(response, {
         onSuccess: (data) => {
           if (data && data.success && Array.isArray(data.data)) {
             setRoles(data.data);
+            setMeta(data.meta ?? null);
           } else {
             toast.error('Failed to fetch roles - invalid response structure');
+            setMeta(null);
           }
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to fetch roles');
+          setMeta(null);
         },
       });
     } catch (error) {
       toast.error('An unexpected error occurred');
+      setMeta(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchRoles();
-  }, []);
+    const sortBy = sorting[0]?.id || 'createdAt';
+    const sortOrder = sorting[0]?.desc ? 'DESC' : 'ASC';
+    fetchRoles(requestCursor, pagination.pageSize, sortBy, sortOrder);
+  }, [fetchRoles, pagination.pageSize, requestCursor, sorting]);
 
   const filteredData = useMemo(() => {
     if (!searchQuery) return roles;
@@ -110,7 +130,9 @@ export function RolesPageContent() {
           toast.success('Role deleted successfully!');
           setDeleteDialogOpen(false);
           setRoleToDelete(null);
-          fetchRoles();
+          const sortBy = sorting[0]?.id || 'createdAt';
+          const sortOrder = sorting[0]?.desc ? 'DESC' : 'ASC';
+          fetchRoles(requestCursor, pagination.pageSize, sortBy, sortOrder);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to delete role');
@@ -185,16 +207,38 @@ export function RolesPageContent() {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    onSortingChange: setSorting,
-    onPaginationChange: setPagination,
+    manualPagination: true,
+    manualSorting: true,
+    pageCount: 1,
+    onSortingChange: (updater) => {
+      const next = typeof updater === 'function' ? updater(sorting) : updater;
+      setSorting(next);
+      resetCursor();
+    },
+    onPaginationChange: (updater) => {
+      const next = typeof updater === 'function' ? updater(pagination) : updater;
+      if (next.pageSize !== pagination.pageSize) {
+        setPagination({ pageIndex: 0, pageSize: next.pageSize });
+        resetCursor();
+      } else {
+        setPagination(next);
+      }
+    },
     getRowId: (row) => String(row.id),
     state: {
       sorting,
       pagination,
     },
   });
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [goNext, meta?.nextCursor]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   return (
     <Fragment>
@@ -248,8 +292,20 @@ export function RolesPageContent() {
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </CardTable>
-            <CardFooter className={modernTableCardClasses.footer}>
-              <DataGridPagination />
+            <CardFooter
+              className={cn(
+                modernTableCardClasses.footer,
+                'w-full min-w-0 flex-wrap items-stretch gap-2 py-3 sm:min-h-14',
+              )}
+            >
+              <CursorDataGridPagination
+                meta={meta ?? null}
+                onNext={handleCursorNext}
+                onPrev={handleCursorPrev}
+                canGoPrev={canGoPrev}
+                rowCount={filteredData.length}
+                className="w-full min-w-0"
+              />
             </CardFooter>
           </Card>
         </DataGrid>

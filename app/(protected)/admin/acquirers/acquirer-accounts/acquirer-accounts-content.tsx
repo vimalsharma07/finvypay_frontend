@@ -17,7 +17,6 @@ import {
   ColumnDef,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   PaginationState,
   SortingState,
@@ -25,7 +24,9 @@ import {
 } from '@tanstack/react-table';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
-import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
   Card,
@@ -71,17 +72,16 @@ export function AcquirerAccountsContent() {
   const [accountToDelete, setAccountToDelete] = useState<AcquirerAccount | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState<Record<string | number, boolean>>({});
-  const [meta, setMeta] = useState<AcquirerAccountListResponse['data']['meta'] | null>(null);
+  const [meta, setMeta] = useState<CursorPaginationMeta | null>(null);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
+  const [limit, setLimit] = useState(20);
 
-  // Pagination state
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-
-  const fetchAcquirerAccounts = useCallback(async (pageNum: number, pageLimit: number) => {
+  const fetchAcquirerAccounts = useCallback(async (cursor: string | undefined, pageLimit: number) => {
     setLoading(true);
     try {
-      const params: { page: number; limit: number; acquirerId?: number } = {
-        page: pageNum,
+      const params: { cursor?: string; limit: number; acquirerId?: number } = {
+        ...(cursor ? { cursor } : {}),
         limit: pageLimit,
       };
       
@@ -95,7 +95,7 @@ export function AcquirerAccountsContent() {
           // New format: { success: true, data: [...], meta: {...} }
           if (data && data.success && data.data) {
             setAcquirerAccounts(data.data);
-            setMeta(data.meta);
+            setMeta(data.meta ?? null);
             
             // If we have accounts and acquirerId, try to get acquirer name from first account
             if (data.data.length > 0 && data.data[0].acquirer?.acquirerName) {
@@ -150,14 +150,22 @@ export function AcquirerAccountsContent() {
   }, [acquirerIdFromUrl]);
 
   useEffect(() => {
-    fetchAcquirerAccounts(page, limit);
-  }, [page, limit, acquirerIdFromUrl, fetchAcquirerAccounts]);
+    resetCursor();
+  }, [acquirerIdFromUrl, resetCursor]);
+
+  useEffect(() => {
+    fetchAcquirerAccounts(requestCursor, limit);
+  }, [requestCursor, limit, acquirerIdFromUrl, fetchAcquirerAccounts]);
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 20,
   });
+
+  useEffect(() => {
+    setPagination((p) => ({ ...p, pageSize: limit, pageIndex: 0 }));
+  }, [limit]);
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredData = useMemo(() => {
@@ -208,24 +216,24 @@ export function AcquirerAccountsContent() {
             } else {
               // Fallback: refetch data if response doesn't include updated status
               toast.success('Acquirer account status updated successfully');
-              fetchAcquirerAccounts(page, limit);
+              fetchAcquirerAccounts(requestCursor, limit);
             }
           },
           onError: (errorMessage) => {
             toast.error(errorMessage || 'Failed to update acquirer account status');
             // Revert optimistic update on error by refetching
-            fetchAcquirerAccounts(page, limit);
+            fetchAcquirerAccounts(requestCursor, limit);
           },
           onUnauthorized: () => {
             toast.error('Unauthorized. Please check your authentication.');
-            fetchAcquirerAccounts(page, limit);
+            fetchAcquirerAccounts(requestCursor, limit);
           },
         });
       } catch (error) {
         toast.error('An unexpected error occurred');
         console.error('Update status error:', error);
         // Revert optimistic update on error by refetching
-        fetchAcquirerAccounts(page, limit);
+        fetchAcquirerAccounts(requestCursor, limit);
       } finally {
         setUpdatingStatus((prev) => {
           const updated = { ...prev };
@@ -234,7 +242,7 @@ export function AcquirerAccountsContent() {
         });
       }
     },
-    [fetchAcquirerAccounts, page, limit]
+    [fetchAcquirerAccounts, requestCursor, limit]
   );
 
   const handleDeleteAcquirerAccount = useCallback(async () => {
@@ -248,7 +256,7 @@ export function AcquirerAccountsContent() {
           toast.success('Acquirer account deleted successfully!');
           setDeleteDialogOpen(false);
           setAccountToDelete(null);
-          fetchAcquirerAccounts(page, limit);
+          fetchAcquirerAccounts(requestCursor, limit);
         },
           onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to delete acquirer account');
@@ -263,7 +271,15 @@ export function AcquirerAccountsContent() {
     } finally {
       setDeleting(false);
     }
-  }, [accountToDelete, fetchAcquirerAccounts, page, limit]);
+  }, [accountToDelete, fetchAcquirerAccounts, requestCursor, limit]);
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   const columns = useMemo<ColumnDef<AcquirerAccount>[]>(
     () => [
@@ -393,31 +409,28 @@ export function AcquirerAccountsContent() {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
     onPaginationChange: (updater) => {
       const newPagination = typeof updater === 'function' ? updater(pagination) : updater;
-      setPagination(newPagination);
-      // Update server-side pagination
-      if (newPagination.pageIndex !== page - 1) {
-        setPage(newPagination.pageIndex + 1);
-      }
-      if (newPagination.pageSize !== limit) {
+      if (newPagination.pageSize !== pagination.pageSize) {
         setLimit(newPagination.pageSize);
-        setPage(1);
+        setPagination({ pageIndex: 0, pageSize: newPagination.pageSize });
+        resetCursor();
+      } else {
+        setPagination(newPagination);
       }
     },
     getRowId: (row) => String(row.id),
     state: {
       sorting,
       pagination: {
-        pageIndex: page - 1,
+        pageIndex: 0,
         pageSize: limit,
       },
     },
     manualPagination: true,
-    pageCount: meta ? meta.totalPages : 0,
+    pageCount: 1,
   });
 
   return (
@@ -425,7 +438,7 @@ export function AcquirerAccountsContent() {
       <Container>
         <DataGrid
           table={table}
-          recordCount={meta?.totalItems ?? filteredData.length}
+          recordCount={meta?.totalCount ?? acquirerAccounts.length}
           isLoading={loading}
           tableLayout={modernTableLayout}
           tableClassNames={modernTableClassNames}
@@ -473,7 +486,13 @@ export function AcquirerAccountsContent() {
             </ScrollArea>
           </CardTable>
           <CardFooter className={modernTableCardClasses.footer}>
-            <DataGridPagination />
+            <CursorDataGridPagination
+              meta={meta}
+              onNext={handleCursorNext}
+              onPrev={handleCursorPrev}
+              canGoPrev={canGoPrev}
+              rowCount={filteredData.length}
+            />
           </CardFooter>
         </Card>
       </DataGrid>

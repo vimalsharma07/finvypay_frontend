@@ -7,7 +7,10 @@ import {
   type AffiliateTransaction,
   type AffiliateTransactionListResponse,
 } from '@/lib/services/affiliate/transactions';
-import { getAffiliateMerchants } from '@/lib/services/affiliate/merchants';
+import {
+  getAffiliateMerchants,
+  type AffiliateMerchant,
+} from '@/lib/services/affiliate/merchants';
 import { TRANSACTION_STATUS_FILTER_OPTIONS } from '@/lib/services/admin/transaction';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { generateFilterQuery, mapAffiliateTransactionFiltersToApiParams } from '@/lib/helpers';
@@ -20,7 +23,8 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { DataGrid } from '@/components/ui/data-grid';
-import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
   Card,
@@ -62,7 +66,8 @@ export function AffiliateTransactionsPageContent({
   const filterOpen = externalFilterOpen ?? internalFilterOpen;
   const setFilterOpen = externalSetFilterOpen ?? setInternalFilterOpen;
 
-  const [page, setPage] = useState(1);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
   const [limit, setLimit] = useState(20);
   const [sortBy, setSortBy] = useState('transactionDate');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
@@ -70,26 +75,51 @@ export function AffiliateTransactionsPageContent({
   const [merchantOptions, setMerchantOptions] = useState<{ label: string; value: string }[]>([]);
 
   useEffect(() => {
-    getAffiliateMerchants().then((res) => {
-      if (res.data?.success && Array.isArray(res.data.data)) {
+    let cancelled = false;
+    (async () => {
+      const acc: AffiliateMerchant[] = [];
+      let cursor: string | undefined;
+      const pageSize = 100;
+      for (let i = 0; i < 50; i++) {
+        const res = await getAffiliateMerchants({
+          ...(cursor ? { cursor } : {}),
+          limit: pageSize,
+          sortBy: 'name',
+          sortOrder: 'ASC',
+        });
+        if (cancelled) return;
+        if (!res.data?.success || !Array.isArray(res.data.data)) break;
+        acc.push(...res.data.data);
+        const next = res.data.meta?.nextCursor;
+        if (!next) break;
+        cursor = next;
+      }
+      if (!cancelled) {
         setMerchantOptions(
-          res.data.data.map((m) => ({
+          acc.map((m) => ({
             label: m.name || m.email || `Merchant ${m.id}`,
             value: String(m.id),
           }))
         );
       }
-    });
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const fetchTransactions = useCallback(
-    async (pageNum: number, pageLimit: number, activeFilters: FilterFields = {}) => {
+    async (
+      cursor: string | undefined,
+      pageLimit: number,
+      activeFilters: FilterFields = {},
+    ) => {
       setLoading(true);
       try {
         const filterQuery = generateFilterQuery(activeFilters);
         const apiParams = mapAffiliateTransactionFiltersToApiParams(filterQuery);
         const params = {
-          page: pageNum,
+          ...(cursor ? { cursor } : {}),
           limit: pageLimit,
           sortBy,
           sortOrder,
@@ -117,12 +147,12 @@ export function AffiliateTransactionsPageContent({
         setLoading(false);
       }
     },
-    [sortBy, sortOrder]
+    [sortBy, sortOrder],
   );
 
   useEffect(() => {
-    fetchTransactions(page, limit, filters);
-  }, [fetchTransactions, page, limit, filters]);
+    fetchTransactions(requestCursor, limit, filters);
+  }, [fetchTransactions, requestCursor, limit, filters]);
 
   const filteredData = useMemo(() => {
     if (!searchQuery.trim()) return transactions;
@@ -137,19 +167,18 @@ export function AffiliateTransactionsPageContent({
     );
   }, [transactions, searchQuery]);
 
-  const handlePageChange = useCallback((pageIndex: number) => {
-    setPage(pageIndex + 1);
-  }, []);
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
 
-  const handlePageSizeChange = useCallback((newPageSize: number) => {
-    setLimit(newPageSize);
-    setPage(1);
-  }, []);
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   const handleApplyFilters = useCallback((appliedFilters: FilterFields) => {
     setFilters(appliedFilters);
-    setPage(1);
-  }, []);
+    resetCursor();
+  }, [resetCursor]);
 
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -158,16 +187,6 @@ export function AffiliateTransactionsPageContent({
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'transactionDate', desc: true },
   ]);
-
-  useEffect(() => {
-    if (meta) {
-      setPagination((prev) => ({
-        ...prev,
-        pageIndex: meta.currentPage - 1,
-        pageSize: meta.itemsPerPage,
-      }));
-    }
-  }, [meta]);
 
   const handleSortingChange = useCallback(
     (updaterOrValue: SortingState | ((old: SortingState) => SortingState)) => {
@@ -178,12 +197,12 @@ export function AffiliateTransactionsPageContent({
           const { id, desc } = next[0];
           setSortBy(id);
           setSortOrder(desc ? 'DESC' : 'ASC');
-          setPage(1);
+          resetCursor();
         }
         return next;
       });
     },
-    []
+    [resetCursor],
   );
 
   const filterSchema: FiltersSchema[] = useMemo(
@@ -225,17 +244,17 @@ export function AffiliateTransactionsPageContent({
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
     manualSorting: true,
-    pageCount: meta ? meta.totalPages : undefined,
+    pageCount: 1,
     onSortingChange: handleSortingChange,
     onPaginationChange: (updater) => {
       const newPagination =
         typeof updater === 'function' ? updater(pagination) : updater;
-      setPagination(newPagination);
-      if (newPagination.pageIndex !== pagination.pageIndex) {
-        handlePageChange(newPagination.pageIndex);
-      }
       if (newPagination.pageSize !== pagination.pageSize) {
-        handlePageSizeChange(newPagination.pageSize);
+        setLimit(newPagination.pageSize);
+        setPagination({ pageIndex: 0, pageSize: newPagination.pageSize });
+        resetCursor();
+      } else {
+        setPagination(newPagination);
       }
     },
     getRowId: (row) => String(row.id),
@@ -250,7 +269,7 @@ export function AffiliateTransactionsPageContent({
       <Container>
         <DataGrid
           table={table}
-          recordCount={meta?.totalItems ?? filteredData.length}
+          recordCount={filteredData.length}
           isLoading={loading}
           tableLayout={modernTableLayout}
           tableClassNames={modernTableClassNames}
@@ -272,7 +291,13 @@ export function AffiliateTransactionsPageContent({
               </ScrollArea>
             </CardTable>
             <CardFooter className={modernTableCardClasses.footer}>
-              <DataGridPagination />
+              <CursorDataGridPagination
+                meta={meta}
+                onNext={handleCursorNext}
+                onPrev={handleCursorPrev}
+                canGoPrev={canGoPrev}
+                rowCount={filteredData.length}
+              />
             </CardFooter>
           </Card>
         </DataGrid>

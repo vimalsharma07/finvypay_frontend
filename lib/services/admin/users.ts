@@ -8,6 +8,7 @@
 import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 
 // Merchant types matching the actual API response structure
 export interface Merchant {
@@ -61,7 +62,7 @@ export interface UpdateMerchantPayload {
 export interface UpdateUserPayload extends UpdateMerchantPayload {}
 
 export interface MerchantListParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
@@ -72,14 +73,7 @@ export interface MerchantListParams {
 // Backward compatibility
 export interface UserListParams extends MerchantListParams {}
 
-export interface MerchantListMeta {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
+export type MerchantListMeta = CursorPaginationMeta;
 
 // Backward compatibility
 export interface UserListMeta extends MerchantListMeta {}
@@ -142,7 +136,7 @@ const MERCHANT_FILTER_PAGE_SIZE = 100;
 /** Avoid infinite loops if API meta is wrong */
 const MERCHANT_FILTER_MAX_PAGES = 1000;
 
-export type MerchantFilterFetchParams = Omit<MerchantListParams, 'page' | 'limit'>;
+export type MerchantFilterFetchParams = Omit<MerchantListParams, 'cursor' | 'limit'>;
 
 /**
  * Load every merchant for admin dropdowns (Advanced Filter, etc.).
@@ -160,12 +154,14 @@ export async function getAllMerchantsPaginated(
   const paramsBase = { ...defaults, ...baseParams };
 
   const all: Merchant[] = [];
-  let page = 1;
+  let cursor: string | undefined;
+  let iterations = 0;
 
-  while (page <= MERCHANT_FILTER_MAX_PAGES) {
+  while (iterations < MERCHANT_FILTER_MAX_PAGES) {
+    iterations += 1;
     const res = await getMerchants({
       ...paramsBase,
-      page,
+      ...(cursor ? { cursor } : {}),
       limit: MERCHANT_FILTER_PAGE_SIZE,
     });
 
@@ -175,12 +171,11 @@ export async function getAllMerchantsPaginated(
 
     all.push(...res.data.data);
 
-    const meta = res.data.meta;
-    const totalPages = meta?.totalPages ?? 1;
-    if (page >= totalPages || res.data.data.length === 0) {
+    const next = res.data.meta?.nextCursor;
+    if (!next || res.data.data.length === 0) {
       break;
     }
-    page += 1;
+    cursor = next;
   }
 
   return all;

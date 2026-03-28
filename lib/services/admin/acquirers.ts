@@ -8,6 +8,8 @@ import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
 import { adminAcquirerRoutes } from '../../routes/admin/acquirer-routes';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
+import { normalizeToCursorListEnvelope } from '@/lib/utils/normalize-cursor-list';
 
 // Acquirer types matching the API response structure
 export interface Acquirer {
@@ -23,27 +25,14 @@ export interface Acquirer {
 }
 
 export interface AcquirerListParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
-}
-
-export interface AcquirerListMeta {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
-
-export interface AcquirerListData {
-  data: Acquirer[];
-  meta: AcquirerListMeta;
 }
 
 export interface AcquirerListResponse {
   success: boolean;
-  data: AcquirerListData;
+  data: Acquirer[];
+  meta: CursorPaginationMeta | null;
   message?: string;
 }
 
@@ -69,12 +58,17 @@ export async function getAcquirers(
   params?: AcquirerListParams
 ): Promise<ApiResponse<AcquirerListResponse>> {
   try {
-    const data = await http.get(adminRoutes.acquirer.list, {
+    const raw = await http.get(adminRoutes.acquirer.list, {
       query: params as Record<string, string | number | undefined>,
-    }) as AcquirerListResponse;
+    });
+    const normalized = normalizeToCursorListEnvelope<Acquirer>(raw);
     return {
       status: 200,
-      data,
+      data: {
+        success: normalized.success,
+        data: normalized.data,
+        meta: normalized.meta,
+      },
     };
   } catch (error) {
     if (error instanceof ApiError) {
@@ -337,22 +331,15 @@ export interface MerchantAcquirerRequest {
   updatedAt: string;
 }
 
-export interface MerchantAcquirerRequestsMeta {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
-
 export interface MerchantAcquirerRequestsResponse {
   success: boolean;
   data: MerchantAcquirerRequest[];
-  meta: MerchantAcquirerRequestsMeta;
+  meta: CursorPaginationMeta | null;
   message?: string;
 }
 
 export interface MerchantAcquirerRequestsParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
 }
 
@@ -376,16 +363,21 @@ export interface GetMerchantAcquirerRequestResponse {
  * Get merchant acquirer requests (paginated)
  */
 export async function getMerchantAcquirerRequests(
-  params: MerchantAcquirerRequestsParams = { page: 1, limit: 20 }
+  params: MerchantAcquirerRequestsParams = { limit: 20 }
 ): Promise<ApiResponse<MerchantAcquirerRequestsResponse>> {
   try {
-    const response = await http.get(adminAcquirerRoutes.merchantAcquirerRequests, {
+    const raw = await http.get(adminAcquirerRoutes.merchantAcquirerRequests, {
       query: params as Record<string, string | number | boolean | null | undefined>,
-    }) as MerchantAcquirerRequestsResponse;
-
+    });
+    const normalized =
+      normalizeToCursorListEnvelope<MerchantAcquirerRequest>(raw);
     return {
       status: 200,
-      data: response,
+      data: {
+        success: normalized.success,
+        data: normalized.data,
+        meta: normalized.meta,
+      },
     };
   } catch (error) {
     if (error instanceof ApiError) {

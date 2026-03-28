@@ -8,6 +8,8 @@
 import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
+import { normalizeToCursorListEnvelope } from '@/lib/utils/normalize-cursor-list';
 
 // Industry types matching the actual API response structure
 export interface Industry {
@@ -21,29 +23,16 @@ export interface Industry {
 }
 
 export interface IndustryListParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
 }
 
-export interface IndustryListMeta {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
-
-export interface IndustryListData {
-  data: Industry[];
-  meta: IndustryListMeta;
-}
-
 export interface IndustryListResponse {
   success: boolean;
-  data: IndustryListData;
+  data: Industry[];
+  meta: CursorPaginationMeta | null;
   message?: string;
 }
 
@@ -70,12 +59,17 @@ export async function getIndustries(
   params?: IndustryListParams
 ): Promise<ApiResponse<IndustryListResponse>> {
   try {
-    const data = await http.get(adminRoutes.master.industries.list, {
+    const raw = await http.get(adminRoutes.master.industries.list, {
       query: params as Record<string, string | number | boolean | null | undefined>,
-    }) as IndustryListResponse;
+    });
+    const normalized = normalizeToCursorListEnvelope<Industry>(raw);
     return {
       status: 200,
-      data,
+      data: {
+        success: normalized.success,
+        data: normalized.data,
+        meta: normalized.meta,
+      },
     };
   } catch (error) {
     if (error instanceof ApiError) {

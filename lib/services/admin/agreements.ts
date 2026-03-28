@@ -8,6 +8,8 @@
 import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
+import { normalizeToCursorListEnvelope } from '@/lib/utils/normalize-cursor-list';
 
 // Agreement types matching the actual API response structure
 export interface Agreement {
@@ -23,29 +25,16 @@ export interface Agreement {
 }
 
 export interface AgreementListParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
 }
 
-export interface AgreementListMeta {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
-
-export interface AgreementListData {
-  data: Agreement[];
-  meta: AgreementListMeta;
-}
-
 export interface AgreementListResponse {
   success: boolean;
-  data: AgreementListData;
+  data: Agreement[];
+  meta: CursorPaginationMeta | null;
   message?: string;
 }
 
@@ -76,12 +65,17 @@ export async function getAgreements(
   params?: AgreementListParams
 ): Promise<ApiResponse<AgreementListResponse>> {
   try {
-    const data = await http.get(adminRoutes.master.agreements.list, {
+    const raw = await http.get(adminRoutes.master.agreements.list, {
       query: params as Record<string, string | number | boolean | null | undefined>,
-    }) as AgreementListResponse;
+    });
+    const normalized = normalizeToCursorListEnvelope<Agreement>(raw);
     return {
       status: 200,
-      data,
+      data: {
+        success: normalized.success,
+        data: normalized.data,
+        meta: normalized.meta,
+      },
     };
   } catch (error) {
     if (error instanceof ApiError) {

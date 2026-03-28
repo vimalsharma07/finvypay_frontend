@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link2, Pencil, Trash2, Plus } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
@@ -14,7 +14,6 @@ import {
   TableHeader,
 } from '../../components/table-comp';
 import { Badge } from '@/components/ui/badge';
-import { ContentLoader } from '@/components/common/content-loader';
 import { ConfirmComp } from '../../components/confirm-comp';
 import { toast } from 'sonner';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
@@ -23,55 +22,67 @@ import {
   deleteUserPaymentLink,
   PaymentLink,
   PaymentLinksListResponse,
-  PaymentLinksListMeta,
 } from '@/lib/services/user/payment-links';
 import type { TableAction } from '../../components/table-comp';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 
 export default function PaymentLinksPage() {
   const [loading, setLoading] = useState(true);
   const [paymentLinks, setPaymentLinks] = useState<PaymentLink[]>([]);
-  const [meta, setMeta] = useState<PaymentLinksListMeta | null>(null);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [meta, setMeta] = useState<CursorPaginationMeta | null>(null);
+  const [limit, setLimit] = useState(20);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [paymentLinkToDelete, setPaymentLinkToDelete] = useState<PaymentLink | null>(null);
 
-  // Fetch payment links
-  const fetchPaymentLinks = async (
-    pageNum: number,
-    pageLimit: number,
-  ) => {
-    setLoading(true);
-    try {
-      const params: any = {
-        page: pageNum,
-        limit: pageLimit,
-      };
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
 
-      const response = await getUserPaymentLinks(params);
+  const fetchPaymentLinks = useCallback(
+    async (cursor: string | undefined, pageLimit: number) => {
+      setLoading(true);
+      try {
+        const response = await getUserPaymentLinks({
+          ...(cursor ? { cursor } : {}),
+          limit: pageLimit,
+        });
 
-      handleApiResponse<PaymentLinksListResponse>(response, {
-        onSuccess: (data) => {
-          if (!data?.success) return;
-          const list = Array.isArray(data.data) ? data.data : (data.data?.data ?? []);
-          const metaData = data.meta ?? (data.data as any)?.meta ?? null;
-          setPaymentLinks(list as PaymentLink[]);
-          setMeta(metaData);
-        },
-        onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to load payment links');
-        },
-      });
-    } catch (error) {
-      toast.error('An unexpected error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
+        handleApiResponse<PaymentLinksListResponse>(response, {
+          onSuccess: (data) => {
+            if (!data?.success) return;
+            const list = Array.isArray(data.data) ? data.data : [];
+            setPaymentLinks(list as PaymentLink[]);
+            setMeta(data.meta ?? null);
+          },
+          onError: (errorMessage) => {
+            toast.error(errorMessage || 'Failed to load payment links');
+          },
+        });
+      } catch (error) {
+        toast.error('An unexpected error occurred');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
-    fetchPaymentLinks(page, limit);
-  }, [page, limit]);
+    fetchPaymentLinks(requestCursor, limit);
+  }, [requestCursor, limit, fetchPaymentLinks]);
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setLimit(newPageSize);
+    resetCursor();
+  };
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   const headers: TableHeader<PaymentLink>[] = useMemo(() => [
     { key: 'name', label: 'Name', sortable: false },
@@ -130,13 +141,14 @@ export default function PaymentLinksPage() {
             {new Date(item.createdAt).toLocaleDateString()}
           </div>
         );
-      default:
+      default: {
         const value = item[key as keyof PaymentLink];
         return (
           <div className="text-foreground font-normal">
             {value != null ? String(value) : '-'}
           </div>
         );
+      }
     }
   };
 
@@ -166,7 +178,7 @@ export default function PaymentLinksPage() {
       handleApiResponse(response, {
         onSuccess: () => {
           toast.success('Payment link deleted successfully');
-          fetchPaymentLinks(page, limit);
+          fetchPaymentLinks(requestCursor, limit);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to delete payment link');
@@ -213,13 +225,13 @@ export default function PaymentLinksPage() {
           getRowId={(row: PaymentLink) => String(row.id)}
           pagination={{
             pageSize: limit,
-            pageIndex: page - 1,
-            totalCount: meta?.total ?? 0,
-            onPageChange: (pageIndex) => setPage(pageIndex + 1),
-            onPageSizeChange: (newSize) => {
-              setLimit(newSize);
-              setPage(1);
-            },
+            onPageSizeChange: handlePageSizeChange,
+          }}
+          cursorPagination={{
+            meta,
+            onNext: handleCursorNext,
+            onPrev: handleCursorPrev,
+            canGoPrev,
           }}
           loading={loading}
         />
@@ -246,4 +258,3 @@ export default function PaymentLinksPage() {
     </>
   );
 }
-

@@ -1,12 +1,13 @@
 /**
  * Affiliate Merchants API Service
  *
- * Fetches merchants referred by the logged-in affiliate.
+ * Fetches merchants referred by the logged-in affiliate (cursor-paginated).
  */
 
 import { http, ApiError } from '../../api';
 import { affiliateRoutes } from '../../routes/affiliate';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 
 /** Merchant rates from API */
 export interface AffiliateMerchantRates {
@@ -34,26 +35,35 @@ export interface AffiliateMerchant {
   isBlocked: boolean;
   kycStatus: string;
   referralPartnerId: number;
-  referralPartnerCommission: number | null;
+  referralPartnerCommission: string | null;
   createdAt: string;
   updatedAt: string;
   rates?: AffiliateMerchantRates | null;
 }
 
-/** API list response shape */
+export interface AffiliateMerchantListParams {
+  cursor?: string;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'ASC' | 'DESC';
+}
+
 export interface AffiliateMerchantListResponse {
   success: boolean;
   data: AffiliateMerchant[];
+  meta?: CursorPaginationMeta;
 }
 
 /**
- * Get list of merchants for the current affiliate
+ * List merchants for the current affiliate (RP) with cursor pagination.
  */
-export async function getAffiliateMerchants(): Promise<
-  ApiResponse<AffiliateMerchantListResponse>
-> {
+export async function getAffiliateMerchants(
+  params?: AffiliateMerchantListParams
+): Promise<ApiResponse<AffiliateMerchantListResponse>> {
   try {
-    const data = (await http.get(affiliateRoutes.merchant.list)) as AffiliateMerchantListResponse;
+    const data = (await http.get(affiliateRoutes.merchant.list, {
+      query: params as Record<string, string | number | undefined>,
+    })) as AffiliateMerchantListResponse;
     return {
       status: 200,
       data,

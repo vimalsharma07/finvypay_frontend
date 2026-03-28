@@ -7,6 +7,7 @@
 import { http, ApiError } from '../../api';
 import { userTransactionRoutes } from '../../routes/user/transaction-routes';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 
 // Transaction types matching the API response structure
 export interface TransactionUser {
@@ -68,7 +69,7 @@ export interface Transaction {
 }
 
 export interface TransactionListParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
   profileId?: number; // Merchant Profile ID for filtering
   /** Search by transactionId, orderId, or email (partial match) */
@@ -88,23 +89,12 @@ export interface TransactionListParams {
   message?: string;
 }
 
-export interface TransactionListMeta {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
-
-export interface TransactionListData {
-  data: Transaction[];
-  meta: TransactionListMeta;
-}
+export type TransactionListMeta = CursorPaginationMeta;
 
 export interface TransactionListResponse {
   success: boolean;
-  data: TransactionListData;
+  data: Transaction[];
+  meta: TransactionListMeta;
   message?: string;
 }
 

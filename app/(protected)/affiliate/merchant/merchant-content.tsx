@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { Container } from '@/components/common/container';
 import {
   getAffiliateMerchants,
   type AffiliateMerchant,
+  type AffiliateMerchantListResponse,
 } from '@/lib/services/affiliate/merchants';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
@@ -21,37 +22,81 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Percent } from 'lucide-react';
+import { toast } from 'sonner';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 
 export function AffiliateMerchantContent() {
   const [merchants, setMerchants] = useState<AffiliateMerchant[]>([]);
+  const [meta, setMeta] = useState<CursorPaginationMeta | null>(null);
   const [loading, setLoading] = useState(true);
+  const [limit, setLimit] = useState(20);
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
   const [ratesModalOpen, setRatesModalOpen] = useState(false);
   const [selectedMerchant, setSelectedMerchant] = useState<AffiliateMerchant | null>(null);
 
-  const fetchMerchants = async () => {
-    setLoading(true);
-    try {
-      const response = await getAffiliateMerchants();
-      handleApiResponse(response, {
-        onSuccess: (data) => {
-          if (data?.success && Array.isArray(data.data)) {
-            setMerchants(data.data);
-          }
-        },
-        onUnauthorized: () => {
-          console.warn('Unauthorized: check token');
-        },
-      });
-    } catch (error) {
-      console.error('Failed to fetch affiliate merchants:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchMerchants = useCallback(
+    async (
+      cursor: string | undefined,
+      pageLimit: number,
+      sortField: string,
+      sortDir: 'ASC' | 'DESC',
+    ) => {
+      setLoading(true);
+      try {
+        const response = await getAffiliateMerchants({
+          ...(cursor ? { cursor } : {}),
+          limit: pageLimit,
+          sortBy: sortField,
+          sortOrder: sortDir,
+        });
+        handleApiResponse<AffiliateMerchantListResponse>(response, {
+          onSuccess: (data) => {
+            if (data?.success && Array.isArray(data.data)) {
+              setMerchants(data.data);
+              setMeta(data.meta ?? null);
+            }
+          },
+          onError: (msg) => toast.error(msg || 'Failed to load merchants'),
+          onUnauthorized: () => {
+            toast.error('Unauthorized');
+          },
+        });
+      } catch (error) {
+        console.error('Failed to fetch affiliate merchants:', error);
+        toast.error('An unexpected error occurred');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
-    fetchMerchants();
-  }, []);
+    fetchMerchants(requestCursor, limit, sortBy, sortOrder);
+  }, [fetchMerchants, requestCursor, limit, sortBy, sortOrder]);
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setLimit(newPageSize);
+    resetCursor();
+  };
+
+  const handleSortChange = (newSortBy: string, newSortOrder: 'ASC' | 'DESC') => {
+    setSortBy(newSortBy);
+    setSortOrder(newSortOrder);
+    resetCursor();
+  };
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   const openRatesModal = useCallback((row: AffiliateMerchant) => {
     setSelectedMerchant(row);
@@ -160,19 +205,35 @@ export function AffiliateMerchantContent() {
     : [];
 
   return (
-    <Container>
-      <TableComp<AffiliateMerchant>
-        data={merchants}
-        headers={headers}
-        renderCell={renderCell}
-        actions={actions}
-        enableCheckbox={false}
-        searchPlaceholder="Search merchants..."
-        searchKeys={['name', 'email', 'uniqueId']}
-        getRowId={(row) => row.id}
-        pagination={{ pageSize: 10 }}
-        loading={loading}
-      />
+    <Fragment>
+      <Container>
+        <TableComp<AffiliateMerchant>
+          data={merchants}
+          headers={headers}
+          renderCell={renderCell}
+          actions={actions}
+          enableCheckbox={false}
+          searchPlaceholder="Search merchants..."
+          searchKeys={['name', 'email', 'uniqueId']}
+          getRowId={(row) => String(row.id)}
+          pagination={{
+            pageSize: limit,
+            onPageSizeChange: handlePageSizeChange,
+          }}
+          cursorPagination={{
+            meta,
+            onNext: handleCursorNext,
+            onPrev: handleCursorPrev,
+            canGoPrev,
+          }}
+          sorting={{
+            sortBy,
+            sortOrder,
+            onSortChange: handleSortChange,
+          }}
+          loading={loading}
+        />
+      </Container>
 
       <Dialog open={ratesModalOpen} onOpenChange={setRatesModalOpen}>
         <DialogContent className="max-w-xl">
@@ -206,6 +267,6 @@ export function AffiliateMerchantContent() {
           )}
         </DialogContent>
       </Dialog>
-    </Container>
+    </Fragment>
   );
 }

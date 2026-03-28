@@ -268,7 +268,6 @@ export default function RoutingEditPage() {
         const response = await getUserConnectors({
           userId,
           merchantProfileId: Number(selectedProfileId),
-          page: 1,
           limit: 100,
         });
         handleApiResponse(response, {

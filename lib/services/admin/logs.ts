@@ -7,6 +7,7 @@
 import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 
 // Log entry types
 export type LogType =
@@ -68,12 +69,7 @@ export interface LogEntry {
   [key: string]: any;
 }
 
-export interface LogListMeta {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
+export type LogListMeta = CursorPaginationMeta;
 
 export interface LogListResponse {
   success: boolean;
@@ -84,8 +80,8 @@ export interface LogListResponse {
 
 export interface LogListParams {
   type: LogType;
-  page: number;
   limit: number;
+  cursor?: string;
   startDate?: string;
   endDate?: string;
   /** Filter by transaction_id (provider, transaction, and webhook logs) */
@@ -104,15 +100,15 @@ export async function getAdminLogs(
   params: LogListParams
 ): Promise<ApiResponse<LogListResponse>> {
   try {
-    const endpoint = adminRoutes.logs.logs(
-      params.type,
-      params.page,
-      params.limit,
-      params.startDate,
-      params.endDate,
-      params.transaction_id,
-      params.payment_mode
-    );
+    const endpoint = adminRoutes.logs.logs({
+      type: params.type,
+      limit: params.limit,
+      cursor: params.cursor,
+      startDate: params.startDate,
+      endDate: params.endDate,
+      transactionId: params.transaction_id,
+      paymentMode: params.payment_mode,
+    });
     const data = await http.get(endpoint) as LogListResponse;
 
     return {

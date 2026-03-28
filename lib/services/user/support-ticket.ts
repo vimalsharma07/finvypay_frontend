@@ -7,6 +7,8 @@
 import { http, ApiError } from '../../api';
 import { userSupportTicketRoutes } from '../../routes/user/support-ticket-routes';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
+import { normalizeToCursorListEnvelope } from '@/lib/utils/normalize-cursor-list';
 
 // Support Ticket types matching the API response structure
 export interface SupportTicketUser {
@@ -31,27 +33,14 @@ export interface SupportTicket {
 }
 
 export interface SupportTicketListParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
-}
-
-export interface SupportTicketListMeta {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
-
-export interface SupportTicketListData {
-  items: SupportTicket[];
-  meta: SupportTicketListMeta;
 }
 
 export interface SupportTicketListResponse {
   success: boolean;
-  data: SupportTicketListData;
+  data: SupportTicket[];
+  meta: CursorPaginationMeta | null;
   message?: string;
 }
 
@@ -76,12 +65,17 @@ export async function getSupportTickets(
   params?: SupportTicketListParams
 ): Promise<ApiResponse<SupportTicketListResponse>> {
   try {
-    const data = await http.get(userSupportTicketRoutes.list, {
+    const raw = await http.get(userSupportTicketRoutes.list, {
       query: params as Record<string, string | number | undefined>,
-    }) as SupportTicketListResponse;
+    });
+    const normalized = normalizeToCursorListEnvelope<SupportTicket>(raw);
     return {
       status: 200,
-      data,
+      data: {
+        success: normalized.success,
+        data: normalized.data,
+        meta: normalized.meta,
+      },
     };
   } catch (error) {
     if (error instanceof ApiError) {

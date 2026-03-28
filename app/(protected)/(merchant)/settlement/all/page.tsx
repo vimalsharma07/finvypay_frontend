@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
 import { Receipt, FileText, ExternalLink } from 'lucide-react';
 import {
   Toolbar,
@@ -12,6 +13,7 @@ import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
   getUserSettlements,
   UserSettlement,
+  UserSettlementListMeta,
 } from '@/lib/services/user/settlements';
 import {
   ColumnDef,
@@ -24,7 +26,7 @@ import {
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridTable } from '@/components/ui/data-grid-table';
-import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardFooter, CardTable } from '@/components/ui/card';
 import { TableActionMenu, TableActionMenuItem } from '@/app/(protected)/components/table-action-menu';
@@ -39,14 +41,16 @@ const DATE_TIME_FMT = 'yyyy-MM-dd HH:mm';
 export default function UserSettlementsPage() {
   const [data, setData] = useState<UserSettlement[]>([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState<{ total: number; page: number; limit: number; totalPages: number } | null>(null);
+  const [meta, setMeta] = useState<UserSettlementListMeta | null>(null);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
 
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'settlementDate', desc: true },
   ]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 20,
   });
 
   const formatCurrency = (amount: string | null | undefined) => {
@@ -81,18 +85,17 @@ export default function UserSettlementsPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const page = pagination.pageIndex + 1;
       const limit = pagination.pageSize;
 
       const response = await getUserSettlements({
-        page,
+        ...(requestCursor ? { cursor: requestCursor } : {}),
         limit,
       });
       handleApiResponse(response, {
         onSuccess: (res) => {
           if (res && res.success && res.data) {
             setData(res.data);
-            setMeta(res.meta);
+            setMeta(res.meta ?? null);
           } else {
             toast.error('Invalid response structure while loading settlements');
           }
@@ -108,11 +111,19 @@ export default function UserSettlementsPage() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.pageIndex, pagination.pageSize]);
+  }, [requestCursor, pagination.pageSize]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   const columns = useMemo<ColumnDef<UserSettlement>[]>(
     () => [
@@ -236,11 +247,19 @@ export default function UserSettlementsPage() {
       pagination,
     },
     onSortingChange: setSorting,
-    onPaginationChange: setPagination,
+    onPaginationChange: (updater) => {
+      const next = typeof updater === 'function' ? updater(pagination) : updater;
+      if (next.pageSize !== pagination.pageSize) {
+        setPagination({ pageIndex: 0, pageSize: next.pageSize });
+        resetCursor();
+      } else {
+        setPagination(next);
+      }
+    },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
-    pageCount: meta ? meta.totalPages : -1,
+    pageCount: 1,
   });
 
   return (
@@ -261,7 +280,7 @@ export default function UserSettlementsPage() {
       <Container>
         <DataGrid
           table={table}
-          recordCount={meta?.total ?? data.length}
+          recordCount={data.length}
           isLoading={loading}
           tableLayout={modernTableLayout}
           tableClassNames={modernTableClassNames}
@@ -274,7 +293,13 @@ export default function UserSettlementsPage() {
               </ScrollArea>
             </CardTable>
             <CardFooter className={modernTableCardClasses.footer}>
-              <DataGridPagination />
+              <CursorDataGridPagination
+                meta={meta}
+                onNext={handleCursorNext}
+                onPrev={handleCursorPrev}
+                canGoPrev={canGoPrev}
+                rowCount={data.length}
+              />
             </CardFooter>
           </Card>
         </DataGrid>

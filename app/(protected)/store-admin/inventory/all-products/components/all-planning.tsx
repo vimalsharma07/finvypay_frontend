@@ -487,7 +487,7 @@ export function AllPlanning() {
 
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 20,
   });
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'customer', desc: true },

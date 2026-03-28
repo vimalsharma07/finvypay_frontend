@@ -107,7 +107,7 @@ export function EditAcquirerAccountContent() {
   useEffect(() => {
     const fetchAcquirers = async () => {
       try {
-        const response = await getAcquirers({ page: 1, limit: 100 });
+        const response = await getAcquirers({ limit: 100 });
         handleApiResponse(response, {
           onSuccess: (data) => {
             // New format: { success: true, data: [...] }

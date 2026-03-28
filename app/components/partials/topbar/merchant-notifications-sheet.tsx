@@ -19,7 +19,6 @@ import {
   Sheet,
   SheetBody,
   SheetContent,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -67,13 +66,13 @@ export function MerchantNotificationsSheet({
   const [isOpen, setIsOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [notificationToDelete, setNotificationToDelete] = useState<Notification | null>(null);
+  const listLimit = 20;
 
   const fetchNotifications = useCallback(async () => {
     setLoading(true);
     try {
       const response = await getMerchantNotifications({
-        page: 1,
-        limit: 20,
+        limit: listLimit,
         includeDeleted: false,
         sortBy: 'createdAt',
         sortOrder: 'DESC',
@@ -190,7 +189,7 @@ export function MerchantNotificationsSheet({
           if (meta) {
             setMeta((prev) => ({
               ...prev!,
-              totalItems: Math.max(0, (prev?.totalItems || 0) - 1),
+              totalCount: Math.max(0, (prev?.totalCount || 0) - 1),
               unreadCount: prev?.unreadCount 
                 ? Math.max(0, prev.unreadCount - (notificationToDelete.isRead ? 0 : 1))
                 : 0,
@@ -353,28 +352,39 @@ export function MerchantNotificationsSheet({
             )}
           </ScrollArea>
         </SheetBody>
-        <SheetFooter className="border-t border-border p-5 grid grid-cols-2 gap-2.5">
-          <Button 
-            variant="outline" 
-            onClick={handleMarkAllAsRead}
-            disabled={markingAllAsRead || meta?.unreadCount === 0}
-          >
-            {markingAllAsRead ? (
-              <Loader2 className="size-4 animate-spin mr-1" />
-            ) : (
-              <CheckSquare className="size-4 mr-1" />
-            )}
-            Mark all as read
-          </Button>
-          <Button variant="outline" onClick={fetchNotifications} disabled={loading}>
-            {loading ? (
-              <Loader2 className="size-4 animate-spin mr-1" />
-            ) : (
-              <Archive className="size-4 mr-1" />
-            )}
-            Refresh
-          </Button>
-        </SheetFooter>
+        <footer
+          className="shrink-0 w-full border-t border-border px-4 py-3 sm:px-5"
+          aria-label="Notification actions"
+        >
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:gap-3">
+            <Button
+              variant="outline"
+              className="h-9 w-full min-w-0 shrink-0 justify-center gap-2 sm:flex-1"
+              onClick={handleMarkAllAsRead}
+              disabled={markingAllAsRead || meta?.unreadCount === 0}
+            >
+              {markingAllAsRead ? (
+                <Loader2 className="size-4 shrink-0 animate-spin" />
+              ) : (
+                <CheckSquare className="size-4 shrink-0" />
+              )}
+              Mark all as read
+            </Button>
+            <Button
+              variant="outline"
+              className="h-9 w-full min-w-0 shrink-0 justify-center gap-2 sm:flex-1"
+              onClick={fetchNotifications}
+              disabled={loading}
+            >
+              {loading ? (
+                <Loader2 className="size-4 shrink-0 animate-spin" />
+              ) : (
+                <Archive className="size-4 shrink-0" />
+              )}
+              Refresh
+            </Button>
+          </div>
+        </footer>
       </SheetContent>
 
       {/* Delete Confirmation Dialog */}

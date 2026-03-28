@@ -27,7 +27,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { createRole, CreateRolePayload } from '@/lib/services/admin/roles';
-import { getPermissions, Permission } from '@/lib/services/admin/permissions';
+import { getAllPermissionsForAssignment, Permission } from '@/lib/services/admin/permissions';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -67,7 +67,7 @@ export function CreateRoleContent() {
     const fetchPermissions = async () => {
       setLoading(true);
       try {
-        const response = await getPermissions();
+        const response = await getAllPermissionsForAssignment();
         handleApiResponse(response, {
           onSuccess: (data) => {
             if (data && data.success && Array.isArray(data.data)) {

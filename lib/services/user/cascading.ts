@@ -2,6 +2,8 @@
 
 import { http, ApiError } from '../../api';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
+import { normalizeToCursorListEnvelope } from '@/lib/utils/normalize-cursor-list';
 
 export interface UserCascadingRule {
   id: string;
@@ -45,34 +47,42 @@ export interface UserCascadingRule {
   updatedAt?: string;
 }
 
-export interface UserCascadingListMeta {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
+export type UserCascadingListMeta = CursorPaginationMeta;
+
+export interface UserCascadingListParams {
+  cursor?: string;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'ASC' | 'DESC';
+  profileId?: string | number;
+  userProfileId?: string | number;
+  status?: boolean;
 }
 
 export interface UserCascadingListResponse {
   success: boolean;
-  data: UserCascadingRule[] | { data: UserCascadingRule[]; meta?: UserCascadingListMeta };
-  meta?: UserCascadingListMeta;
+  data: UserCascadingRule[];
+  meta: UserCascadingListMeta | null;
   message?: string;
 }
 
 const getBaseUrl = () => '/merchant/cascading';
 
 export async function getUserMerchantCascading(
-  params?: Record<string, any>
+  params?: UserCascadingListParams,
 ): Promise<ApiResponse<UserCascadingListResponse>> {
   try {
-    const data = await http.get(getBaseUrl(), {
+    const raw = await http.get(getBaseUrl(), {
       query: params as Record<string, string | number | boolean | null | undefined>,
-    }) as UserCascadingListResponse;
+    });
+    const normalized = normalizeToCursorListEnvelope<UserCascadingRule>(raw);
     return {
       status: 200,
-      data,
+      data: {
+        success: normalized.success,
+        data: normalized.data,
+        meta: normalized.meta,
+      },
     };
   } catch (error) {
     if (error instanceof ApiError) {

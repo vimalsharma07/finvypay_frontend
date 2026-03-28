@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Users, Eye, CheckCircle2 } from 'lucide-react';
@@ -14,19 +14,23 @@ import {
   getAffiliatePendingApplications,
   approveAffiliateApplication,
   type AffiliateApplication,
+  type AffiliateApplicationListResponse,
 } from '@/lib/services/admin/applications';
 import {
   ColumnDef,
   getCoreRowModel,
   getSortedRowModel,
+  PaginationState,
   SortingState,
   useReactTable,
 } from '@tanstack/react-table';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardTable } from '@/components/ui/card';
+import { Card, CardFooter, CardTable } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import {
@@ -43,6 +47,8 @@ import {
   modernTableClassNames,
   modernTableCardClasses,
 } from '@/app/(protected)/components/table-comp';
+import { DEFAULT_LIST_PAGE_SIZE } from '@/lib/types/pagination';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 
 const DATE_FMT = 'yyyy-MM-dd HH:mm';
 
@@ -57,39 +63,88 @@ const statusVariant = (status: string | null) => {
 
 export default function AdminAffiliateApplicationsPage() {
   const [data, setData] = useState<AffiliateApplication[]>([]);
+  const [meta, setMeta] = useState<CursorPaginationMeta | null>(null);
   const [loading, setLoading] = useState(true);
   const [actioningId, setActioningId] = useState<string | null>(null);
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
+  const [limit, setLimit] = useState(DEFAULT_LIST_PAGE_SIZE);
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: 'createdAt', desc: true },
+  ]);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: DEFAULT_LIST_PAGE_SIZE,
+  });
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await getAffiliatePendingApplications();
-      handleApiResponse(response, {
-        onSuccess: (body) => {
-          if (body?.success && Array.isArray(body.data)) {
-            setData(body.data);
-          } else {
+  const fetchData = useCallback(
+    async (cursor: string | undefined, pageLimit: number) => {
+      setLoading(true);
+      try {
+        const response = await getAffiliatePendingApplications({
+          ...(cursor ? { cursor } : {}),
+          limit: pageLimit,
+          sortBy,
+          sortOrder,
+        });
+        handleApiResponse<AffiliateApplicationListResponse>(response, {
+          onSuccess: (body) => {
+            if (body?.success && Array.isArray(body.data)) {
+              setData(body.data);
+              setMeta(body.meta ?? null);
+            } else {
+              setData([]);
+              setMeta(null);
+            }
+          },
+          onError: (message) => {
+            toast.error(message || 'Failed to load affiliate applications');
             setData([]);
-          }
-        },
-        onError: (message) => {
-          toast.error(message || 'Failed to load affiliate applications');
-          setData([]);
-        },
-        silent: true,
-      });
-    } catch (error) {
-      toast.error('An unexpected error occurred');
-      setData([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+            setMeta(null);
+          },
+          silent: true,
+        });
+      } catch {
+        toast.error('An unexpected error occurred');
+        setData([]);
+        setMeta(null);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [sortBy, sortOrder],
+  );
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchData(requestCursor, limit);
+  }, [fetchData, requestCursor, limit]);
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
+
+  const handleSortingChange = useCallback(
+    (updaterOrValue: SortingState | ((old: SortingState) => SortingState)) => {
+      setSorting((prev) => {
+        const next =
+          typeof updaterOrValue === 'function' ? updaterOrValue(prev) : updaterOrValue;
+        if (next.length > 0) {
+          const { id, desc } = next[0];
+          setSortBy(id);
+          setSortOrder(desc ? 'DESC' : 'ASC');
+          resetCursor();
+        }
+        return next;
+      });
+    },
+    [resetCursor],
+  );
 
   const handleApprove = useCallback(
     async (id: string) => {
@@ -100,20 +155,20 @@ export default function AdminAffiliateApplicationsPage() {
           onSuccess: (res) => {
             if (res?.success) {
               toast.success('Affiliate application approved');
-              fetchData();
+              fetchData(requestCursor, limit);
             } else {
               toast.error(res?.message || 'Failed to approve');
             }
           },
           onError: (message) => toast.error(message || 'Failed to approve'),
         });
-      } catch (error) {
+      } catch {
         toast.error('An unexpected error occurred');
       } finally {
         setActioningId(null);
       }
     },
-    [fetchData]
+    [fetchData, requestCursor, limit],
   );
 
   const columns = useMemo<ColumnDef<AffiliateApplication>[]>(
@@ -142,6 +197,7 @@ export default function AdminAffiliateApplicationsPage() {
           const num = row.original.phoneNumber || '';
           return code || num ? `${code} ${num}`.trim() : '—';
         },
+        enableSorting: false,
       },
       {
         accessorKey: 'country',
@@ -149,6 +205,7 @@ export default function AdminAffiliateApplicationsPage() {
           <DataGridColumnHeader column={column} title="Country" />
         ),
         cell: ({ row }) => row.original.country || '—',
+        enableSorting: false,
       },
       {
         accessorKey: 'status',
@@ -163,6 +220,7 @@ export default function AdminAffiliateApplicationsPage() {
             {row.original.status || '—'}
           </Badge>
         ),
+        enableSorting: false,
       },
       {
         accessorKey: 'createdAt',
@@ -219,6 +277,7 @@ export default function AdminAffiliateApplicationsPage() {
             </DropdownMenu>
           );
         },
+        enableSorting: false,
       },
     ],
     [actioningId, handleApprove]
@@ -227,10 +286,24 @@ export default function AdminAffiliateApplicationsPage() {
   const table = useReactTable({
     data,
     columns,
-    state: { sorting },
-    onSortingChange: setSorting,
+    state: { sorting, pagination },
+    onSortingChange: handleSortingChange,
+    onPaginationChange: (updater) => {
+      const next = typeof updater === 'function' ? updater(pagination) : updater;
+      if (next.pageSize !== pagination.pageSize) {
+        setLimit(next.pageSize);
+        setPagination({ pageIndex: 0, pageSize: next.pageSize });
+        resetCursor();
+      } else {
+        setPagination(next);
+      }
+    },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    manualPagination: true,
+    manualSorting: true,
+    pageCount: 1,
+    getRowId: (row) => String(row.id),
   });
 
   return (
@@ -259,6 +332,15 @@ export default function AdminAffiliateApplicationsPage() {
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </CardTable>
+            <CardFooter className={modernTableCardClasses.footer}>
+              <CursorDataGridPagination
+                meta={meta}
+                onNext={handleCursorNext}
+                onPrev={handleCursorPrev}
+                canGoPrev={canGoPrev}
+                rowCount={data.length}
+              />
+            </CardFooter>
           </Card>
         </DataGrid>
       </Container>

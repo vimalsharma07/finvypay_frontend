@@ -18,7 +18,7 @@ import type { Option } from '../types/common-types';
  */
 export async function fetchAdminProviderOptions(token?: string): Promise<Option[]> {
   try {
-    const response = await getAcquirers({ page: 1, limit: 100 });
+    const response = await getAcquirers({ limit: 100 });
     let providers: Option[] = [];
 
     handleApiResponse(response, {
@@ -63,7 +63,6 @@ export async function fetchAdminProviderConnectorsOptions(
     const providerType = providerTypeMap[paymentMethod] || 'CARD';
 
     const response = await getAcquirerAccounts({
-      page: 1,
       limit: 100,
       acquirerId: Number(providerId),
     });
@@ -104,7 +103,7 @@ export async function fetchAdminProviderConnectorsOptions(
  */
 export async function fetchListOfCurrencies(token?: string): Promise<Option[]> {
   try {
-    const response = await getCurrencies({ page: 1, limit: 1000 });
+    const response = await getCurrencies({ limit: 1000 });
     let currencies: Option[] = [];
 
     handleApiResponse(response, {
@@ -132,7 +131,6 @@ export async function fetchListOfCurrencies(token?: string): Promise<Option[]> {
 export async function fetchListOfCountries(token?: string): Promise<Option[]> {
   try {
     const response = await getCountries({
-      page: 1,
       limit: 1000,
       sortBy: 'countryName',
       sortOrder: 'ASC',
