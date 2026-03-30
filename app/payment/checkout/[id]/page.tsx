@@ -23,7 +23,7 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
             P4
           </div>
           <div>
-            <p className="text-2xl font-semibold leading-tight">FinvyPay Checkout</p>
+            <p className="text-2xl font-semibold leading-tight">Aims LLC Checkout</p>
             <p className="text-sm text-white/80">Securely collect payer details</p>
           </div>
         </div>
