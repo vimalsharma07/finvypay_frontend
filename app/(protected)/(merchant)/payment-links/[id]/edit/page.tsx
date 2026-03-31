@@ -31,6 +31,7 @@ import {
   updateUserPaymentLink,
   PaymentLink,
 } from '@/lib/services/user/payment-links';
+import { getUserPaymentTemplates, PaymentTemplate } from '@/lib/services/user/payment-templates';
 import { useCurrencies } from '@/lib/hooks/use-currencies';
 import { z } from 'zod';
 
@@ -40,9 +41,8 @@ const updatePaymentLinkSchema = z.object({
     .max(255, 'Payment link name must be less than 255 characters')
     .refine((val) => !/^\s*$/.test(val), 'Payment link name cannot contain only spaces'),
 
-  amount: z.number()
-    .positive('Amount must be greater than 0')
-    .max(999999.99, 'Amount cannot exceed 999,999.99'),
+  amountType: z.enum(['fixed', 'custom']),
+  amount: z.number().optional(),
 
   currency: z.string()
     .min(1, 'Currency is required')
@@ -52,6 +52,17 @@ const updatePaymentLinkSchema = z.object({
     .min(1, 'Expiry validity is required')
     .refine((val) => ['1hr', '6hr', '12hr', '24hr', '48hr', '7d', '30d'].includes(val),
       'Invalid expiry validity. Must be one of: 1hr, 6hr, 12hr, 24hr, 48hr, 7d, 30d'),
+  paymentTemplateId: z.string().optional(),
+}).superRefine((val, ctx) => {
+  if (val.amountType === 'fixed') {
+    if (typeof val.amount !== 'number' || Number.isNaN(val.amount) || val.amount <= 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['amount'],
+        message: 'Amount must be greater than 0 for fixed amount links',
+      });
+    }
+  }
 });
 
 type UpdatePaymentLinkFormData = z.infer<typeof updatePaymentLinkSchema>;
@@ -79,12 +90,12 @@ export default function EditPaymentLinkPage({ params }: EditPaymentLinkPageProps
   const [isLoading, setIsLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [paymentLink, setPaymentLink] = useState<PaymentLink | null>(null);
+  const [templates, setTemplates] = useState<PaymentTemplate[]>([]);
   const { currencies, loading: loadingCurrencies } = useCurrencies();
 
   const {
     register,
     handleSubmit,
-    control,
     formState: { errors },
     setValue,
     watch,
@@ -95,10 +106,22 @@ export default function EditPaymentLinkPage({ params }: EditPaymentLinkPageProps
     defaultValues: {
       name: '',
       amount: 0,
+      amountType: 'fixed',
       currency: '',
       expiryValidity: '24hr',
+      paymentTemplateId: '',
     },
   });
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      const response = await getUserPaymentTemplates();
+      handleApiResponse(response, {
+        onSuccess: (data) => setTemplates(data.data ?? []),
+      });
+    };
+    fetchTemplates();
+  }, []);
+
 
   // Resolve params (Next.js 15 async params)
   useEffect(() => {
@@ -124,9 +147,11 @@ export default function EditPaymentLinkPage({ params }: EditPaymentLinkPageProps
               // Pre-populate form with existing data
               reset({
                 name: linkData.name,
-                amount: parseFloat(linkData.amount),
+                amount: linkData.amount ? parseFloat(linkData.amount) : undefined,
+                amountType: linkData.amountType || 'fixed',
                 currency: linkData.currency,
                 expiryValidity: linkData.expiryValidity || '24hr',
+                paymentTemplateId: linkData.paymentTemplateId ? String(linkData.paymentTemplateId) : '',
               });
             } else {
               toast.error('Payment link not found');
@@ -157,7 +182,12 @@ export default function EditPaymentLinkPage({ params }: EditPaymentLinkPageProps
       setIsLoading(true);
       console.log('Updating payment link:', data);
 
-      const response = await updateUserPaymentLink(resolvedParams.id, data);
+      const selectedTemplateId = data.paymentTemplateId ? Number(data.paymentTemplateId) : undefined;
+      const response = await updateUserPaymentLink(resolvedParams.id, {
+        ...data,
+        paymentTemplateId: Number.isFinite(selectedTemplateId) ? selectedTemplateId : undefined,
+        amount: data.amountType === 'fixed' ? data.amount : undefined,
+      });
 
       handleApiResponse(response, {
         onSuccess: () => {
@@ -226,8 +256,26 @@ export default function EditPaymentLinkPage({ params }: EditPaymentLinkPageProps
 
                 {/* Amount */}
                 <div className="space-y-2">
+                  <Label htmlFor="amountType" className="text-sm font-medium">
+                    Amount Type <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    onValueChange={(value) => setValue('amountType', value as 'fixed' | 'custom')}
+                    value={watch('amountType')}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select amount type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="fixed">Fixed Amount</SelectItem>
+                      <SelectItem value="custom">Custom Amount</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="amount" className="text-sm font-medium">
-                    Amount <span className="text-red-500">*</span>
+                    Amount {watch('amountType') === 'fixed' ? <span className="text-red-500">*</span> : null}
                   </Label>
                   <Input
                     id="amount"
@@ -237,10 +285,37 @@ export default function EditPaymentLinkPage({ params }: EditPaymentLinkPageProps
                     {...register('amount', { valueAsNumber: true })}
                     placeholder="0.00"
                     className="w-full"
+                    disabled={watch('amountType') === 'custom'}
                   />
+                  {watch('amountType') === 'custom' && (
+                    <p className="text-xs text-muted-foreground">
+                      Customer will enter amount on checkout.
+                    </p>
+                  )}
                   {errors.amount && (
                     <p className="text-red-500 text-xs">{errors.amount.message}</p>
                   )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="paymentTemplateId" className="text-sm font-medium">
+                    Payment Template
+                  </Label>
+                  <Select
+                    onValueChange={(value) => setValue('paymentTemplateId', value)}
+                    value={watch('paymentTemplateId')}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a template color theme" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {templates.map((template) => (
+                        <SelectItem key={template.id} value={template.id}>
+                          {template.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Currency */}

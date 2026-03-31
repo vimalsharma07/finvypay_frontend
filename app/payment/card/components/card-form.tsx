@@ -21,6 +21,8 @@ import { getUserPaymentLinkById } from '@/lib/services/user/payment-links';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { getPaymentReturnUrl } from '@/lib/utils/payment-return-url';
 import { http } from '@/lib/api';
+import { Badge } from '@/components/ui/badge';
+import { motion } from 'motion/react';
 
 const numericString = (min: number, max: number, message: string) =>
   z
@@ -52,7 +54,10 @@ const parseExpiry = (value: string) => {
 };
 
 const cardSchema = z.object({
-  cardNumber: numericString(13, 19, 'Enter a valid card number'),
+  cardNumber: z.string().trim().refine((v) => {
+    const digits = v.replace(/\D/g, '');
+    return digits.length >= 13 && digits.length <= 19;
+  }, 'Enter a valid card number'),
   cardExpiry: z
     .string()
     .trim()
@@ -88,6 +93,32 @@ const getInitialValues = (params: ReturnType<typeof useSearchParams>): CardFormV
     cardExpiry: formatExpiryInput(combined),
     cvv: params.get('cvv') ?? '',
   };
+};
+
+const getCardBrand = (raw: string): string => {
+  const digits = raw.replace(/\D/g, '');
+  if (/^4/.test(digits)) return 'VISA';
+  if (/^5[1-5]/.test(digits) || /^2(2[2-9]|[3-6]|7[01]|720)/.test(digits)) return 'MASTERCARD';
+  if (/^3[47]/.test(digits)) return 'AMEX';
+  if (/^6(?:011|5)/.test(digits)) return 'DISCOVER';
+  return 'CARD';
+};
+
+const formatCardNumberInput = (value: string) =>
+  value
+    .replace(/\D/g, '')
+    .slice(0, 19)
+    .replace(/(.{4})/g, '$1 ')
+    .trim();
+
+const hexToRgb = (hex: string) => {
+  const value = hex.replace('#', '').trim();
+  if (value.length !== 6) return { r: 23, g: 184, b: 166 };
+  const r = parseInt(value.slice(0, 2), 16);
+  const g = parseInt(value.slice(2, 4), 16);
+  const b = parseInt(value.slice(4, 6), 16);
+  if ([r, g, b].some((n) => Number.isNaN(n))) return { r: 23, g: 184, b: 166 };
+  return { r, g, b };
 };
 
 export function CardForm() {
@@ -174,11 +205,17 @@ export function CardForm() {
 
       const paymentLinkId = searchParams.get('paymentLinkId');
 
+      const checkoutAmount = searchParams.get('amount');
+      const resolvedAmount =
+        paymentLinkData.amountType === 'custom'
+          ? Number(checkoutAmount || 0)
+          : Number(paymentLinkData.amount || 0);
+
       const paymentPayload = {
         orderId: searchParams.get('orderId') || `ORD_${Date.now()}`,
-        amount: parseFloat(paymentLinkData.amount),
+        amount: resolvedAmount,
         currency: paymentLinkData.currency,
-        cardNumber: values.cardNumber,
+        cardNumber: values.cardNumber.replace(/\D/g, ''),
         cardExpiryMonth: parsed?.month || 0,
         cardExpiryYear: parsed?.year || 0,
         cvv: values.cvv,
@@ -250,6 +287,15 @@ export function CardForm() {
     return padded.replace(/(.{4})/g, '$1 ').trim();
   };
 
+  const brand = getCardBrand(watched.cardNumber || '');
+  const primaryColor = paymentLinkData?.paymentTemplate?.primaryColor || '#17B8A6';
+  const logoUrl =
+    searchParams.get('logoUrl') ||
+    paymentLinkData?.paymentTemplate?.logoUrl ||
+    '/media/app/mini-logo.svg';
+  const inputClassName =
+    'h-11 rounded-xl border-slate-200 bg-slate-50/70 focus-visible:ring-2 focus-visible:ring-offset-0';
+
   const previewExpiry = () => {
     const parsed = parseExpiry(watched.cardExpiry || '');
     if (!parsed) return 'MM/YY';
@@ -273,13 +319,18 @@ export function CardForm() {
     <div className="space-y-6">
       {/* Payment Summary */}
       {paymentLinkData && (
-        <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+        <Card
+          className="border-0 shadow-md"
+          style={{
+            background: `linear-gradient(to right, ${primaryColor}14, ${primaryColor}1F)`,
+          }}
+        >
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Payment Amount</p>
                 <p className="text-2xl font-bold text-primary">
-                  {paymentLinkData.currency} {parseFloat(paymentLinkData.amount).toFixed(2)}
+                  {paymentLinkData.currency} {Number(searchParams.get('amount') || paymentLinkData.amount || 0).toFixed(2)}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">{paymentLinkData.name}</p>
               </div>
@@ -292,20 +343,23 @@ export function CardForm() {
         </Card>
       )}
 
-      <div className="relative grid gap-8 md:grid-cols-2 items-start">
-      <div className="relative z-10">
-        <Card className="shadow-sm border border-muted">
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-1">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
-                1
+      <div className="relative grid gap-8 md:grid-cols-[1fr_1fr] items-start">
+        <div className="relative z-10">
+          <Card className="shadow-xl border-0">
+            <CardHeader className="pb-2 border-b bg-slate-50">
+              <div className="flex items-center gap-2">
+                <div
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-primary-foreground text-xs font-semibold"
+                  style={{ backgroundColor: primaryColor }}
+                >
+                  1
+                </div>
+                <div>
+                  <CardTitle className="text-base leading-tight">Card details</CardTitle>
+                  <p className="text-sm text-muted-foreground">Enter your card details</p>
+                </div>
               </div>
-              <div>
-                <CardTitle className="text-base leading-tight">Card details</CardTitle>
-                <p className="text-sm text-muted-foreground">Enter your payment info</p>
-              </div>
-            </div>
-          </CardHeader>
+            </CardHeader>
 
           <CardContent className="pt-2">
             <Form {...form}>
@@ -321,10 +375,15 @@ export function CardForm() {
                           {...field}
                           inputMode="numeric"
                           placeholder="4111 1111 1111 1111"
-                          maxLength={19}
+                          maxLength={23}
+                          className={inputClassName}
+                          onChange={(event) => field.onChange(formatCardNumberInput(event.target.value))}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <div className="flex justify-between">
+                        <FormMessage />
+                        <p className="text-xs text-muted-foreground">{brand}</p>
+                      </div>
                     </FormItem>
                   )}
                 />
@@ -342,6 +401,7 @@ export function CardForm() {
                             inputMode="numeric"
                             placeholder="MM / YY"
                             maxLength={7}
+                            className={inputClassName}
                             onChange={(event) => {
                               const formatted = formatExpiryInput(event.target.value);
                               field.onChange(formatted);
@@ -367,6 +427,7 @@ export function CardForm() {
                             type="password"
                             placeholder="123"
                             maxLength={4}
+                            className={inputClassName}
                           />
                         </FormControl>
                         <FormMessage />
@@ -379,65 +440,115 @@ export function CardForm() {
                   <Button variant="outline" type="button" onClick={() => router.back()} disabled={processing}>
                     Back
                   </Button>
-                  <Button type="submit" disabled={processing}>
+                  <Button
+                    type="submit"
+                    disabled={processing}
+                    style={{ backgroundColor: primaryColor }}
+                  >
                     {processing ? 'Processing...' : 'Complete payment'}
                   </Button>
                 </div>
               </form>
             </Form>
           </CardContent>
-        </Card>
-      </div>
+          </Card>
+        </div>
 
       <div className="relative">
-        <div className="absolute inset-0 right-[-10%] top-[-12%] rotate-3 bg-gradient-to-br from-primary to-primary/70 rounded-3xl blur-sm opacity-80" />
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/80 to-primary/60 shadow-xl p-5 text-white min-h-[240px] max-w-xl ml-auto">
-          <div className="absolute -right-10 -top-14 h-32 w-28 rotate-9 bg-white/12 blur-2xl" />
-          <div className="absolute -left-8 bottom-0 h-28 w-28 -rotate-3 bg-white/10 blur-2xl" />
-          <div className="relative flex flex-col gap-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1">
-                <div className="h-9 w-12 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center text-[11px] font-semibold">
-                  P4
+        {(() => {
+          const accent = hexToRgb(primaryColor);
+          const holderName =
+            `${searchParams.get('firstName') || ''} ${searchParams.get('lastName') || ''}`.trim() ||
+            'Card Holder';
+          const cvvDots = watched.cvv ? '•'.repeat(Math.min(watched.cvv.length, 4)) : '***';
+          const brandLabel =
+            brand === 'MASTERCARD' ? 'Mastercard' : brand === 'VISA' ? 'Visa' : brand;
+
+          return (
+            <>
+              <div
+                className="absolute inset-0 right-[-6%] top-[-8%] rounded-[30px] blur-2xl opacity-75"
+                style={{
+                  background: `radial-gradient(circle at 30% 30%, rgba(${accent.r}, ${accent.g}, ${accent.b}, 0.55), rgba(15, 23, 42, 0.65) 65%)`,
+                }}
+              />
+              <motion.div
+                initial={{ opacity: 0, y: 14, rotateX: 6 }}
+                animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                transition={{ duration: 0.35 }}
+                className="relative ml-auto max-w-xl rounded-[28px] p-6 shadow-2xl border border-white/10 overflow-hidden"
+                style={{
+                  background: `linear-gradient(145deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.94) 50%, rgba(${accent.r}, ${accent.g}, ${accent.b}, 0.55) 100%)`,
+                }}
+              >
+                <div className="absolute -top-10 -right-10 h-36 w-36 rounded-full bg-white/10 blur-2xl" />
+                <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
+
+                <div className="relative flex flex-col gap-6 text-white">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {logoUrl ? (
+                        <img
+                          src={logoUrl}
+                          alt="Logo"
+                          className="h-8 max-w-20 object-contain rounded bg-white/90 px-1.5"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = '/media/app/mini-logo.svg';
+                          }}
+                        />
+                      ) : (
+                        <div className="h-8 w-12 rounded-md bg-white/15 flex items-center justify-center text-[11px] font-semibold tracking-wide">FP</div>
+                      )}
+                      <div className="h-9 w-12 rounded-md border border-white/30 bg-gradient-to-br from-slate-200/80 to-slate-400/60" />
+                    </div>
+                    <Badge className="bg-white/10 text-white border-white/20">{brandLabel}</Badge>
+                  </div>
+
+                  <motion.div
+                    key={formatPreviewNumber(watched.cardNumber || '')}
+                    initial={{ opacity: 0.35, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="font-mono text-[22px] tracking-[0.22em] leading-none"
+                  >
+                    {formatPreviewNumber(watched.cardNumber || '')}
+                  </motion.div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="col-span-2">
+                      <p className="text-[10px] uppercase tracking-[0.16em] text-white/65">Card Holder</p>
+                      <p className="text-sm font-semibold truncate">{holderName}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.16em] text-white/65">Expiry</p>
+                      <p className="text-sm font-semibold">{previewExpiry()}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.16em] text-white/65">CVV</p>
+                      <p className="text-sm font-semibold tracking-[0.24em]">{cvvDots}</p>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {brand === 'MASTERCARD' && (
+                        <>
+                          <span className="h-5 w-5 rounded-full bg-red-500/90" />
+                          <span className="-ml-2 h-5 w-5 rounded-full bg-yellow-400/90" />
+                        </>
+                      )}
+                      {brand === 'VISA' && <p className="text-xl font-black italic tracking-tight">VISA</p>}
+                      {brand !== 'VISA' && brand !== 'MASTERCARD' && (
+                        <p className="text-sm font-semibold">{brandLabel}</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className="text-xs">
-                  <p className="font-semibold">FinvyPay</p>
-                  <p className="text-white/80">Checkout</p>
-                </div>
-              </div>
-              <div className="text-right text-[11px]">
-                <p className="text-white/80">STEP 2</p>
-                <p className="font-semibold tracking-wide">CARD</p>
-              </div>
-            </div>
-
-            <div className="flex justify-between items-center text-base font-semibold tracking-widest">
-              {formatPreviewNumber(watched.cardNumber || '')}
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div>
-                <p className="text-white/80 text-[10px] uppercase tracking-wide">Name</p>
-                <p className="font-semibold">FinvyPay User</p>
-              </div>
-              <div className="text-right">
-                <p className="text-white/80 text-[10px] uppercase tracking-wide">Expiry</p>
-                <p className="font-semibold">{previewExpiry()}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1 text-xs">
-              <div className="h-8 w-12 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center text-[11px] font-semibold">
-                CVV
-              </div>
-              <div className="text-sm font-semibold tracking-widest">
-                {watched.cvv ? '•••' : '***'}
-              </div>
-            </div>
-          </div>
+              </motion.div>
+            </>
+          );
+        })()}
         </div>
       </div>
-    </div>
     </div>
   );
 }

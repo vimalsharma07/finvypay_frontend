@@ -10,9 +10,17 @@ export interface PaymentLink {
   merchantId: string;
   name: string;
   link: string;
-  amount: string;
+  amount: string | null;
+  amountType: 'fixed' | 'custom';
   currency: string;
   expiryValidity: string;
+  paymentTemplateId?: string | null;
+  paymentTemplate?: {
+    id: string;
+    name: string;
+    primaryColor: string;
+    logoUrl?: string | null;
+  } | null;
   status: 'active' | 'inactive' | 'expired';
   isDeleted: boolean;
   createdAt: string;
@@ -94,9 +102,11 @@ export async function deleteUserPaymentLink(
 export async function createUserPaymentLink(
   payload: {
     name: string;
-    amount: number;
+    amount?: number;
+    amountType: 'fixed' | 'custom';
     currency: string;
     expiryValidity: string;
+    paymentTemplateId?: number;
   }
 ): Promise<ApiResponse<{ success: boolean; message: string; data?: any }>> {
   try {
@@ -150,9 +160,11 @@ export async function updateUserPaymentLink(
   paymentLinkId: string,
   payload: {
     name: string;
-    amount: number;
+    amount?: number;
+    amountType: 'fixed' | 'custom';
     currency: string;
     expiryValidity: string;
+    paymentTemplateId?: number;
   }
 ): Promise<ApiResponse<{ success: boolean; message: string; data?: any }>> {
   try {

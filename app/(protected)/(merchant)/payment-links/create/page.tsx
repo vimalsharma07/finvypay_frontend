@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -29,6 +29,7 @@ import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
   createUserPaymentLink,
 } from '@/lib/services/user/payment-links';
+import { getUserPaymentTemplates, PaymentTemplate } from '@/lib/services/user/payment-templates';
 import { useCurrencies } from '@/lib/hooks/use-currencies';
 import { z } from 'zod';
 
@@ -38,9 +39,9 @@ const createPaymentLinkSchema = z.object({
     .max(255, 'Payment link name must be less than 255 characters')
     .refine((val) => !/^\s*$/.test(val), 'Payment link name cannot contain only spaces'),
 
-  amount: z.number()
-    .positive('Amount must be greater than 0')
-    .max(999999.99, 'Amount cannot exceed 999,999.99'),
+  amountType: z.enum(['fixed', 'custom']),
+
+  amount: z.number().optional(),
 
   currency: z.string()
     .min(1, 'Currency is required')
@@ -50,6 +51,17 @@ const createPaymentLinkSchema = z.object({
     .min(1, 'Expiry validity is required')
     .refine((val) => ['1hr', '6hr', '12hr', '24hr', '7d', '30d'].includes(val),
       'Invalid expiry validity. Must be one of: 1hr, 6hr, 12hr, 24hr, 7d, 30d'),
+  paymentTemplateId: z.string().optional(),
+}).superRefine((val, ctx) => {
+  if (val.amountType === 'fixed') {
+    if (typeof val.amount !== 'number' || Number.isNaN(val.amount) || val.amount <= 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['amount'],
+        message: 'Amount must be greater than 0 for fixed amount links',
+      });
+    }
+  }
 });
 
 type CreatePaymentLinkFormData = z.infer<typeof createPaymentLinkSchema>;
@@ -67,12 +79,12 @@ export default function CreatePaymentLinkPage() {
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [templates, setTemplates] = useState<PaymentTemplate[]>([]);
   const { currencies, loading: loadingCurrencies } = useCurrencies();
 
   const {
     register,
     handleSubmit,
-    control,
     formState: { errors },
     setValue,
     watch,
@@ -82,17 +94,35 @@ export default function CreatePaymentLinkPage() {
     defaultValues: {
       name: '',
       amount: 0,
+      amountType: 'fixed',
       currency: '',
       expiryValidity: '24hr',
+      paymentTemplateId: '',
     },
   });
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      const response = await getUserPaymentTemplates();
+      handleApiResponse(response, {
+        onSuccess: (data) => setTemplates(data.data ?? []),
+      });
+    };
+    fetchTemplates();
+  }, []);
 
   const onSubmit = async (data: CreatePaymentLinkFormData): Promise<void> => {
     try {
       setIsLoading(true);
       console.log('Creating payment link:', data); // Debug log
 
-      const response = await createUserPaymentLink(data);
+      const selectedTemplateId = data.paymentTemplateId ? Number(data.paymentTemplateId) : undefined;
+      const payload = {
+        ...data,
+        paymentTemplateId: Number.isFinite(selectedTemplateId) ? selectedTemplateId : undefined,
+        amount: data.amountType === 'fixed' ? data.amount : undefined,
+      };
+      const response = await createUserPaymentLink(payload);
 
       handleApiResponse(response, {
         onSuccess: () => {
@@ -151,8 +181,26 @@ export default function CreatePaymentLinkPage() {
 
                 {/* Amount */}
                 <div className="space-y-2">
+                  <Label htmlFor="amountType" className="text-sm font-medium">
+                    Amount Type <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    onValueChange={(value) => setValue('amountType', value as 'fixed' | 'custom')}
+                    value={watch('amountType')}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select amount type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="fixed">Fixed Amount</SelectItem>
+                      <SelectItem value="custom">Custom Amount</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="amount" className="text-sm font-medium">
-                    Amount <span className="text-red-500">*</span>
+                    Amount {watch('amountType') === 'fixed' ? <span className="text-red-500">*</span> : null}
                   </Label>
                   <Input
                     id="amount"
@@ -162,10 +210,37 @@ export default function CreatePaymentLinkPage() {
                     {...register('amount', { valueAsNumber: true })}
                     placeholder="0.00"
                     className="w-full"
+                    disabled={watch('amountType') === 'custom'}
                   />
+                  {watch('amountType') === 'custom' && (
+                    <p className="text-xs text-muted-foreground">
+                      Customer will enter amount on checkout.
+                    </p>
+                  )}
                   {errors.amount && (
                     <p className="text-red-500 text-xs">{errors.amount.message}</p>
                   )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="paymentTemplateId" className="text-sm font-medium">
+                    Payment Template
+                  </Label>
+                  <Select
+                    onValueChange={(value) => setValue('paymentTemplateId', value)}
+                    value={watch('paymentTemplateId')}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a template color theme" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {templates.map((template) => (
+                        <SelectItem key={template.id} value={template.id}>
+                          {template.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Currency */}
