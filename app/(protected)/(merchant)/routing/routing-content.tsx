@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { Container } from '@/components/common/container';
@@ -31,6 +31,7 @@ import {
   getMerchantProfiles,
   type MerchantProfileListResponse,
 } from '@/lib/services/user/merchant-profile';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
 
 export function UserRoutingPageContent() {
   const router = useRouter();
@@ -43,8 +44,9 @@ export function UserRoutingPageContent() {
   const [loading, setLoading] = useState(true);
   const [routes, setRoutes] = useState<UserRouteRule[]>([]);
   const [meta, setMeta] = useState<UserRouteRuleListMeta | null>(null);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
+  const [limit, setLimit] = useState(20);
   const [sortBy, setSortBy] = useState<string>('priority');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('ASC');
 
@@ -57,58 +59,71 @@ export function UserRoutingPageContent() {
   const userId = user?.id?.toString() || '';
 
   // Fetch routing rules (user-scoped service)
-  const fetchRoutings = async (
-    pageNum: number,
-    pageLimit: number,
-    sortField: string,
-    sortDir: 'ASC' | 'DESC',
-    profileId?: string,
-  ) => {
-    if (!userId) return;
-    setLoading(true);
-    try {
-      const params: any = {
-        page: pageNum,
-        limit: pageLimit,
-        sortBy: sortField,
-        sortOrder: sortDir,
-        ...(profileId && { profileId }),
-      };
+  const fetchRoutings = useCallback(
+    async (
+      cursor: string | undefined,
+      pageLimit: number,
+      sortField: string,
+      sortDir: 'ASC' | 'DESC',
+      profileId?: string,
+    ) => {
+      if (!userId) return;
+      setLoading(true);
+      try {
+        const params: Record<string, string | number | undefined> = {
+          ...(cursor ? { cursor } : {}),
+          limit: pageLimit,
+          sortBy: sortField,
+          sortOrder: sortDir,
+          ...(profileId && { profileId: Number(profileId) }),
+        };
 
-      const response = await getUserMerchantRoutings(params);
+        const response = await getUserMerchantRoutings(params);
 
-      handleApiResponse<UserRouteRuleListResponse>(response, {
-        onSuccess: (data) => {
-          if (!data?.success) return;
-          const list = Array.isArray(data.data) ? data.data : (data.data?.data ?? []);
-          const metaData = data.meta ?? (data.data as any)?.meta ?? null;
-          const normalized = list.map((item: any) => ({
-            ...item,
-            isCascade: item.isCascade ?? item.is_cascade ?? false,
-            routingFor: item.routingFor ?? item.routing_for ?? item.routingFor,
-            splitEnable: item.splitEnable ?? item.split_enable ?? item.splitEnable,
-            viewRoute: item.viewRoute ?? item.view_route ?? item.viewRoute,
-          }));
-          setRoutes(normalized as UserRouteRule[]);
-          setMeta(metaData);
-        },
-        onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to load routing rules');
-        },
-      });
-    } catch (error) {
-      toast.error('An unexpected error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
+        handleApiResponse<UserRouteRuleListResponse>(response, {
+          onSuccess: (data) => {
+            if (!data?.success) return;
+            const list = Array.isArray(data.data)
+              ? data.data
+              : (data.data as { data?: UserRouteRule[] })?.data ?? [];
+            const metaData =
+              data.meta ?? (data.data as { meta?: UserRouteRuleListMeta })?.meta ?? null;
+            const normalized = list.map((item: any) => ({
+              ...item,
+              isCascade: item.isCascade ?? item.is_cascade ?? false,
+              routingFor: item.routingFor ?? item.routing_for ?? item.routingFor,
+              splitEnable: item.splitEnable ?? item.split_enable ?? item.splitEnable,
+              viewRoute: item.viewRoute ?? item.view_route ?? item.viewRoute,
+            }));
+            setRoutes(normalized as UserRouteRule[]);
+            setMeta(metaData);
+          },
+          onError: (errorMessage) => {
+            toast.error(errorMessage || 'Failed to load routing rules');
+          },
+        });
+      } catch (error) {
+        toast.error('An unexpected error occurred');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userId],
+  );
 
-  // Load routes when profile or pagination changes
   useEffect(() => {
     if (userId && selectedProfileId) {
-      fetchRoutings(page, limit, sortBy, sortOrder, selectedProfileId);
+      fetchRoutings(requestCursor, limit, sortBy, sortOrder, selectedProfileId);
     }
-  }, [userId, page, limit, sortBy, sortOrder, selectedProfileId]);
+  }, [userId, requestCursor, limit, sortBy, sortOrder, selectedProfileId, fetchRoutings]);
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   // Prepare merchant profiles from user data/local storage
   useEffect(() => {
@@ -170,10 +185,10 @@ export function UserRoutingPageContent() {
       const nextProfileId = (primary?.id ?? profileList[0]?.id)?.toString() || '';
       if (nextProfileId) {
         setSelectedProfileId(nextProfileId);
-        setPage(1);
+        resetCursor();
       }
     }
-  }, [profileList, selectedProfileId]);
+  }, [profileList, selectedProfileId, resetCursor]);
 
   const headers: TableHeader<UserRouteRule>[] = useMemo(() => [
     { key: 'name', label: 'Name', sortable: true },
@@ -227,7 +242,7 @@ export function UserRoutingPageContent() {
                 handleApiResponse(response, {
                   onSuccess: () => {
                     toast.success('Routing status updated');
-                    fetchRoutings(page, limit, sortBy, sortOrder, selectedProfileId);
+                    fetchRoutings(requestCursor, limit, sortBy, sortOrder, selectedProfileId);
                   },
                   onError: (errorMessage) => {
                     toast.error(errorMessage || 'Failed to update status');
@@ -307,7 +322,7 @@ export function UserRoutingPageContent() {
                   value={selectedProfileId}
                   onChange={(val) => {
                     setSelectedProfileId(val);
-                    setPage(1);
+                    resetCursor();
                   }}
                   placeholder="Select profile (industry)"
                 />
@@ -326,13 +341,17 @@ export function UserRoutingPageContent() {
           getRowId={(row: UserRouteRule) => String(row.id)}
           pagination={{
             pageSize: limit,
-            pageIndex: page - 1,
-            totalCount: meta?.totalItems ?? 0,
-            onPageChange: (pageIndex) => setPage(pageIndex + 1),
+            pageIndex: 0,
             onPageSizeChange: (newSize) => {
               setLimit(newSize);
-              setPage(1);
+              resetCursor();
             },
+          }}
+          cursorPagination={{
+            meta,
+            onNext: handleCursorNext,
+            onPrev: handleCursorPrev,
+            canGoPrev,
           }}
           sorting={{
             sortBy: sortBy,
@@ -340,7 +359,7 @@ export function UserRoutingPageContent() {
             onSortChange: (newSortBy, newSortOrder) => {
               setSortBy(newSortBy);
               setSortOrder(newSortOrder);
-              setPage(1);
+              resetCursor();
             },
           }}
           loading={isTableLoading}
@@ -365,7 +384,7 @@ export function UserRoutingPageContent() {
             handleApiResponse(response, {
               onSuccess: () => {
                 toast.success('Routing rule deleted successfully');
-                fetchRoutings(page, limit, sortBy, sortOrder, selectedProfileId);
+                fetchRoutings(requestCursor, limit, sortBy, sortOrder, selectedProfileId);
               },
               onError: (errorMessage) => {
                 toast.error(errorMessage || 'Failed to delete routing rule');

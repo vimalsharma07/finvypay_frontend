@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { Route, Eye, Pencil, Trash2, Plus } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
@@ -28,21 +28,23 @@ import {
   type GlobalRouteRuleListMeta,
 } from '@/lib/services/admin/global-routing';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
 
 export default function GlobalRoutingPage() {
   const [loading, setLoading] = useState(true);
   const [routes, setRoutes] = useState<GlobalRouteRule[]>([]);
   const [meta, setMeta] = useState<GlobalRouteRuleListMeta | null>(null);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(20);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [routeToDelete, setRouteToDelete] = useState<GlobalRouteRule | null>(null);
 
-  const fetchRoutings = async (pageNum: number, pageLimit: number) => {
+  const fetchRoutings = useCallback(async (cursor: string | undefined, pageLimit: number) => {
     setLoading(true);
     try {
       const response = await getGlobalRoutings({
-        page: pageNum,
+        ...(cursor ? { cursor } : {}),
         limit: pageLimit,
       });
 
@@ -63,11 +65,24 @@ export default function GlobalRoutingPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchRoutings(page, limit);
-  }, [page, limit]);
+    fetchRoutings(requestCursor, limit);
+  }, [fetchRoutings, requestCursor, limit]);
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setLimit(newPageSize);
+    resetCursor();
+  };
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   const headers: TableHeader<GlobalRouteRule>[] = [
     { key: 'name', label: 'Name', sortable: true },
@@ -128,7 +143,7 @@ export default function GlobalRoutingPage() {
                 handleApiResponse(response, {
                   onSuccess: () => {
                     toast.success('Routing status updated');
-                    fetchRoutings(page, limit);
+                    fetchRoutings(requestCursor, limit);
                   },
                   onError: (errorMessage) => {
                     toast.error(errorMessage || 'Failed to update status');
@@ -150,7 +165,7 @@ export default function GlobalRoutingPage() {
                 handleApiResponse(response, {
                   onSuccess: () => {
                     toast.success('Cascade status updated');
-                    fetchRoutings(page, limit);
+                    fetchRoutings(requestCursor, limit);
                   },
                   onError: (errorMessage) => {
                     toast.error(errorMessage || 'Failed to update cascade');
@@ -229,13 +244,13 @@ export default function GlobalRoutingPage() {
           getRowId={(row: GlobalRouteRule) => String(row.id)}
           pagination={{
             pageSize: limit,
-            pageIndex: page - 1,
-            totalCount: meta?.totalItems ?? 0,
-            onPageChange: (pageIndex) => setPage(pageIndex + 1),
-            onPageSizeChange: (newLimit) => {
-              setLimit(newLimit);
-              setPage(1);
-            },
+            onPageSizeChange: handlePageSizeChange,
+          }}
+          cursorPagination={{
+            meta,
+            onNext: handleCursorNext,
+            onPrev: handleCursorPrev,
+            canGoPrev,
           }}
           loading={loading}
         />
@@ -260,7 +275,7 @@ export default function GlobalRoutingPage() {
             handleApiResponse(response, {
               onSuccess: () => {
                 toast.success('Global routing rule deleted successfully');
-                fetchRoutings(page, limit);
+                fetchRoutings(requestCursor, limit);
               },
               onError: (errorMessage) => {
                 toast.error(errorMessage || 'Failed to delete global routing rule');

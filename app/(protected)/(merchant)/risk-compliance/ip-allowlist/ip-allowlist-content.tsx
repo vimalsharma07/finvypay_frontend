@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { X, Trash2, Save, LoaderCircleIcon, Pencil } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import { TableActionMenu, TableActionMenuItem } from '@/app/(protected)/components/table-action-menu';
@@ -24,7 +24,9 @@ import {
 } from '@tanstack/react-table';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
-import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
   Card,
@@ -63,7 +65,7 @@ import { DynamicAddIpDialog } from '@/components/dialogs';
 export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChange }: { addDialogOpen?: boolean; onAddDialogOpenChange?: (open: boolean) => void }) {
   const [ipWhitelist, setIpWhitelist] = useState<IpWhitelist[]>([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState<IpWhitelistListResponse['data']['meta'] | null>(null);
+  const [meta, setMeta] = useState<CursorPaginationMeta | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [ipToDelete, setIpToDelete] = useState<IpWhitelist | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -78,9 +80,9 @@ export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChang
   const addDialogOpenState = addDialogOpen !== undefined ? addDialogOpen : internalAddDialogOpen;
   const setAddDialogOpen = onAddDialogOpenChange || setInternalAddDialogOpen;
 
-  // Pagination state
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
+  const [limit, setLimit] = useState(20);
 
   // Sorting state
   const [sortBy, setSortBy] = useState<string>('createdAt');
@@ -89,46 +91,48 @@ export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChang
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
 
-  const fetchIpWhitelist = async (
-    pageNum: number,
-    pageLimit: number,
-    sortField: string,
-    sortDir: 'ASC' | 'DESC'
-  ) => {
-    setLoading(true);
-    try {
-      const params = {
-        page: pageNum,
-        limit: pageLimit,
-        sortBy: sortField,
-        sortOrder: sortDir,
-      };
+  const fetchIpWhitelist = useCallback(
+    async (
+      cursor: string | undefined,
+      pageLimit: number,
+      sortField: string,
+      sortDir: 'ASC' | 'DESC',
+    ) => {
+      setLoading(true);
+      try {
+        const params = {
+          ...(cursor ? { cursor } : {}),
+          limit: pageLimit,
+          sortBy: sortField,
+          sortOrder: sortDir,
+        };
 
-      const response = await getUserIpWhitelist(params);
-      handleApiResponse<IpWhitelistListResponse>(response, {
-        onSuccess: (data) => {
-          // New format: { success: true, data: [...], meta: {...} }
-          if (data && data.success && data.data) {
-            setIpWhitelist(data.data);
-            setMeta(data.meta);
-          } else {
-            toast.error('Failed to fetch IP whitelist - invalid response structure');
-          }
-        },
-        onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to fetch IP whitelist');
-        },
-      });
-    } catch (error) {
-      toast.error('An unexpected error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
+        const response = await getUserIpWhitelist(params);
+        handleApiResponse<IpWhitelistListResponse>(response, {
+          onSuccess: (data) => {
+            if (data?.success && Array.isArray(data.data)) {
+              setIpWhitelist(data.data);
+              setMeta(data.meta ?? null);
+            } else {
+              toast.error('Failed to fetch IP whitelist - invalid response structure');
+            }
+          },
+          onError: (errorMessage) => {
+            toast.error(errorMessage || 'Failed to fetch IP whitelist');
+          },
+        });
+      } catch (error) {
+        toast.error('An unexpected error occurred');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
-    fetchIpWhitelist(page, limit, sortBy, sortOrder);
-  }, [page, limit, sortBy, sortOrder]);
+    fetchIpWhitelist(requestCursor, limit, sortBy, sortOrder);
+  }, [fetchIpWhitelist, requestCursor, limit, sortBy, sortOrder]);
 
   // Filter data based on search query (client-side)
   const filteredData = useMemo(() => {
@@ -150,7 +154,7 @@ export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChang
         onSuccess: () => {
           toast.success('IP addresses added successfully!');
           setAddDialogOpen(false);
-          fetchIpWhitelist(page, limit, sortBy, sortOrder);
+          fetchIpWhitelist(requestCursor, limit, sortBy, sortOrder);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to add IP addresses');
@@ -183,7 +187,7 @@ export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChang
           setEditDialogOpen(false);
           setIpToEdit(null);
           setEditIp('');
-          fetchIpWhitelist(page, limit, sortBy, sortOrder);
+          fetchIpWhitelist(requestCursor, limit, sortBy, sortOrder);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to update IP address');
@@ -212,7 +216,7 @@ export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChang
           toast.success('IP whitelist entry deleted successfully!');
           setDeleteDialogOpen(false);
           setIpToDelete(null);
-          fetchIpWhitelist(page, limit, sortBy, sortOrder);
+          fetchIpWhitelist(requestCursor, limit, sortBy, sortOrder);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to delete IP whitelist entry');
@@ -238,36 +242,27 @@ export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChang
   ]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 20,
   });
 
-  // Handle page change
-  const handlePageChange = (pageIndex: number) => {
-    setPage(pageIndex + 1); // API uses 1-based, table uses 0-based
-  };
-
-  // Handle page size change
   const handlePageSizeChange = (newPageSize: number) => {
     setLimit(newPageSize);
-    setPage(1); // Reset to first page
+    resetCursor();
   };
 
-  // Handle sort change
   const handleSortChange = (columnId: string, desc: boolean) => {
     setSortBy(columnId);
     setSortOrder(desc ? 'DESC' : 'ASC');
-    setPage(1); // Reset to first page when sorting changes
+    resetCursor();
   };
 
-  // Update pagination when meta changes
-  useEffect(() => {
-    if (meta) {
-      setPagination({
-        pageIndex: meta.currentPage - 1, // Convert 1-based to 0-based
-        pageSize: meta.itemsPerPage,
-      });
-    }
-  }, [meta]);
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   const columns = useMemo<ColumnDef<IpWhitelist>[]>(
     () => [
@@ -348,7 +343,7 @@ export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChang
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
     manualSorting: true,
-    pageCount: meta ? meta.totalPages : undefined,
+    pageCount: 1,
     onSortingChange: (updater) => {
       const newSorting = typeof updater === 'function' ? updater(sorting) : updater;
       setSorting(newSorting);
@@ -359,13 +354,11 @@ export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChang
     },
     onPaginationChange: (updater) => {
       const newPagination = typeof updater === 'function' ? updater(pagination) : updater;
-      setPagination(newPagination);
-      // Only trigger API call if page or pageSize actually changed
-      if (newPagination.pageIndex !== pagination.pageIndex) {
-        handlePageChange(newPagination.pageIndex);
-      }
       if (newPagination.pageSize !== pagination.pageSize) {
         handlePageSizeChange(newPagination.pageSize);
+        setPagination({ pageIndex: 0, pageSize: newPagination.pageSize });
+      } else {
+        setPagination(newPagination);
       }
     },
     getRowId: (row) => String(row.id),
@@ -380,7 +373,7 @@ export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChang
       <Container>
         <DataGrid
           table={table}
-          recordCount={meta?.totalItems || filteredData.length}
+          recordCount={filteredData.length}
           isLoading={loading}
           tableLayout={{
             cellBorder: false,
@@ -445,7 +438,13 @@ export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChang
               </ScrollArea>
             </CardTable>
             <CardFooter className="border-t border-border/50 bg-muted/10">
-              <DataGridPagination />
+              <CursorDataGridPagination
+                meta={meta}
+                onNext={handleCursorNext}
+                onPrev={handleCursorPrev}
+                canGoPrev={canGoPrev}
+                rowCount={filteredData.length}
+              />
             </CardFooter>
           </Card>
         </DataGrid>

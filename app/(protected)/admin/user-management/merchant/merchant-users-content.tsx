@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useState, useRef } from 'react';
+import { Fragment, useCallback, useEffect, useState, useRef } from 'react';
 import { Pencil, Eye, Plug, Route, Trash2, Percent, Shield, Lock, Copy, LogIn, IdCard } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
@@ -47,6 +47,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
 
 interface MerchantUsersPageContentProps {
   filters?: Record<string, string>;
@@ -57,9 +58,9 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<UserListResponse['meta'] | null>(null);
   
-  // Pagination state
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
+  const [limit, setLimit] = useState(20);
   
   // Sorting state
   const [sortBy, setSortBy] = useState<string>('name');
@@ -122,7 +123,7 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
 
   // Fetch users function
   const fetchUsers = async (
-    pageNum: number,
+    cursor: string | undefined,
     pageLimit: number,
     sortField: string,
     sortDir: 'ASC' | 'DESC',
@@ -130,8 +131,8 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
   ) => {
     setLoading(true);
     try {
-      const params: any = {
-        page: pageNum,
+      const params: Record<string, string | number | boolean | undefined> = {
+        ...(cursor ? { cursor } : {}),
         limit: pageLimit,
         sortBy: sortField,
         sortOrder: sortDir,
@@ -181,34 +182,32 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
     }
   };
 
-  // Reset to first page when filters change
   useEffect(() => {
-    setPage(1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [externalFilters]);
+    resetCursor();
+  }, [externalFilters, resetCursor]);
 
-  // Fetch when pagination, sorting, limit, or filters change
   useEffect(() => {
-    fetchUsers(page, limit, sortBy, sortOrder, filters);
+    fetchUsers(requestCursor, limit, sortBy, sortOrder, filters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, limit, sortBy, sortOrder, externalFilters]);
+  }, [requestCursor, limit, sortBy, sortOrder, externalFilters]);
 
-  // Handle page change
-  const handlePageChange = (pageIndex: number) => {
-    setPage(pageIndex + 1); // API uses 1-based, table uses 0-based
-  };
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
 
-  // Handle page size change
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
+
   const handlePageSizeChange = (newPageSize: number) => {
     setLimit(newPageSize);
-    setPage(1); // Reset to first page
+    resetCursor();
   };
 
-  // Handle sort change
   const handleSortChange = (newSortBy: string, newSortOrder: 'ASC' | 'DESC') => {
     setSortBy(newSortBy);
     setSortOrder(newSortOrder);
-    setPage(1); // Reset to first page when sorting changes
+    resetCursor();
   };
 
 
@@ -268,7 +267,7 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
         onSuccess: () => {
           toast.success('Merchant deleted successfully!');
           // Immediately refetch merchants list to update the table
-          fetchUsers(page, limit, sortBy, sortOrder, filters);
+          fetchUsers(requestCursor, limit, sortBy, sortOrder, filters);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to delete merchant');
@@ -292,7 +291,7 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
         onSuccess: (data) => {
           toast.success(data?.message || 'Two-Factor Authentication reset successfully!');
           // Immediately refetch merchants list to update the table
-          fetchUsers(page, limit, sortBy, sortOrder, filters);
+          fetchUsers(requestCursor, limit, sortBy, sortOrder, filters);
           setReset2FaDialogOpen(false);
           setUserToReset2Fa(null);
         },
@@ -327,11 +326,10 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
             const profileId = firstProfile.id;
             
             // Fetch acquirer accounts with the first profile
-            const params: any = {
-              page: 1,
+            const params: Record<string, number> = {
               limit: 20,
-              userId: userId,
-              merchantProfileId: profileId,
+              userId: Number(userId),
+              merchantProfileId: Number(profileId),
             };
             
             try {
@@ -477,7 +475,7 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
   const fetchIndustries = async () => {
     setIndustriesLoading(true);
     try {
-      const response = await getIndustries({ page: 1, limit: 1000 });
+      const response = await getIndustries({ limit: 1000 });
       handleApiResponse(response, {
         onSuccess: (data) => {
           // Industries API returns: { success: true, data: Industry[], meta: {...} }
@@ -668,10 +666,14 @@ export function MerchantUsersPageContent({ filters: externalFilters = {} }: Merc
           getRowId={(row: User) => row.id}
           pagination={{
             pageSize: limit,
-            pageIndex: page - 1, // Convert to 0-based for table
-            totalCount: meta?.totalItems ?? 0,
-            onPageChange: handlePageChange,
+            pageIndex: 0,
             onPageSizeChange: handlePageSizeChange,
+          }}
+          cursorPagination={{
+            meta,
+            onNext: handleCursorNext,
+            onPrev: handleCursorPrev,
+            canGoPrev,
           }}
           sorting={{
             sortBy: sortBy,

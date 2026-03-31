@@ -22,7 +22,9 @@ import {
 } from '@tanstack/react-table';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
-import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
   Card,
@@ -57,7 +59,7 @@ interface TrustedCardsPageContentProps {
 export function TrustedCardsPageContent({ addDialogOpen: externalAddDialogOpen, setAddDialogOpen: externalSetAddDialogOpen }: TrustedCardsPageContentProps = {}) {
   const [cardWhitelist, setCardWhitelist] = useState<CardWhitelist[]>([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState<CardWhitelistListResponse['data']['meta'] | null>(null);
+  const [meta, setMeta] = useState<CursorPaginationMeta | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cardToDelete, setCardToDelete] = useState<CardWhitelist | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -70,29 +72,30 @@ export function TrustedCardsPageContent({ addDialogOpen: externalAddDialogOpen, 
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [cardToEdit, setCardToEdit] = useState<CardWhitelist | null>(null);
   const [updating, setUpdating] = useState(false);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
+  const [limit, setLimit] = useState(20);
   const [searchQuery, setSearchQuery] = useState('');
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 20,
   });
 
   const fetchCardWhitelist = useCallback(
-    async (pageNum: number, pageLimit: number) => {
+    async (cursor: string | undefined, pageLimit: number) => {
       setLoading(true);
       try {
-        const params = { page: pageNum, limit: pageLimit };
+        const params = {
+          ...(cursor ? { cursor } : {}),
+          limit: pageLimit,
+        };
         const response = await getCardWhitelist(params);
         handleApiResponse<CardWhitelistListResponse>(response, {
           onSuccess: (data) => {
-            // API format: { success: true, data: { items: [...], meta: {...} } }
-            if (data && data.success && data.data) {
-              const items = data.data.items || [];
-              const metaData = data.data.meta;
-              setCardWhitelist(Array.isArray(items) ? items : []);
-              setMeta(metaData);
+            if (data?.success && Array.isArray(data.data)) {
+              setCardWhitelist(data.data);
+              setMeta(data.meta ?? null);
             } else {
               toast.error('Failed to fetch card whitelist - invalid response structure');
             }
@@ -111,8 +114,8 @@ export function TrustedCardsPageContent({ addDialogOpen: externalAddDialogOpen, 
   );
 
   useEffect(() => {
-    fetchCardWhitelist(page, limit);
-  }, [page, limit, fetchCardWhitelist]);
+    fetchCardWhitelist(requestCursor, limit);
+  }, [fetchCardWhitelist, requestCursor, limit]);
 
   const filteredData = useMemo(() => {
     if (!searchQuery) return cardWhitelist;
@@ -135,7 +138,7 @@ export function TrustedCardsPageContent({ addDialogOpen: externalAddDialogOpen, 
         onSuccess: () => {
           toast.success('Card whitelist entry created successfully!');
           setAddDialogOpen(false);
-          fetchCardWhitelist(page, limit);
+          fetchCardWhitelist(requestCursor, limit);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to create card whitelist entry');
@@ -162,7 +165,7 @@ export function TrustedCardsPageContent({ addDialogOpen: externalAddDialogOpen, 
           toast.success('Card whitelist entry updated successfully!');
           setEditDialogOpen(false);
           setCardToEdit(null);
-          fetchCardWhitelist(page, limit);
+          fetchCardWhitelist(requestCursor, limit);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to update card whitelist entry');
@@ -190,7 +193,7 @@ export function TrustedCardsPageContent({ addDialogOpen: externalAddDialogOpen, 
           toast.success('Card whitelist entry deleted successfully!');
           setDeleteDialogOpen(false);
           setCardToDelete(null);
-          fetchCardWhitelist(page, limit);
+          fetchCardWhitelist(requestCursor, limit);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to delete card whitelist entry');
@@ -204,23 +207,13 @@ export function TrustedCardsPageContent({ addDialogOpen: externalAddDialogOpen, 
     }
   };
 
-  const handlePageChange = (pageIndex: number) => {
-    setPage(pageIndex + 1);
-  };
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
 
-  const handlePageSizeChange = (newPageSize: number) => {
-    setLimit(newPageSize);
-    setPage(1);
-  };
-
-  useEffect(() => {
-    if (meta) {
-      setPagination({
-        pageIndex: meta.currentPage - 1,
-        pageSize: meta.itemsPerPage,
-      });
-    }
-  }, [meta]);
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   const formatCardNumber = useMemo(
     () => (card: string | null | undefined) => {
@@ -291,16 +284,16 @@ export function TrustedCardsPageContent({ addDialogOpen: externalAddDialogOpen, 
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
     manualSorting: false,
-    pageCount: meta ? meta.totalPages : undefined,
+    pageCount: 1,
     onSortingChange: setSorting,
     onPaginationChange: (updater) => {
       const newPagination = typeof updater === 'function' ? updater(pagination) : updater;
-      setPagination(newPagination);
-      if (newPagination.pageIndex !== pagination.pageIndex) {
-        handlePageChange(newPagination.pageIndex);
-      }
       if (newPagination.pageSize !== pagination.pageSize) {
-        handlePageSizeChange(newPagination.pageSize);
+        setLimit(newPagination.pageSize);
+        setPagination({ pageIndex: 0, pageSize: newPagination.pageSize });
+        resetCursor();
+      } else {
+        setPagination(newPagination);
       }
     },
     getRowId: (row) => String(row.id),
@@ -315,7 +308,7 @@ export function TrustedCardsPageContent({ addDialogOpen: externalAddDialogOpen, 
       <Container>
         <DataGrid
           table={table}
-          recordCount={meta?.totalItems || filteredData.length}
+          recordCount={filteredData.length}
           isLoading={loading}
           tableLayout={modernTableLayout}
           tableClassNames={modernTableClassNames}
@@ -337,7 +330,13 @@ export function TrustedCardsPageContent({ addDialogOpen: externalAddDialogOpen, 
               </ScrollArea>
             </CardTable>
             <CardFooter className={modernTableCardClasses.footer}>
-              <DataGridPagination />
+              <CursorDataGridPagination
+                meta={meta}
+                onNext={handleCursorNext}
+                onPrev={handleCursorPrev}
+                canGoPrev={canGoPrev}
+                rowCount={filteredData.length}
+              />
             </CardFooter>
           </Card>
         </DataGrid>

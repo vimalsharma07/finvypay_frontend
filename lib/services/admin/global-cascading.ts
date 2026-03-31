@@ -5,6 +5,7 @@
 
 import { http, ApiError } from '../../api';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 
 export interface GlobalCascadingRule {
   id: string;
@@ -26,14 +27,7 @@ export interface GlobalCascadingRule {
   updatedAt?: string;
 }
 
-export interface GlobalCascadingRuleListMeta {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
+export type GlobalCascadingRuleListMeta = CursorPaginationMeta;
 
 export interface GlobalCascadingRuleListResponse {
   success: boolean;

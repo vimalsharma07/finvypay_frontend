@@ -32,7 +32,7 @@ import {
   UpdateRolePayload,
   Role,
 } from '@/lib/services/admin/roles';
-import { getPermissions, Permission } from '@/lib/services/admin/permissions';
+import { getAllPermissionsForAssignment, Permission } from '@/lib/services/admin/permissions';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -93,7 +93,7 @@ export function EditRoleContent() {
       try {
         const [roleResponse, permissionsResponse] = await Promise.all([
           getRoleById(roleId),
-          getPermissions(),
+          getAllPermissionsForAssignment(),
         ]);
 
         handleApiResponse(permissionsResponse, {

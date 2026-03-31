@@ -7,6 +7,7 @@
 import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 
 /** Transaction status enum – display by name in UI, send ID in API */
 export enum TransactionStatus {
@@ -95,7 +96,7 @@ export interface Transaction {
 }
 
 export interface TransactionListParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
   /** Search by transactionId, orderId, or email (partial match) */
   search?: string;
@@ -118,23 +119,13 @@ export interface TransactionListParams {
   chargebackDateEnd?: string;
 }
 
-export interface TransactionListMeta {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
+export type TransactionListMeta = CursorPaginationMeta;
 
-export interface TransactionListData {
-  data: Transaction[];
-  meta: TransactionListMeta;
-}
-
+/** API: { success, data: Transaction[], meta } */
 export interface TransactionListResponse {
   success: boolean;
-  data: TransactionListData;
+  data: Transaction[];
+  meta: TransactionListMeta;
   message?: string;
 }
 

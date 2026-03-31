@@ -7,6 +7,7 @@
 
 import { http, ApiError } from '../../api';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 
 export interface UserSettlement {
   id: string;
@@ -34,16 +35,13 @@ export interface UserSettlement {
 }
 
 export interface UserSettlementListParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
+  startDate?: string;
+  endDate?: string;
 }
 
-export interface UserSettlementListMeta {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
+export type UserSettlementListMeta = CursorPaginationMeta;
 
 export interface UserSettlementListResponse {
   success: boolean;
@@ -218,18 +216,13 @@ export interface UserSettlementBalance {
 }
 
 export interface UserSettlementBalanceListParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
-  sortBy?: string;
-  sortOrder?: 'ASC' | 'DESC';
+  startDate?: string;
+  endDate?: string;
 }
 
-export interface UserSettlementBalanceListMeta {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
+export type UserSettlementBalanceListMeta = CursorPaginationMeta;
 
 export interface UserSettlementBalanceListResponse {
   success: boolean;
@@ -297,12 +290,7 @@ export interface UserSettlementSummaryItem {
 export interface UserSettlementSummaryListResponse {
   success: boolean;
   data: UserSettlementSummaryItem[];
-  meta?: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
+  meta?: CursorPaginationMeta;
   message?: string;
 }
 
@@ -347,13 +335,25 @@ export async function getUserSettlementSummary(): Promise<ApiResponse<UserSettle
  * Get settlement summary list for the authenticated merchant (with optional pagination)
  */
 export async function getUserSettlementSummaryList(params?: {
-  page?: number;
+  cursor?: string;
   limit?: number;
+  transaction_date_start?: string;
+  transaction_date_end?: string;
+  status?: string | number;
 }): Promise<ApiResponse<UserSettlementSummaryListResponse>> {
   try {
     const query: Record<string, string | number | undefined> = {};
-    if (params?.page != null) query.page = params.page;
+    if (params?.cursor != null) query.cursor = params.cursor;
     if (params?.limit != null) query.limit = params.limit;
+    if (params?.transaction_date_start != null) {
+      query.transaction_date_start = params.transaction_date_start;
+    }
+    if (params?.transaction_date_end != null) {
+      query.transaction_date_end = params.transaction_date_end;
+    }
+    if (params?.status !== undefined && params?.status !== '') {
+      query.status = params.status;
+    }
     const data = await http.get('/merchant/settlements/summary', {
       query: Object.keys(query).length ? query : undefined,
     }) as UserSettlementSummaryListResponse;

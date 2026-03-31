@@ -20,7 +20,9 @@ import {
 } from '@tanstack/react-table';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
-import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
   Card,
@@ -51,7 +53,7 @@ export function RequestsContent() {
   const router = useRouter();
   const [requests, setRequests] = useState<MerchantAcquirerRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState<MerchantAcquirerRequestsResponse['meta'] | null>(null);
+  const [meta, setMeta] = useState<CursorPaginationMeta | null>(null);
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [requestToApprove, setRequestToApprove] = useState<MerchantAcquirerRequest | null>(null);
@@ -59,9 +61,9 @@ export function RequestsContent() {
   const [approving, setApproving] = useState(false);
   const [rejecting, setRejecting] = useState(false);
 
-  // Pagination state
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
+  const [limit, setLimit] = useState(20);
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,15 +74,15 @@ export function RequestsContent() {
   // Pagination state for table
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 20,
   });
 
   const fetchMerchantAcquirerRequests = useCallback(
-    async (pageNum: number, pageLimit: number) => {
+    async (cursor: string | undefined, pageLimit: number) => {
       setLoading(true);
       try {
         const params: MerchantAcquirerRequestsParams = {
-          page: pageNum,
+          ...(cursor ? { cursor } : {}),
           limit: pageLimit,
         };
 
@@ -89,7 +91,7 @@ export function RequestsContent() {
           onSuccess: (data) => {
             if (data && data.success && data.data) {
               setRequests(Array.isArray(data.data) ? data.data : []);
-              setMeta(data.meta);
+              setMeta(data.meta ?? null);
             } else {
               toast.error('Failed to fetch acquirer requests - invalid response structure');
             }
@@ -109,18 +111,8 @@ export function RequestsContent() {
   );
 
   useEffect(() => {
-    fetchMerchantAcquirerRequests(page, limit);
-  }, [page, limit, fetchMerchantAcquirerRequests]);
-
-  // Update pagination when meta changes
-  useEffect(() => {
-    if (meta) {
-      setPagination({
-        pageIndex: meta.page - 1, // Convert 1-based to 0-based
-        pageSize: meta.limit,
-      });
-    }
-  }, [meta]);
+    fetchMerchantAcquirerRequests(requestCursor, limit);
+  }, [requestCursor, limit, fetchMerchantAcquirerRequests]);
 
   // Filter data based on search query (client-side)
   const filteredData = useMemo(() => {
@@ -137,14 +129,18 @@ export function RequestsContent() {
     );
   }, [searchQuery, requests]);
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage + 1); // Convert 0-based to 1-based
-  };
-
   const handlePageSizeChange = (newPageSize: number) => {
     setLimit(newPageSize);
-    setPage(1); // Reset to first page when page size changes
+    resetCursor();
   };
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   const handleApproveRequest = async () => {
     if (!requestToApprove) return;
@@ -161,7 +157,7 @@ export function RequestsContent() {
           toast.success(`Request for ${requestToApprove.merchantProfile?.merchantProfileName ?? requestToApprove.merchant?.name} approved successfully!`);
           setApproveDialogOpen(false);
           setRequestToApprove(null);
-          fetchMerchantAcquirerRequests(page, limit);
+          fetchMerchantAcquirerRequests(requestCursor, limit);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to approve request');
@@ -190,7 +186,7 @@ export function RequestsContent() {
           toast.success(`Request for ${requestToReject.merchantProfile?.merchantProfileName ?? requestToReject.merchant?.name} rejected successfully!`);
           setRejectDialogOpen(false);
           setRequestToReject(null);
-          fetchMerchantAcquirerRequests(page, limit);
+          fetchMerchantAcquirerRequests(requestCursor, limit);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to reject request');
@@ -336,7 +332,7 @@ export function RequestsContent() {
       enableSorting: false,
       size: 100,
     },
-  ], [pagination.pageIndex, pagination.pageSize]);
+  ], []);
 
   const table = useReactTable({
     data: filteredData,
@@ -345,16 +341,15 @@ export function RequestsContent() {
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
     manualSorting: false,
-    pageCount: meta ? meta.totalPages : undefined,
+    pageCount: 1,
     onSortingChange: setSorting,
     onPaginationChange: (updater) => {
       const newPagination = typeof updater === 'function' ? updater(pagination) : updater;
-      setPagination(newPagination);
-      if (newPagination.pageIndex !== pagination.pageIndex) {
-        handlePageChange(newPagination.pageIndex);
-      }
       if (newPagination.pageSize !== pagination.pageSize) {
         handlePageSizeChange(newPagination.pageSize);
+        setPagination({ pageIndex: 0, pageSize: newPagination.pageSize });
+      } else {
+        setPagination(newPagination);
       }
     },
     getRowId: (row) => String(row.id),
@@ -368,7 +363,7 @@ export function RequestsContent() {
     <Fragment>
       <DataGrid
         table={table}
-        recordCount={meta?.total || filteredData.length}
+        recordCount={filteredData.length}
         isLoading={loading}
         tableLayout={modernTableLayout}
         tableClassNames={modernTableClassNames}
@@ -394,7 +389,13 @@ export function RequestsContent() {
             </ScrollArea>
           </CardTable>
           <CardFooter className={modernTableCardClasses.footer}>
-            <DataGridPagination />
+            <CursorDataGridPagination
+              meta={meta}
+              onNext={handleCursorNext}
+              onPrev={handleCursorPrev}
+              canGoPrev={canGoPrev}
+              rowCount={filteredData.length}
+            />
           </CardFooter>
         </Card>
       </DataGrid>

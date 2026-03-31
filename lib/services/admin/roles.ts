@@ -8,6 +8,7 @@
 import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 
 // Role types matching the actual API response structure
 export interface Role {
@@ -22,7 +23,16 @@ export interface Role {
 export interface RoleListResponse {
   success: boolean;
   data: Role[];
+  meta?: CursorPaginationMeta | null;
   message?: string;
+}
+
+export interface RoleListParams {
+  type?: string;
+  cursor?: string;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'ASC' | 'DESC';
 }
 
 export interface CreateRolePayload {
@@ -41,14 +51,21 @@ export interface UpdateRolePayload {
  * Get all roles
  * @param type - Optional role type filter (e.g., 'ADMIN', 'USER', 'AFFILIATE')
  */
-export async function getRoles(type?: string): Promise<ApiResponse<RoleListResponse>> {
+export async function getRoles(
+  params?: RoleListParams | string
+): Promise<ApiResponse<RoleListResponse>> {
   try {
-    const endpoint = type 
-      ? `${adminRoutes.roles.list}?type=${type}`
-      : adminRoutes.roles.list;
-    console.log('📡 Calling API:', endpoint);
-    const data = await http.get(endpoint) as RoleListResponse;
-    console.log('📦 Raw API response:', data);
+    const normalizedParams: RoleListParams =
+      typeof params === 'string' ? { type: params } : (params ?? {});
+    const data = await http.get(adminRoutes.roles.list, {
+      query: {
+        ...(normalizedParams.type ? { type: normalizedParams.type } : {}),
+        ...(normalizedParams.cursor ? { cursor: normalizedParams.cursor } : {}),
+        ...(normalizedParams.limit ? { limit: normalizedParams.limit } : {}),
+        ...(normalizedParams.sortBy ? { sortBy: normalizedParams.sortBy } : {}),
+        ...(normalizedParams.sortOrder ? { sortOrder: normalizedParams.sortOrder } : {}),
+      },
+    }) as RoleListResponse;
     return {
       status: 200,
       data,

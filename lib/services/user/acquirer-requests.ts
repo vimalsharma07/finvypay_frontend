@@ -2,6 +2,8 @@
 
 import { http, ApiError } from '../../api';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
+import { normalizeToCursorListEnvelope } from '@/lib/utils/normalize-cursor-list';
 
 export interface UserAcquirerRequest {
   id: string;
@@ -31,30 +33,39 @@ export interface UserAcquirerRequest {
   updatedAt?: string;
 }
 
-export interface UserAcquirerRequestListMeta {
-  total?: number;
-  page?: number;
+export type UserAcquirerRequestListMeta = CursorPaginationMeta;
+
+export interface UserAcquirerRequestListParams {
+  cursor?: string;
   limit?: number;
-  totalPages?: number;
+  status?: string;
 }
 
 export interface UserAcquirerRequestListResponse {
   success: boolean;
-  data: UserAcquirerRequest[] | { data: UserAcquirerRequest[]; meta?: UserAcquirerRequestListMeta };
-  meta?: UserAcquirerRequestListMeta;
+  data: UserAcquirerRequest[];
+  meta: UserAcquirerRequestListMeta | null;
   message?: string;
 }
 
 const getBaseUrl = () => '/merchant/acquirer-requests';
 
 export async function getUserAcquirerRequests(
-  params?: Record<string, any>
+  params?: UserAcquirerRequestListParams,
 ): Promise<ApiResponse<UserAcquirerRequestListResponse>> {
   try {
-    const data = await http.get(getBaseUrl(), {
+    const raw = await http.get(getBaseUrl(), {
       query: params as Record<string, string | number | boolean | null | undefined>,
-    }) as UserAcquirerRequestListResponse;
-    return { status: 200, data };
+    });
+    const normalized = normalizeToCursorListEnvelope<UserAcquirerRequest>(raw);
+    return {
+      status: 200,
+      data: {
+        success: normalized.success,
+        data: normalized.data,
+        meta: normalized.meta,
+      },
+    };
   } catch (error) {
     if (error instanceof ApiError) {
       return { status: error.status, error: error.message, data: error.data };

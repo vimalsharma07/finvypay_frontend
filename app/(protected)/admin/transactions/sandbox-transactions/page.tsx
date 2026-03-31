@@ -26,7 +26,8 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { DataGrid } from '@/components/ui/data-grid';
-import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
   Card,
@@ -59,7 +60,7 @@ import { useCountries } from '@/lib/hooks/use-countries';
 export default function SandboxTransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState<TransactionListResponse['data']['meta'] | null>(null);
+  const [meta, setMeta] = useState<TransactionListResponse['meta'] | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [logsDialogOpen, setLogsDialogOpen] = useState(false);
@@ -89,8 +90,8 @@ export default function SandboxTransactionsPage() {
       })),
     [countries]
   );
-  // Pagination state
-  const [page, setPage] = useState(1);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
   const [limit, setLimit] = useState(20);
 
   // Search state
@@ -106,13 +107,17 @@ export default function SandboxTransactionsPage() {
   });
 
   const fetchTransactions = useCallback(
-    async (pageNum: number, pageLimit: number, activeFilters: FilterFields = {}) => {
+    async (
+      cursor: string | undefined,
+      pageLimit: number,
+      activeFilters: FilterFields = {},
+    ) => {
       setLoading(true);
       try {
         const filterQuery = generateFilterQuery(activeFilters);
         const apiParams = mapAdminTransactionFiltersToApiParams(filterQuery);
         const params = {
-          page: pageNum,
+          ...(cursor ? { cursor } : {}),
           limit: pageLimit,
           ...apiParams,
         };
@@ -120,10 +125,9 @@ export default function SandboxTransactionsPage() {
         const response = await getSandboxTransactions(params);
         handleApiResponse<TransactionListResponse>(response, {
           onSuccess: (data) => {
-            // New format: { success: true, data: [...], meta: {...} }
-            if (data && data.success && data.data) {
+            if (data && data.success && Array.isArray(data.data)) {
               setTransactions(data.data);
-              setMeta(data.meta);
+              setMeta(data.meta ?? null);
             } else {
               toast.error('Failed to fetch sandbox transactions - invalid response structure');
             }
@@ -139,12 +143,12 @@ export default function SandboxTransactionsPage() {
         setLoading(false);
       }
     },
-    []
+    [],
   );
 
   useEffect(() => {
-    fetchTransactions(page, limit, filters);
-  }, [fetchTransactions, page, limit, filters]);
+    fetchTransactions(requestCursor, limit, filters);
+  }, [fetchTransactions, requestCursor, limit, filters]);
 
   // Fetch filter options
   useEffect(() => {
@@ -164,9 +168,10 @@ export default function SandboxTransactionsPage() {
           );
         }
 
-        if (connectorsRes.data?.data?.data) {
+        const connPayload = connectorsRes.data;
+        if (connPayload?.success && Array.isArray(connPayload.data)) {
           setConnectorOptions(
-            connectorsRes.data.data.data.map((c) => ({
+            connPayload.data.map((c) => ({
               label: c.name,
               value: String(c.id),
             }))
@@ -186,26 +191,13 @@ export default function SandboxTransactionsPage() {
     [transactions, searchQuery]
   );
 
-  // Handle page change
-  const handlePageChange = (pageIndex: number) => {
-    setPage(pageIndex + 1); // API uses 1-based, table uses 0-based
-  };
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
 
-  // Handle page size change
-  const handlePageSizeChange = (newPageSize: number) => {
-    setLimit(newPageSize);
-    setPage(1); // Reset to first page
-  };
-
-  // Update pagination when meta changes
-  useEffect(() => {
-    if (meta) {
-      setPagination({
-        pageIndex: meta.currentPage - 1, // Convert 1-based to 0-based
-        pageSize: meta.itemsPerPage,
-      });
-    }
-  }, [meta]);
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   // Handlers for action menu
   const handleViewDetails = useCallback((transaction: Transaction) => {
@@ -262,9 +254,9 @@ export default function SandboxTransactionsPage() {
   const handleApplyFilters = useCallback(
     (appliedFilters: FilterFields) => {
       setFilters(appliedFilters);
-      setPage(1);
+      resetCursor();
     },
-    []
+    [resetCursor],
   );
 
   const filterSchema: FiltersSchema[] = useMemo(
@@ -336,17 +328,17 @@ export default function SandboxTransactionsPage() {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
-    manualSorting: false, // Client-side sorting
-    pageCount: meta ? meta.totalPages : undefined,
+    manualSorting: false,
+    pageCount: 1,
     onSortingChange: setSorting,
     onPaginationChange: (updater) => {
       const newPagination = typeof updater === 'function' ? updater(pagination) : updater;
-      setPagination(newPagination);
-      if (newPagination.pageIndex !== pagination.pageIndex) {
-        handlePageChange(newPagination.pageIndex);
-      }
       if (newPagination.pageSize !== pagination.pageSize) {
-        handlePageSizeChange(newPagination.pageSize);
+        setLimit(newPagination.pageSize);
+        setPagination({ pageIndex: 0, pageSize: newPagination.pageSize });
+        resetCursor();
+      } else {
+        setPagination(newPagination);
       }
     },
     getRowId: (row) => String(row.id),
@@ -412,7 +404,7 @@ export default function SandboxTransactionsPage() {
       <Container>
         <DataGrid
           table={table}
-          recordCount={meta?.totalItems || filteredData.length}
+          recordCount={filteredData.length}
           isLoading={loading}
           tableLayout={modernTableLayout}
           tableClassNames={modernTableClassNames}
@@ -434,7 +426,13 @@ export default function SandboxTransactionsPage() {
               </ScrollArea>
             </CardTable>
             <CardFooter className={modernTableCardClasses.footer}>
-              <DataGridPagination />
+              <CursorDataGridPagination
+                meta={meta}
+                onNext={handleCursorNext}
+                onPrev={handleCursorPrev}
+                canGoPrev={canGoPrev}
+                rowCount={filteredData.length}
+              />
             </CardFooter>
           </Card>
         </DataGrid>

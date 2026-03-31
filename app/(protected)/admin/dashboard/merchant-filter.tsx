@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { SearchSelect } from '@/components/ui/molecules/SearchSelect';
-import { getMerchants, type Merchant } from '@/lib/services/admin/users';
-import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import { getAllMerchantsPaginated, type Merchant } from '@/lib/services/admin/users';
 import { Loader2 } from 'lucide-react';
 import type { Option } from '@/lib/types/common-types';
 
@@ -21,30 +20,12 @@ export function MerchantFilter({ value, onChange }: MerchantFilterProps) {
       setLoading(true);
       try {
         // Try without role filter first to see all users, then we can filter client-side if needed
-        const response = await getMerchants({ page: 1, limit: 1000 });
-        handleApiResponse(response, {
-          onSuccess: (res) => {
-            // res is MerchantListResponse: { success: boolean, data: Merchant[], meta: {...} }
-            if (res?.success && Array.isArray(res.data)) {
-              // Filter merchants client-side by role
-              const merchantUsers = res.data.filter((user: Merchant) => 
-                user.role?.toLowerCase() === 'merchant' || user.role === 'MERCHANT'
-              );
-              setMerchants(merchantUsers);
-            } else {
-              // Try direct array access as fallback
-              if (Array.isArray(res)) {
-                const merchantUsers = res.filter((user: Merchant) => 
-                  user.role?.toLowerCase() === 'merchant' || user.role === 'MERCHANT'
-                );
-                setMerchants(merchantUsers);
-              }
-            }
-          },
-          onError: (errorMessage) => {
-            console.error('Failed to fetch merchants:', errorMessage);
-          },
-        });
+        const rows = await getAllMerchantsPaginated();
+        const merchantUsers = rows.filter(
+          (user: Merchant) =>
+            user.role?.toLowerCase() === 'merchant' || user.role === 'MERCHANT',
+        );
+        setMerchants(merchantUsers);
       } catch (error) {
         console.error('Merchants fetch error:', error);
       } finally {

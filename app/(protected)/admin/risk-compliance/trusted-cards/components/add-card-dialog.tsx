@@ -30,9 +30,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { getUsers, User } from '@/lib/services/admin/users';
+import { getAllMerchantsPaginated, User } from '@/lib/services/admin/users';
 import { X, Plus } from 'lucide-react';
-import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 
 // Card number validation (basic validation - accepts digits only, 13-19 digits)
@@ -88,23 +87,8 @@ export function AddCardDialog({
   const fetchUsers = async () => {
     setLoadingUsers(true);
     try {
-      // Fetch users with role "merchant" only
-      const response = await getUsers({
-        limit: 100,
-        page: 1,
-        role: 'merchant',
-      });
-      handleApiResponse(response, {
-        onSuccess: (data) => {
-          // New format: { success: true, data: [...] }
-          if (data && data.success && data.data) {
-            setUsers(Array.isArray(data.data) ? data.data : []);
-          }
-        },
-        onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to fetch users');
-        },
-      });
+      const rows = await getAllMerchantsPaginated({ role: 'merchant' });
+      setUsers(rows);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast.error('Failed to fetch users');

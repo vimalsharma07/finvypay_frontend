@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
 import { DateRange } from 'react-day-picker';
 import { Calculator } from 'lucide-react';
 import {
@@ -14,6 +15,7 @@ import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
   getSettlementCalculations,
   SettlementCalculation,
+  SettlementListMeta,
 } from '@/lib/services/admin/settlements';
 import {
   ColumnDef,
@@ -26,7 +28,7 @@ import {
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridTable } from '@/components/ui/data-grid-table';
-import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardFooter, CardTable } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -40,16 +42,27 @@ const DATE_TIME_FMT = 'yyyy-MM-dd HH:mm';
 export default function AdminSettlementCalculationsPage() {
   const [data, setData] = useState<SettlementCalculation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState<{ total: number; page: number; limit: number; totalPages: number } | null>(null);
+  const [meta, setMeta] = useState<SettlementListMeta | null>(null);
 
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'createdAt', desc: true },
   ]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 20,
   });
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
+
+  const dateRangeKey = useMemo(() => {
+    if (!dateRange?.from || !dateRange?.to) return '';
+    return `${dateRange.from.getTime()}-${dateRange.to.getTime()}`;
+  }, [dateRange?.from, dateRange?.to]);
+
+  useEffect(() => {
+    resetCursor();
+  }, [dateRangeKey, resetCursor]);
 
   const formatDateForAPI = (date: Date | undefined): string => {
     if (!date) return '';
@@ -83,23 +96,22 @@ export default function AdminSettlementCalculationsPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const page = pagination.pageIndex + 1;
       const limit = pagination.pageSize;
       const hasDateFilter = dateRange?.from && dateRange?.to;
       const startDate = hasDateFilter ? formatDateForAPI(dateRange.from) : undefined;
       const endDate = hasDateFilter ? formatDateForAPI(dateRange.to) : undefined;
 
       const response = await getSettlementCalculations({
-        page,
+        ...(requestCursor ? { cursor: requestCursor } : {}),
         limit,
         startDate,
         endDate,
       });
       handleApiResponse(response, {
         onSuccess: (res) => {
-          if (res && res.success && res.data) {
+          if (res && res.success && Array.isArray(res.data)) {
             setData(res.data);
-            setMeta(res.meta);
+            setMeta(res.meta ?? null);
           } else {
             toast.error('Invalid response structure while loading settlement calculations');
           }
@@ -115,7 +127,7 @@ export default function AdminSettlementCalculationsPage() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.pageIndex, pagination.pageSize, dateRange]);
+  }, [requestCursor, pagination.pageSize, dateRange]);
 
   useEffect(() => {
     fetchData();
@@ -237,8 +249,15 @@ export default function AdminSettlementCalculationsPage() {
 
   const handleDateRangeChange = (range: DateRange | undefined) => {
     setDateRange(range);
-    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   };
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   const table = useReactTable({
     data,
@@ -248,11 +267,18 @@ export default function AdminSettlementCalculationsPage() {
       pagination,
     },
     onSortingChange: setSorting,
-    onPaginationChange: setPagination,
+    onPaginationChange: (updater) => {
+      const next =
+        typeof updater === 'function' ? updater(pagination) : updater;
+      if (next.pageSize !== pagination.pageSize) {
+        setPagination({ pageIndex: 0, pageSize: next.pageSize });
+        resetCursor();
+      }
+    },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
-    pageCount: meta ? meta.totalPages : -1,
+    pageCount: 1,
   });
 
   return (
@@ -278,7 +304,7 @@ export default function AdminSettlementCalculationsPage() {
       <Container>
         <DataGrid
           table={table}
-          recordCount={meta?.total ?? data.length}
+          recordCount={data.length}
           isLoading={loading}
           tableLayout={modernTableLayout}
           tableClassNames={modernTableClassNames}
@@ -291,7 +317,13 @@ export default function AdminSettlementCalculationsPage() {
               </ScrollArea>
             </CardTable>
             <CardFooter className={modernTableCardClasses.footer}>
-              <DataGridPagination />
+              <CursorDataGridPagination
+                meta={meta}
+                onNext={handleCursorNext}
+                onPrev={handleCursorPrev}
+                canGoPrev={canGoPrev}
+                rowCount={data.length}
+              />
             </CardFooter>
           </Card>
         </DataGrid>

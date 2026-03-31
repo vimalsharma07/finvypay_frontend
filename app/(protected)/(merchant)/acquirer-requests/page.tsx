@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { FileText, Plus } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
@@ -18,16 +18,19 @@ import {
   getUserAcquirerRequests,
   UserAcquirerRequest,
   UserAcquirerRequestListResponse,
-  UserAcquirerRequestListMeta,
 } from '@/lib/services/user/acquirer-requests';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 
 export default function UserAcquirerRequestsPage() {
   const [isClient, setIsClient] = useState(false);
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState<UserAcquirerRequest[]>([]);
-  const [meta, setMeta] = useState<UserAcquirerRequestListMeta | null>(null);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [meta, setMeta] = useState<CursorPaginationMeta | null>(null);
+  const [limit, setLimit] = useState(20);
+
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
 
   const isTableLoading = loading;
 
@@ -35,41 +38,57 @@ export default function UserAcquirerRequestsPage() {
     setIsClient(true);
   }, []);
 
-  const fetchRequests = async (pageNum: number, pageLimit: number) => {
-    setLoading(true);
-    try {
-      const params: any = { page: pageNum, limit: pageLimit };
-      const response = await getUserAcquirerRequests(params);
+  const fetchRequests = useCallback(
+    async (cursor: string | undefined, pageLimit: number) => {
+      setLoading(true);
+      try {
+        const response = await getUserAcquirerRequests({
+          ...(cursor ? { cursor } : {}),
+          limit: pageLimit,
+        });
 
-      handleApiResponse<UserAcquirerRequestListResponse>(response, {
-        onSuccess: (data) => {
-          if (!data?.success) return;
-          const list = Array.isArray(data.data) ? data.data : (data.data?.data ?? []);
-          const metaData = data.meta ?? (data.data as any)?.meta ?? null;
+        handleApiResponse<UserAcquirerRequestListResponse>(response, {
+          onSuccess: (data) => {
+            if (!data?.success) return;
+            const list = Array.isArray(data.data) ? data.data : [];
+            const normalized = list.map((item: UserAcquirerRequest, idx: number) => ({
+              ...item,
+              sno: idx + 1,
+              requestStatus: item.status || 'pending',
+            }));
 
-          const normalized = list.map((item: any, idx: number) => ({
-            ...item,
-            sno: (pageNum - 1) * pageLimit + idx + 1,
-            requestStatus: item.status || 'pending',
-          }));
-
-          setRequests(normalized as UserAcquirerRequest[]);
-          setMeta(metaData);
-        },
-        onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to load acquirer requests');
-        },
-      });
-    } catch (error) {
-      toast.error('An unexpected error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
+            setRequests(normalized as UserAcquirerRequest[]);
+            setMeta(data.meta ?? null);
+          },
+          onError: (errorMessage) => {
+            toast.error(errorMessage || 'Failed to load acquirer requests');
+          },
+        });
+      } catch (error) {
+        toast.error('An unexpected error occurred');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
-    fetchRequests(page, limit);
-  }, [page, limit]);
+    fetchRequests(requestCursor, limit);
+  }, [requestCursor, limit, fetchRequests]);
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setLimit(newPageSize);
+    resetCursor();
+  };
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   const headers: TableHeader<UserAcquirerRequest>[] = useMemo(
     () => [
@@ -123,9 +142,10 @@ export default function UserAcquirerRequestsPage() {
             {(item as any).requestStatus}
           </Badge>
         );
-      default:
+      default: {
         const value = item[key as keyof UserAcquirerRequest];
         return <div className="text-foreground font-normal">{value != null ? String(value) : '-'}</div>;
+      }
     }
   };
 
@@ -161,13 +181,13 @@ export default function UserAcquirerRequestsPage() {
           getRowId={(row: UserAcquirerRequest) => String(row.id)}
           pagination={{
             pageSize: limit,
-            pageIndex: page - 1,
-            totalCount: meta?.total ?? 0,
-            onPageChange: (pageIndex) => setPage(pageIndex + 1),
-            onPageSizeChange: (newSize) => {
-              setLimit(newSize);
-              setPage(1);
-            },
+            onPageSizeChange: handlePageSizeChange,
+          }}
+          cursorPagination={{
+            meta,
+            onNext: handleCursorNext,
+            onPrev: handleCursorPrev,
+            canGoPrev,
           }}
           sorting={undefined}
           loading={isTableLoading}
@@ -176,5 +196,3 @@ export default function UserAcquirerRequestsPage() {
     </Fragment>
   );
 }
-
-

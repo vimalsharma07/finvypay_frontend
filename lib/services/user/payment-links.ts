@@ -2,6 +2,8 @@
 
 import { http, ApiError } from '../../api';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
+import { normalizeToCursorListEnvelope } from '@/lib/utils/normalize-cursor-list';
 
 export interface PaymentLink {
   id: string;
@@ -18,34 +20,40 @@ export interface PaymentLink {
   deletedAt: string | null;
 }
 
-export interface PaymentLinksListMeta {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
+export type PaymentLinksListMeta = CursorPaginationMeta;
+
+export interface PaymentLinksListParams {
+  cursor?: string;
+  limit?: number;
+  status?: string;
+  search?: string;
+  includeDeleted?: boolean;
 }
 
 export interface PaymentLinksListResponse {
   success: boolean;
-  data: PaymentLink[] | { data: PaymentLink[]; meta?: PaymentLinksListMeta };
-  meta?: PaymentLinksListMeta;
+  data: PaymentLink[];
+  meta: PaymentLinksListMeta | null;
   message?: string;
 }
 
 const getBaseUrl = () => '/merchant/payment-link';
 
 export async function getUserPaymentLinks(
-  params?: Record<string, any>
+  params?: PaymentLinksListParams,
 ): Promise<ApiResponse<PaymentLinksListResponse>> {
   try {
-    const data = await http.get(getBaseUrl(), {
+    const raw = await http.get(getBaseUrl(), {
       query: params as Record<string, string | number | boolean | null | undefined>,
-    }) as PaymentLinksListResponse;
+    });
+    const normalized = normalizeToCursorListEnvelope<PaymentLink>(raw);
     return {
       status: 200,
-      data,
+      data: {
+        success: normalized.success,
+        data: normalized.data,
+        meta: normalized.meta,
+      },
     };
   } catch (error) {
     if (error instanceof ApiError) {

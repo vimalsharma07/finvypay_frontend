@@ -6,6 +6,7 @@
 
 import { http, ApiError } from '../../api';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 
 // Cascading Rule types
 export interface CascadingRule {
@@ -46,23 +47,12 @@ export const CASCADING_FOR_LABELS: Record<number, string> = {
   4: 'APM',
 };
 
-export interface CascadingRuleListMeta {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
-
-export interface CascadingRuleListData {
-  data: CascadingRule[];
-  meta: CascadingRuleListMeta;
-}
+export type CascadingRuleListMeta = CursorPaginationMeta;
 
 export interface CascadingRuleListResponse {
   success: boolean;
-  data: CascadingRuleListData;
+  data: CascadingRule[];
+  meta?: CascadingRuleListMeta;
   message?: string;
 }
 

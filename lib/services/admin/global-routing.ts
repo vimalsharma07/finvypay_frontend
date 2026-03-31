@@ -5,6 +5,7 @@
 
 import { http, ApiError } from '../../api';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 
 export interface GlobalRouteRule {
   id: string;
@@ -34,14 +35,7 @@ export interface GlobalRouteRule {
   updatedAt?: string;
 }
 
-export interface GlobalRouteRuleListMeta {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
+export type GlobalRouteRuleListMeta = CursorPaginationMeta;
 
 export interface GlobalRouteRuleListResponse {
   success: boolean;

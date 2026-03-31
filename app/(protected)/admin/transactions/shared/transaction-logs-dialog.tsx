@@ -65,7 +65,6 @@ export function TransactionLogsDialog({
       return await new Promise<LogEntry[]>((resolve, reject) => {
         getAdminLogs({
           type,
-          page: 1,
           limit: 50,
           transaction_id: txnId,
           ...(mode ? { payment_mode: mode } : {}),

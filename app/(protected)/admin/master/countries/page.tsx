@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { Globe, Plus, Eye, Pencil, Trash2 } from 'lucide-react';
 import {
   Toolbar,
@@ -20,16 +20,17 @@ import { Button } from '@/components/ui/button';
 import { ConfirmComp } from '../../../components/confirm-comp';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 
 export default function CountriesPage() {
   const router = useRouter();
   const [countries, setCountries] = useState<Country[]>([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState<CountryListResponse['data']['meta'] | null>(null);
-  
-  // Pagination state
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [meta, setMeta] = useState<CursorPaginationMeta | null>(null);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
+  const [limit, setLimit] = useState(20);
   
   // Sorting state
   const [sortBy, setSortBy] = useState<string>('countryName');
@@ -39,74 +40,71 @@ export default function CountriesPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [countryToDelete, setCountryToDelete] = useState<Country | null>(null);
 
-  // Fetch countries function
-  const fetchCountries = async (
-    pageNum: number,
-    pageLimit: number,
-    sortField: string,
-    sortDir: 'ASC' | 'DESC'
-  ) => {
-    setLoading(true);
-    try {
-      const params: any = {
-        page: pageNum,
-        limit: pageLimit,
-        sortBy: sortField,
-        sortOrder: sortDir,
-      };
+  const fetchCountries = useCallback(
+    async (
+      cursor: string | undefined,
+      pageLimit: number,
+      sortField: string,
+      sortDir: 'ASC' | 'DESC',
+    ) => {
+      setLoading(true);
+      try {
+        const params = {
+          ...(cursor ? { cursor } : {}),
+          limit: pageLimit,
+          sortBy: sortField,
+          sortOrder: sortDir,
+        };
 
-      const response = await getCountries(params);
+        const response = await getCountries(params);
 
-      // Handle response using centralized handler
-      handleApiResponse<CountryListResponse>(response, {
-        onSuccess: (data) => {
-          if (data.success) {
-            // New format: { success: true, data: [...], meta: {...} }
-            setCountries(data.data);
-            setMeta(data.meta);
-            console.log('Countries list:', data.data);
-            console.log('Meta info:', data.meta);
-          } else {
-            console.warn('⚠️ API returned success=false:', data);
-          }
-        },
-        onValidationError: (errors, messages) => {
-          console.error('Validation errors:', errors);
-        },
-        onUnauthorized: () => {
-          console.log('Please check your TOKEN in .env file');
-        },
-      });
-    } catch (error) {
-      console.error('❌ Network/Request error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        handleApiResponse<CountryListResponse>(response, {
+          onSuccess: (data) => {
+            if (data.success && Array.isArray(data.data)) {
+              setCountries(data.data);
+              setMeta(data.meta ?? null);
+            } else {
+              console.warn('⚠️ API returned success=false:', data);
+            }
+          },
+          onValidationError: (errors, messages) => {
+            console.error('Validation errors:', errors);
+          },
+          onUnauthorized: () => {
+            console.log('Please check your TOKEN in .env file');
+          },
+        });
+      } catch (error) {
+        console.error('❌ Network/Request error:', error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
-  // Fetch when pagination, sorting, or limit change
   useEffect(() => {
-    fetchCountries(page, limit, sortBy, sortOrder);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, limit, sortBy, sortOrder]);
+    fetchCountries(requestCursor, limit, sortBy, sortOrder);
+  }, [fetchCountries, requestCursor, limit, sortBy, sortOrder]);
 
-  // Handle page change
-  const handlePageChange = (pageIndex: number) => {
-    setPage(pageIndex + 1); // API uses 1-based, table uses 0-based
-  };
-
-  // Handle page size change
   const handlePageSizeChange = (newPageSize: number) => {
     setLimit(newPageSize);
-    setPage(1); // Reset to first page
+    resetCursor();
   };
 
-  // Handle sort change
   const handleSortChange = (newSortBy: string, newSortOrder: 'ASC' | 'DESC') => {
     setSortBy(newSortBy);
     setSortOrder(newSortOrder);
-    setPage(1); // Reset to first page when sorting changes
+    resetCursor();
   };
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   // Handle create country
   const handleCreateCountry = () => {
@@ -121,7 +119,7 @@ export default function CountriesPage() {
         onSuccess: () => {
           toast.success('Country deleted successfully!');
           // Immediately refetch countries list to update the table
-          fetchCountries(page, limit, sortBy, sortOrder);
+          fetchCountries(requestCursor, limit, sortBy, sortOrder);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to delete country');
@@ -304,10 +302,13 @@ export default function CountriesPage() {
           getRowId={(row: Country) => row.id}
           pagination={{
             pageSize: limit,
-            pageIndex: page - 1, // Convert to 0-based for table
-            totalCount: meta?.totalItems ?? 0,
-            onPageChange: handlePageChange,
             onPageSizeChange: handlePageSizeChange,
+          }}
+          cursorPagination={{
+            meta,
+            onNext: handleCursorNext,
+            onPrev: handleCursorPrev,
+            canGoPrev,
           }}
           sorting={{
             sortBy: sortBy,

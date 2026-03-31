@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { BarChart3, Eye, Pencil, Trash2, Plus } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
@@ -26,21 +26,23 @@ import {
   type GlobalCascadingRuleListMeta,
 } from '@/lib/services/admin/global-cascading';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
 
 export default function GlobalCascadingPage() {
   const [loading, setLoading] = useState(true);
   const [cascades, setCascades] = useState<GlobalCascadingRule[]>([]);
   const [meta, setMeta] = useState<GlobalCascadingRuleListMeta | null>(null);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(20);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cascadeToDelete, setCascadeToDelete] = useState<GlobalCascadingRule | null>(null);
 
-  const fetchCascadings = async (pageNum: number, pageLimit: number) => {
+  const fetchCascadings = useCallback(async (cursor: string | undefined, pageLimit: number) => {
     setLoading(true);
     try {
       const response = await getGlobalCascadings({
-        page: pageNum,
+        ...(cursor ? { cursor } : {}),
         limit: pageLimit,
       });
 
@@ -61,11 +63,24 @@ export default function GlobalCascadingPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchCascadings(page, limit);
-  }, [page, limit]);
+    fetchCascadings(requestCursor, limit);
+  }, [fetchCascadings, requestCursor, limit]);
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setLimit(newPageSize);
+    resetCursor();
+  };
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   const CASCADING_FOR_LABELS: Record<number, string> = {
     1: 'Card',
@@ -130,7 +145,7 @@ export default function GlobalCascadingPage() {
                 handleApiResponse(response, {
                   onSuccess: () => {
                     toast.success('Cascading status updated');
-                    fetchCascadings(page, limit);
+                    fetchCascadings(requestCursor, limit);
                   },
                   onError: (errorMessage) => {
                     toast.error(errorMessage || 'Failed to update status');
@@ -209,13 +224,13 @@ export default function GlobalCascadingPage() {
           getRowId={(row: GlobalCascadingRule) => String(row.id)}
           pagination={{
             pageSize: limit,
-            pageIndex: page - 1,
-            totalCount: meta?.totalItems ?? 0,
-            onPageChange: (pageIndex) => setPage(pageIndex + 1),
-            onPageSizeChange: (newLimit) => {
-              setLimit(newLimit);
-              setPage(1);
-            },
+            onPageSizeChange: handlePageSizeChange,
+          }}
+          cursorPagination={{
+            meta,
+            onNext: handleCursorNext,
+            onPrev: handleCursorPrev,
+            canGoPrev,
           }}
           loading={loading}
         />
@@ -240,7 +255,7 @@ export default function GlobalCascadingPage() {
             handleApiResponse(response, {
               onSuccess: () => {
                 toast.success('Global cascading rule deleted successfully');
-                fetchCascadings(page, limit);
+                fetchCascadings(requestCursor, limit);
               },
               onError: (errorMessage) => {
                 toast.error(errorMessage || 'Failed to delete global cascading rule');

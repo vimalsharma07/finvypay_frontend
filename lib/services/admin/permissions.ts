@@ -7,6 +7,8 @@
 import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
+import { normalizeToCursorListEnvelope } from '@/lib/utils/normalize-cursor-list';
 
 // Permission types matching the API response structure
 export interface Permission {
@@ -24,9 +26,19 @@ export interface Permission {
   updatedAt?: string;
 }
 
+export interface PermissionListParams {
+  cursor?: string;
+  limit?: number;
+  type?: string;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: 'ASC' | 'DESC';
+}
+
 export interface PermissionListResponse {
   success: boolean;
   data: Permission[];
+  meta: CursorPaginationMeta | null;
   message?: string;
 }
 
@@ -53,14 +65,23 @@ export interface UpdatePermissionPayload {
 }
 
 /**
- * Get all permissions
+ * Cursor-paginated permissions list (admin)
  */
-export async function getPermissions(): Promise<ApiResponse<PermissionListResponse>> {
+export async function getPermissions(
+  params?: PermissionListParams,
+): Promise<ApiResponse<PermissionListResponse>> {
   try {
-    const data = await http.get(adminRoutes.permissions.list) as PermissionListResponse;
+    const raw = await http.get(adminRoutes.permissions.list, {
+      query: params as Record<string, string | number | undefined>,
+    });
+    const normalized = normalizeToCursorListEnvelope<Permission>(raw);
     return {
       status: 200,
-      data,
+      data: {
+        success: normalized.success,
+        data: normalized.data,
+        meta: normalized.meta,
+      },
     };
   } catch (error) {
     if (error instanceof ApiError) {
@@ -73,6 +94,53 @@ export async function getPermissions(): Promise<ApiResponse<PermissionListRespon
     return {
       status: 0,
       error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Load every permission via cursor pages (role create/edit checklists).
+ */
+export async function getAllPermissionsForAssignment(): Promise<
+  ApiResponse<{ success: boolean; data: Permission[] }>
+> {
+  const all: Permission[] = [];
+  let cursor: string | undefined;
+  try {
+    for (let safety = 0; safety < 50; safety++) {
+      const response = await getPermissions({
+        cursor,
+        limit: 500,
+        sortBy: 'name',
+        sortOrder: 'ASC',
+      });
+      if (response.status !== 200 || !response.data) {
+        return {
+          status: response.status || 0,
+          error: response.error,
+          data: { success: false, data: [] },
+        };
+      }
+      const body = response.data;
+      if (!body.success || !Array.isArray(body.data)) {
+        break;
+      }
+      all.push(...body.data);
+      const meta = body.meta;
+      if (!meta?.hasNextPage || !meta.nextCursor) {
+        break;
+      }
+      cursor = meta.nextCursor;
+    }
+    return {
+      status: 200,
+      data: { success: true, data: all },
+    };
+  } catch (error) {
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      data: { success: false, data: [] },
     };
   }
 }

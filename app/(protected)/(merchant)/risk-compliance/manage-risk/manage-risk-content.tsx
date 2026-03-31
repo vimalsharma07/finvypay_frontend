@@ -22,7 +22,9 @@ import {
 } from '@tanstack/react-table';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
-import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
   Card,
@@ -52,7 +54,7 @@ import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from
 export function UserManageRiskPageContent({ addDialogOpen, onAddDialogOpenChange }: { addDialogOpen?: boolean; onAddDialogOpenChange?: (open: boolean) => void }) {
   const [riskManagement, setRiskManagement] = useState<RiskManagement[]>([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState<RiskManagementListResponse['data']['meta'] | null>(null);
+  const [meta, setMeta] = useState<CursorPaginationMeta | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [riskToDelete, setRiskToDelete] = useState<RiskManagement | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -66,31 +68,28 @@ export function UserManageRiskPageContent({ addDialogOpen, onAddDialogOpenChange
   const [riskToEdit, setRiskToEdit] = useState<RiskManagement | null>(null);
   const [updating, setUpdating] = useState(false);
 
-  // Pagination state
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
+  const [limit, setLimit] = useState(20);
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
 
   const fetchRiskManagement = useCallback(
-    async (pageNum: number, pageLimit: number) => {
+    async (cursor: string | undefined, pageLimit: number) => {
       setLoading(true);
       try {
         const params = {
-          page: pageNum,
+          ...(cursor ? { cursor } : {}),
           limit: pageLimit,
         };
 
         const response = await getRiskManagement(params);
         handleApiResponse<RiskManagementListResponse>(response, {
           onSuccess: (data) => {
-            // API format: { success: true, data: { items: [...], meta: {...} } }
-            if (data && data.success && data.data) {
-              const items = data.data.items || [];
-              const metaData = data.data.meta;
-              setRiskManagement(Array.isArray(items) ? items : []);
-              setMeta(metaData);
+            if (data?.success && Array.isArray(data.data)) {
+              setRiskManagement(data.data);
+              setMeta(data.meta ?? null);
             } else {
               toast.error('Failed to fetch risk management - invalid response structure');
             }
@@ -109,8 +108,8 @@ export function UserManageRiskPageContent({ addDialogOpen, onAddDialogOpenChange
   );
 
   useEffect(() => {
-    fetchRiskManagement(page, limit);
-  }, [page, limit, fetchRiskManagement]);
+    fetchRiskManagement(requestCursor, limit);
+  }, [fetchRiskManagement, requestCursor, limit]);
 
   // Filter data based on search query (client-side)
   const filteredData = useMemo(() => {
@@ -137,7 +136,7 @@ export function UserManageRiskPageContent({ addDialogOpen, onAddDialogOpenChange
         onSuccess: () => {
           toast.success('Risk management entry created successfully!');
           setAddDialogOpen(false);
-          fetchRiskManagement(page, limit);
+          fetchRiskManagement(requestCursor, limit);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to create risk management entry');
@@ -167,7 +166,7 @@ export function UserManageRiskPageContent({ addDialogOpen, onAddDialogOpenChange
           toast.success('Risk management entry updated successfully!');
           setEditDialogOpen(false);
           setRiskToEdit(null);
-          fetchRiskManagement(page, limit);
+          fetchRiskManagement(requestCursor, limit);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to update risk management entry');
@@ -196,7 +195,7 @@ export function UserManageRiskPageContent({ addDialogOpen, onAddDialogOpenChange
           toast.success('Risk management entry deleted successfully!');
           setDeleteDialogOpen(false);
           setRiskToDelete(null);
-          fetchRiskManagement(page, limit);
+          fetchRiskManagement(requestCursor, limit);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to delete risk management entry');
@@ -214,29 +213,16 @@ export function UserManageRiskPageContent({ addDialogOpen, onAddDialogOpenChange
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 20,
   });
 
-  // Handle page change
-  const handlePageChange = (pageIndex: number) => {
-    setPage(pageIndex + 1); // API uses 1-based, table uses 0-based
-  };
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
 
-  // Handle page size change
-  const handlePageSizeChange = (newPageSize: number) => {
-    setLimit(newPageSize);
-    setPage(1); // Reset to first page
-  };
-
-  // Update pagination when meta changes
-  useEffect(() => {
-    if (meta) {
-      setPagination({
-        pageIndex: meta.currentPage - 1, // Convert 1-based to 0-based
-        pageSize: meta.itemsPerPage,
-      });
-    }
-  }, [meta]);
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   const columns = useMemo<ColumnDef<RiskManagement>[]>(
     () => [
@@ -301,17 +287,17 @@ export function UserManageRiskPageContent({ addDialogOpen, onAddDialogOpenChange
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
-    manualSorting: false, // Client-side sorting since API doesn't support it
-    pageCount: meta ? meta.totalPages : undefined,
+    manualSorting: false,
+    pageCount: 1,
     onSortingChange: setSorting,
     onPaginationChange: (updater) => {
       const newPagination = typeof updater === 'function' ? updater(pagination) : updater;
-      setPagination(newPagination);
-      if (newPagination.pageIndex !== pagination.pageIndex) {
-        handlePageChange(newPagination.pageIndex);
-      }
       if (newPagination.pageSize !== pagination.pageSize) {
-        handlePageSizeChange(newPagination.pageSize);
+        setLimit(newPagination.pageSize);
+        setPagination({ pageIndex: 0, pageSize: newPagination.pageSize });
+        resetCursor();
+      } else {
+        setPagination(newPagination);
       }
     },
     getRowId: (row) => String(row.id),
@@ -326,7 +312,7 @@ export function UserManageRiskPageContent({ addDialogOpen, onAddDialogOpenChange
       <Container>
         <DataGrid
           table={table}
-          recordCount={meta?.totalItems || filteredData.length}
+          recordCount={filteredData.length}
           isLoading={loading}
           tableLayout={modernTableLayout}
           tableClassNames={modernTableClassNames}
@@ -348,7 +334,13 @@ export function UserManageRiskPageContent({ addDialogOpen, onAddDialogOpenChange
               </ScrollArea>
             </CardTable>
             <CardFooter className={modernTableCardClasses.footer}>
-              <DataGridPagination />
+              <CursorDataGridPagination
+                meta={meta}
+                onNext={handleCursorNext}
+                onPrev={handleCursorPrev}
+                canGoPrev={canGoPrev}
+                rowCount={filteredData.length}
+              />
             </CardFooter>
           </Card>
         </DataGrid>

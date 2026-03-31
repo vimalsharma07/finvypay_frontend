@@ -7,6 +7,8 @@
 import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
+import { normalizeToCursorListEnvelope } from '@/lib/utils/normalize-cursor-list';
 
 // Acquirer Account types matching the API response structure
 export interface AcquirerAccountAcquirer {
@@ -47,28 +49,15 @@ export interface AcquirerAccount {
 }
 
 export interface AcquirerAccountListParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
   acquirerId?: number;
 }
 
-export interface AcquirerAccountListMeta {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
-
-export interface AcquirerAccountListData {
-  data: AcquirerAccount[];
-  meta: AcquirerAccountListMeta;
-}
-
 export interface AcquirerAccountListResponse {
   success: boolean;
-  data: AcquirerAccountListData;
+  data: AcquirerAccount[];
+  meta: CursorPaginationMeta | null;
   message?: string;
 }
 
@@ -129,12 +118,17 @@ export async function getAcquirerAccounts(
   params?: AcquirerAccountListParams
 ): Promise<ApiResponse<AcquirerAccountListResponse>> {
   try {
-    const data = await http.get(adminRoutes.acquirerAccounts.list, {
+    const raw = await http.get(adminRoutes.acquirerAccounts.list, {
       query: params as Record<string, string | number | undefined>,
-    }) as AcquirerAccountListResponse;
+    });
+    const normalized = normalizeToCursorListEnvelope<AcquirerAccount>(raw);
     return {
       status: 200,
-      data,
+      data: {
+        success: normalized.success,
+        data: normalized.data,
+        meta: normalized.meta,
+      },
     };
   } catch (error) {
     if (error instanceof ApiError) {

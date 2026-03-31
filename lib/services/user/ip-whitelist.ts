@@ -7,6 +7,8 @@
 import { http, ApiError } from '../../api';
 import { userIpWhitelistRoutes } from '../../routes/user/ip-whitelist-routes';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
+import { normalizeToCursorListEnvelope } from '@/lib/utils/normalize-cursor-list';
 
 // IP Whitelist types matching the API response structure
 export interface IpWhitelistUser {
@@ -29,29 +31,16 @@ export interface IpWhitelist {
 }
 
 export interface IpWhitelistListParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
 }
 
-export interface IpWhitelistListMeta {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
-
-export interface IpWhitelistListData {
-  data: IpWhitelist[];
-  meta: IpWhitelistListMeta;
-}
-
 export interface IpWhitelistListResponse {
   success: boolean;
-  data: IpWhitelistListData;
+  data: IpWhitelist[];
+  meta: CursorPaginationMeta | null;
   message?: string;
 }
 
@@ -70,12 +59,17 @@ export async function getUserIpWhitelist(
   params?: IpWhitelistListParams
 ): Promise<ApiResponse<IpWhitelistListResponse>> {
   try {
-    const data = await http.get(userIpWhitelistRoutes.list, {
+    const raw = await http.get(userIpWhitelistRoutes.list, {
       query: params as Record<string, string | number | undefined>,
-    }) as IpWhitelistListResponse;
+    });
+    const normalized = normalizeToCursorListEnvelope<IpWhitelist>(raw);
     return {
       status: 200,
-      data,
+      data: {
+        success: normalized.success,
+        data: normalized.data,
+        meta: normalized.meta,
+      },
     };
   } catch (error) {
     if (error instanceof ApiError) {

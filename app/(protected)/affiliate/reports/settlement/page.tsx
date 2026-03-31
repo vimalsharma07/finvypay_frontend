@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { FileText } from 'lucide-react';
 import {
@@ -11,6 +11,7 @@ import { Container } from '@/components/common/container';
 import {
   ColumnDef,
   getCoreRowModel,
+  getSortedRowModel,
   useReactTable,
   SortingState,
   PaginationState,
@@ -18,7 +19,8 @@ import {
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridTable } from '@/components/ui/data-grid-table';
-import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardFooter, CardTable } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -27,25 +29,16 @@ import {
   modernTableClassNames,
   modernTableCardClasses,
 } from '@/app/(protected)/components/table-comp';
+import {
+  getAffiliateSettlements,
+  type AffiliateSettlementRow,
+  type AffiliateSettlementListResponse,
+} from '@/lib/services/affiliate/settlements';
+import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import { toast } from 'sonner';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 
 const DATE_FMT = 'yyyy-MM-dd';
-
-/** Row type aligned with admin settlement list (same fields for table) */
-interface AffiliateSettlementRow {
-  id: string;
-  invoiceNumber: string;
-  userName: string;
-  userEmail: string;
-  settlementDate: string;
-  grossAmountUsd: string | null;
-  totalDeductionsUsd: string | null;
-  netAmountUsd: string | null;
-  paidAmount: string | null;
-  isPaid: boolean;
-  type: string;
-  totalSuccessCount: number | null;
-  createdAt: string;
-}
 
 const formatCurrency = (amount: string | null | undefined) => {
   if (amount == null || amount === '') return '—';
@@ -59,15 +52,87 @@ const formatCurrency = (amount: string | null | undefined) => {
   }).format(num);
 };
 
+const formatNumber = (num: number | null | undefined) => {
+  if (num === null || num === undefined) return '—';
+  return num.toLocaleString();
+};
+
 export default function AffiliateReportsSettlementPage() {
-  const [data] = useState<AffiliateSettlementRow[]>([]);
+  const [data, setData] = useState<AffiliateSettlementRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [meta, setMeta] = useState<CursorPaginationMeta | null>(null);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
+  const [limit, setLimit] = useState(20);
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
+
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 20,
+  });
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'createdAt', desc: true },
   ]);
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
+
+  const fetchData = useCallback(
+    async (cursor: string | undefined, pageLimit: number) => {
+      setLoading(true);
+      try {
+        const response = await getAffiliateSettlements({
+          ...(cursor ? { cursor } : {}),
+          limit: pageLimit,
+          sortBy,
+          sortOrder,
+        });
+        handleApiResponse<AffiliateSettlementListResponse>(response, {
+          onSuccess: (res) => {
+            if (res?.success && Array.isArray(res.data)) {
+              setData(res.data);
+              setMeta(res.meta ?? null);
+            } else {
+              toast.error('Invalid response while loading settlements');
+            }
+          },
+          onError: (msg) => toast.error(msg || 'Failed to load settlements'),
+        });
+      } catch {
+        toast.error('An unexpected error occurred');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [sortBy, sortOrder],
+  );
+
+  useEffect(() => {
+    fetchData(requestCursor, limit);
+  }, [fetchData, requestCursor, limit]);
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
+
+  const handleSortingChange = useCallback(
+    (updaterOrValue: SortingState | ((old: SortingState) => SortingState)) => {
+      setSorting((prev) => {
+        const next =
+          typeof updaterOrValue === 'function' ? updaterOrValue(prev) : updaterOrValue;
+        if (next.length > 0) {
+          const { id, desc } = next[0];
+          setSortBy(id);
+          setSortOrder(desc ? 'DESC' : 'ASC');
+          resetCursor();
+        }
+        return next;
+      });
+    },
+    [resetCursor],
+  );
 
   const columns = useMemo<ColumnDef<AffiliateSettlementRow>[]>(
     () => [
@@ -77,6 +142,20 @@ export default function AffiliateReportsSettlementPage() {
           <DataGridColumnHeader column={column} title="Invoice Number" />
         ),
         cell: ({ row }) => row.original.invoiceNumber || '—',
+      },
+      {
+        accessorKey: 'userName',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Merchant" />
+        ),
+        cell: ({ row }) => (
+          <div>
+            <div className="font-medium">{row.original.userName || '—'}</div>
+            <div className="text-xs text-muted-foreground">
+              {row.original.userEmail || ''}
+            </div>
+          </div>
+        ),
       },
       {
         accessorKey: 'settlementDate',
@@ -145,6 +224,13 @@ export default function AffiliateReportsSettlementPage() {
           </Badge>
         ),
       },
+      {
+        accessorKey: 'totalSuccessCount',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Success Count" />
+        ),
+        cell: ({ row }) => formatNumber(row.original.totalSuccessCount),
+      },
     ],
     []
   );
@@ -153,11 +239,23 @@ export default function AffiliateReportsSettlementPage() {
     data,
     columns,
     state: { sorting, pagination },
-    onSortingChange: setSorting,
-    onPaginationChange: setPagination,
+    onSortingChange: handleSortingChange,
+    onPaginationChange: (updater) => {
+      const next = typeof updater === 'function' ? updater(pagination) : updater;
+      if (next.pageSize !== pagination.pageSize) {
+        setLimit(next.pageSize);
+        setPagination({ pageIndex: 0, pageSize: next.pageSize });
+        resetCursor();
+      } else {
+        setPagination(next);
+      }
+    },
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
+    manualSorting: true,
     pageCount: 1,
+    getRowId: (row) => String(row.id),
   });
 
   return (
@@ -166,7 +264,7 @@ export default function AffiliateReportsSettlementPage() {
         <Toolbar>
           <ToolbarHeading
             title="Settlement Report"
-            description="View your settlement records"
+            description="Settlement records for merchants linked to your partner account"
             icon={FileText}
           />
         </Toolbar>
@@ -174,8 +272,8 @@ export default function AffiliateReportsSettlementPage() {
       <Container>
         <DataGrid
           table={table}
-          recordCount={0}
-          isLoading={false}
+          recordCount={data.length}
+          isLoading={loading}
           tableLayout={modernTableLayout}
           tableClassNames={modernTableClassNames}
         >
@@ -187,7 +285,13 @@ export default function AffiliateReportsSettlementPage() {
               </ScrollArea>
             </CardTable>
             <CardFooter className={modernTableCardClasses.footer}>
-              <DataGridPagination />
+              <CursorDataGridPagination
+                meta={meta}
+                onNext={handleCursorNext}
+                onPrev={handleCursorPrev}
+                canGoPrev={canGoPrev}
+                rowCount={data.length}
+              />
             </CardFooter>
           </Card>
         </DataGrid>

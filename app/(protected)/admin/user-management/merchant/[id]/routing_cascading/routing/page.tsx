@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Route, Eye, Pencil, Trash2 } from 'lucide-react';
 import { Container } from '@/components/common/container';
@@ -41,6 +41,7 @@ import {
 } from '@/lib/services/admin/merchant-acquirer-account';
 import type { Option } from '@/lib/types/common-types';
 import { formatConnectorLabel } from '@/lib/utils/connector-display';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
 
 export default function RoutingPage() {
   const params = useParams();
@@ -49,8 +50,9 @@ export default function RoutingPage() {
   const [profilesLoading, setProfilesLoading] = useState(true);
   const [routes, setRoutes] = useState<RouteRule[]>([]);
   const [meta, setMeta] = useState<RouteRuleListMeta | null>(null);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(20);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
   const [sortBy, setSortBy] = useState<string>('priority');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('ASC');
   const [profiles, setProfiles] = useState<MerchantProfile[]>([]);
@@ -62,8 +64,8 @@ export default function RoutingPage() {
   const isTableLoading = loading || profilesLoading;
 
   // Fetch routing rules
-  const fetchRoutings = async (
-    pageNum: number,
+  const fetchRoutings = useCallback(async (
+    cursor: string | undefined,
     pageLimit: number,
     sortField: string,
     sortDir: 'ASC' | 'DESC',
@@ -71,12 +73,12 @@ export default function RoutingPage() {
   ) => {
     setLoading(true);
     try {
-      const params: any = {
-        page: pageNum,
+      const params: Record<string, string | number | undefined> = {
         limit: pageLimit,
         sortBy: sortField,
         sortOrder: sortDir,
       };
+      if (cursor) params.cursor = cursor;
 
       const response = await getUserRoutings(userId, params, profileId);
 
@@ -113,13 +115,17 @@ export default function RoutingPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useLayoutEffect(() => {
+    if (selectedProfileId) resetCursor();
+  }, [selectedProfileId, resetCursor]);
 
   useEffect(() => {
     if (userId && selectedProfileId) {
-      fetchRoutings(page, limit, sortBy, sortOrder, selectedProfileId);
+      fetchRoutings(requestCursor, limit, sortBy, sortOrder, selectedProfileId);
     }
-  }, [userId, page, limit, sortBy, sortOrder, selectedProfileId]);
+  }, [userId, requestCursor, limit, sortBy, sortOrder, selectedProfileId, fetchRoutings]);
 
   // Fetch merchant profiles to drive routing context
   useEffect(() => {
@@ -230,7 +236,7 @@ export default function RoutingPage() {
                 handleApiResponse(response, {
                   onSuccess: () => {
                     toast.success('Routing status updated');
-                    fetchRoutings(page, limit, sortBy, sortOrder, selectedProfileId);
+                    fetchRoutings(requestCursor, limit, sortBy, sortOrder, selectedProfileId);
                   },
                   onError: (errorMessage) => {
                     toast.error(errorMessage || 'Failed to update status');
@@ -256,7 +262,7 @@ export default function RoutingPage() {
                 handleApiResponse(response, {
                   onSuccess: () => {
                     toast.success('Cascade status updated');
-                    fetchRoutings(page, limit, sortBy, sortOrder, selectedProfileId);
+                    fetchRoutings(requestCursor, limit, sortBy, sortOrder, selectedProfileId);
                   },
                   onError: (errorMessage) => {
                     toast.error(errorMessage || 'Failed to update cascade');
@@ -310,23 +316,24 @@ export default function RoutingPage() {
     },
   ];
 
-  // Handle page change
-  const handlePageChange = (pageIndex: number) => {
-    setPage(pageIndex + 1);
-  };
-
-  // Handle page size change
   const handlePageSizeChange = (newPageSize: number) => {
     setLimit(newPageSize);
-    setPage(1);
+    resetCursor();
   };
 
-  // Handle sort change
   const handleSortChange = (newSortBy: string, newSortOrder: 'ASC' | 'DESC') => {
     setSortBy(newSortBy);
     setSortOrder(newSortOrder);
-    setPage(1);
+    resetCursor();
   };
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   return (
     <Fragment>
@@ -372,7 +379,6 @@ export default function RoutingPage() {
                   value={selectedProfileId}
                   onChange={(val) => {
                     setSelectedProfileId(val);
-                    setPage(1);
                   }}
                   placeholder="Select profile (industry)"
                 />
@@ -391,10 +397,13 @@ export default function RoutingPage() {
           getRowId={(row: RouteRule) => String(row.id)}
           pagination={{
             pageSize: limit,
-            pageIndex: page - 1,
-            totalCount: meta?.totalItems ?? 0,
-            onPageChange: handlePageChange,
             onPageSizeChange: handlePageSizeChange,
+          }}
+          cursorPagination={{
+            meta,
+            onNext: handleCursorNext,
+            onPrev: handleCursorPrev,
+            canGoPrev,
           }}
           sorting={{
             sortBy: sortBy,
@@ -424,7 +433,7 @@ export default function RoutingPage() {
             handleApiResponse(response, {
               onSuccess: () => {
                 toast.success('Routing rule deleted successfully');
-                fetchRoutings(page, limit, sortBy, sortOrder, selectedProfileId);
+                fetchRoutings(requestCursor, limit, sortBy, sortOrder, selectedProfileId);
               },
               onError: (errorMessage) => {
                 toast.error(errorMessage || 'Failed to delete routing rule');

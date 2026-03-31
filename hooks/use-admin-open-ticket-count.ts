@@ -23,7 +23,6 @@ export function useAdminOpenTicketCount(): UseAdminOpenTicketCountResult {
       setLoading(true);
       try {
         const response = await getSupportTickets({
-          page: 1,
           limit: 1,
           status: 'OPEN',
         });
@@ -31,9 +30,10 @@ export function useAdminOpenTicketCount(): UseAdminOpenTicketCountResult {
         handleApiResponse<SupportTicketListResponse>(response, {
           onSuccess: (data) => {
             if (!isMounted) return;
-            const meta = data?.data?.meta;
             const total =
-              typeof meta?.totalItems === 'number' ? meta.totalItems : 0;
+              typeof data?.meta?.totalCount === 'number'
+                ? data.meta.totalCount
+                : 0;
             setCount(total);
           },
           onError: () => {

@@ -7,6 +7,7 @@
 import { http, ApiError } from '../../api';
 import { affiliateRoutes } from '../../routes/affiliate';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 
 /** User nested in transaction */
 export interface AffiliateTransactionUser {
@@ -68,17 +69,10 @@ export interface AffiliateTransaction {
   user: AffiliateTransactionUser;
 }
 
-export interface AffiliateTransactionListMeta {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
+export type AffiliateTransactionListMeta = CursorPaginationMeta;
 
 export interface AffiliateTransactionListParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';

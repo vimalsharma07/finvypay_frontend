@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
 import { FileText, Filter } from 'lucide-react';
 import {
   Toolbar,
@@ -11,9 +12,10 @@ import { Container } from '@/components/common/container';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import {
   getSettlementSummaryList,
+  SettlementListMeta,
   SettlementSummaryItem,
 } from '@/lib/services/admin/settlements';
-import { getMerchants } from '@/lib/services/admin/users';
+import { getAllMerchantsPaginated } from '@/lib/services/admin/users';
 import {
   ColumnDef,
   getCoreRowModel,
@@ -25,7 +27,7 @@ import {
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridTable } from '@/components/ui/data-grid-table';
-import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardFooter, CardTable } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -58,31 +60,33 @@ const formatCurrency = (amount: number | string) => {
 export default function AdminSettlementSummaryPage() {
   const [data, setData] = useState<SettlementSummaryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState<{
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  } | null>(null);
+  const [meta, setMeta] = useState<SettlementListMeta | null>(null);
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [merchantOptions, setMerchantOptions] = useState<{ label: string; value: string }[]>([]);
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 20,
   });
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
+
+  const userFilterKey = filters.userId || '';
+
+  useEffect(() => {
+    resetCursor();
+  }, [userFilterKey, resetCursor]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const page = pagination.pageIndex + 1;
       const limit = pagination.pageSize;
       const userId = filters.userId || undefined;
 
       const response = await getSettlementSummaryList({
         userId,
-        page,
+        ...(requestCursor ? { cursor: requestCursor } : {}),
         limit,
       });
       handleApiResponse(response, {
@@ -105,7 +109,7 @@ export default function AdminSettlementSummaryPage() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.pageIndex, pagination.pageSize, filters.userId]);
+  }, [requestCursor, pagination.pageSize, filters.userId]);
 
   useEffect(() => {
     fetchData();
@@ -114,15 +118,13 @@ export default function AdminSettlementSummaryPage() {
   useEffect(() => {
     const loadMerchants = async () => {
       try {
-        const res = await getMerchants({ page: 1, limit: 1000, role: 'merchant' });
-        if (res.data?.data && Array.isArray(res.data.data)) {
-          setMerchantOptions(
-            res.data.data.map((user) => ({
-              label: user.name || user.email || user.id,
-              value: String(user.id),
-            }))
-          );
-        }
+        const merchants = await getAllMerchantsPaginated();
+        setMerchantOptions(
+          merchants.map((user) => ({
+            label: user.name || user.email || user.id,
+            value: String(user.id),
+          })),
+        );
       } catch (e) {
         console.error('Failed to load merchants for filter', e);
       }
@@ -145,7 +147,6 @@ export default function AdminSettlementSummaryPage() {
 
   const handleApplyFilters = (appliedFilters: Record<string, string>) => {
     setFilters(appliedFilters);
-    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   };
 
   const handleResetFilters = () => {
@@ -239,6 +240,14 @@ export default function AdminSettlementSummaryPage() {
     []
   );
 
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
+
   const table = useReactTable({
     data,
     columns,
@@ -247,11 +256,18 @@ export default function AdminSettlementSummaryPage() {
       pagination,
     },
     onSortingChange: setSorting,
-    onPaginationChange: setPagination,
+    onPaginationChange: (updater) => {
+      const next =
+        typeof updater === 'function' ? updater(pagination) : updater;
+      if (next.pageSize !== pagination.pageSize) {
+        setPagination({ pageIndex: 0, pageSize: next.pageSize });
+        resetCursor();
+      }
+    },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
-    pageCount: meta ? meta.totalPages : -1,
+    pageCount: 1,
   });
 
   return (
@@ -282,7 +298,7 @@ export default function AdminSettlementSummaryPage() {
       <Container>
         <DataGrid
           table={table}
-          recordCount={meta?.total ?? data.length}
+          recordCount={data.length}
           isLoading={loading}
           tableLayout={modernTableLayout}
           tableClassNames={modernTableClassNames}
@@ -295,7 +311,13 @@ export default function AdminSettlementSummaryPage() {
               </ScrollArea>
             </CardTable>
             <CardFooter className={modernTableCardClasses.footer}>
-              <DataGridPagination />
+              <CursorDataGridPagination
+                meta={meta}
+                onNext={handleCursorNext}
+                onPrev={handleCursorPrev}
+                canGoPrev={canGoPrev}
+                rowCount={data.length}
+              />
             </CardFooter>
           </Card>
         </DataGrid>

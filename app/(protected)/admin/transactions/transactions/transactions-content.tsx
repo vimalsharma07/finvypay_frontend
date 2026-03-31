@@ -22,7 +22,8 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { DataGrid } from '@/components/ui/data-grid';
-import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
   Card,
@@ -65,7 +66,7 @@ interface TransactionsPageContentProps {
 export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFilterOpen: externalSetFilterOpen }: TransactionsPageContentProps = {}) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState<TransactionListResponse['data']['meta'] | null>(null);
+  const [meta, setMeta] = useState<TransactionListResponse['meta'] | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [chargebackDialogOpen, setChargebackDialogOpen] = useState(false);
@@ -105,8 +106,8 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
       })),
     [countries]
   );
-  // Pagination state
-  const [page, setPage] = useState(1);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
   const [limit, setLimit] = useState(20);
 
   // Search state
@@ -122,13 +123,17 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
   });
 
   const fetchTransactions = useCallback(
-    async (pageNum: number, pageLimit: number, activeFilters: FilterFields = {}) => {
+    async (
+      cursor: string | undefined,
+      pageLimit: number,
+      activeFilters: FilterFields = {},
+    ) => {
       setLoading(true);
       try {
         const filterQuery = generateFilterQuery(activeFilters);
         const apiParams = mapAdminTransactionFiltersToApiParams(filterQuery);
         const params = {
-          page: pageNum,
+          ...(cursor ? { cursor } : {}),
           limit: pageLimit,
           ...apiParams,
         };
@@ -136,9 +141,9 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
         const response = await getProductionTransactions(params);
         handleApiResponse<TransactionListResponse>(response, {
           onSuccess: (data) => {
-            if (data && data.success && data.data) {
+            if (data && data.success && Array.isArray(data.data)) {
               setTransactions(data.data);
-              setMeta(data.meta);
+              setMeta(data.meta ?? null);
             } else {
               toast.error('Failed to fetch transactions - invalid response structure');
             }
@@ -154,12 +159,12 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
         setLoading(false);
       }
     },
-    []
+    [],
   );
 
   useEffect(() => {
-    fetchTransactions(page, limit, filters);
-  }, [fetchTransactions, page, limit, filters]);
+    fetchTransactions(requestCursor, limit, filters);
+  }, [fetchTransactions, requestCursor, limit, filters]);
 
   // Fetch filter options
   useEffect(() => {
@@ -179,9 +184,10 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
           );
         }
 
-        if (connectorsRes.data?.data?.data) {
+        const connPayload = connectorsRes.data;
+        if (connPayload?.success && Array.isArray(connPayload.data)) {
           setConnectorOptions(
-            connectorsRes.data.data.data.map((c) => ({
+            connPayload.data.map((c) => ({
               label: c.name,
               value: String(c.id),
             }))
@@ -201,26 +207,13 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
     [transactions, searchQuery]
   );
 
-  // Handle page change
-  const handlePageChange = (pageIndex: number) => {
-    setPage(pageIndex + 1);
-  };
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
 
-  // Handle page size change
-  const handlePageSizeChange = (newPageSize: number) => {
-    setLimit(newPageSize);
-    setPage(1);
-  };
-
-  // Update pagination when meta changes
-  useEffect(() => {
-    if (meta) {
-      setPagination({
-        pageIndex: meta.currentPage - 1,
-        pageSize: meta.itemsPerPage,
-      });
-    }
-  }, [meta]);
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   // Handlers for action menu
   const handleViewDetails = useCallback((transaction: Transaction) => {
@@ -292,9 +285,9 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
   const handleApplyFilters = useCallback(
     (appliedFilters: FilterFields) => {
       setFilters(appliedFilters);
-      setPage(1);
+      resetCursor();
     },
-    []
+    [resetCursor],
   );
 
   const filterSchema: FiltersSchema[] = useMemo(
@@ -355,7 +348,7 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
             toast.success('Chargeback processed successfully');
             setChargebackDialogOpen(false);
             setTransactionForAction(null);
-            fetchTransactions(page, limit);
+            fetchTransactions(requestCursor, limit, filters);
           },
           onError: (errorMessage) => {
             toast.error(errorMessage || 'Failed to process chargeback');
@@ -368,7 +361,7 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
         setProcessingChargeback(false);
       }
     },
-    [page, limit, fetchTransactions]
+    [requestCursor, limit, filters, fetchTransactions],
   );
 
   const handleRefundSubmit = useCallback(
@@ -381,7 +374,7 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
             toast.success('Refund processed successfully');
             setRefundDialogOpen(false);
             setTransactionForAction(null);
-            fetchTransactions(page, limit);
+            fetchTransactions(requestCursor, limit, filters);
           },
           onError: (errorMessage) => {
             toast.error(errorMessage || 'Failed to process refund');
@@ -394,7 +387,7 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
         setProcessingRefund(false);
       }
     },
-    [page, limit, fetchTransactions]
+    [requestCursor, limit, filters, fetchTransactions],
   );
 
   const handleSuspiciousSubmit = useCallback(
@@ -407,7 +400,7 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
             toast.success('Transaction marked as suspicious successfully');
             setSuspiciousDialogOpen(false);
             setTransactionForAction(null);
-            fetchTransactions(page, limit);
+            fetchTransactions(requestCursor, limit, filters);
           },
           onError: (errorMessage) => {
             toast.error(errorMessage || 'Failed to mark transaction as suspicious');
@@ -420,7 +413,7 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
         setProcessingSuspicious(false);
       }
     },
-    [page, limit, fetchTransactions]
+    [requestCursor, limit, filters, fetchTransactions],
   );
 
   const columns = useMemo<ColumnDef<Transaction>[]>(
@@ -453,16 +446,16 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
     manualSorting: false,
-    pageCount: meta ? meta.totalPages : undefined,
+    pageCount: 1,
     onSortingChange: setSorting,
     onPaginationChange: (updater) => {
       const newPagination = typeof updater === 'function' ? updater(pagination) : updater;
-      setPagination(newPagination);
-      if (newPagination.pageIndex !== pagination.pageIndex) {
-        handlePageChange(newPagination.pageIndex);
-      }
       if (newPagination.pageSize !== pagination.pageSize) {
-        handlePageSizeChange(newPagination.pageSize);
+        setLimit(newPagination.pageSize);
+        setPagination({ pageIndex: 0, pageSize: newPagination.pageSize });
+        resetCursor();
+      } else {
+        setPagination(newPagination);
       }
     },
     getRowId: (row) => String(row.id),
@@ -477,7 +470,7 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
       <Container>
         <DataGrid
           table={table}
-          recordCount={meta?.totalItems || filteredData.length}
+          recordCount={filteredData.length}
           isLoading={loading}
           tableLayout={modernTableLayout}
           tableClassNames={modernTableClassNames}
@@ -499,7 +492,13 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
               </ScrollArea>
             </CardTable>
             <CardFooter className={modernTableCardClasses.footer}>
-              <DataGridPagination />
+              <CursorDataGridPagination
+                meta={meta}
+                onNext={handleCursorNext}
+                onPrev={handleCursorPrev}
+                canGoPrev={canGoPrev}
+                rowCount={filteredData.length}
+              />
             </CardFooter>
           </Card>
         </DataGrid>

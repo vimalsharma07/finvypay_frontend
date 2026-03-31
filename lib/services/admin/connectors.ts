@@ -6,6 +6,7 @@
 
 import { http, ApiError } from '../../api';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 
 // Merchant Acquirer Account types
 export interface MerchantAcquirerAccount {
@@ -57,23 +58,12 @@ export interface MerchantAcquirerAccount {
   updatedAt: string;
 }
 
-export interface MerchantAcquirerAccountListMeta {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
-
-export interface MerchantAcquirerAccountListData {
-  data: MerchantAcquirerAccount[];
-  meta: MerchantAcquirerAccountListMeta;
-}
+export type MerchantAcquirerAccountListMeta = CursorPaginationMeta;
 
 export interface MerchantAcquirerAccountListResponse {
   success: boolean;
-  data: MerchantAcquirerAccountListData;
+  data: MerchantAcquirerAccount[];
+  meta?: MerchantAcquirerAccountListMeta;
   message?: string;
 }
 

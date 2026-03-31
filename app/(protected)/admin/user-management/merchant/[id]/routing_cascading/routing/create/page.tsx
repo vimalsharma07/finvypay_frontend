@@ -172,9 +172,8 @@ export default function RoutingCreatePage() {
       setConnectorsLoading(true);
       try {
         const response = await getUserConnectors({
-          userId,
+          userId: Number(userId),
           merchantProfileId: Number(selectedProfileId),
-          page: 1,
           limit: 100,
         });
         handleApiResponse(response, {

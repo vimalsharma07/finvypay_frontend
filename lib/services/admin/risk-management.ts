@@ -7,6 +7,8 @@
 import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
+import { normalizeToCursorListEnvelope } from '@/lib/utils/normalize-cursor-list';
 
 // Risk Management types matching the API response structure
 export interface RiskManagementUser {
@@ -28,27 +30,14 @@ export interface RiskManagement {
 }
 
 export interface RiskManagementListParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
-}
-
-export interface RiskManagementListMeta {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
-
-export interface RiskManagementListData {
-  items: RiskManagement[];
-  meta: RiskManagementListMeta;
 }
 
 export interface RiskManagementListResponse {
   success: boolean;
-  data: RiskManagementListData;
+  data: RiskManagement[];
+  meta: CursorPaginationMeta | null;
   message?: string;
 }
 
@@ -84,12 +73,17 @@ export async function getRiskManagement(
   params?: RiskManagementListParams
 ): Promise<ApiResponse<RiskManagementListResponse>> {
   try {
-    const data = await http.get(adminRoutes.riskManagement.list, {
+    const raw = await http.get(adminRoutes.riskManagement.list, {
       query: params as Record<string, string | number | undefined>,
-    }) as RiskManagementListResponse;
+    });
+    const normalized = normalizeToCursorListEnvelope<RiskManagement>(raw);
     return {
       status: 200,
-      data,
+      data: {
+        success: normalized.success,
+        data: normalized.data,
+        meta: normalized.meta,
+      },
     };
   } catch (error) {
     if (error instanceof ApiError) {

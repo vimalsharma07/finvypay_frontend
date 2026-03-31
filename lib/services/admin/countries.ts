@@ -8,6 +8,8 @@
 import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
+import { normalizeToCursorListEnvelope } from '@/lib/utils/normalize-cursor-list';
 
 // Country types matching the actual API response structure
 export interface Country {
@@ -30,29 +32,16 @@ export interface Country {
 }
 
 export interface CountryListParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
 }
 
-export interface CountryListMeta {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
-
-export interface CountryListData {
-  data: Country[];
-  meta: CountryListMeta;
-}
-
 export interface CountryListResponse {
   success: boolean;
-  data: CountryListData;
+  data: Country[];
+  meta: CursorPaginationMeta | null;
   message?: string;
 }
 
@@ -97,12 +86,17 @@ export async function getCountries(
   params?: CountryListParams
 ): Promise<ApiResponse<CountryListResponse>> {
   try {
-    const data = await http.get(adminRoutes.master.countries.list, {
+    const raw = await http.get(adminRoutes.master.countries.list, {
       query: params as Record<string, string | number | boolean | null | undefined>,
-    }) as CountryListResponse;
+    });
+    const normalized = normalizeToCursorListEnvelope<Country>(raw);
     return {
       status: 200,
-      data,
+      data: {
+        success: normalized.success,
+        data: normalized.data,
+        meta: normalized.meta,
+      },
     };
   } catch (error) {
     if (error instanceof ApiError) {

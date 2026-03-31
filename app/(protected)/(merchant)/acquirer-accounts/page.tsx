@@ -1,6 +1,13 @@
 'use client';
 
-import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Cpu, DollarSign, Pencil } from 'lucide-react';
 import { Container } from '@/components/common/container';
 import {
@@ -48,6 +55,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
 
 function RatesDialog({
   open,
@@ -179,8 +187,9 @@ export default function UserAcquirerAccountsPage() {
   const [loading, setLoading] = useState(true);
   const [accounts, setAccounts] = useState<UserAcquirerAccount[]>([]);
   const [meta, setMeta] = useState<UserAcquirerAccountListMeta | null>(null);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
+  const [limit, setLimit] = useState(20);
   const [ratesDialogOpen, setRatesDialogOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<UserAcquirerAccount | null>(null);
@@ -193,54 +202,57 @@ export default function UserAcquirerAccountsPage() {
     setIsClient(true);
   }, []);
 
-  const fetchAccounts = async (
-    pageNum: number,
-    pageLimit: number,
-    currentProfileId?: string | null,
-  ) => {
-    if (!currentProfileId) {
-      setAccounts([]);
-      setMeta(null);
-      return;
-    }
-    setLoading(true);
-    try {
-      const params: any = {
-        page: pageNum,
-        limit: pageLimit,
-        merchantProfileId: currentProfileId,
-      };
+  const fetchAccounts = useCallback(
+    async (
+      cursor: string | undefined,
+      pageLimit: number,
+      currentProfileId?: string | null,
+    ) => {
+      if (!currentProfileId) {
+        setAccounts([]);
+        setMeta(null);
+        return;
+      }
+      setLoading(true);
+      try {
+        const params: Record<string, string | number | undefined> = {
+          ...(cursor ? { cursor } : {}),
+          limit: pageLimit,
+          merchantProfileId: currentProfileId,
+        };
 
-      const response = await getUserAcquirerAccounts(params);
+        const response = await getUserAcquirerAccounts(params);
 
-      handleApiResponse<UserAcquirerAccountListResponse>(response, {
-        onSuccess: (data) => {
-          if (!data?.success) return;
-          const list = Array.isArray(data.data) ? data.data : (data.data?.data ?? []);
-          const metaData = data.meta ?? (data.data as any)?.meta ?? null;
+        handleApiResponse<UserAcquirerAccountListResponse>(response, {
+          onSuccess: (data) => {
+            if (!data?.success) return;
+            const list = Array.isArray(data.data) ? data.data : (data.data?.data ?? []);
+            const metaData = data.meta ?? (data.data as any)?.meta ?? null;
 
-          const normalized = list.map((item: any) => ({
-            ...item,
-            status: item.status ?? (item.isActive ? 1 : 0),
-            isActive: item.isActive ?? item.status === 1,
-            isPrimary: item.isPrimary ?? item.merchantProfile?.isPrimary,
-            industryName: item.merchantProfile?.industry?.name,
-            currency: item.currencyCode ?? item.acquirerAccount?.currency ?? 'N/A',
-          }));
+            const normalized = list.map((item: any) => ({
+              ...item,
+              status: item.status ?? (item.isActive ? 1 : 0),
+              isActive: item.isActive ?? item.status === 1,
+              isPrimary: item.isPrimary ?? item.merchantProfile?.isPrimary,
+              industryName: item.merchantProfile?.industry?.name,
+              currency: item.currencyCode ?? item.acquirerAccount?.currency ?? 'N/A',
+            }));
 
-          setAccounts(normalized as UserAcquirerAccount[]);
-          setMeta(metaData);
-        },
-        onError: (errorMessage) => {
-          toast.error(errorMessage || 'Failed to load acquirer accounts');
-        },
-      });
-    } catch (error) {
-      toast.error('An unexpected error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
+            setAccounts(normalized as UserAcquirerAccount[]);
+            setMeta(metaData);
+          },
+          onError: (errorMessage) => {
+            toast.error(errorMessage || 'Failed to load acquirer accounts');
+          },
+        });
+      } catch (error) {
+        toast.error('An unexpected error occurred');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   // Resolve current merchant profile ID
   useEffect(() => {
@@ -276,14 +288,26 @@ export default function UserAcquirerAccountsPage() {
     resolveProfile();
   }, [user]);
 
+  useLayoutEffect(() => {
+    resetCursor();
+  }, [profileId, resetCursor]);
+
   useEffect(() => {
     if (profileId) {
-      fetchAccounts(page, limit, profileId);
+      fetchAccounts(requestCursor, limit, profileId);
     } else {
       setAccounts([]);
       setMeta(null);
     }
-  }, [page, limit, profileId]);
+  }, [requestCursor, limit, profileId, fetchAccounts]);
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   const headers: TableHeader<UserAcquirerAccount>[] = useMemo(
     () => [
@@ -333,7 +357,7 @@ export default function UserAcquirerAccountsPage() {
   };
 
   const refreshAccounts = () => {
-    if (profileId) fetchAccounts(page, limit, profileId);
+    if (profileId) fetchAccounts(requestCursor, limit, profileId);
   };
 
   const actions: TableAction<UserAcquirerAccount>[] = [
@@ -382,13 +406,17 @@ export default function UserAcquirerAccountsPage() {
           getRowId={(row: UserAcquirerAccount) => String(row.id)}
           pagination={{
             pageSize: limit,
-            pageIndex: page - 1,
-            totalCount: meta?.total ?? 0,
-            onPageChange: (pageIndex) => setPage(pageIndex + 1),
+            pageIndex: 0,
             onPageSizeChange: (newSize) => {
               setLimit(newSize);
-              setPage(1);
+              resetCursor();
             },
+          }}
+          cursorPagination={{
+            meta,
+            onNext: handleCursorNext,
+            onPrev: handleCursorPrev,
+            canGoPrev,
           }}
           sorting={undefined}
           loading={isTableLoading}

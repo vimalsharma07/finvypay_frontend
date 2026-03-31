@@ -2,6 +2,7 @@
 
 import { http, ApiError } from '../../api';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 
 export interface UserAcquirerAccount {
   id: string;
@@ -31,12 +32,7 @@ export interface UserAcquirerAccount {
   updatedAt?: string;
 }
 
-export interface UserAcquirerAccountListMeta {
-  total?: number;
-  page?: number;
-  limit?: number;
-  totalPages?: number;
-}
+export type UserAcquirerAccountListMeta = CursorPaginationMeta;
 
 export interface UserAcquirerAccountListResponse {
   success: boolean;
@@ -61,6 +57,30 @@ export async function getUserAcquirerAccounts(
     }
     throw error;
   }
+}
+
+const ACQUIRER_FILTER_MAX = 100;
+
+/** Walk cursor pages for filter dropdowns */
+export async function getAllUserAcquirerAccountsForFilter(): Promise<
+  UserAcquirerAccount[]
+> {
+  const all: UserAcquirerAccount[] = [];
+  let cursor: string | undefined;
+  for (let i = 0; i < ACQUIRER_FILTER_MAX; i++) {
+    const res = await getUserAcquirerAccounts({
+      limit: 100,
+      ...(cursor ? { cursor } : {}),
+    });
+    if (res.status !== 200 || !res.data?.success) break;
+    const raw = res.data.data;
+    const rows = Array.isArray(raw) ? raw : [];
+    all.push(...rows);
+    const next = res.data.meta?.nextCursor;
+    if (!next || rows.length === 0) break;
+    cursor = next;
+  }
+  return all;
 }
 
 export async function updateAcquirerAccountCustomName(

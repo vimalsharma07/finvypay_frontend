@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import {
   ColumnDef,
   getCoreRowModel,
   getSortedRowModel,
+  PaginationState,
   useReactTable,
 } from '@tanstack/react-table';
 import {
@@ -38,9 +39,15 @@ import {
 } from '@/components/ui/collapsible';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
-import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
-import { getAdminLogs, type LogEntry, type LogType } from '@/lib/services/admin/logs';
+import {
+  getAdminLogs,
+  type LogEntry,
+  type LogListMeta,
+  type LogType,
+} from '@/lib/services/admin/logs';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
@@ -72,10 +79,15 @@ interface LogsContentProps {
 
 export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [meta, setMeta] = useState<{ total: number; page: number; limit: number; totalPages: number } | null>(null);
+  const [meta, setMeta] = useState<LogListMeta | null>(null);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
   const [limit, setLimit] = useState(20);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 20,
+  });
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
@@ -91,55 +103,56 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
     return format(date, 'yyyy-MM-dd');
   };
 
-  // Fetch logs
-  const fetchLogs = async (
-    pageNum: number,
-    pageLimit: number,
-    startDate?: string,
-    endDate?: string,
-    transactionId?: string
-  ) => {
-    setLoading(true);
-    try {
-      const response = await getAdminLogs({
-        type: logType,
-        page: pageNum,
-        limit: pageLimit,
-        startDate,
-        endDate,
-        ...(transactionId?.trim() ? { transaction_id: transactionId.trim() } : {}),
-        ...(logType === 'webhook_logs' || logType === 'txn_logs'
-          ? { payment_mode: 'production' }
-          : {}),
-      });
-      handleApiResponse(response, {
-        onSuccess: (data) => {
-          if (data?.success && data.data) {
-            setLogs(data.data);
-            setMeta(data.meta);
-          } else {
+  const fetchLogs = useCallback(
+    async (
+      cursor: string | undefined,
+      pageLimit: number,
+      startDate?: string,
+      endDate?: string,
+      transactionId?: string,
+    ) => {
+      setLoading(true);
+      try {
+        const response = await getAdminLogs({
+          type: logType,
+          limit: pageLimit,
+          ...(cursor ? { cursor } : {}),
+          startDate,
+          endDate,
+          ...(transactionId?.trim() ? { transaction_id: transactionId.trim() } : {}),
+          ...(logType === 'webhook_logs' || logType === 'txn_logs'
+            ? { payment_mode: 'production' }
+            : {}),
+        });
+        handleApiResponse(response, {
+          onSuccess: (data) => {
+            if (data?.success && Array.isArray(data.data)) {
+              setLogs(data.data);
+              setMeta(data.meta ?? null);
+            } else {
+              setLogs([]);
+              setMeta(null);
+            }
+          },
+          onError: (errorMessage) => {
+            console.error('Failed to fetch logs:', errorMessage);
+            toast.error(errorMessage || 'Failed to load logs');
             setLogs([]);
             setMeta(null);
-          }
-        },
-        onError: (errorMessage) => {
-          console.error('Failed to fetch logs:', errorMessage);
-          toast.error(errorMessage || 'Failed to load logs');
-          setLogs([]);
-          setMeta(null);
-        },
-      });
-    } catch (error) {
-      console.error('Logs fetch error:', error);
-      toast.error('Unexpected error while loading logs');
-      setLogs([]);
-      setMeta(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+          },
+        });
+      } catch (error) {
+        console.error('Logs fetch error:', error);
+        toast.error('Unexpected error while loading logs');
+        setLogs([]);
+        setMeta(null);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [logType],
+  );
 
-  // Fetch logs - pass date range and transaction_id when supported and set
   useEffect(() => {
     const hasDateFilter = dateRange?.from && dateRange?.to;
     const startDate = hasDateFilter ? formatDateForAPI(dateRange.from) : undefined;
@@ -148,18 +161,34 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
       supportsTransactionIdFilter && transactionIdFilter.trim()
         ? transactionIdFilter.trim()
         : undefined;
-    fetchLogs(page, limit, startDate, endDate, txnId);
-  }, [page, limit, dateRange, logType, transactionIdFilter]);
+    fetchLogs(requestCursor, limit, startDate, endDate, txnId);
+  }, [
+    requestCursor,
+    limit,
+    dateRange,
+    logType,
+    transactionIdFilter,
+    supportsTransactionIdFilter,
+    fetchLogs,
+  ]);
 
   const handleDateRangeChange = (range: DateRange | undefined) => {
     setDateRange(range);
-    setPage(1);
+    resetCursor();
   };
 
   const handleClearTransactionIdFilter = () => {
     setTransactionIdFilter('');
-    setPage(1);
+    resetCursor();
   };
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   const handleViewDetails = (log: LogEntry) => {
     setSelectedLog(log);
@@ -491,18 +520,21 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
-    pageCount: meta ? meta.totalPages : 0,
+    pageCount: 1,
     getRowId: (row) => String(row.id),
     onPaginationChange: (updater) => {
-      const next = typeof updater === 'function' ? updater({ pageIndex: page - 1, pageSize: limit }) : updater;
-      if (next.pageIndex !== page - 1) setPage(next.pageIndex + 1);
-      if (next.pageSize !== limit) {
+      const next =
+        typeof updater === 'function' ? updater(pagination) : updater;
+      if (next.pageSize !== pagination.pageSize) {
         setLimit(next.pageSize);
-        setPage(1);
+        setPagination({ pageIndex: 0, pageSize: next.pageSize });
+        resetCursor();
+      } else {
+        setPagination(next);
       }
     },
     state: {
-      pagination: { pageIndex: page - 1, pageSize: limit },
+      pagination,
     },
   });
 
@@ -512,7 +544,11 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div className="text-sm text-muted-foreground">
-            {!loading && meta && <span>Showing {logs.length} of {meta.total} logs</span>}
+            {!loading && meta && (
+              <span>
+                {logs.length} log{logs.length === 1 ? '' : 's'} on this page
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             {supportsTransactionIdFilter && (
@@ -539,7 +575,7 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
                         value={transactionIdFilter}
                         onChange={(e) => {
                           setTransactionIdFilter(e.target.value);
-                          setPage(1);
+                          resetCursor();
                         }}
                         className="font-mono h-8"
                         variant="sm"
@@ -587,7 +623,7 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
       ) : (
         <DataGrid
           table={table}
-          recordCount={meta?.total ?? logs.length}
+          recordCount={logs.length}
           isLoading={false}
           tableLayout={modernTableLayout}
           tableClassNames={modernTableClassNames}
@@ -605,7 +641,13 @@ export function LogsContent({ logType, logTypeLabel }: LogsContentProps) {
               </ScrollArea>
             </CardTable>
             <CardFooter className={modernTableCardClasses.footer}>
-              <DataGridPagination />
+              <CursorDataGridPagination
+                meta={meta}
+                onNext={handleCursorNext}
+                onPrev={handleCursorPrev}
+                canGoPrev={canGoPrev}
+                rowCount={logs.length}
+              />
             </CardFooter>
           </Card>
         </DataGrid>

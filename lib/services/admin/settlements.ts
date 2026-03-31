@@ -8,6 +8,7 @@
 import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 
 export interface SettlementUser {
   id: string;
@@ -163,7 +164,7 @@ export interface SettlementDetailApiResponse {
 }
 
 export interface SettlementListParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
@@ -171,12 +172,7 @@ export interface SettlementListParams {
   endDate?: string;
 }
 
-export interface SettlementListMeta {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
+export type SettlementListMeta = CursorPaginationMeta;
 
 export interface SettlementListResponse {
   success: boolean;
@@ -202,7 +198,7 @@ export interface MerchantBalance {
 }
 
 export interface MerchantBalanceListParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
 }
 
@@ -242,7 +238,7 @@ export interface SettlementSummaryItem {
 
 export interface SettlementSummaryListParams {
   userId?: string | number;
-  page?: number;
+  cursor?: string;
   limit?: number;
 }
 
@@ -337,7 +333,7 @@ export interface SettlementCalculation {
 }
 
 export interface SettlementCalculationListParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
   startDate?: string;
   endDate?: string;
@@ -552,7 +548,7 @@ export async function getSettlementSummaryList(
   try {
     const query: Record<string, string | number | undefined> = {};
     if (params?.userId != null) query.userId = params.userId;
-    if (params?.page != null) query.page = params.page;
+    if (params?.cursor != null) query.cursor = params.cursor;
     if (params?.limit != null) query.limit = params.limit;
 
     const data = await http.get(adminRoutes.settlements.summary, {
@@ -585,7 +581,7 @@ export async function getSettlementCalculations(
 ): Promise<ApiResponse<SettlementCalculationListResponse>> {
   try {
     const query: Record<string, string | number | undefined> = {};
-    if (params?.page != null) query.page = params.page;
+    if (params?.cursor != null) query.cursor = params.cursor;
     if (params?.limit != null) query.limit = params.limit;
     if (params?.startDate) query.startDate = params.startDate;
     if (params?.endDate) query.endDate = params.endDate;

@@ -21,7 +21,9 @@ import {
 } from '@tanstack/react-table';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
-import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
   Card,
@@ -60,7 +62,7 @@ export function SupportPageContent({
 }: SupportPageContentProps) {
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState<SupportTicketListResponse['data']['meta'] | null>(null);
+  const [meta, setMeta] = useState<CursorPaginationMeta | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [ticketToDelete, setTicketToDelete] = useState<SupportTicket | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -69,9 +71,9 @@ export function SupportPageContent({
   const [updating, setUpdating] = useState(false);
   const [creating, setCreating] = useState(false);
 
-  // Pagination state
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
+  const [limit, setLimit] = useState(20);
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -82,24 +84,24 @@ export function SupportPageContent({
   // Pagination state for table
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 20,
   });
 
   const fetchSupportTickets = useCallback(
-    async (pageNum: number, pageLimit: number) => {
+    async (cursor: string | undefined, pageLimit: number) => {
       setLoading(true);
       try {
         const params = {
-          page: pageNum,
+          ...(cursor ? { cursor } : {}),
           limit: pageLimit,
         };
 
         const response = await getSupportTickets(params);
         handleApiResponse<SupportTicketListResponse>(response, {
           onSuccess: (data) => {
-            if (data && data.success && data.data) {
-              setTickets(Array.isArray(data.data.items) ? data.data.items : []);
-              setMeta(data.data.meta ?? null);
+            if (data?.success && Array.isArray(data.data)) {
+              setTickets(data.data);
+              setMeta(data.meta ?? null);
             } else {
               toast.error('Failed to fetch support tickets - invalid response structure');
             }
@@ -119,18 +121,8 @@ export function SupportPageContent({
   );
 
   useEffect(() => {
-    fetchSupportTickets(page, limit);
-  }, [page, limit, fetchSupportTickets]);
-
-  // Update pagination when meta changes
-  useEffect(() => {
-    if (meta) {
-      setPagination({
-        pageIndex: meta.currentPage - 1,
-        pageSize: meta.itemsPerPage,
-      });
-    }
-  }, [meta]);
+    fetchSupportTickets(requestCursor, limit);
+  }, [requestCursor, limit, fetchSupportTickets]);
 
   // Filter data based on search query (client-side)
   const filteredData = useMemo(() => {
@@ -146,14 +138,18 @@ export function SupportPageContent({
     );
   }, [searchQuery, tickets]);
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage + 1);
-  };
-
   const handlePageSizeChange = (newPageSize: number) => {
     setLimit(newPageSize);
-    setPage(1);
+    resetCursor();
   };
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
 
   const handleEditTicket = (ticket: SupportTicket) => {
     setTicketToEdit(ticket);
@@ -168,7 +164,7 @@ export function SupportPageContent({
         onSuccess: () => {
           toast.success('Support ticket created successfully!');
           setCreateDialogOpen(false);
-          fetchSupportTickets(page, limit);
+          fetchSupportTickets(requestCursor, limit);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to create support ticket');
@@ -204,7 +200,7 @@ export function SupportPageContent({
           toast.success('Ticket updated successfully!');
           setEditDialogOpen(false);
           setTicketToEdit(null);
-          fetchSupportTickets(page, limit);
+          fetchSupportTickets(requestCursor, limit);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to update ticket');
@@ -233,7 +229,7 @@ export function SupportPageContent({
           toast.success('Ticket deleted successfully!');
           setDeleteDialogOpen(false);
           setTicketToDelete(null);
-          fetchSupportTickets(page, limit);
+          fetchSupportTickets(requestCursor, limit);
         },
         onError: (errorMessage) => {
           toast.error(errorMessage || 'Failed to delete ticket');
@@ -389,16 +385,15 @@ export function SupportPageContent({
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
     manualSorting: false,
-    pageCount: meta ? meta.totalPages : undefined,
+    pageCount: 1,
     onSortingChange: setSorting,
     onPaginationChange: (updater) => {
       const newPagination = typeof updater === 'function' ? updater(pagination) : updater;
-      setPagination(newPagination);
-      if (newPagination.pageIndex !== pagination.pageIndex) {
-        handlePageChange(newPagination.pageIndex);
-      }
       if (newPagination.pageSize !== pagination.pageSize) {
         handlePageSizeChange(newPagination.pageSize);
+        setPagination({ pageIndex: 0, pageSize: newPagination.pageSize });
+      } else {
+        setPagination(newPagination);
       }
     },
     getRowId: (row) => String(row.id),
@@ -413,7 +408,7 @@ export function SupportPageContent({
       <Container>
         <DataGrid
           table={table}
-          recordCount={meta?.totalItems || filteredData.length}
+          recordCount={filteredData.length}
           isLoading={loading}
           tableLayout={modernTableLayout}
           tableClassNames={modernTableClassNames}
@@ -435,7 +430,13 @@ export function SupportPageContent({
               </ScrollArea>
             </CardTable>
             <CardFooter className={modernTableCardClasses.footer}>
-              <DataGridPagination />
+              <CursorDataGridPagination
+                meta={meta}
+                onNext={handleCursorNext}
+                onPrev={handleCursorPrev}
+                canGoPrev={canGoPrev}
+                rowCount={filteredData.length}
+              />
             </CardFooter>
           </Card>
         </DataGrid>

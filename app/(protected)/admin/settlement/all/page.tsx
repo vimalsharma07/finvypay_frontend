@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 import { FileText } from 'lucide-react';
@@ -17,10 +18,11 @@ import {
   updateSettlement,
   generateSettlement,
   Settlement,
+  SettlementListMeta,
   UpdateSettlementPayload,
   GenerateSettlementPayload,
 } from '@/lib/services/admin/settlements';
-import { getMerchants } from '@/lib/services/admin/users';
+import { getAllMerchantsPaginated } from '@/lib/services/admin/users';
 import { EditSettlementDialog } from './components/edit-settlement-dialog';
 import {
   ColumnDef,
@@ -33,7 +35,7 @@ import {
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridTable } from '@/components/ui/data-grid-table';
-import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter, CardTable } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -64,7 +66,7 @@ const DATE_TIME_FMT = 'yyyy-MM-dd HH:mm';
 export default function AdminSettlementsPage() {
   const [data, setData] = useState<Settlement[]>([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState<{ total: number; page: number; limit: number; totalPages: number } | null>(null);
+  const [meta, setMeta] = useState<SettlementListMeta | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [settlementToEdit, setSettlementToEdit] = useState<Settlement | null>(null);
   const [updating, setUpdating] = useState(false);
@@ -83,9 +85,25 @@ export default function AdminSettlementsPage() {
   ]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 20,
   });
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
+
+  const dateRangeKey = useMemo(() => {
+    if (!dateRange?.from || !dateRange?.to) return '';
+    return `${dateRange.from.getTime()}-${dateRange.to.getTime()}`;
+  }, [dateRange?.from, dateRange?.to]);
+
+  const sortKey = useMemo(
+    () => `${sorting[0]?.id ?? 'createdAt'}_${sorting[0]?.desc ?? true}`,
+    [sorting],
+  );
+
+  useEffect(() => {
+    resetCursor();
+  }, [dateRangeKey, sortKey, resetCursor]);
 
   const formatCurrency = (amount: string | null | undefined) => {
     if (!amount) return '—';
@@ -116,7 +134,6 @@ export default function AdminSettlementsPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const page = pagination.pageIndex + 1;
       const limit = pagination.pageSize;
       const sortBy = sorting[0]?.id || 'createdAt';
       const sortOrder = sorting[0]?.desc ? 'DESC' : 'ASC';
@@ -125,7 +142,7 @@ export default function AdminSettlementsPage() {
       const endDate = hasDateFilter ? formatDateForAPI(dateRange.to) : undefined;
 
       const response = await getSettlements({
-        page,
+        ...(requestCursor ? { cursor: requestCursor } : {}),
         limit,
         sortBy,
         sortOrder,
@@ -134,9 +151,9 @@ export default function AdminSettlementsPage() {
       });
       handleApiResponse(response, {
         onSuccess: (res) => {
-          if (res && res.success && res.data) {
+          if (res && res.success && Array.isArray(res.data)) {
             setData(res.data);
-            setMeta(res.meta);
+            setMeta(res.meta ?? null);
           } else {
             toast.error('Invalid response structure while loading settlements');
           }
@@ -152,7 +169,7 @@ export default function AdminSettlementsPage() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.pageIndex, pagination.pageSize, sorting, dateRange]);
+  }, [requestCursor, pagination.pageSize, sorting, dateRange]);
 
   useEffect(() => {
     fetchData();
@@ -161,15 +178,13 @@ export default function AdminSettlementsPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await getMerchants({ page: 1, limit: 1000, role: 'merchant' });
-        if (res.data?.data && Array.isArray(res.data.data)) {
-          setMerchantOptions(
-            res.data.data.map((u) => ({
-              label: u.name || u.email || u.id,
-              value: String(u.id),
-            }))
-          );
-        }
+        const merchants = await getAllMerchantsPaginated();
+        setMerchantOptions(
+          merchants.map((u) => ({
+            label: u.name || u.email || u.id,
+            value: String(u.id),
+          })),
+        );
       } catch (e) {
         console.error('Failed to load merchants', e);
       }
@@ -479,6 +494,14 @@ export default function AdminSettlementsPage() {
     [updatingId]
   );
 
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
+
   const table = useReactTable({
     data,
     columns,
@@ -487,11 +510,18 @@ export default function AdminSettlementsPage() {
       pagination,
     },
     onSortingChange: setSorting,
-    onPaginationChange: setPagination,
+    onPaginationChange: (updater) => {
+      const next =
+        typeof updater === 'function' ? updater(pagination) : updater;
+      if (next.pageSize !== pagination.pageSize) {
+        setPagination({ pageIndex: 0, pageSize: next.pageSize });
+        resetCursor();
+      }
+    },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
-    pageCount: meta ? meta.totalPages : -1,
+    pageCount: 1,
   });
 
   return (
@@ -508,7 +538,6 @@ export default function AdminSettlementsPage() {
               value={dateRange}
               onChange={(range) => {
                 setDateRange(range);
-                setPagination((prev) => ({ ...prev, pageIndex: 0 }));
               }}
               placeholder="Select from and to date"
               numberOfMonths={2}
@@ -601,7 +630,7 @@ export default function AdminSettlementsPage() {
       <Container>
         <DataGrid
           table={table}
-          recordCount={meta?.total ?? data.length}
+          recordCount={data.length}
           isLoading={loading}
           tableLayout={modernTableLayout}
           tableClassNames={modernTableClassNames}
@@ -614,7 +643,13 @@ export default function AdminSettlementsPage() {
               </ScrollArea>
             </CardTable>
             <CardFooter className={modernTableCardClasses.footer}>
-              <DataGridPagination />
+              <CursorDataGridPagination
+                meta={meta}
+                onNext={handleCursorNext}
+                onPrev={handleCursorPrev}
+                canGoPrev={canGoPrev}
+                rowCount={data.length}
+              />
             </CardFooter>
           </Card>
         </DataGrid>

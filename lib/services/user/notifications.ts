@@ -7,6 +7,8 @@
 import { http, ApiError } from '../../api';
 import { routes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
+import { coerceCursorMeta, extractListRows } from '@/lib/utils/normalize-cursor-list';
 
 // Notification types matching the API response structure
 export interface NotificationUser {
@@ -49,21 +51,23 @@ export interface Notification {
 }
 
 export interface NotificationListParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
   includeDeleted?: boolean;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
 }
 
-export interface NotificationListMeta {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-  unreadCount: number;
+export type NotificationListMeta = CursorPaginationMeta & { unreadCount: number };
+
+function coerceNotificationMeta(raw: unknown): NotificationListMeta | null {
+  const base = coerceCursorMeta(raw);
+  if (!base || raw == null || typeof raw !== 'object') return null;
+  const m = raw as Record<string, unknown>;
+  return {
+    ...base,
+    unreadCount: Number(m.unreadCount ?? 0),
+  };
 }
 
 export interface NotificationListResponse {
@@ -91,22 +95,39 @@ export async function getMerchantNotifications(
   params?: NotificationListParams
 ): Promise<ApiResponse<NotificationListResponse>> {
   try {
-    const queryParams = new URLSearchParams();
-    
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-    if (params?.includeDeleted !== undefined) {
-      queryParams.append('includeDeleted', params.includeDeleted.toString());
-    }
-    if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
-    if (params?.sortOrder) queryParams.append('sortOrder', params.sortOrder);
+    const raw = await http.get(routes.merchant.notifications.list, {
+      query: {
+        ...(params?.cursor ? { cursor: params.cursor } : {}),
+        ...(params?.limit != null ? { limit: params.limit } : {}),
+        ...(params?.includeDeleted !== undefined
+          ? { includeDeleted: params.includeDeleted }
+          : {}),
+        ...(params?.sortBy ? { sortBy: params.sortBy } : {}),
+        ...(params?.sortOrder ? { sortOrder: params.sortOrder } : {}),
+      },
+    }) as NotificationListResponse & Record<string, unknown>;
 
-    const endpoint = routes.merchant.notifications.list + (queryParams.toString() ? `?${queryParams.toString()}` : '');
-    const data = await http.get(endpoint) as NotificationListResponse;
+    const rows = extractListRows<Notification>(raw);
+    const listData = Array.isArray(raw.data) ? raw.data : rows;
+    const meta =
+      coerceNotificationMeta(raw.meta) ??
+      ({
+        itemsPerPage: params?.limit ?? 20,
+        hasNextPage: false,
+        hasPreviousPage: false,
+        nextCursor: null,
+        totalCount: listData.length,
+        unreadCount: 0,
+      } satisfies NotificationListMeta);
 
     return {
       status: 200,
-      data,
+      data: {
+        success: raw.success !== false,
+        data: listData,
+        meta,
+        message: raw.message,
+      },
     };
   } catch (error) {
     if (error instanceof ApiError) {

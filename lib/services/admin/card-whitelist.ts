@@ -7,6 +7,8 @@
 import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
 import type { ApiResponse } from '../types';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
+import { normalizeToCursorListEnvelope } from '@/lib/utils/normalize-cursor-list';
 
 // Card Whitelist types matching the API response structure
 export interface CardWhitelistUser {
@@ -28,28 +30,14 @@ export interface CardWhitelist {
 }
 
 export interface CardWhitelistListParams {
-  page?: number;
+  cursor?: string;
   limit?: number;
-  // Note: API doesn't support sortBy and sortOrder parameters
-}
-
-export interface CardWhitelistListMeta {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
-
-export interface CardWhitelistListData {
-  items: CardWhitelist[];
-  meta: CardWhitelistListMeta;
 }
 
 export interface CardWhitelistListResponse {
   success: boolean;
-  data: CardWhitelistListData;
+  data: CardWhitelist[];
+  meta: CursorPaginationMeta | null;
   message?: string;
 }
 
@@ -69,12 +57,17 @@ export async function getCardWhitelist(
   params?: CardWhitelistListParams
 ): Promise<ApiResponse<CardWhitelistListResponse>> {
   try {
-    const data = await http.get(adminRoutes.cardWhitelist.list, {
+    const raw = await http.get(adminRoutes.cardWhitelist.list, {
       query: params as Record<string, string | number | undefined>,
-    }) as CardWhitelistListResponse;
+    });
+    const normalized = normalizeToCursorListEnvelope<CardWhitelist>(raw);
     return {
       status: 200,
-      data,
+      data: {
+        success: normalized.success,
+        data: normalized.data,
+        meta: normalized.meta,
+      },
     };
   } catch (error) {
     if (error instanceof ApiError) {

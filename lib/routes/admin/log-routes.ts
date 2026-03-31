@@ -7,26 +7,33 @@ import { getBaseUrl } from '../config/base-url';
 
 const BASE_URL = getBaseUrl();
 
+export type AdminLogsUrlParams = {
+  type: string;
+  limit: number;
+  cursor?: string;
+  startDate?: string;
+  endDate?: string;
+  transactionId?: string;
+  paymentMode?: string;
+};
+
 export const adminLogRoutes = {
-  logs: (
-    type: string,
-    page: number,
-    limit: number,
-    startDate?: string,
-    endDate?: string,
-    transactionId?: string,
-    paymentMode?: string
-  ) => {
+  logs: (opts: AdminLogsUrlParams) => {
     const params = new URLSearchParams({
-      type,
-      page: String(page),
-      limit: String(limit),
+      type: opts.type,
+      limit: String(opts.limit),
     });
-    if (startDate) params.append('start_date', startDate);
-    if (endDate) params.append('end_date', endDate);
-    if (transactionId?.trim()) params.append('transaction_id', transactionId.trim());
-    if (paymentMode?.trim()) params.append('payment_mode', paymentMode.trim());
+    if (opts.cursor?.trim()) {
+      params.append('cursor', opts.cursor.trim());
+    }
+    if (opts.startDate) params.append('start_date', opts.startDate);
+    if (opts.endDate) params.append('end_date', opts.endDate);
+    if (opts.transactionId?.trim()) {
+      params.append('transaction_id', opts.transactionId.trim());
+    }
+    if (opts.paymentMode?.trim()) {
+      params.append('payment_mode', opts.paymentMode.trim());
+    }
     return `${BASE_URL}/admin/logs?${params.toString()}`;
   },
 } as const;
-
