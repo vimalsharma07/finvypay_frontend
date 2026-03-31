@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { getUserPaymentLinkById, PaymentLink } from '@/lib/services/user/payment-links';
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 
 const checkoutSchema = z.object({
   firstName: z.string().trim().min(1, 'First name is required'),
@@ -49,19 +50,6 @@ const checkoutSchema = z.object({
 });
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
-
-const fieldLabels: Record<keyof CheckoutFormValues, string> = {
-  firstName: 'First Name',
-  lastName: 'Last Name',
-  address: 'Address',
-  city: 'City',
-  state: 'State',
-  zip: 'ZIP',
-  email: 'Email',
-  orderId: 'Order ID',
-  amount: 'Amount',
-  currency: 'Currency',
-};
 
 interface CheckoutFormProps {
   paymentLinkId: string;
@@ -150,15 +138,6 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
     }
   }, [form, paymentLinkData, initialValues]);
 
-  const prefilledFields = useMemo(
-    () =>
-      Object.entries(initialValues)
-        .filter(([, value]) => value.trim() !== '')
-        .map(([key]) => fieldLabels[key as keyof CheckoutFormValues]),
-    [initialValues],
-  );
-
-
   const handleSubmit = (values: CheckoutFormValues) => {
     // No payment API is called on this page. We only:
     // 1) GET payment link details via getUserPaymentLinkById(paymentLinkId) above
@@ -177,6 +156,8 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
       amount: values.amount,
       currency: values.currency,
       source: 'link', // Indicate payment source is from payment link
+      primaryColor: paymentLinkData?.paymentTemplate?.primaryColor || '',
+      logoUrl: paymentLinkData?.paymentTemplate?.logoUrl || '',
     });
 
     router.push(`/payment/card?${queryParams.toString()}`);
@@ -197,33 +178,61 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
     );
   }
 
-  return (
-    <Card className="shadow-lg border-primary/10">
-      <CardHeader className="pb-4">
-        <div className="flex w-full flex-wrap items-center gap-4 justify-center md:justify-between">
-          <div className="flex items-center gap-1">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
-              1
-            </div>
-            <div>
-              <CardTitle className="text-base text-center md:text-left">Checkout details</CardTitle>
-              <p className="text-sm text-muted-foreground text-center md:text-left">Your payer info</p>
-            </div>
-          </div>
-          <div className="hidden h-px flex-1 bg-muted md:block" />
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-sm font-semibold">
-              2
-            </div>
-            <div>
-              <p className="text-sm font-semibold leading-tight text-center md:text-left">Payment</p>
-              <p className="text-xs text-muted-foreground text-center md:text-left">Card details</p>
-            </div>
-          </div>
-        </div>
-      </CardHeader>
+  const primaryColor = paymentLinkData?.paymentTemplate?.primaryColor || '#17B8A6';
+  const brandLogoUrl = paymentLinkData?.paymentTemplate?.logoUrl || '/media/app/mini-logo.svg';
+  const inputClassName =
+    'h-11 rounded-xl border-slate-200 bg-slate-50/70 focus-visible:ring-2 focus-visible:ring-offset-0';
 
-      <CardContent className="pt-0">
+  return (
+    <div className="space-y-6">
+      <Card
+        className="border-0 shadow-xl overflow-hidden"
+        style={{
+          background: `linear-gradient(145deg, ${primaryColor}, ${primaryColor}CC 55%, #0f172a 120%)`,
+        }}
+      >
+        <CardContent className="p-6 md:p-7 text-white">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="h-14 w-24 rounded-lg bg-white/90 p-2 flex items-center justify-center">
+                <img
+                  src={brandLogoUrl}
+                  alt="Brand logo"
+                  className="h-full max-w-full object-contain"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/media/app/mini-logo.svg';
+                  }}
+                />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-white/75">Secure Checkout</p>
+                <p className="text-2xl font-semibold leading-tight">{paymentLinkData?.name || 'Payment Link'}</p>
+                <p className="text-xs text-white/75 mt-1">Fill your details and continue to card payment</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-white/70">Order ID</p>
+              <p className="font-mono text-sm">{form.watch('orderId')}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-5">
+      <Card className="shadow-xl border-0">
+        <CardHeader className="border-b bg-gradient-to-r from-slate-50 to-white">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <CardTitle className="text-lg">Checkout details</CardTitle>
+              <p className="text-xs text-muted-foreground">Step 1 of 2</p>
+            </div>
+            <Badge variant="outline" className="font-mono">
+              {paymentLinkData?.currency} {Number(initialValues.amount || 0).toFixed(2)}
+            </Badge>
+          </div>
+        </CardHeader>
+
+        <CardContent className="pt-5">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
@@ -242,6 +251,7 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
                         {...field}
                         placeholder="Jane"
                         autoComplete="given-name"
+                        className={inputClassName}
                       />
                     </FormControl>
                     <FormMessage />
@@ -260,6 +270,7 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
                         {...field}
                         placeholder="Doe"
                         autoComplete="family-name"
+                        className={inputClassName}
                       />
                     </FormControl>
                     <FormMessage />
@@ -279,6 +290,7 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
                       {...field}
                       placeholder="123 Main St, Suite 500"
                       autoComplete="street-address"
+                      className={inputClassName}
                     />
                   </FormControl>
                   <FormMessage />
@@ -294,7 +306,7 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
                   <FormItem>
                     <FormLabel>City</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="San Francisco" autoComplete="address-level2" />
+                      <Input {...field} placeholder="San Francisco" autoComplete="address-level2" className={inputClassName} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -307,7 +319,7 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
                   <FormItem>
                     <FormLabel>State</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="CA" autoComplete="address-level1" />
+                      <Input {...field} placeholder="CA" autoComplete="address-level1" className={inputClassName} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -320,7 +332,7 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
                   <FormItem>
                     <FormLabel>ZIP</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="94107" autoComplete="postal-code" />
+                      <Input {...field} placeholder="94107" autoComplete="postal-code" className={inputClassName} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -341,14 +353,13 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
                       placeholder="customer@company.com"
                       autoComplete="email"
                       inputMode="email"
+                      className={inputClassName}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            {/* Order ID is auto-generated and passed in background; not shown to user */}
 
             <div className="grid gap-4 md:grid-cols-3">
               <FormField
@@ -365,8 +376,8 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
                         min="0"
                         inputMode="decimal"
                         placeholder="99.99"
-                        readOnly={!!paymentLinkData?.amount}
-                        className={paymentLinkData?.amount ? 'bg-muted' : ''}
+                        readOnly={paymentLinkData?.amountType === 'fixed'}
+                        className={`${inputClassName} ${paymentLinkData?.amount ? 'bg-slate-100' : ''}`}
                       />
                     </FormControl>
                     <FormMessage />
@@ -386,7 +397,7 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
                         placeholder="USD"
                         autoComplete="off"
                         readOnly={!!paymentLinkData?.currency}
-                        className={paymentLinkData?.currency ? 'bg-muted' : ''}
+                        className={`${inputClassName} ${paymentLinkData?.currency ? 'bg-slate-100' : ''}`}
                         onChange={(event) =>
                           field.onChange(event.target.value.toUpperCase())
                         }
@@ -399,15 +410,52 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
 
             </div>
 
-            <div className="flex justify-end">
-              <Button type="submit" className="min-w-48">
+            <div className="flex justify-end pt-1">
+              <Button
+                type="submit"
+                className="min-w-48 h-11 rounded-xl"
+                style={{ backgroundColor: primaryColor }}
+              >
                 Continue to payment
               </Button>
             </div>
           </form>
         </Form>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      <Card className="border-0 shadow-lg overflow-hidden">
+        <CardContent
+          className="p-6 text-white h-full min-h-[280px] flex flex-col justify-between"
+          style={{
+            background: `linear-gradient(155deg, ${primaryColor}, ${primaryColor}B3 60%, #0f172a 100%)`,
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold">Payment summary</p>
+            <Badge className="bg-white/20 text-white border-white/30">Secure</Badge>
+          </div>
+          <div>
+            <p className="text-xs text-white/80">Amount</p>
+            <p className="text-3xl font-bold">
+              {paymentLinkData?.currency} {Number(form.watch('amount') || 0).toFixed(2)}
+            </p>
+            <p className="text-xs text-white/80 mt-2">{paymentLinkData?.name || 'Payment Link'}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-4 text-xs">
+            <div>
+              <p className="text-white/70">Order ID</p>
+              <p className="font-mono truncate">{form.watch('orderId')}</p>
+            </div>
+            <div>
+              <p className="text-white/70">Currency</p>
+              <p className="font-semibold">{form.watch('currency') || paymentLinkData?.currency}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      </div>
+    </div>
   );
 }
 

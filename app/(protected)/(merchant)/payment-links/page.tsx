@@ -26,8 +26,11 @@ import {
 import type { TableAction } from '../../components/table-comp';
 import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
 import type { CursorPaginationMeta } from '@/lib/types/pagination';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PaymentTemplatesTabContent } from './components/payment-templates-tab-content';
 
 export default function PaymentLinksPage() {
+  const [activeTab, setActiveTab] = useState('payment-template');
   const [loading, setLoading] = useState(true);
   const [paymentLinks, setPaymentLinks] = useState<PaymentLink[]>([]);
   const [meta, setMeta] = useState<CursorPaginationMeta | null>(null);
@@ -114,7 +117,7 @@ export default function PaymentLinksPage() {
       case 'amount':
         return (
           <div className="font-mono font-semibold">
-            {parseFloat(item.amount).toFixed(2)}
+            {item.amount ? parseFloat(item.amount).toFixed(2) : 'Custom'}
           </div>
         );
       case 'currency':
@@ -198,43 +201,62 @@ export default function PaymentLinksPage() {
         <Toolbar>
           <ToolbarHeading
             title="Payment Links"
-            description="Create and manage payment links for your customers to make secure payments"
+            description="Manage payment templates and payment links from one place"
             icon={Link2}
           />
           <ToolbarActions>
-            <Button
-              variant="primary"
-              onClick={() => window.location.href = '/payment-links/create'}
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Create Payment Link
-            </Button>
+            {activeTab === 'payment-link' && (
+              <Button
+                variant="primary"
+                onClick={() => window.location.href = '/payment-links/create'}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Create Payment Link
+              </Button>
+            )}
           </ToolbarActions>
         </Toolbar>
       </Container>
 
       <Container>
-        <TableComp
-          data={paymentLinks}
-          headers={headers}
-          renderCell={renderCell}
-          actions={actions}
-          enableCheckbox={false}
-          searchPlaceholder="Search payment links..."
-          searchKeys={['name', 'amount', 'currency']}
-          getRowId={(row: PaymentLink) => String(row.id)}
-          pagination={{
-            pageSize: limit,
-            onPageSizeChange: handlePageSizeChange,
-          }}
-          cursorPagination={{
-            meta,
-            onNext: handleCursorNext,
-            onPrev: handleCursorPrev,
-            canGoPrev,
-          }}
-          loading={loading}
-        />
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="w-full"
+        >
+          <TabsList className="mb-4">
+            <TabsTrigger value="payment-template">Payment Template</TabsTrigger>
+            <TabsTrigger value="payment-link">Payment Link</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="payment-template">
+            <PaymentTemplatesTabContent />
+          </TabsContent>
+
+          <TabsContent value="payment-link">
+            <TableComp
+              data={paymentLinks}
+              headers={headers}
+              renderCell={renderCell}
+              actions={actions}
+              enableCheckbox={false}
+              searchPlaceholder="Search payment links..."
+              searchKeys={['name', 'amount', 'currency']}
+              getRowId={(row: PaymentLink) => String(row.id)}
+              pagination={{
+                pageSize: limit,
+                onPageSizeChange: handlePageSizeChange,
+              }}
+              cursorPagination={{
+                meta,
+                onNext: handleCursorNext,
+                onPrev: handleCursorPrev,
+                canGoPrev,
+              }}
+              loading={loading}
+            />
+          </TabsContent>
+        </Tabs>
       </Container>
 
       <ConfirmComp
