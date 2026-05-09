@@ -1,0 +1,352 @@
+'use client';
+
+import { Fragment, useCallback, useEffect, useState } from 'react';
+import { Pencil, Trash2 } from 'lucide-react';
+import { Container } from '@/components/common/container';
+import {
+  getIndustries,
+  IndustryListResponse,
+  Industry,
+  deleteIndustry,
+  updateIndustry,
+  createIndustry,
+} from '@/lib/services/admin/industries';
+import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import {
+  TableComp,
+  TableHeader,
+  TableAction,
+} from '@/app/(protected)/components/table-comp';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ConfirmComp } from '@/app/(protected)/components/confirm-comp';
+import { toast } from 'sonner';
+import { EditIndustryDialog } from './components/edit-industry-dialog';
+import { CreateIndustryDialog } from './components/create-industry-dialog';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
+
+interface IndustriesPageContentProps {
+  createDialogOpen?: boolean;
+  setCreateDialogOpen?: (open: boolean) => void;
+}
+
+export function IndustriesPageContent({ createDialogOpen: externalCreateDialogOpen, setCreateDialogOpen: externalSetCreateDialogOpen }: IndustriesPageContentProps = {}) {
+  const [industries, setIndustries] = useState<Industry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [meta, setMeta] = useState<CursorPaginationMeta | null>(null);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
+  const [limit, setLimit] = useState(20);
+
+  // Sorting state
+  const [sortBy, setSortBy] = useState<string>('name');
+  const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('ASC');
+
+  // Create dialog state
+  const [internalCreateDialogOpen, setInternalCreateDialogOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  
+  // Use external dialog state if provided, otherwise use internal
+  const createDialogOpen = externalCreateDialogOpen !== undefined ? externalCreateDialogOpen : internalCreateDialogOpen;
+  const setCreateDialogOpen = externalSetCreateDialogOpen || setInternalCreateDialogOpen;
+
+  // Edit dialog state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [industryToEdit, setIndustryToEdit] = useState<Industry | null>(null);
+  const [updating, setUpdating] = useState(false);
+
+  // Delete dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [industryToDelete, setIndustryToDelete] = useState<Industry | null>(null);
+
+  const fetchIndustries = useCallback(
+    async (
+      cursor: string | undefined,
+      pageLimit: number,
+      sortField: string,
+      sortDir: 'ASC' | 'DESC',
+    ) => {
+      setLoading(true);
+      try {
+        const params = {
+          ...(cursor ? { cursor } : {}),
+          limit: pageLimit,
+          sortBy: sortField,
+          sortOrder: sortDir,
+        };
+
+        const response = await getIndustries(params);
+
+        handleApiResponse<IndustryListResponse>(response, {
+          onSuccess: (data) => {
+            if (data.success && Array.isArray(data.data)) {
+              setIndustries(data.data);
+              setMeta(data.meta ?? null);
+            } else {
+              console.warn('⚠️ API returned success=false:', data);
+            }
+          },
+          onError: (errorMessage) => {
+            toast.error(errorMessage || 'Failed to fetch industries');
+          },
+          onValidationError: (errors, messages) => {
+            console.error('Validation errors:', errors);
+          },
+          onUnauthorized: () => {
+            toast.error('Unauthorized. Please check your authentication.');
+          },
+        });
+      } catch (error) {
+        toast.error('An unexpected error occurred');
+        console.error('❌ Network/Request error:', error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    fetchIndustries(requestCursor, limit, sortBy, sortOrder);
+  }, [fetchIndustries, requestCursor, limit, sortBy, sortOrder]);
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setLimit(newPageSize);
+    resetCursor();
+  };
+
+  const handleSortChange = (newSortBy: string, newSortOrder: 'ASC' | 'DESC') => {
+    setSortBy(newSortBy);
+    setSortOrder(newSortOrder);
+    resetCursor();
+  };
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
+
+  // Handle create industry
+  const handleCreateIndustry = async (name: string, status: string) => {
+    setCreating(true);
+    try {
+      const response = await createIndustry({ name, status });
+      handleApiResponse(response, {
+        onSuccess: () => {
+          toast.success('Industry created successfully!');
+          setCreateDialogOpen(false);
+          // Immediately refetch industries list to update the table
+          fetchIndustries(requestCursor, limit, sortBy, sortOrder);
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to create industry');
+        },
+        onValidationError: (errors, messages) => {
+          const errorMsg = Array.isArray(messages) ? messages.join(', ') : messages;
+          toast.error(errorMsg || 'Validation error');
+        },
+        onUnauthorized: () => {
+          toast.error('Unauthorized. Please check your authentication.');
+        },
+      });
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+      console.error('Create industry error:', error);
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  // Handle edit industry
+  const handleEditIndustry = (industry: Industry) => {
+    setIndustryToEdit(industry);
+    setEditDialogOpen(true);
+  };
+
+  // Handle update industry
+  const handleUpdateIndustry = async (name: string, status: string) => {
+    if (!industryToEdit) return;
+
+    setUpdating(true);
+    try {
+      const response = await updateIndustry(industryToEdit.id, { name, status });
+      handleApiResponse(response, {
+        onSuccess: () => {
+          toast.success('Industry updated successfully!');
+          setEditDialogOpen(false);
+          setIndustryToEdit(null);
+          // Immediately refetch industries list to update the table
+          fetchIndustries(requestCursor, limit, sortBy, sortOrder);
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to update industry');
+        },
+        onValidationError: (errors, messages) => {
+          const errorMsg = Array.isArray(messages) ? messages.join(', ') : messages;
+          toast.error(errorMsg || 'Validation error');
+        },
+        onUnauthorized: () => {
+          toast.error('Unauthorized. Please check your authentication.');
+        },
+      });
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+      console.error('Update industry error:', error);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  // Delete industry handler
+  const handleDeleteIndustry = async (industryId: string) => {
+    try {
+      const response = await deleteIndustry(industryId);
+      handleApiResponse(response, {
+        onSuccess: () => {
+          toast.success('Industry deleted successfully!');
+          // Immediately refetch industries list to update the table
+          fetchIndustries(requestCursor, limit, sortBy, sortOrder);
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to delete industry');
+        },
+        onUnauthorized: () => {
+          toast.error('Unauthorized. Please check your authentication.');
+        },
+      });
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+      console.error('Delete industry error:', error);
+    }
+  };
+
+  // Define table headers
+  const headers: TableHeader<Industry>[] = [
+    { key: 'name', label: 'Name', sortable: true },
+    { key: 'status', label: 'Status', sortable: true },
+  ];
+
+  // Render cell function - handles all cell rendering dynamically
+  const renderCell = (item: Industry, key: keyof Industry | string) => {
+    switch (key) {
+      case 'name':
+        return (
+          <div className="font-medium">
+            {item.name}
+          </div>
+        );
+      case 'status':
+        return (
+          <Badge
+            variant={item.status === 'active' ? 'success' : 'destructive'}
+            className="capitalize"
+          >
+            {item.status}
+          </Badge>
+        );
+      default:
+        const value = item[key as keyof Industry];
+        return (
+          <div className="text-foreground font-normal">
+            {value != null ? String(value) : '-'}
+          </div>
+        );
+    }
+  };
+
+  // Define actions
+  const actions: TableAction<Industry>[] = [
+    {
+      label: 'Edit',
+      icon: Pencil,
+      onClick: (row: Industry) => {
+        handleEditIndustry(row);
+      },
+    },
+    {
+      label: 'Delete',
+      icon: Trash2,
+      onClick: (row: Industry) => {
+        setIndustryToDelete(row);
+        setDeleteDialogOpen(true);
+      },
+      variant: 'destructive',
+      separator: true,
+    },
+  ];
+
+  return (
+    <Fragment>
+      <Container>
+        <TableComp
+          data={industries}
+          headers={headers}
+          renderCell={renderCell}
+          actions={actions}
+          enableCheckbox={false}
+          searchPlaceholder="Search industries..."
+          searchKeys={['name']}
+          getRowId={(row: Industry) => row.id}
+          pagination={{
+            pageSize: limit,
+            onPageSizeChange: handlePageSizeChange,
+          }}
+          cursorPagination={{
+            meta,
+            onNext: handleCursorNext,
+            onPrev: handleCursorPrev,
+            canGoPrev,
+          }}
+          sorting={{
+            sortBy: sortBy,
+            sortOrder: sortOrder,
+            onSortChange: handleSortChange,
+          }}
+          loading={loading}
+        />
+      </Container>
+
+      {/* Create Dialog */}
+      <CreateIndustryDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        onSubmit={handleCreateIndustry}
+        isSubmitting={creating}
+      />
+
+      {/* Edit Dialog */}
+      <EditIndustryDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        industry={industryToEdit}
+        onSubmit={handleUpdateIndustry}
+        isSubmitting={updating}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmComp
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Industry"
+        message={`Are you sure you want to delete industry "${industryToDelete?.name}"? This action cannot be undone.`}
+        confirmLabel="Yes, Delete"
+        cancelLabel="Cancel"
+        variant="destructive"
+        onConfirm={async () => {
+          if (industryToDelete) {
+            await handleDeleteIndustry(industryToDelete.id);
+            setIndustryToDelete(null);
+          }
+        }}
+        onCancel={() => {
+          setIndustryToDelete(null);
+        }}
+      />
+    </Fragment>
+  );
+}
+

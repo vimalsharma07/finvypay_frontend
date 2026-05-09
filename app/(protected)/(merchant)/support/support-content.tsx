@@ -1,0 +1,483 @@
+'use client';
+
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { Container } from '@/components/common/container';
+import {
+  getSupportTickets,
+  deleteSupportTicket,
+  updateSupportTicket,
+  createSupportTicket,
+  SupportTicket,
+  SupportTicketListResponse,
+} from '@/lib/services/user/support-ticket';
+import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import {
+  ColumnDef,
+  getCoreRowModel,
+  getSortedRowModel,
+  PaginationState,
+  SortingState,
+  useReactTable,
+} from '@tanstack/react-table';
+import { DataGrid } from '@/components/ui/data-grid';
+import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
+import { DataGridTable } from '@/components/ui/data-grid-table';
+import {
+  Card,
+  CardFooter,
+  CardHeader,
+  CardHeading,
+  CardTable,
+} from '@/components/ui/card';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
+import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
+import { TicketActionMenu } from './components/ticket-action-menu';
+import { SearchInput } from './components/search-input';
+import { DynamicCreateTicketDialog, DynamicEditTicketDialog } from '@/components/dialogs';
+
+interface SupportPageContentProps {
+  createDialogOpen: boolean;
+  setCreateDialogOpen: (open: boolean) => void;
+}
+
+export function SupportPageContent({
+  createDialogOpen,
+  setCreateDialogOpen,
+}: SupportPageContentProps) {
+  const [tickets, setTickets] = useState<SupportTicket[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [meta, setMeta] = useState<CursorPaginationMeta | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [ticketToDelete, setTicketToDelete] = useState<SupportTicket | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [ticketToEdit, setTicketToEdit] = useState<SupportTicket | null>(null);
+  const [updating, setUpdating] = useState(false);
+  const [creating, setCreating] = useState(false);
+
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
+  const [limit, setLimit] = useState(20);
+
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Sorting state
+  const [sorting, setSorting] = useState<SortingState>([]);
+
+  // Pagination state for table
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 20,
+  });
+
+  const fetchSupportTickets = useCallback(
+    async (cursor: string | undefined, pageLimit: number) => {
+      setLoading(true);
+      try {
+        const params = {
+          ...(cursor ? { cursor } : {}),
+          limit: pageLimit,
+        };
+
+        const response = await getSupportTickets(params);
+        handleApiResponse<SupportTicketListResponse>(response, {
+          onSuccess: (data) => {
+            if (data?.success && Array.isArray(data.data)) {
+              setTickets(data.data);
+              setMeta(data.meta ?? null);
+            } else {
+              toast.error('Failed to fetch support tickets - invalid response structure');
+            }
+          },
+          onError: (errorMessage) => {
+            toast.error(errorMessage || 'Failed to fetch support tickets');
+          },
+        });
+      } catch (error) {
+        toast.error('An unexpected error occurred');
+        console.error('Fetch support tickets error:', error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    fetchSupportTickets(requestCursor, limit);
+  }, [requestCursor, limit, fetchSupportTickets]);
+
+  // Filter data based on search query (client-side)
+  const filteredData = useMemo(() => {
+    if (!searchQuery) return tickets;
+
+    const searchLower = searchQuery.toLowerCase();
+    return tickets.filter(
+      (item) =>
+        item.title?.toLowerCase().includes(searchLower) ||
+        item.description?.toLowerCase().includes(searchLower) ||
+        item.priority?.toLowerCase().includes(searchLower) ||
+        item.status?.toLowerCase().includes(searchLower),
+    );
+  }, [searchQuery, tickets]);
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setLimit(newPageSize);
+    resetCursor();
+  };
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
+
+  const handleEditTicket = (ticket: SupportTicket) => {
+    setTicketToEdit(ticket);
+    setEditDialogOpen(true);
+  };
+
+  const handleCreateTicket = async (formData: FormData) => {
+    setCreating(true);
+    try {
+      const response = await createSupportTicket(formData);
+      handleApiResponse(response, {
+        onSuccess: () => {
+          toast.success('Support ticket created successfully!');
+          setCreateDialogOpen(false);
+          fetchSupportTickets(requestCursor, limit);
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to create support ticket');
+        },
+        onValidationError: (errors, messages) => {
+          console.error('Validation errors:', errors);
+          toast.error(Array.isArray(messages) ? messages.join(', ') : messages);
+        },
+      });
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+      console.error('Create ticket error:', error);
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleUpdateTicket = async (
+    id: string,
+    title: string,
+    description: string,
+    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
+  ) => {
+    setUpdating(true);
+    try {
+      const response = await updateSupportTicket(id, {
+        title,
+        description,
+        priority,
+      });
+      handleApiResponse(response, {
+        onSuccess: () => {
+          toast.success('Ticket updated successfully!');
+          setEditDialogOpen(false);
+          setTicketToEdit(null);
+          fetchSupportTickets(requestCursor, limit);
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to update ticket');
+        },
+        onValidationError: (errors, messages) => {
+          console.error('Validation errors:', errors);
+          toast.error(Array.isArray(messages) ? messages.join(', ') : messages);
+        },
+      });
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+      console.error('Update ticket error:', error);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleDeleteTicket = async () => {
+    if (!ticketToDelete) return;
+
+    setDeleting(true);
+    try {
+      const response = await deleteSupportTicket(ticketToDelete.id);
+      handleApiResponse(response, {
+        onSuccess: () => {
+          toast.success('Ticket deleted successfully!');
+          setDeleteDialogOpen(false);
+          setTicketToDelete(null);
+          fetchSupportTickets(requestCursor, limit);
+        },
+        onError: (errorMessage) => {
+          toast.error(errorMessage || 'Failed to delete ticket');
+        },
+      });
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+      console.error('Delete ticket error:', error);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const getPriorityBadgeVariant = (priority: string): 'primary' | 'destructive' | 'secondary' | 'warning' | 'info' => {
+    switch (priority) {
+      case 'HIGH':
+        return 'destructive';
+      case 'CRITICAL':
+        return 'destructive';
+      case 'MEDIUM':
+        return 'primary';
+      case 'LOW':
+        return 'secondary';
+      default:
+        return 'primary';
+    }
+  };
+
+  const getStatusBadgeVariant = (status: string): 'primary' | 'destructive' | 'secondary' | 'success' | 'warning' | 'info' => {
+    switch (status) {
+      case 'OPEN':
+        return 'primary';
+      case 'IN_PROGRESS':
+        return 'info';
+      case 'RESOLVED':
+        return 'success';
+      case 'CLOSED':
+        return 'secondary';
+      default:
+        return 'primary';
+    }
+  };
+
+  const columns = useMemo<ColumnDef<SupportTicket>[]>(
+    () => [
+      {
+        id: 'ticketId',
+        accessorKey: 'id',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Ticket ID" />
+        ),
+        cell: ({ row }) => {
+          return <div className="font-mono text-xs text-muted-foreground">#{row.original.id}</div>;
+        },
+        size: 90,
+        minSize: 80,
+      },
+      {
+        id: 'title',
+        accessorKey: 'title',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Title" />
+        ),
+        cell: ({ row }) => {
+          return <div className="font-medium max-w-[300px] truncate">{row.original.title || '-'}</div>;
+        },
+        size: 250,
+        minSize: 200,
+      },
+      {
+        id: 'description',
+        accessorKey: 'description',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Description" />
+        ),
+        cell: ({ row }) => {
+          return (
+            <div className="max-w-[400px] truncate text-muted-foreground">
+              {row.original.description || '-'}
+            </div>
+          );
+        },
+        size: 400,
+        minSize: 300,
+      },
+      {
+        id: 'priority',
+        accessorKey: 'priority',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Priority" />
+        ),
+        cell: ({ row }) => {
+          const value = row.original.priority;
+          return (
+            <Badge
+              variant={getPriorityBadgeVariant(value)}
+              className="flex items-center gap-1"
+            >
+              {value === 'LOW' && <ArrowDownRight className="size-3.5" />}
+              {value === 'MEDIUM' && <Minus className="size-3.5" />}
+              {value === 'HIGH' && <ArrowUpRight className="size-3.5" />}
+              {value === 'CRITICAL' && <AlertTriangle className="size-3.5" />}
+              {value}
+            </Badge>
+          );
+        },
+        size: 120,
+        minSize: 100,
+      },
+      {
+        id: 'status',
+        accessorKey: 'status',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Status" />
+        ),
+        cell: ({ row }) => {
+          return (
+            <Badge variant={getStatusBadgeVariant(row.original.status)}>
+              {row.original.status.replace('_', ' ')}
+            </Badge>
+          );
+        },
+        size: 120,
+        minSize: 100,
+      },
+      {
+        id: 'actions',
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Action" />
+        ),
+        cell: ({ row }) => (
+          <TicketActionMenu
+            ticket={row.original}
+            onEdit={handleEditTicket}
+            onDelete={(ticket) => {
+              setTicketToDelete(ticket);
+              setDeleteDialogOpen(true);
+            }}
+          />
+        ),
+        enableSorting: false,
+        size: 80,
+        minSize: 80,
+      },
+    ],
+    []
+  );
+
+  const table = useReactTable({
+    data: filteredData,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    manualPagination: true,
+    manualSorting: false,
+    pageCount: 1,
+    onSortingChange: setSorting,
+    onPaginationChange: (updater) => {
+      const newPagination = typeof updater === 'function' ? updater(pagination) : updater;
+      if (newPagination.pageSize !== pagination.pageSize) {
+        handlePageSizeChange(newPagination.pageSize);
+        setPagination({ pageIndex: 0, pageSize: newPagination.pageSize });
+      } else {
+        setPagination(newPagination);
+      }
+    },
+    getRowId: (row) => String(row.id),
+    state: {
+      sorting,
+      pagination,
+    },
+  });
+
+  return (
+    <Fragment>
+      <Container>
+        <DataGrid
+          table={table}
+          recordCount={filteredData.length}
+          isLoading={loading}
+          tableLayout={modernTableLayout}
+          tableClassNames={modernTableClassNames}
+        >
+          <Card className={modernTableCardClasses.card}>
+            <CardHeader className={modernTableCardClasses.header}>
+              <CardHeading>
+                <SearchInput
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder="Search tickets..."
+                />
+              </CardHeading>
+            </CardHeader>
+            <CardTable className={modernTableCardClasses.table}>
+              <ScrollArea className="w-full">
+                <DataGridTable />
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </CardTable>
+            <CardFooter className={modernTableCardClasses.footer}>
+              <CursorDataGridPagination
+                meta={meta}
+                onNext={handleCursorNext}
+                onPrev={handleCursorPrev}
+                canGoPrev={canGoPrev}
+                rowCount={filteredData.length}
+              />
+            </CardFooter>
+          </Card>
+        </DataGrid>
+      </Container>
+
+      <DynamicCreateTicketDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        onSubmit={handleCreateTicket}
+        isSubmitting={creating}
+      />
+
+      <DynamicEditTicketDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        ticket={ticketToEdit}
+        onSubmit={handleUpdateTicket}
+        isSubmitting={updating}
+      />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Support Ticket</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete ticket &quot;{ticketToDelete?.title || 'N/A'}&quot;? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteTicket}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </Fragment>
+  );
+}
+

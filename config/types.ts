@@ -1,0 +1,36 @@
+import { type LucideIcon } from 'lucide-react';
+
+export interface MenuItem {
+  title?: string;
+  icon?: LucideIcon;
+  path?: string;
+  rootPath?: string;
+  childrenIndex?: number;
+  heading?: string;
+  children?: MenuConfig;
+  disabled?: boolean;
+  /** When true, item is omitted from the sidebar (routes and code stay in place). */
+  hidden?: boolean;
+  collapse?: boolean;
+  collapseTitle?: string;
+  expandTitle?: string;
+  badge?: string;
+  separator?: boolean;
+  // Permission control
+  permissionModule?: string; // Explicit permission module name (e.g., "User Management", "Gateway Management")
+  requirePermission?: boolean; // If true, requires permission check. If false/undefined, always visible (like Dashboard)
+  submodule?: string; // Submodule identifier for child items (e.g., "Admin User", "admin", "Merchant")
+}
+
+export type MenuConfig = MenuItem[];
+
+export interface Settings {
+  container: 'fixed' | 'fluid';
+  layout: string;
+  layouts: {
+    main: {
+      sidebarCollapse: boolean;
+      sidebarTheme: 'light' | 'dark';
+    };
+  };
+}

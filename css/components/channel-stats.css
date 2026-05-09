@@ -1,0 +1,10 @@
+/* Channel Stats Component Styles */
+
+.channel-stats-bg {
+  background-image: url('/media/images/2600x1600/bg-3.png');
+}
+
+.dark .channel-stats-bg {
+  background-image: url('/media/images/2600x1600/bg-3-dark.png');
+}
+

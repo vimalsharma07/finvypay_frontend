@@ -1,0 +1,319 @@
+'use client';
+
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { ClipboardList } from 'lucide-react';
+import {
+  Toolbar,
+  ToolbarHeading,
+  ToolbarActions,
+} from '@/layouts/main/components/toolbar';
+import { Container } from '@/components/common/container';
+import { handleApiResponse } from '@/lib/utils/api-response-handler';
+import {
+  getMerchantApplications,
+  changeApplicationStatus,
+  MerchantApplication,
+  ApplicationKycStatus,
+} from '@/lib/services/admin/applications';
+import Link from 'next/link';
+import {
+  ColumnDef,
+  getCoreRowModel,
+  getSortedRowModel,
+  SortingState,
+  PaginationState,
+  useReactTable,
+} from '@tanstack/react-table';
+import { DataGrid } from '@/components/ui/data-grid';
+import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
+import { DataGridTable } from '@/components/ui/data-grid-table';
+import { CursorDataGridPagination } from '@/components/ui/cursor-data-grid-pagination';
+import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
+import type { CursorPaginationMeta } from '@/lib/types/pagination';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardFooter, CardTable } from '@/components/ui/card';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { MoreHorizontal, Eye, CheckCircle2, XCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { modernTableLayout, modernTableClassNames, modernTableCardClasses } from '@/app/(protected)/components/table-comp';
+
+const DATE_FMT = 'yyyy-MM-dd HH:mm';
+
+export default function AdminApplicationListPage() {
+  const [data, setData] = useState<MerchantApplication[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [meta, setMeta] = useState<CursorPaginationMeta | null>(null);
+  const [actioningId, setActioningId] = useState<string | null>(null);
+  const { requestCursor, reset: resetCursor, goNext, goPrev, canGoPrev } =
+    useCursorPagination();
+  const [limit, setLimit] = useState(20);
+
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 20,
+  });
+
+  const formatStatus = (status?: string | null) =>
+    status ? status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : '—';
+
+  const statusVariant = (status?: string | null) => {
+    if (!status) return 'outline';
+    const normalized = status.toLowerCase();
+    if (normalized.includes('approved')) return 'success';
+    if (normalized.includes('pending')) return 'warning';
+    if (normalized.includes('reject')) return 'destructive';
+    return 'outline';
+  };
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await getMerchantApplications({
+        ...(requestCursor ? { cursor: requestCursor } : {}),
+        limit,
+      });
+      handleApiResponse(response, {
+        onSuccess: (res) => {
+          if (res && res.success && res.data) {
+            setData(res.data);
+            setMeta(res.meta ?? null);
+          } else {
+            toast.error('Invalid response structure while loading applications');
+          }
+        },
+        onError: (message) => {
+          toast.error(message || 'Failed to load applications');
+        },
+        silent: true,
+      });
+    } catch (error) {
+      toast.error('An unexpected error occurred while fetching applications');
+      console.error('Applications fetch error:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [requestCursor, limit]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    setPagination((p) => ({ ...p, pageSize: limit }));
+  }, [limit]);
+
+  const handleCursorNext = useCallback(() => {
+    if (meta?.nextCursor) goNext(meta.nextCursor);
+  }, [meta?.nextCursor, goNext]);
+
+  const handleCursorPrev = useCallback(() => {
+    goPrev();
+  }, [goPrev]);
+
+  const handleChangeStatus = useCallback(
+    async (userId: string, kycStatus: ApplicationKycStatus) => {
+      const numericId = Number(userId);
+      if (!Number.isFinite(numericId)) {
+        toast.error('Invalid user id');
+        return;
+      }
+      setActioningId(userId);
+      try {
+        const response = await changeApplicationStatus({ userId: numericId, kycStatus });
+        handleApiResponse(response, {
+          onSuccess: (res) => {
+            if (res?.success) {
+              toast.success(`Application ${kycStatus}`);
+              fetchData();
+            } else {
+              toast.error(res?.message || 'Failed to update status');
+            }
+          },
+          onError: (message) => {
+            toast.error(message || 'Failed to update status');
+          },
+          silent: true,
+        });
+      } catch (error) {
+        console.error('Change status error:', error);
+        toast.error('An unexpected error occurred while updating status');
+      } finally {
+        setActioningId(null);
+      }
+    },
+    [fetchData],
+  );
+
+  const columns = useMemo<ColumnDef<MerchantApplication>[]>(() => [
+    {
+      accessorKey: 'name',
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title="Name" />
+      ),
+      cell: ({ row }) => row.original.name || '—',
+    },
+    {
+      accessorKey: 'email',
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title="Email" />
+      ),
+      cell: ({ row }) => row.original.email || '—',
+    },
+    {
+      accessorKey: 'entityType',
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title="Entity" />
+      ),
+      cell: ({ row }) => row.original.entityType || '—',
+    },
+    {
+      accessorKey: 'kycStatus',
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title="KYC Status" />
+      ),
+      cell: ({ row }) => (
+        <Badge
+          variant={statusVariant(row.original.kycStatus)}
+          className="px-2.5 py-1 text-[11px] font-semibold leading-tight whitespace-normal max-w-[160px] text-left break-words uppercase tracking-wide"
+        >
+          {formatStatus(row.original.kycStatus)}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: 'createdAt',
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title="Created" />
+      ),
+      cell: ({ row }) =>
+        row.original.createdAt
+          ? format(new Date(row.original.createdAt), DATE_FMT)
+          : '—',
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm" variant="ghost" className="px-2">
+              <MoreHorizontal className="h-4 w-4" />
+              <span className="sr-only">Actions</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem asChild>
+              <Link href={`/admin/applications/${row.original.id}`} className="flex items-center gap-1">
+                <Eye className="h-4 w-4" />
+                View
+              </Link>
+            </DropdownMenuItem>
+            {row.original.kycStatus === 'rate_accepted' && (
+              <DropdownMenuItem
+                disabled={actioningId === row.original.id}
+                onClick={() => handleChangeStatus(row.original.id, 'approved')}
+                className="flex items-center gap-1"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                <span className={cn('text-success', actioningId === row.original.id && 'opacity-70')}>
+                  {actioningId === row.original.id ? 'Approving...' : 'Approve'}
+                </span>
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem
+              disabled={actioningId === row.original.id}
+              onClick={() => handleChangeStatus(row.original.id, 'rejected')}
+              className="flex items-center gap-1"
+            >
+              <XCircle className="h-4 w-4" />
+              <span className={cn('text-destructive', actioningId === row.original.id && 'opacity-70')}>
+                {actioningId === row.original.id ? 'Rejecting...' : 'Reject'}
+              </span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ], [actioningId, handleChangeStatus, formatStatus, statusVariant]);
+
+  const table = useReactTable({
+    data,
+    columns,
+    state: {
+      sorting,
+      pagination,
+    },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    manualPagination: true,
+    pageCount: 1,
+    onPaginationChange: (updater) => {
+      const newPagination = typeof updater === 'function' ? updater(pagination) : updater;
+      if (newPagination.pageSize !== pagination.pageSize) {
+        setLimit(newPagination.pageSize);
+        setPagination({ pageIndex: 0, pageSize: newPagination.pageSize });
+        resetCursor();
+      } else {
+        setPagination(newPagination);
+      }
+    },
+  });
+
+  return (
+    <div className="overflow-x-hidden">
+      <Container>
+        <Toolbar>
+            <ToolbarHeading
+              title="Applications"
+              description="Review, approve, and manage merchant onboarding applications with status tracking and application details"
+              icon={ClipboardList}
+            />
+          <ToolbarActions>
+            {/* reserved for filters or bulk actions */}
+          </ToolbarActions>
+        </Toolbar>
+      </Container>
+
+      <Container>
+        <DataGrid 
+          table={table} 
+          recordCount={data.length}
+          isLoading={loading}
+          tableLayout={modernTableLayout}
+          tableClassNames={modernTableClassNames}
+        >
+          <Card className={modernTableCardClasses.card}>
+            <CardTable className={modernTableCardClasses.table}>
+              <ScrollArea className="w-full">
+                <DataGridTable />
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </CardTable>
+            <CardFooter className={modernTableCardClasses.footer}>
+              <CursorDataGridPagination
+                meta={meta}
+                onNext={handleCursorNext}
+                onPrev={handleCursorPrev}
+                canGoPrev={canGoPrev}
+                rowCount={data.length}
+              />
+            </CardFooter>
+          </Card>
+        </DataGrid>
+      </Container>
+    </div>
+  );
+}
+
+
