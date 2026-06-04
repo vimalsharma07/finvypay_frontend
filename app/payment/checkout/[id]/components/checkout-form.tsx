@@ -20,7 +20,6 @@ import { getUserPaymentLinkById, PaymentLink } from '@/lib/services/user/payment
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
-import { CountryCodeSelector } from '@/components/common/CountryCodeSelector';
 
 const checkoutSchema = z.object({
   firstName: z.string().trim().min(1, 'First name is required'),
@@ -29,7 +28,6 @@ const checkoutSchema = z.object({
   city: z.string().trim().min(1, 'City is required'),
   state: z.string().trim().min(1, 'State is required'),
   zip: z.string().trim().min(1, 'ZIP is required'),
-  countryId: z.coerce.number().min(1, 'Country is required'),
   email: z
     .string()
     .trim()
@@ -70,7 +68,6 @@ const getInitialValues = (
   orderId: `ORDER_${Date.now()}`,
   amount: paymentLinkData?.amount?.toString() ?? '',
   currency: paymentLinkData?.currency ?? '',
-  countryId: 0,
 });
 
 export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
@@ -161,7 +158,6 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
       source: 'link', // Indicate payment source is from payment link
       primaryColor: paymentLinkData?.paymentTemplate?.primaryColor || '',
       logoUrl: paymentLinkData?.paymentTemplate?.logoUrl || '',
-      countryId: String(values.countryId),
     });
 
     router.push(`/payment/card?${queryParams.toString()}`);
@@ -302,7 +298,7 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
               )}
             />
 
-            <div className="grid gap-4 md:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-3">
               <FormField
                 control={form.control}
                 name="city"
@@ -342,26 +338,8 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
                   </FormItem>
                 )}
               />
-               <FormField
-            control={form.control}
-            name="countryId"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Country</FormLabel>
-                <FormControl>
-                    <CountryCodeSelector
-                    value={field.value}
-                    onChange={field.onChange}
-                    showPhoneCode={false}
-                    />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
-            />
             </div>
 
-           
             <FormField
               control={form.control}
               name="email"
@@ -383,7 +361,7 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
               )}
             />
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-3">
               <FormField
                 control={form.control}
                 name="amount"
@@ -480,4 +458,5 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
     </div>
   );
 }
+
 
