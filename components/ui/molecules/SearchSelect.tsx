@@ -53,7 +53,7 @@ export function SearchSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between min-w-[200px]"
+          className="w-full min-w-0 justify-between"
           disabled={disabled}
         >
           <span className="truncate text-left flex-1">
@@ -65,7 +65,7 @@ export function SearchSelect({
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[var(--radix-popover-trigger-width)] p-0 min-w-[350px]" 
+        className="w-[var(--radix-popover-trigger-width)] p-0 min-w-[var(--radix-popover-trigger-width)]" 
         align="start"
         side="bottom"
         sideOffset={4}
@@ -106,4 +106,3 @@ export function SearchSelect({
     </Popover>
   );
 }
-
