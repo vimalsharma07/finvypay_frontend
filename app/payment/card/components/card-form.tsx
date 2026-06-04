@@ -199,7 +199,7 @@ export function CardForm() {
         city: searchParams.get('city') || '',
         state: searchParams.get('state') || '',
         zip: searchParams.get('zip') || '',
-        country: 'US', // Default country
+        country: searchParams.get('country') || 'US',
         email: searchParams.get('email') || '',
       };
 
