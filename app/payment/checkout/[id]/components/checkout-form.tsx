@@ -20,6 +20,24 @@ import { getUserPaymentLinkById, PaymentLink } from '@/lib/services/user/payment
 import { handleApiResponse } from '@/lib/utils/api-response-handler';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { SearchSelect } from '@/components/ui/molecules/SearchSelect';
+import countriesJson from '@/data/countries.json';
+
+const COUNTRY_OPTIONS = (
+  countriesJson as Array<{
+    country_name: string;
+    iso_two: string;
+    flag: string;
+    status: string;
+    is_deleted: boolean;
+  }>
+)
+  .filter((c) => c.status === 'active' && !c.is_deleted)
+  .sort((a, b) => a.country_name.localeCompare(b.country_name))
+  .map((c) => ({
+    value: c.iso_two,
+    label: `${c.country_name} ${c.flag}`,
+  }));
 
 const checkoutSchema = z.object({
   firstName: z.string().trim().min(1, 'First name is required'),
@@ -28,6 +46,7 @@ const checkoutSchema = z.object({
   city: z.string().trim().min(1, 'City is required'),
   state: z.string().trim().min(1, 'State is required'),
   zip: z.string().trim().min(1, 'ZIP is required'),
+  country: z.string().trim().min(2, 'Country is required'),
   email: z
     .string()
     .trim()
@@ -64,6 +83,7 @@ const getInitialValues = (
   city: '',
   state: '',
   zip: '',
+  country: '',
   email: '',
   orderId: `ORDER_${Date.now()}`,
   amount: paymentLinkData?.amount?.toString() ?? '',
@@ -151,6 +171,7 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
       city: values.city,
       state: values.state,
       zip: values.zip,
+      country: values.country,
       email: values.email,
       orderId: values.orderId,
       amount: values.amount,
@@ -298,7 +319,7 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
               )}
             />
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="city"
@@ -320,6 +341,29 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
                     <FormLabel>State</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="CA" autoComplete="address-level1" className={inputClassName} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem className="min-w-0">
+                    <FormLabel>Country</FormLabel>
+                    <FormControl>
+                      <div className="[&_button]:h-11 [&_button]:rounded-xl [&_button]:border-slate-200 [&_button]:bg-slate-50/70">
+                        <SearchSelect
+                          options={COUNTRY_OPTIONS}
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Select country"
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -361,7 +405,7 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
               )}
             />
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="amount"
