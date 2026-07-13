@@ -8,11 +8,19 @@ import { DISPLAY_TIMEZONE } from '@/lib/constants/datetime';
 /**
  * Transaction status mapping (API sends numeric status)
  * PENDING = 0, SUCCESS = 1, FAILED = 2, BLOCKED = 3, ABANDONED = 4, REDIRECTED = 5
+ * When chargebackDate is set, display as Chargeback regardless of numeric status.
  */
-export function formatTransactionStatus(status: number): {
+export function formatTransactionStatus(
+  status: number,
+  options?: { chargebackDate?: string | null }
+): {
   label: string;
   variant: 'primary' | 'success' | 'destructive' | 'warning' | 'secondary';
 } {
+  if (options?.chargebackDate) {
+    return { label: 'Chargeback', variant: 'destructive' };
+  }
+
   const statusMap: Record<
     number,
     { label: string; variant: 'primary' | 'success' | 'destructive' | 'warning' | 'secondary' }
