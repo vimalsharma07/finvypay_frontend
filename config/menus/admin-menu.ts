@@ -1,20 +1,20 @@
 import {
-  BarChart3,
   Bolt,
-  ClipboardList,
+  Building2,
+  ChartColumn,
+  CircleDollarSign,
+  ClipboardCheck,
   Codepen,
-  CreditCard,
-  Database,
-  FileText,
-  LayoutGrid,
+  FileSearch,
+  KeyRound,
+  LayoutDashboard,
   LifeBuoy,
-  Plug,
   Route,
-  ScrollText,
-  ShieldCheck,
-  ShieldUser,
+  Settings2,
+  ShieldAlert,
   Theater,
-  Users,
+  UsersRound,
+  WalletCards,
 } from 'lucide-react';
 import { type MenuConfig } from '../types';
 import { filterMenuByPermissions } from '@/lib/utils/permission-menu-matcher';
@@ -22,15 +22,14 @@ import { filterMenuByPermissions } from '@/lib/utils/permission-menu-matcher';
 // Base admin menu configuration (before permission filtering)
 const BASE_ADMIN_MENU: MenuConfig = [
   {
-    title: 'Dashboard',
-    icon: LayoutGrid,
+    title: 'Overview',
+    icon: LayoutDashboard,
     path: '/admin/dashboard',
     requirePermission: false, // Dashboard always visible
   },
-  // { heading: 'User' },
   {
-    title: 'User Management',
-    icon: Users,
+    title: 'Identity & Access',
+    icon: UsersRound,
     permissionModule: 'User Management',
     requirePermission: true,
     children: [
@@ -40,9 +39,9 @@ const BASE_ADMIN_MENU: MenuConfig = [
     ],
   },
   {
-    title: 'Transactions',
-    icon: CreditCard,
-    permissionModule: 'Transactions', 
+    title: 'Payments',
+    icon: WalletCards,
+    permissionModule: 'Transactions',
     requirePermission: false,
     children: [
       { title: 'Transactions', path: '/admin/transactions/transactions', submodule: 'Transactions' },
@@ -50,8 +49,8 @@ const BASE_ADMIN_MENU: MenuConfig = [
     ],
   },
   {
-    title: 'Roles & Permissions',
-    icon: ShieldUser,
+    title: 'Access Control',
+    icon: KeyRound,
     permissionModule: 'Roles & Permissions', // Explicit permission module mapping
     requirePermission: true,
     children: [
@@ -60,8 +59,8 @@ const BASE_ADMIN_MENU: MenuConfig = [
     ],
   },
   {
-    title: 'Risk & Compliance',
-    icon: ShieldCheck,
+    title: 'Risk Center',
+    icon: ShieldAlert,
     permissionModule: 'Risk Management', // Explicit permission module mapping
     requirePermission: true,
     children: [
@@ -72,7 +71,7 @@ const BASE_ADMIN_MENU: MenuConfig = [
   },
   {
     title: 'Acquirers',
-    icon: Plug,
+    icon: Building2,
     path: '/admin/acquirers',
     permissionModule: 'Acquirer Management', // Explicit permission module mapping
     requirePermission: true,
@@ -89,26 +88,26 @@ const BASE_ADMIN_MENU: MenuConfig = [
     ],
   },
   {
-    title: 'Applications & Requests',
-    icon: ClipboardList,
+    title: 'Merchant Onboarding',
+    icon: ClipboardCheck,
     path: '/admin/applications',
     permissionModule: 'Application Management', // Explicit permission module mapping
     requirePermission: false,
   },
   {
-    title: 'Settlement Reports',
-    icon: BarChart3,
+    title: 'Settlements',
+    icon: CircleDollarSign,
     permissionModule: 'Settlement Reports', // Explicit permission module mapping
     requirePermission: false,
     children: [
-      {title: 'Settlement Summary', path: '/admin/settlement/summary', submodule: 'Settlement Summary' },
+      { title: 'Settlement Summary', path: '/admin/settlement/summary', submodule: 'Settlement Summary' },
       { title: 'All Settlements', path: '/admin/settlement/all', submodule: 'All Settlements' },
-      {title: 'Settlement Calculations', path: '/admin/settlement/calculations', submodule: 'Settlement Calculations' },
+      { title: 'Settlement Calculations', path: '/admin/settlement/calculations', submodule: 'Settlement Calculations' },
     ],
   },
   {
-    title: 'Reports',
-    icon: BarChart3,
+    title: 'Analytics',
+    icon: ChartColumn,
     permissionModule: 'Reports', // Explicit permission module mapping
     requirePermission: false,
     children: [
@@ -120,8 +119,8 @@ const BASE_ADMIN_MENU: MenuConfig = [
     ],
   },
   {
-    title: 'Master',
-    icon: Database,
+    title: 'Configuration',
+    icon: Settings2,
     permissionModule: 'Master Module', // Explicit permission module mapping
     requirePermission: true,
     children: [
@@ -129,12 +128,10 @@ const BASE_ADMIN_MENU: MenuConfig = [
       { title: 'Currency', path: '/admin/master/currency', submodule: 'Currency' },
       { title: 'Industries', path: '/admin/master/industries', submodule: 'Industries' },
       { title: 'Agreements', path: '/admin/master/agreements', submodule: 'Agreements' },
-
     ],
   },
- 
   {
-    title: 'Support',
+    title: 'Help Center',
     icon: LifeBuoy,
     permissionModule: 'Support', // Explicit permission module mapping
     requirePermission: true,
@@ -144,8 +141,8 @@ const BASE_ADMIN_MENU: MenuConfig = [
     ],
   },
   {
-    title: 'Logs',
-    icon: ScrollText,
+    title: 'Audit Logs',
+    icon: FileSearch,
     permissionModule: 'Logs', // Explicit permission module mapping
     requirePermission: false,
     children: [
@@ -195,13 +192,13 @@ const BASE_ADMIN_MENU: MenuConfig = [
   },
   { title: 'Store - Services', icon: Codepen, disabled: true },
   { title: 'AI Promt', icon: Theater, disabled: true },
-  { title: 'Invoice Generator', icon: ScrollText, disabled: true },
+  { title: 'Invoice Generator', icon: FileSearch, disabled: true },
 ];
 
 /**
  * Get filtered admin menu based on user permissions
  * Only shows menu items for modules the user has access to
- * 
+ *
  * @returns Filtered menu configuration
  */
 export function getAdminMenu(): MenuConfig {
@@ -217,4 +214,3 @@ export function getAdminMenu(): MenuConfig {
 export const ADMIN_MENU: MenuConfig = BASE_ADMIN_MENU.filter((item) => !item.hidden);
 
 export default ADMIN_MENU;
-

@@ -1,17 +1,18 @@
 import {
-  Home,
-  Cpu,
-  Wallet,
-  CircleDollarSign,
-  FileBarChart,
-  Route,
-  Link2,
   BarChart3,
-  Heart,
-  FileText,
-  Receipt,
-  Settings,
   BookOpen,
+  ChartColumn,
+  CircleDollarSign,
+  Cpu,
+  LayoutDashboard,
+  LifeBuoy,
+  Link2,
+  Receipt,
+  Route,
+  Settings,
+  ShieldAlert,
+  Wallet,
+  WalletCards,
 } from 'lucide-react';
 import { type MenuConfig } from '../types';
 import { filterMenuByPermissions } from '@/lib/utils/permission-menu-matcher';
@@ -20,8 +21,8 @@ import { generalSettings } from '../general.config';
 // Base user menu configuration (before permission filtering)
 const BASE_USER_MENU: MenuConfig = [
   {
-    title: 'Dashboard',
-    icon: Home,
+    title: 'Overview',
+    icon: LayoutDashboard,
     path: '/dashboard',
     requirePermission: false, // Dashboard always visible
   },
@@ -44,8 +45,8 @@ const BASE_USER_MENU: MenuConfig = [
     requirePermission: true,
   },
   {
-    title: 'Transactions',
-    icon: CircleDollarSign,
+    title: 'Payments',
+    icon: WalletCards,
     permissionModule: 'Transactions',
     requirePermission: false,
     children: [
@@ -55,8 +56,8 @@ const BASE_USER_MENU: MenuConfig = [
     ],
   },
   {
-    title: 'Risk & Compliance',
-    icon: FileBarChart,
+    title: 'Risk Center',
+    icon: ShieldAlert,
     permissionModule: 'Risk Management',
     requirePermission: false,
     children: [
@@ -97,8 +98,8 @@ const BASE_USER_MENU: MenuConfig = [
     requirePermission: false,
   },
   {
-    title: 'Settlement Reports',
-    icon: BarChart3,
+    title: 'Settlements',
+    icon: CircleDollarSign,
     permissionModule: 'Settlement Reports', // Explicit permission module mapping
     requirePermission: false,
     children: [
@@ -106,8 +107,8 @@ const BASE_USER_MENU: MenuConfig = [
     ],
   },
   {
-    title: 'Reports',
-    icon: FileText,
+    title: 'Analytics',
+    icon: ChartColumn,
     permissionModule: 'Reports',
     requirePermission: false,
     children: [
@@ -117,8 +118,8 @@ const BASE_USER_MENU: MenuConfig = [
     ],
   },
   {
-    title: 'Support',
-    icon: Heart,
+    title: 'Help Center',
+    icon: LifeBuoy,
     path: '/support',
     permissionModule: 'Support',
     requirePermission: false,

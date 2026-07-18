@@ -43,7 +43,7 @@ export default function AdminDashboardPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Dashboard"
+            title="Overview"
             description="Overview of system statistics, transaction analytics, user activity, and key performance metrics for administrative monitoring"
             icon={LayoutGrid}
           />

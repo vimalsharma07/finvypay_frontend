@@ -40,17 +40,17 @@ export function SidebarMenu() {
 
   // Global classNames for consistent styling
   const classNames: AccordionMenuClassNames = {
-    root: 'lg:ps-1 space-y-3',
-    group: 'gap-px',
+    root: 'lg:ps-0.5 space-y-1',
+    group: 'gap-0.5',
     label:
-      'uppercase text-xs font-medium text-muted-foreground/70 pt-2.25 pb-px',
+      'uppercase tracking-wide text-[11px] font-semibold text-muted-foreground/80 pt-3 pb-1 px-2 first:pt-0',
     separator: '',
-    item: 'h-8 hover:bg-transparent text-accent-foreground hover:text-primary data-[selected=true]:text-primary data-[selected=true]:bg-muted data-[selected=true]:font-medium',
+    item: 'h-9 rounded-lg px-2.5 text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground data-[selected=true]:bg-primary/10 data-[selected=true]:text-primary data-[selected=true]:font-semibold data-[selected=true]:shadow-none',
     sub: '',
     subTrigger:
-      'h-8 hover:bg-transparent text-accent-foreground hover:text-primary data-[selected=true]:text-primary data-[selected=true]:bg-muted data-[selected=true]:font-medium',
-    subContent: 'py-0',
-    indicator: '',
+      'h-9 rounded-lg px-2.5 text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground data-[selected=true]:bg-primary/10 data-[selected=true]:text-primary data-[selected=true]:font-semibold',
+    subContent: 'py-1 ms-3 ps-2.5 border-s border-border/70',
+    indicator: 'text-muted-foreground/70',
   };
 
   const buildMenu = (items: MenuConfig): JSX.Element[] => {
@@ -69,15 +69,22 @@ export function SidebarMenu() {
     if (item.children) {
       return (
         <AccordionMenuSub key={index} value={item.path || `root-${index}`}>
-          <AccordionMenuSubTrigger className="text-sm font-medium flex items-center gap-1">
-            {item.icon && <item.icon data-slot="accordion-menu-icon" className="shrink-0" />}
-            <span data-slot="accordion-menu-title" className="flex-1 text-left">{item.title}</span>
+          <AccordionMenuSubTrigger className="text-[13px] font-medium flex items-center gap-2.5">
+            {item.icon && (
+              <item.icon
+                data-slot="accordion-menu-icon"
+                className="size-4 shrink-0 opacity-80"
+              />
+            )}
+            <span data-slot="accordion-menu-title" className="flex-1 text-left leading-tight">
+              {item.title}
+            </span>
           </AccordionMenuSubTrigger>
           <AccordionMenuSubContent
             type="single"
             collapsible
             parentValue={item.path || `root-${index}`}
-            className="ps-6"
+            className="ps-0"
           >
             <AccordionMenuGroup>
               {buildMenuItemChildren(item.children, 1)}
@@ -93,7 +100,7 @@ export function SidebarMenu() {
         <AccordionMenuItem
           key={index}
           value={path}
-          className="text-sm font-medium"
+          className="text-[13px] font-medium"
           onClick={isExternal ? (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -105,24 +112,38 @@ export function SidebarMenu() {
               href={path}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1"
+              className="flex items-center gap-2.5"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 window.open(path, '_blank', 'noopener,noreferrer');
               }}
             >
-              {item.icon && <item.icon data-slot="accordion-menu-icon" className="shrink-0" />}
-              <span data-slot="accordion-menu-title" className="flex-1 text-left">{item.title}</span>
+              {item.icon && (
+                <item.icon
+                  data-slot="accordion-menu-icon"
+                  className="size-4 shrink-0 opacity-80"
+                />
+              )}
+              <span data-slot="accordion-menu-title" className="flex-1 text-left leading-tight">
+                {item.title}
+              </span>
               <ExternalLink className="shrink-0 size-3.5 text-muted-foreground" />
             </a>
           ) : (
             <Link
               href={path}
-              className="flex items-center gap-1"
+              className="flex items-center gap-2.5"
             >
-              {item.icon && <item.icon data-slot="accordion-menu-icon" className="shrink-0" />}
-              <span data-slot="accordion-menu-title" className="flex-1 text-left">{item.title}</span>
+              {item.icon && (
+                <item.icon
+                  data-slot="accordion-menu-icon"
+                  className="size-4 shrink-0 opacity-80"
+                />
+              )}
+              <span data-slot="accordion-menu-title" className="flex-1 text-left leading-tight">
+                {item.title}
+              </span>
             </Link>
           )}
         </AccordionMenuItem>
@@ -138,10 +159,12 @@ export function SidebarMenu() {
       <AccordionMenuItem
         key={index}
         value={`disabled-${index}`}
-        className="text-sm font-medium"
+        className="text-[13px] font-medium opacity-60"
       >
-        {item.icon && <item.icon data-slot="accordion-menu-icon" />}
-        <span data-slot="accordion-menu-title">{item.title}</span>
+        {item.icon && (
+          <item.icon data-slot="accordion-menu-icon" className="size-4 shrink-0 opacity-80" />
+        )}
+        <span data-slot="accordion-menu-title" className="leading-tight">{item.title}</span>
         {item.disabled && (
           <Badge variant="secondary" size="sm" className="ms-auto me-[-10px]">
             Soon
@@ -175,7 +198,7 @@ export function SidebarMenu() {
           key={index}
           value={item.path || `child-${level}-${index}`}
         >
-          <AccordionMenuSubTrigger className="text-[13px]">
+          <AccordionMenuSubTrigger className="text-[12.5px] font-medium">
             {item.collapse ? (
               <span className="text-muted-foreground">
                 <span className="hidden [[data-state=open]>span>&]:inline">
@@ -193,11 +216,7 @@ export function SidebarMenu() {
             type="single"
             collapsible
             parentValue={item.path || `child-${level}-${index}`}
-            className={cn(
-              'ps-4',
-              !item.collapse && 'relative',
-              !item.collapse && (level > 0 ? '' : ''),
-            )}
+            className={cn('ps-0', !item.collapse && 'relative')}
           >
             <AccordionMenuGroup>
               {buildMenuItemChildren(
@@ -216,7 +235,7 @@ export function SidebarMenu() {
         <AccordionMenuItem
           key={index}
           value={path}
-          className="text-[13px]"
+          className="text-[12.5px] h-8 rounded-md"
           onClick={isExternal ? (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -228,19 +247,19 @@ export function SidebarMenu() {
               href={path}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1"
+              className="flex items-center gap-1.5"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 window.open(path, '_blank', 'noopener,noreferrer');
               }}
             >
-              <span>{item.title}</span>
+              <span className="leading-tight">{item.title}</span>
               <ExternalLink className="shrink-0 size-3 text-muted-foreground" />
             </a>
           ) : (
-            <Link href={path} className="flex items-center gap-1 justify-between">
-              <span>{item.title}</span>
+            <Link href={path} className="flex items-center gap-1.5 justify-between w-full">
+              <span className="leading-tight">{item.title}</span>
               {isAdminPath && path === '/admin/support/tickets' && typeof openTicketCount === 'number' && openTicketCount > 0 && (
                 <Badge
                   variant="outline"
@@ -282,7 +301,7 @@ export function SidebarMenu() {
   };
 
   return (
-    <div className="kt-scrollable-y-hover flex grow shrink-0 py-5 px-5 lg:max-h-[calc(100vh-5.5rem)]">
+    <div className="kt-scrollable-y-hover flex grow shrink-0 py-4 px-3.5 lg:max-h-[calc(100vh-5.5rem)]">
       <AccordionMenu
         selectedValue={pathname}
         matchPath={matchPath}
