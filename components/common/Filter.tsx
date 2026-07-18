@@ -191,11 +191,12 @@ export function Filter({
     return null;
   };
 
-  /** Value for DateRangeFilter (react-day-picker: from/to) from start_date/end_date (created_at) */
+  /** Value for DateRangeFilter (react-day-picker: from/to) from the field's start/end values */
   const getDateRangeFilterValue = (field: string): PickerDateRange | undefined => {
-    if (field !== "created_at") return undefined;
-    const start = filterValues["start_date" as keyof FilterFields] as string | undefined;
-    const end = filterValues["end_date" as keyof FilterFields] as string | undefined;
+    const startKey = field === "created_at" ? "start_date" : `${field}_start`;
+    const endKey = field === "created_at" ? "end_date" : `${field}_end`;
+    const start = filterValues[startKey as keyof FilterFields] as string | undefined;
+    const end = filterValues[endKey as keyof FilterFields] as string | undefined;
     if (!start || !end) return undefined;
     const from = new Date(start);
     const to = new Date(end);
@@ -205,20 +206,21 @@ export function Filter({
 
   const handleDateRangeFilterChange = useCallback(
     (field: keyof FilterFields, range: PickerDateRange | undefined) => {
-      if (field !== "created_at") return;
+      const key = String(field);
+      const startKey = field === "created_at" ? "start_date" : `${key}_start`;
+      const endKey = field === "created_at" ? "end_date" : `${key}_end`;
+
       if (range?.from && range?.to) {
-        const start_date = format(range.from, "yyyy-MM-dd");
-        const end_date = format(range.to, "yyyy-MM-dd");
         setFilterValues((prev: FilterFields) => ({
           ...prev,
-          start_date,
-          end_date,
+          [startKey]: format(range.from!, "yyyy-MM-dd"),
+          [endKey]: format(range.to!, "yyyy-MM-dd"),
         }));
       } else {
         setFilterValues((prev: FilterFields) => {
           const next = { ...prev };
-          delete next["start_date" as keyof FilterFields];
-          delete next["end_date" as keyof FilterFields];
+          delete next[startKey as keyof FilterFields];
+          delete next[endKey as keyof FilterFields];
           return next;
         });
       }

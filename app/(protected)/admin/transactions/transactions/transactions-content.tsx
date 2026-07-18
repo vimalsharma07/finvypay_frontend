@@ -300,6 +300,7 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
         multiSelectSize: 'comfortable',
       },
       { field: 'transaction_id', label: 'Transaction ID', type: FieldTypes.input },
+      { field: 'gateway_id', label: 'Gateway ID', type: FieldTypes.input },
       { field: 'order_id', label: 'Order ID', type: FieldTypes.input },
       { field: 'email', label: 'Email', type: FieldTypes.input },
       { field: 'card_bin', label: 'Card Bin', type: FieldTypes.input },
@@ -330,10 +331,21 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
         type: FieldTypes.searchSelect,
         options: countryOptions,
       },
-      { field: 'transaction_date', label: 'Transaction Date', type: FieldTypes.date },
-      { field: 'refund_date', label: 'Refund Date', type: FieldTypes.date },
-      { field: 'chargeback_date', label: 'ChargeBack Date', type: FieldTypes.date },
-      { field: 'message', label: 'Message', type: FieldTypes.input },
+      {
+        field: 'transaction_date',
+        label: 'Transaction Date',
+        type: FieldTypes.dateRangeFilter,
+      },
+      {
+        field: 'refund_date',
+        label: 'Refund Date',
+        type: FieldTypes.dateRangeFilter,
+      },
+      {
+        field: 'chargeback_date',
+        label: 'ChargeBack Date',
+        type: FieldTypes.dateRangeFilter,
+      },
     ],
     [userOptions, connectorOptions, currencyOptions, countryOptions]
   );

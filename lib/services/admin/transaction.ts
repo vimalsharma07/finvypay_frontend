@@ -102,6 +102,7 @@ export interface TransactionListParams {
   search?: string;
   /** Advance filter params (production & sandbox) */
   userId?: string;
+  gatewayId?: string;
   orderId?: string;
   cardBin?: string;
   currency?: string;
