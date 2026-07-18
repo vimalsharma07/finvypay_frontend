@@ -33,9 +33,10 @@ export function TransactionActionMenu({
   resendingWebhookTransactionId = null,
   showDisabledActions = true, // Default to true for production transactions
 }: TransactionActionMenuProps) {
-  // Check if transaction is successful (status === 1 means Success)
-  const isSuccessful = transaction.status === 1;
-  const showActionOptions = showDisabledActions && isSuccessful;
+  // Status 1 = Success; chargebackDate means already charged back (status stays 1)
+  const canTakeStatusActions =
+    transaction.status === 1 && !transaction.chargebackDate;
+  const showActionOptions = showDisabledActions && canTakeStatusActions;
 
   return (
     <DropdownMenu>
