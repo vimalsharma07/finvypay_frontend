@@ -29,7 +29,7 @@ export function SidebarMenu() {
   const pathname = usePathname();
   const menu = useRoleBasedMenu();
   const isAdminPath = pathname.startsWith('/admin');
-  const { count: openTicketCount } = isAdminPath ? useAdminOpenTicketCount() : { count: null };
+  const { count: openTicketCount } = useAdminOpenTicketCount(isAdminPath);
 
   // Memoize matchPath to prevent unnecessary re-renders
   const matchPath = useCallback(
