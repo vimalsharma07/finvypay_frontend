@@ -10,9 +10,16 @@
  * - description: Page description
  */
 
+export type AdminReportApiType =
+  | 'merchant-turnover-report'
+  | 'merchant-transaction-report'
+  | 'mid-transaction-report'
+  | 'transaction-summary-report'
+  | 'country-wise-transaction-report';
+
 export interface AdminReportTypeConfig {
   slug: string;
-  apiType: string;
+  apiType: AdminReportApiType;
   title: string;
   description: string;
 }
@@ -43,28 +50,10 @@ export const ADMIN_REPORT_TYPES: AdminReportTypeConfig[] = [
     description: 'View transaction summary reports with aggregated metrics',
   },
   {
-    slug: 'merchant-transaction-response',
-    apiType: 'merchant-transaction-response',
-    title: 'Merchant Transaction Response',
-    description: 'View merchant transaction response reports',
-  },
-  {
     slug: 'country-wise-transaction',
     apiType: 'country-wise-transaction-report',
     title: 'Country-wise Transaction',
     description: 'View country-wise transaction distribution and metrics',
-  },
-  {
-    slug: 'bin-wise-transaction',
-    apiType: 'bin-wise-transaction-report',
-    title: 'BIN-wise Transaction',
-    description: 'View BIN (Bank Identification Number) wise transaction reports',
-  },
-  {
-    slug: 'provider-rates',
-    apiType: 'provider-rates',
-    title: 'Provider Rates',
-    description: 'View provider rates and fee structures',
   },
 ];
 

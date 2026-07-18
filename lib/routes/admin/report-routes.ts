@@ -4,6 +4,7 @@
  */
 
 import { getBaseUrl } from '../config/base-url';
+import type { AdminReportApiType } from '@/config/reports/admin-report-types';
 
 const BASE_URL = getBaseUrl();
 
@@ -16,7 +17,7 @@ export const adminReportRoutes = {
   report: `${BASE_URL}/admin/report`,
   /** Build report URL for any report type; optional filters (e.g. merchant_id) match backend query params */
   reportByType: (
-    type: string,
+    type: AdminReportApiType,
     startDate: string,
     endDate: string,
     extras?: AdminReportQueryExtras

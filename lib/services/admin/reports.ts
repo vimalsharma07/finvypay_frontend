@@ -7,6 +7,7 @@
 
 import { http, ApiError } from '../../api';
 import { adminRoutes } from '../../routes/routes';
+import type { AdminReportApiType } from '@/config/reports/admin-report-types';
 import type { AdminReportQueryExtras } from '../../routes/admin/report-routes';
 import type { ApiResponse } from '../types';
 
@@ -27,7 +28,7 @@ export interface MerchantTurnoverReportResponse {
 }
 
 export interface ReportParams {
-  type: string;
+  type: AdminReportApiType;
   start_date: string;
   end_date: string;
 }
@@ -48,7 +49,7 @@ export interface GenericReportResponse {
  * @returns Promise with report response
  */
 export async function getReport(
-  type: string,
+  type: AdminReportApiType,
   startDate: string,
   endDate: string,
   extras?: AdminReportQueryExtras

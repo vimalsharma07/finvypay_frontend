@@ -17,6 +17,7 @@ export interface MerchantRates {
   flaggedFee: number;
   setupFee: number;
   refundFee: number;
+  settlementFee: number;
   minTxnAmount?: number;
   maxTxnAmount?: number;
   /** Optional: Referral Partner (Affiliate) ID */
