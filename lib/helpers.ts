@@ -150,6 +150,7 @@ export function generateFilterQuery(filters: GenerateFilterInput) {
 const ADMIN_TX_FILTER_TO_API: Record<string, string> = {
   user_id: 'userId',
   transaction_id: 'transactionId',
+  gateway_id: 'gatewayId',
   order_id: 'orderId',
   email: 'email',
   card_bin: 'cardBin',
