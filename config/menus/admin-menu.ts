@@ -116,10 +116,7 @@ const BASE_ADMIN_MENU: MenuConfig = [
       { title: 'Merchant Transaction', path: '/admin/reports/merchant-transaction', submodule: 'Reports' },
       { title: 'MID Transaction', path: '/admin/reports/mid-transaction', submodule: 'Reports' },
       { title: 'Transaction Summary', path: '/admin/reports/transaction-summary', submodule: 'Reports' },
-      { title: 'Merchant Transaction Response', path: '/admin/reports/merchant-transaction-response', submodule: 'Reports' },
       { title: 'Country-wise Transaction', path: '/admin/reports/country-wise-transaction', submodule: 'Reports' },
-      { title: 'BIN-wise Transaction', path: '/admin/reports/bin-wise-transaction', submodule: 'Reports' },
-      { title: 'Provider Rates', path: '/admin/reports/provider-rates', submodule: 'Reports' },
     ],
   },
   {
