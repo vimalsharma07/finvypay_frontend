@@ -12,11 +12,17 @@ interface UseAdminOpenTicketCountResult {
   loading: boolean;
 }
 
-export function useAdminOpenTicketCount(): UseAdminOpenTicketCountResult {
+export function useAdminOpenTicketCount(enabled = true): UseAdminOpenTicketCountResult {
   const [count, setCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (!enabled) {
+      setCount(null);
+      setLoading(false);
+      return;
+    }
+
     let isMounted = true;
 
     const fetchCount = async () => {
@@ -54,7 +60,7 @@ export function useAdminOpenTicketCount(): UseAdminOpenTicketCountResult {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [enabled]);
 
   return { count, loading };
 }
