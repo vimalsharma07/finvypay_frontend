@@ -75,6 +75,7 @@ export function TransactionDetailsDialog({
       transaction
         ? formatTransactionStatus(transaction.status, {
             chargebackDate: transaction.chargebackDate,
+            refundDate: transaction.refundDate,
           })
         : null,
     [transaction]
