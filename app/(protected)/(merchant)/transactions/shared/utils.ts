@@ -5,14 +5,40 @@
 import { Transaction } from '@/lib/services/user/transaction';
 import { DISPLAY_TIMEZONE } from '@/lib/constants/datetime';
 
+export type TransactionStatusOverride = {
+  chargebackDate?: string | null;
+  refundDate?: string | null;
+};
+
+/** Chargeback takes precedence over refund when both dates exist. */
+export function getTransactionStatusOverride(
+  options?: TransactionStatusOverride
+): 'chargeback' | 'refund' | null {
+  if (options?.chargebackDate) return 'chargeback';
+  if (options?.refundDate) return 'refund';
+  return null;
+}
+
 /**
  * Transaction status mapping (API sends numeric status)
  * PENDING = 0, SUCCESS = 1, FAILED = 2, BLOCKED = 3, ABANDONED = 4, REDIRECTED = 5
+ * chargebackDate / refundDate override the numeric status in the UI.
  */
-export function formatTransactionStatus(status: number): {
+export function formatTransactionStatus(
+  status: number,
+  options?: TransactionStatusOverride
+): {
   label: string;
   variant: 'primary' | 'success' | 'destructive' | 'warning' | 'secondary';
 } {
+  const override = getTransactionStatusOverride(options);
+  if (override === 'chargeback') {
+    return { label: 'Chargeback', variant: 'destructive' };
+  }
+  if (override === 'refund') {
+    return { label: 'Refunded', variant: 'secondary' };
+  }
+
   const statusMap: Record<
     number,
     { label: string; variant: 'primary' | 'success' | 'destructive' | 'warning' | 'secondary' }

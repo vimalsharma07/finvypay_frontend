@@ -28,6 +28,7 @@ import {
   Loader2,
   AlertCircle,
   RotateCcw,
+  Ban,
   Copy,
   Check
 } from 'lucide-react';
@@ -61,7 +62,13 @@ export function TransactionDetailsDialog({
   const [copied, setCopied] = useState(false);
   
   const statusInfo = useMemo(
-    () => (transaction ? formatTransactionStatus(transaction.status) : null),
+    () =>
+      transaction
+        ? formatTransactionStatus(transaction.status, {
+            chargebackDate: transaction.chargebackDate,
+            refundDate: transaction.refundDate,
+          })
+        : null,
     [transaction]
   );
 
@@ -118,11 +125,17 @@ export function TransactionDetailsDialog({
               <Badge
                 variant={statusInfo?.variant || 'secondary'}
                 className={`size-12 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg ${
-                  statusInfo?.label === 'Refunded' ? 'bg-purple-500 hover:bg-purple-600' : ''
+                  statusInfo?.label === 'Refunded'
+                    ? 'bg-purple-500 hover:bg-purple-600'
+                    : statusInfo?.label === 'Chargeback'
+                      ? 'bg-orange-500 hover:bg-orange-600'
+                      : ''
                 }`}
               >
                 {statusInfo?.variant === 'success' ? (
                   <CheckCircle2 className="size-6" />
+                ) : statusInfo?.label === 'Chargeback' ? (
+                  <Ban className="size-6" />
                 ) : statusInfo?.variant === 'destructive' ? (
                   <XCircle className="size-6" />
                 ) : statusInfo?.variant === 'warning' ? (

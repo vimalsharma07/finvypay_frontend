@@ -33,9 +33,9 @@ export function TransactionActionMenu({
   resendingWebhookTransactionId = null,
   showDisabledActions = true, // Default to true for production transactions
 }: TransactionActionMenuProps) {
-  // Status 1 = Success; chargebackDate means already charged back (status stays 1)
+  // Status 1 = Success; chargeback/refund dates mean the txn is already closed
   const canTakeStatusActions =
-    transaction.status === 1 && !transaction.chargebackDate;
+    transaction.status === 1 && !transaction.chargebackDate && !transaction.refundDate;
   const showActionOptions = showDisabledActions && canTakeStatusActions;
 
   return (
