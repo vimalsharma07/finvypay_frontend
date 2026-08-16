@@ -8,12 +8,12 @@ import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { Badge } from '@/components/ui/badge';
 import { Transaction } from '@/lib/services/admin/transaction';
 import {
-  formatTransactionStatus,
   formatTransactionDate,
   formatTransactionAmount,
+  getTransactionStatusOverride,
 } from './utils';
 import { TransactionActionMenu } from './transaction-action-menu';
-import { CheckCircle2, Clock, XCircle, AlertCircle, Copy, Check, Ban } from 'lucide-react';
+import { CheckCircle2, Clock, XCircle, AlertCircle, Copy, Check, Ban, RotateCcw } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -332,18 +332,27 @@ export function getTransactionColumns(
           4: { label: 'Abandoned', icon: AlertCircle, className: 'text-slate-700 dark:text-slate-400 bg-slate-50 dark:bg-slate-950/30 border-slate-200 dark:border-slate-900' },
           5: { label: 'Redirected', icon: AlertCircle, className: 'text-slate-700 dark:text-slate-400 bg-slate-50 dark:bg-slate-950/30 border-slate-200 dark:border-slate-900' },
         };
-        const config = row.original.chargebackDate
-          ? {
-              label: 'Chargeback',
-              icon: Ban,
-              className:
-                'text-orange-700 dark:text-orange-500 bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-900',
-            }
-          : statusConfig[status as keyof typeof statusConfig] || {
-              label: `Status ${status}`,
-              icon: AlertCircle,
-              className: '',
-            };
+        const override = getTransactionStatusOverride(row.original);
+        const config =
+          override === 'chargeback'
+            ? {
+                label: 'Chargeback',
+                icon: Ban,
+                className:
+                  'text-orange-700 dark:text-orange-500 bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-900',
+              }
+            : override === 'refund'
+              ? {
+                  label: 'Refunded',
+                  icon: RotateCcw,
+                  className:
+                    'text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-900',
+                }
+              : statusConfig[status as keyof typeof statusConfig] || {
+                  label: `Status ${status}`,
+                  icon: AlertCircle,
+                  className: '',
+                };
         const Icon = config.icon;
         return (
           <Tooltip>
