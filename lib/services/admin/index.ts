@@ -26,4 +26,5 @@ export * from './notifications';
 export * from './reports';
 export * from './dashboard';
 export * from './logs';
+export * from './smtp';
 
