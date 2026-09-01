@@ -47,8 +47,8 @@ import { getRoles, getPermissions, getUsers } from '@/lib/services/admin';
 - `register()` - User registration
 - `validateUser()` - Validate credentials
 - `googleLogin()` - Google OAuth
-- `forgotPassword()` - Send reset link
-- `resetPassword()` - Reset password
+- `forgotPassword()` - Send reset OTP to email
+- `resetPassword()` - Reset password with email, OTP, and new password
 - `changePassword()` - Change password
 - `verifyEmail()` - Verify email
 - `resendVerification()` - Resend verification
