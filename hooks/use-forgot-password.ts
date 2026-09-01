@@ -12,7 +12,7 @@ export interface UseForgotPasswordOptions {
 }
 
 export interface UseForgotPasswordReturn {
-  sendResetLink: (email: string) => Promise<void>;
+  sendOtp: (email: string) => Promise<void>;
   isProcessing: boolean;
   cooldownRemaining: number;
   canSend: boolean;
@@ -28,13 +28,13 @@ export interface UseForgotPasswordReturn {
  * 
  * @example
  * ```tsx
- * const { sendResetLink, isProcessing, cooldownRemaining, canSend, error, success } = useForgotPassword({
+ * const { sendOtp, isProcessing, cooldownRemaining, canSend, error, success } = useForgotPassword({
  *   onSuccess: (message) => toast.success(message),
  *   onError: (error) => toast.error(error),
  *   cooldownSeconds: 60
  * });
  * 
- * await sendResetLink('user@example.com');
+ * await sendOtp('user@example.com');
  * ```
  */
 export function useForgotPassword({
@@ -91,8 +91,8 @@ export function useForgotPassword({
     return emailRegex.test(email.trim());
   }, []);
 
-  // Main function to send reset link
-  const sendResetLink = useCallback(async (email: string): Promise<void> => {
+  // Main function to send reset OTP
+  const sendOtp = useCallback(async (email: string): Promise<void> => {
     // Clear previous messages
     setError(null);
     setSuccess(null);
@@ -114,7 +114,7 @@ export function useForgotPassword({
 
     // Check if still in cooldown
     if (cooldownRemaining > 0) {
-      const errorMsg = `Please wait ${cooldownRemaining} seconds before requesting another reset link.`;
+      const errorMsg = `Please wait ${cooldownRemaining} seconds before requesting another OTP.`;
       setError(errorMsg);
       onError?.(errorMsg);
       return;
@@ -131,7 +131,7 @@ export function useForgotPassword({
         onSuccess: (data) => {
           const successMessage = 
             data?.message || 
-            'Password reset link has been sent to your email. Please check your inbox.';
+            'A verification code has been sent to your email. Please check your inbox.';
           
           setSuccess(successMessage);
           onSuccess?.(successMessage);
@@ -140,12 +140,12 @@ export function useForgotPassword({
           setCooldownRemaining(cooldownSeconds);
         },
         onError: (errorMessage) => {
-          setError(errorMessage || 'Failed to send password reset link. Please try again.');
-          onError?.(errorMessage || 'Failed to send password reset link. Please try again.');
+          setError(errorMessage || 'Failed to send verification code. Please try again.');
+          onError?.(errorMessage || 'Failed to send verification code. Please try again.');
         },
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to send password reset link. Please try again.';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to send verification code. Please try again.';
       setError(errorMessage);
       onError?.(errorMessage);
     } finally {
@@ -163,7 +163,7 @@ export function useForgotPassword({
   const canSend = !isProcessing && cooldownRemaining === 0;
 
   return {
-    sendResetLink,
+    sendOtp,
     isProcessing,
     cooldownRemaining,
     canSend,

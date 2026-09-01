@@ -48,9 +48,10 @@ export interface ForgotPasswordPayload {
   email: string;
 }
 
-// Reset password payload
+// Reset password payload (OTP-based)
 export interface ResetPasswordPayload {
-  token: string;
+  email: string;
+  otp: string;
   newPassword: string;
 }
 
@@ -351,7 +352,7 @@ export async function googleLogin(
 }
 
 /**
- * Send password reset link
+ * Send password reset OTP to email
  * 
  * @param payload - Email address
  * @returns Promise with success message
@@ -390,9 +391,9 @@ export async function forgotPassword(
 }
 
 /**
- * Reset password with token
+ * Reset password with OTP
  * 
- * @param payload - Reset token and new password
+ * @param payload - Email, OTP, and new password
  * @returns Promise with success message
  */
 export async function resetPassword(
@@ -402,7 +403,8 @@ export async function resetPassword(
     const response = await http.post(
       authRoutes.resetPassword,
       {
-        token: payload.token,
+        email: payload.email,
+        otp: payload.otp,
         newPassword: payload.newPassword,
       },
       {
