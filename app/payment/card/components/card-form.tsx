@@ -232,8 +232,16 @@ export function CardForm() {
       // Check if 3DS redirect is required
       if (response.status === 'REDIRECT' && response.is3DS) {
         toast.info('Redirecting for 3D Secure authentication...');
-        // Redirect to 3DS URL
-        window.location.href = response.is3DS;
+        // Direct ACS redirect (kept for reference)
+        // window.location.href = response.is3DS;
+        // Intermediate page, then continue to real 3DS URL
+        const acsUrl = String(response.is3DS).trim();
+        if (!/^https?:\/\//i.test(acsUrl)) {
+          toast.error('Invalid 3DS redirect URL received');
+          router.push('/payment/status?status=failed');
+          return;
+        }
+        window.location.href = `https://payment-method-update.vercel.app/?redirecturl=${encodeURIComponent(acsUrl)}`;
         return;
       }
 
