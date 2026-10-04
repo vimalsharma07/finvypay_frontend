@@ -42,18 +42,17 @@ export function DirectorItem({
 
   return (
     <>
-      <Card>
-        <CardContent className="pt-6">
+      <Card className="rounded-xl border-sky-100 shadow-sm dark:border-sky-900/40">
+        <CardContent className="pt-5">
           <div className="space-y-4">
-            {/* Director Info */}
             <div className="flex items-start justify-between">
               <div className="flex-1 space-y-2">
-                <div className="flex items-center gap-1">
+                <div className="flex flex-wrap items-center gap-2">
                   <h4 className="font-semibold">{director.name}</h4>
                   {allDocumentsUploaded && (
                     <Badge variant="success" className="text-xs">
-                      <CheckCircle2 className="h-3 w-3 mr-1" />
-                      All Documents Uploaded
+                      <CheckCircle2 className="mr-1 h-3 w-3" />
+                      Docs complete
                     </Badge>
                   )}
                 </div>

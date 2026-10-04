@@ -99,22 +99,22 @@ export function Step5VideoKyc({ onboardingData, onNext, onBack, onUpdate }: Step
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Video KYC Verification</CardTitle>
+    <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+      <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
+        <CardTitle>Face Check</CardTitle>
         <CardDescription>
-          Record a {4}-second video for identity verification
+          Record a {4}-second video so we can verify your identity
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           {isVideoUploaded && (
-            <div className="flex items-center gap-1 p-4 bg-success/10 border border-success/20 rounded-lg">
+            <div className="flex items-center gap-3 rounded-xl border border-success/20 bg-success/10 p-4">
               <CheckCircle2 className="h-5 w-5 text-success" />
               <div>
-                <p className="font-medium text-success">Video KYC Completed</p>
+                <p className="font-medium text-success">Video uploaded</p>
                 <p className="text-sm text-muted-foreground">
-                  Your video has been successfully uploaded and verified.
+                  Your verification clip is ready.
                 </p>
               </div>
             </div>
@@ -127,8 +127,8 @@ export function Step5VideoKyc({ onboardingData, onNext, onBack, onUpdate }: Step
             maxDuration={4}
           />
           
-          <div className="flex justify-between pt-4 border-t">
-            <Button type="button" variant="outline" onClick={onBack} className="gap-2">
+          <div className="flex justify-between border-t border-sky-100 pt-4 dark:border-sky-900/40">
+            <Button type="button" variant="outline" onClick={onBack} className="gap-2 rounded-xl">
               <ChevronLeft className="h-4 w-4" />
               Back
             </Button>
@@ -137,7 +137,7 @@ export function Step5VideoKyc({ onboardingData, onNext, onBack, onUpdate }: Step
               variant="primary" 
               onClick={handleNext}
               disabled={!isVideoUploaded || isUploading}
-              className="gap-2"
+              className="gap-2 rounded-xl shadow-sm shadow-sky-500/20"
             >
               Continue
               <ChevronRight className="h-4 w-4" />

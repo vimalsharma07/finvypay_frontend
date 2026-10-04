@@ -254,9 +254,11 @@ export function Step4Directors({ onboardingData, onNext, onBack, onUpdate }: Ste
 
   if (loading) {
     return (
-      <Card>
+      <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
         <CardContent className="pt-6">
-          <div className="text-center py-8 text-muted-foreground">Loading directors...</div>
+          <div className="rounded-xl border border-sky-100 bg-sky-50/40 py-8 text-center text-muted-foreground dark:border-sky-900/40 dark:bg-sky-950/20">
+            Loading directors...
+          </div>
         </CardContent>
       </Card>
     );
@@ -264,21 +266,22 @@ export function Step4Directors({ onboardingData, onNext, onBack, onUpdate }: Ste
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
+      <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+        <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
+          <div className="flex items-center justify-between gap-3">
             <div>
-              <CardTitle>Directors</CardTitle>
+              <CardTitle>Leadership</CardTitle>
               <CardDescription>
-                Add directors and upload their register of director documents
+                Add directors and upload their required documents
               </CardDescription>
             </div>
             <Button
               type="button"
               variant="primary"
               onClick={() => setAddDialogOpen(true)}
+              className="rounded-xl shadow-sm shadow-sky-500/20"
             >
-              <Plus className="h-4 w-4 mr-1" />
+              <Plus className="mr-1 h-4 w-4" />
               Add Director
             </Button>
           </div>
@@ -286,12 +289,12 @@ export function Step4Directors({ onboardingData, onNext, onBack, onUpdate }: Ste
         <CardContent>
           {directors.length === 0 ? (
             <div className="space-y-6">
-              <div className="text-center py-12 text-muted-foreground">
-                <p className="mb-4">No directors added yet.</p>
-                <p>Click "Add Director" to get started.</p>
+              <div className="rounded-xl border border-dashed border-sky-200 bg-sky-50/40 py-12 text-center text-muted-foreground dark:border-sky-800 dark:bg-sky-950/20">
+                <p className="mb-2 font-medium text-foreground">No directors yet</p>
+                <p className="text-sm">Click Add Director to get started.</p>
               </div>
-              <div className="flex justify-start pt-4 border-t">
-                <Button type="button" variant="outline" onClick={onBack} className="gap-2">
+              <div className="flex justify-start border-t border-sky-100 pt-4 dark:border-sky-900/40">
+                <Button type="button" variant="outline" onClick={onBack} className="gap-2 rounded-xl">
                   <ChevronLeft className="h-4 w-4" />
                   Back
                 </Button>
@@ -316,8 +319,8 @@ export function Step4Directors({ onboardingData, onNext, onBack, onUpdate }: Ste
           )}
 
           {directors.length > 0 && (
-            <div className="flex justify-between pt-6 border-t mt-6">
-              <Button type="button" variant="outline" onClick={onBack} className="gap-2">
+            <div className="mt-6 flex justify-between border-t border-sky-100 pt-6 dark:border-sky-900/40">
+              <Button type="button" variant="outline" onClick={onBack} className="gap-2 rounded-xl">
                 <ChevronLeft className="h-4 w-4" />
                 Back
               </Button>
@@ -326,7 +329,7 @@ export function Step4Directors({ onboardingData, onNext, onBack, onUpdate }: Ste
                 variant="primary"
                 onClick={handleContinue}
                 disabled={!allDirectorsHaveDocuments}
-                className="gap-2"
+                className="gap-2 rounded-xl shadow-sm shadow-sky-500/20"
               >
                 Continue
                 <ChevronRight className="h-4 w-4" />

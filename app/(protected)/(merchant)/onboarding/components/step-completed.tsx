@@ -20,12 +20,11 @@ export function StepCompleted({ onboardingData, onRefresh }: StepCompletedProps)
 
   useEffect(() => {
     fetchStatus();
-    // Refresh status every 30 seconds if waiting for approval
     const interval = setInterval(() => {
       if (kycStatus === 'agreement_received' || kycStatus === 'pending_for_approval') {
         fetchStatus();
       }
-    }, 30000); // 30 seconds
+    }, 30000);
 
     return () => clearInterval(interval);
   }, [kycStatus]);
@@ -40,7 +39,6 @@ export function StepCompleted({ onboardingData, onRefresh }: StepCompletedProps)
             setKycStatus(data.data.user.kycStatus);
             onRefresh?.();
           } else if (data && data.success && data.data?.onboarding) {
-            // Fallback to check onboarding data
             const status = data.data.user?.kycStatus || null;
             setKycStatus(status);
           }
@@ -56,7 +54,6 @@ export function StepCompleted({ onboardingData, onRefresh }: StepCompletedProps)
     }
   };
 
-  // Get status from props if available
   useEffect(() => {
     if (onboardingData?.user?.kycStatus) {
       setKycStatus(onboardingData.user.kycStatus);
@@ -70,46 +67,50 @@ export function StepCompleted({ onboardingData, onRefresh }: StepCompletedProps)
 
   if (loading) {
     return (
-      <Card>
+      <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
         <CardContent className="pt-6">
-          <div className="text-center py-8 text-muted-foreground">Loading status...</div>
+          <div className="rounded-xl border border-sky-100 bg-sky-50/40 py-8 text-center text-muted-foreground dark:border-sky-900/40 dark:bg-sky-950/20">
+            Loading status...
+          </div>
         </CardContent>
       </Card>
     );
   }
 
-  // Check if waiting for admin approval
   if (kycStatus === 'agreement_received' || kycStatus === 'pending_for_approval') {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Application Completed</CardTitle>
+      <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+        <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
+          <CardTitle>You&apos;re in</CardTitle>
           <CardDescription>
-            Your onboarding application is under review
+            Your application is with our review team
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            <div className="flex items-start gap-4 p-6 bg-info/10 border border-info/20 rounded-lg">
-              <Clock className="h-6 w-6 text-info mt-0.5 flex-shrink-0" />
+            <div className="flex items-start gap-4 rounded-xl border border-sky-200/80 bg-sky-50/60 p-6 dark:border-sky-800 dark:bg-sky-950/30">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-300">
+                <Clock className="h-5 w-5" />
+              </div>
               <div className="flex-1 space-y-2">
-                <h3 className="font-semibold text-lg">Pending for Approval</h3>
+                <h3 className="text-lg font-semibold">Pending approval</h3>
                 <p className="text-sm text-muted-foreground">
-                  Your onboarding application has been successfully submitted and is currently 
-                  under review by our admin team. We will notify you once the review is complete.
+                  Your onboarding application was submitted successfully and is under review.
+                  We&apos;ll notify you once the review is complete.
                 </p>
-                <p className="text-xs text-muted-foreground mt-4">
-                  This page will automatically refresh to check for status updates.
+                <p className="mt-4 text-xs text-muted-foreground">
+                  This page refreshes automatically for status updates.
                 </p>
               </div>
             </div>
 
-            <div className="flex justify-center gap-3 pt-4">
+            <div className="flex justify-center gap-3 pt-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={fetchStatus}
                 disabled={loading}
+                className="rounded-xl"
               >
                 Refresh Status
               </Button>
@@ -117,6 +118,7 @@ export function StepCompleted({ onboardingData, onRefresh }: StepCompletedProps)
                 type="button"
                 variant="primary"
                 onClick={handleGoToDashboard}
+                className="rounded-xl shadow-sm shadow-sky-500/20"
               >
                 Go to Dashboard
               </Button>
@@ -127,35 +129,33 @@ export function StepCompleted({ onboardingData, onRefresh }: StepCompletedProps)
     );
   }
 
-  // Check if approved
   if (kycStatus === 'approved' || kycStatus === 'active') {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Congratulations!</CardTitle>
+      <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+        <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
+          <CardTitle>Congratulations</CardTitle>
           <CardDescription>
-            Your onboarding has been completed and approved
+            Your merchant account is verified and ready
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            <div className="flex items-start gap-4 p-6 bg-success/10 border border-success/20 rounded-lg">
-              <CheckCircle2 className="h-6 w-6 text-success mt-0.5 flex-shrink-0" />
+            <div className="flex items-start gap-4 rounded-xl border border-success/20 bg-success/10 p-6">
+              <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-success" />
               <div className="flex-1 space-y-2">
-                <h3 className="font-semibold text-lg">Onboarding Complete</h3>
+                <h3 className="text-lg font-semibold">Setup complete</h3>
                 <p className="text-sm text-muted-foreground">
-                  Your account has been successfully verified and approved. You can now access 
-                  all features of the platform.
+                  Your account has been approved. You can now use the full merchant workspace.
                 </p>
               </div>
             </div>
 
-            <div className="flex justify-center pt-4">
+            <div className="flex justify-center pt-2">
               <Button
                 type="button"
                 variant="primary"
                 onClick={handleGoToDashboard}
-                className="min-w-[200px]"
+                className="min-w-[200px] rounded-xl shadow-sm shadow-sky-500/20"
               >
                 Go to Dashboard
               </Button>
@@ -166,35 +166,34 @@ export function StepCompleted({ onboardingData, onRefresh }: StepCompletedProps)
     );
   }
 
-  // Check if rejected
   if (kycStatus === 'rejected' || kycStatus === 'declined') {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Application Review</CardTitle>
+      <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+        <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
+          <CardTitle>Application review</CardTitle>
           <CardDescription>
-            Your application requires attention
+            Your application needs attention
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            <div className="flex items-start gap-4 p-6 bg-destructive/10 border border-destructive/20 rounded-lg">
-              <AlertCircle className="h-6 w-6 text-destructive mt-0.5 flex-shrink-0" />
+            <div className="flex items-start gap-4 rounded-xl border border-destructive/20 bg-destructive/10 p-6">
+              <AlertCircle className="mt-0.5 h-6 w-6 shrink-0 text-destructive" />
               <div className="flex-1 space-y-2">
-                <h3 className="font-semibold text-lg">Application Status</h3>
+                <h3 className="text-lg font-semibold">Status update</h3>
                 <p className="text-sm text-muted-foreground">
-                  Your onboarding application has been reviewed. Please contact support for 
-                  more information about your application status.
+                  Your onboarding application has been reviewed. Please contact support for
+                  more information.
                 </p>
               </div>
             </div>
 
-            <div className="flex justify-center pt-4">
+            <div className="flex justify-center pt-2">
               <Button
                 type="button"
                 variant="primary"
                 onClick={handleGoToDashboard}
-                className="min-w-[200px]"
+                className="min-w-[200px] rounded-xl shadow-sm shadow-sky-500/20"
               >
                 Go to Dashboard
               </Button>
@@ -205,34 +204,32 @@ export function StepCompleted({ onboardingData, onRefresh }: StepCompletedProps)
     );
   }
 
-  // Default completion message
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Onboarding Complete</CardTitle>
+    <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+      <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
+        <CardTitle>You&apos;re in</CardTitle>
         <CardDescription>
-          All steps have been completed
+          All setup steps are complete
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          <div className="flex items-start gap-4 p-6 bg-success/10 border border-success/20 rounded-lg">
-            <CheckCircle2 className="h-6 w-6 text-success mt-0.5 flex-shrink-0" />
+          <div className="flex items-start gap-4 rounded-xl border border-success/20 bg-success/10 p-6">
+            <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-success" />
             <div className="flex-1 space-y-2">
-              <h3 className="font-semibold text-lg">Congratulations!</h3>
+              <h3 className="text-lg font-semibold">Application submitted</h3>
               <p className="text-sm text-muted-foreground">
-                You have successfully completed all onboarding steps. Your application is 
-                being processed and you will be notified once it's reviewed.
+                You finished every onboarding step. We&apos;ll notify you once review is done.
               </p>
             </div>
           </div>
 
-          <div className="flex justify-center pt-4">
+          <div className="flex justify-center pt-2">
             <Button
               type="button"
               variant="primary"
               onClick={handleGoToDashboard}
-              className="min-w-[200px]"
+              className="min-w-[200px] rounded-xl shadow-sm shadow-sky-500/20"
             >
               Go to Dashboard
             </Button>
@@ -242,4 +239,3 @@ export function StepCompleted({ onboardingData, onRefresh }: StepCompletedProps)
     </Card>
   );
 }
-
