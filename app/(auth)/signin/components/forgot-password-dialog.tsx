@@ -161,21 +161,21 @@ export function ForgotPasswordDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="space-y-4 pb-2">
           <div className="flex justify-center">
-            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 ring-1 ring-sky-500/20">
               {step === 'email' ? (
-                <Mail className="h-6 w-6 text-primary" />
+                <Mail className="h-6 w-6 text-sky-600 dark:text-sky-400" />
               ) : (
-                <KeyRound className="h-6 w-6 text-primary" />
+                <KeyRound className="h-6 w-6 text-sky-600 dark:text-sky-400" />
               )}
             </div>
           </div>
           <div className="space-y-2 text-center">
             <DialogTitle className="text-2xl font-bold tracking-tight">
-              {step === 'email' ? 'Forgot Password?' : 'Reset Password'}
+              {step === 'email' ? 'Reset your password' : 'Choose a new password'}
             </DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
               {step === 'email'
-                ? "Enter your email and we'll send you a verification code."
+                ? "We'll email you a secure code to create a new password."
                 : `Enter the 6-digit code sent to ${email}`}
             </DialogDescription>
           </div>
@@ -225,7 +225,7 @@ export function ForgotPasswordDialog({
               <Button
                 type="submit"
                 disabled={isProcessing || !canSend}
-                className="w-full h-11 text-base font-semibold"
+                className="h-11 w-full rounded-xl text-base font-semibold shadow-sm shadow-sky-500/20"
               >
                 {isProcessing ? (
                   <>
@@ -235,7 +235,7 @@ export function ForgotPasswordDialog({
                 ) : (
                   <>
                     <Mail className="mr-1 h-4 w-4" />
-                    Send Verification Code
+                    Send verification code
                   </>
                 )}
               </Button>
@@ -394,17 +394,17 @@ export function ForgotPasswordDialog({
                     <Button
                       type="submit"
                       disabled={isResetting || otpValue.length !== 6}
-                      className="w-full h-11 text-base font-semibold"
+                      className="h-11 w-full rounded-xl text-base font-semibold shadow-sm shadow-sky-500/20"
                     >
                       {isResetting ? (
                         <>
                           <LoaderCircleIcon className="mr-1 h-4 w-4 animate-spin" />
-                          Resetting...
+                          Updating...
                         </>
                       ) : (
                         <>
                           <Check className="mr-1 h-4 w-4" />
-                          Reset Password
+                          Update password
                         </>
                       )}
                     </Button>
@@ -413,7 +413,7 @@ export function ForgotPasswordDialog({
                       variant="outline"
                       onClick={() => setStep('email')}
                       disabled={isResetting}
-                      className="w-full h-11"
+                      className="h-11 w-full rounded-xl"
                     >
                       Back
                     </Button>
@@ -423,7 +423,7 @@ export function ForgotPasswordDialog({
                     type="button"
                     variant="primary"
                     onClick={() => handleClose(false)}
-                    className="w-full h-11"
+                    className="h-11 w-full rounded-xl shadow-sm shadow-sky-500/20"
                   >
                     Close
                   </Button>

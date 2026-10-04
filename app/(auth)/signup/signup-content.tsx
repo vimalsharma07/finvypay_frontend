@@ -243,18 +243,18 @@ export function SignupContent() {
             className="block w-full space-y-6"
           >
             <div className="space-y-2 pb-2">
-              <div className="flex justify-center mb-4">
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Mail className="h-6 w-6 text-primary" />
+              <div className="mb-4 flex justify-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 ring-1 ring-sky-500/20">
+                  <Mail className="h-6 w-6 text-sky-600 dark:text-sky-400" />
                 </div>
               </div>
-              <h1 className="text-3xl font-bold tracking-tight text-center">
-                Verify Your Email
+              <h1 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
+                Confirm your email
               </h1>
-              <p className="text-sm text-muted-foreground text-center">
-                We&apos;ve sent a 6-digit code to
+              <p className="text-center text-sm text-muted-foreground">
+                Enter the 6-digit verification code sent to
               </p>
-              <p className="text-sm font-semibold text-center text-foreground">
+              <p className="text-center text-sm font-semibold text-foreground">
                 {registeredEmail}
               </p>
             </div>
@@ -354,7 +354,7 @@ export function SignupContent() {
                     otpForm.setValue('otp', otpValue, { shouldValidate: true });
                   }
                 }}
-                className="w-full h-11 text-base font-semibold"
+                className="h-11 w-full rounded-xl text-base font-semibold shadow-sm shadow-sky-500/20"
               >
                 {isProcessing ? (
                   <>
@@ -364,7 +364,7 @@ export function SignupContent() {
                 ) : (
                   <>
                     <CheckCircle className="h-4 w-4 mr-1" />
-                    Verify & Continue
+                    Verify & continue
                   </>
                 )}
               </Button>
@@ -376,7 +376,7 @@ export function SignupContent() {
                   setError(null);
                   setSuccess(null);
                 }}
-                className="w-full h-11"
+                className="h-11 w-full rounded-xl"
               >
                 <ArrowLeft className="h-4 w-4 mr-1" />
                 Back to Registration
@@ -397,16 +397,16 @@ export function SignupContent() {
           className="block w-full space-y-6"
         >
           <div className="space-y-2 pb-2">
-            <div className="flex justify-center mb-4">
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <UserPlus className="h-6 w-6 text-primary" />
+            <div className="mb-4 flex justify-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 ring-1 ring-sky-500/20">
+                <UserPlus className="h-6 w-6 text-sky-600 dark:text-sky-400" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-center">
-              Create Account
+            <h1 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
+              Start accepting payments
             </h1>
-            <p className="text-sm text-muted-foreground text-center">
-              Get started with your free account
+            <p className="text-center text-sm text-muted-foreground">
+              Create your FinvyPay account in a few steps
             </p>
           </div>
 
@@ -428,7 +428,7 @@ export function SignupContent() {
                   <FormLabel className="text-sm font-medium">Full name</FormLabel>
                   <FormControl>
                     <Input 
-                      placeholder="John Doe" 
+                      placeholder="Your full name" 
                       className="h-11"
                       {...field} 
                     />
@@ -583,7 +583,7 @@ export function SignupContent() {
             <Button 
               type="submit" 
               disabled={isProcessing}
-              className="w-full h-11 text-base font-semibold"
+              className="h-11 w-full rounded-xl text-base font-semibold shadow-sm shadow-sky-500/20"
             >
               {isProcessing ? (
                 <>
@@ -593,18 +593,18 @@ export function SignupContent() {
               ) : (
                 <>
                   <UserPlus className="h-4 w-4 mr-1" />
-                  Create Account
+                  Create account
                 </>
               )}
             </Button>
           </div>
 
           <div className="pt-2">
-            <p className="text-sm text-center text-muted-foreground">
+            <p className="text-center text-sm text-muted-foreground">
               Already have an account?{' '}
               <Link
                 href="/signin"
-                className="font-semibold text-primary hover:text-primary/80 transition-colors"
+                className="font-semibold text-primary transition-colors hover:text-primary/80"
               >
                 Sign in
               </Link>

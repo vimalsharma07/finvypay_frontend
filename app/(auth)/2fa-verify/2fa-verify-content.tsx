@@ -122,17 +122,17 @@ export function Verify2FAContent() {
     <div className="w-full space-y-6">
       {/* Header */}
       <div className="space-y-2 pb-2">
-        <div className="mx-auto h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-          <Shield className="h-6 w-6 text-primary" />
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 ring-1 ring-sky-500/20">
+          <Shield className="h-6 w-6 text-sky-600 dark:text-sky-400" />
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-center">
-          Two-Factor Authentication
+        <h1 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
+          Confirm it&apos;s you
         </h1>
-        <p className="text-sm text-muted-foreground text-center">
+        <p className="text-center text-sm text-muted-foreground">
           Enter the 6-digit code from your authenticator app
         </p>
-        <p className="text-xs text-muted-foreground text-center">
-          Verifying for: <span className="font-semibold text-foreground">{email}</span>
+        <p className="text-center text-xs text-muted-foreground">
+          Signing in as <span className="font-semibold text-foreground">{email}</span>
         </p>
       </div>
 
@@ -182,7 +182,7 @@ export function Verify2FAContent() {
             <div className="pt-2">
               <Button
                 type="submit"
-                className="w-full h-11 text-base font-semibold"
+                className="h-11 w-full rounded-xl text-base font-semibold shadow-sm shadow-sky-500/20"
                 disabled={isProcessing}
               >
                 {isProcessing ? (
@@ -193,7 +193,7 @@ export function Verify2FAContent() {
                 ) : (
                   <>
                     <Shield className="mr-1 h-4 w-4" />
-                    Verify & Continue
+                    Verify & continue
                   </>
                 )}
               </Button>

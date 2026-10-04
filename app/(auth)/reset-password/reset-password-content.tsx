@@ -159,13 +159,15 @@ export function ResetPasswordContent() {
         <Form {...emailForm}>
           <form onSubmit={handleEmailSubmit} className="block w-full space-y-6">
             <div className="space-y-2 pb-2">
-              <div className="flex justify-center mb-4">
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Mail className="h-6 w-6 text-primary" />
+              <div className="mb-4 flex justify-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 ring-1 ring-sky-500/20">
+                  <Mail className="h-6 w-6 text-sky-600 dark:text-sky-400" />
                 </div>
               </div>
-              <h1 className="text-3xl font-bold tracking-tight text-center">Reset Password</h1>
-              <p className="text-sm text-muted-foreground text-center">
+              <h1 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
+                Reset your password
+              </h1>
+              <p className="text-center text-sm text-muted-foreground">
                 Enter your email to receive a verification code
               </p>
             </div>
@@ -218,7 +220,7 @@ export function ResetPasswordContent() {
                   <Button
                     type="submit"
                     disabled={isProcessing || !canSend}
-                    className="w-full h-11 text-base font-semibold"
+                    className="h-11 w-full rounded-xl text-base font-semibold shadow-sm shadow-sky-500/20"
                   >
                     {isProcessing ? (
                       <>
@@ -228,17 +230,17 @@ export function ResetPasswordContent() {
                     ) : (
                       <>
                         <Mail className="h-4 w-4 mr-1" />
-                        Send Verification Code
+                        Send verification code
                       </>
                     )}
                   </Button>
                 }
               />
 
-              <Button type="button" variant="outline" className="w-full h-11" asChild>
+              <Button type="button" variant="outline" className="h-11 w-full rounded-xl" asChild>
                 <Link href="/signin">
-                  <ArrowLeft className="size-4 mr-1" />
-                  Back to Sign In
+                  <ArrowLeft className="mr-1 size-4" />
+                  Back to sign in
                 </Link>
               </Button>
             </div>
@@ -251,16 +253,18 @@ export function ResetPasswordContent() {
             className="block w-full space-y-6"
           >
             <div className="space-y-2 pb-2">
-              <div className="flex justify-center mb-4">
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <KeyRound className="h-6 w-6 text-primary" />
+              <div className="mb-4 flex justify-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 ring-1 ring-sky-500/20">
+                  <KeyRound className="h-6 w-6 text-sky-600 dark:text-sky-400" />
                 </div>
               </div>
-              <h1 className="text-3xl font-bold tracking-tight text-center">Reset Password</h1>
-              <p className="text-sm text-muted-foreground text-center">
+              <h1 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
+                Choose a new password
+              </h1>
+              <p className="text-center text-sm text-muted-foreground">
                 Enter the 6-digit code sent to
               </p>
-              <p className="text-sm font-semibold text-center text-foreground">{email}</p>
+              <p className="text-center text-sm font-semibold text-foreground">{email}</p>
             </div>
 
             {resetError && (
@@ -413,17 +417,17 @@ export function ResetPasswordContent() {
                   <Button
                     type="submit"
                     disabled={isResetting || otpValue.length !== 6}
-                    className="w-full h-11 text-base font-semibold"
+                    className="h-11 w-full rounded-xl text-base font-semibold shadow-sm shadow-sky-500/20"
                   >
                     {isResetting ? (
                       <>
                         <LoaderCircleIcon className="size-4 animate-spin mr-1" />
-                        Resetting...
+                        Updating...
                       </>
                     ) : (
                       <>
                         <Check className="h-4 w-4 mr-1" />
-                        Reset Password
+                        Update password
                       </>
                     )}
                   </Button>
@@ -432,7 +436,7 @@ export function ResetPasswordContent() {
                     variant="outline"
                     onClick={() => setStep('email')}
                     disabled={isResetting}
-                    className="w-full h-11"
+                    className="h-11 w-full rounded-xl"
                   >
                     Back
                   </Button>

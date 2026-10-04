@@ -295,16 +295,16 @@ export function SigninContent() {
             className="block w-full space-y-6"
           >
         <div className="space-y-2 pb-2">
-          <div className="flex justify-center mb-4">
-            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <LogIn className="h-6 w-6 text-primary" />
+          <div className="mb-4 flex justify-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 ring-1 ring-sky-500/20">
+              <LogIn className="h-6 w-6 text-sky-600 dark:text-sky-400" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-center">
-            Welcome Back
+          <h1 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
+            Welcome back
           </h1>
-          <p className="text-sm text-muted-foreground text-center">
-            Sign in to your account to continue
+          <p className="text-center text-sm text-muted-foreground">
+            Sign in to your FinvyPay dashboard
           </p>
         </div>
 
@@ -409,7 +409,7 @@ export function SigninContent() {
           <Button 
             type="submit" 
             disabled={isProcessing}
-            className="w-full h-11 text-base font-semibold"
+            className="h-11 w-full rounded-xl text-base font-semibold shadow-sm shadow-sky-500/20"
           >
             {isProcessing ? (
               <>
@@ -426,13 +426,13 @@ export function SigninContent() {
         </div>
 
         <div className="pt-2">
-          <p className="text-sm text-center text-muted-foreground">
-            Don&apos;t have an account?{' '}
+          <p className="text-center text-sm text-muted-foreground">
+            New to FinvyPay?{' '}
             <Link
               href="/signup"
-              className="font-semibold text-primary hover:text-primary/80 transition-colors"
+              className="font-semibold text-primary transition-colors hover:text-primary/80"
             >
-              Sign up
+              Create an account
             </Link>
           </p>
         </div>
@@ -448,16 +448,16 @@ export function SigninContent() {
           className="block w-full space-y-6"
         >
           <div className="space-y-2 pb-2">
-            <div className="flex justify-center mb-4">
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Mail className="h-6 w-6 text-primary" />
+            <div className="mb-4 flex justify-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 ring-1 ring-sky-500/20">
+                <Mail className="h-6 w-6 text-sky-600 dark:text-sky-400" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-center">
-              Sign in with OTP
+            <h1 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
+              Passwordless sign-in
             </h1>
-            <p className="text-sm text-muted-foreground text-center">
-              We&apos;ll send you a one-time password
+            <p className="text-center text-sm text-muted-foreground">
+              We&apos;ll email you a one-time code to continue
             </p>
           </div>
 
@@ -504,7 +504,7 @@ export function SigninContent() {
             <Button 
               type="submit" 
               disabled={isSendingOtp}
-              className="w-full h-11 text-base font-semibold"
+              className="h-11 w-full rounded-xl text-base font-semibold shadow-sm shadow-sky-500/20"
             >
               {isSendingOtp ? (
                 <>
@@ -521,13 +521,13 @@ export function SigninContent() {
           </div>
 
           <div className="pt-2">
-            <p className="text-sm text-center text-muted-foreground">
-              Don&apos;t have an account?{' '}
+            <p className="text-center text-sm text-muted-foreground">
+              New to FinvyPay?{' '}
               <Link
                 href="/signup"
-                className="font-semibold text-primary hover:text-primary/80 transition-colors"
+                className="font-semibold text-primary transition-colors hover:text-primary/80"
               >
-                Sign up
+                Create an account
               </Link>
             </p>
           </div>
@@ -543,18 +543,18 @@ export function SigninContent() {
           className="block w-full space-y-6"
         >
           <div className="space-y-2 pb-2">
-            <div className="flex justify-center mb-4">
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Mail className="h-6 w-6 text-primary" />
+            <div className="mb-4 flex justify-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 ring-1 ring-sky-500/20">
+                <Mail className="h-6 w-6 text-sky-600 dark:text-sky-400" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-center">
-              Verify Your Email
+            <h1 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
+              Check your inbox
             </h1>
-            <p className="text-sm text-muted-foreground text-center">
-              We&apos;ve sent a 6-digit code to
+            <p className="text-center text-sm text-muted-foreground">
+              Enter the 6-digit code we sent to
             </p>
-            <p className="text-sm font-semibold text-center text-foreground">
+            <p className="text-center text-sm font-semibold text-foreground">
               {otpEmail}
             </p>
           </div>
@@ -634,7 +634,7 @@ export function SigninContent() {
               onClick={() => {
                 otpForm.setValue('otp', otpValue, { shouldValidate: true });
               }}
-              className="w-full h-11 text-base font-semibold"
+              className="h-11 w-full rounded-xl text-base font-semibold shadow-sm shadow-sky-500/20"
             >
               {isVerifyingOtp ? (
                 <>
@@ -644,7 +644,7 @@ export function SigninContent() {
               ) : (
                 <>
                   <CheckCircle className="h-4 w-4 mr-1" />
-                  Verify & Continue
+                  Verify & continue
                 </>
               )}
             </Button>
@@ -660,7 +660,7 @@ export function SigninContent() {
                 otpForm.reset({ otp: '' });
                 setError(null);
               }}
-              className="w-full h-11"
+              className="h-11 w-full rounded-xl"
             >
               <ArrowLeft className="h-4 w-4 mr-1" />
               Back to Email
@@ -687,8 +687,8 @@ export function SigninContent() {
         className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium"
       >
         {loginMethod === 'password'
-          ? 'Sign in with OTP instead'
-          : 'Sign in with password instead'}
+          ? 'Use a one-time code instead'
+          : 'Use email & password instead'}
       </button>
     </div>
 
