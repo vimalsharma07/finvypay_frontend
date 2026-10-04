@@ -24,8 +24,8 @@ export default function CreateRoutingPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Create Routing Rule"
-            description="Configure routing rules to optimize payment processing across multiple acquirers"
+            title="Add Route"
+            description="Create a new path for sending payments to a bank partner"
             icon={Plus}
           />
         </Toolbar>

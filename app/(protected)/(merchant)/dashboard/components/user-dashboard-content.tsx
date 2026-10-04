@@ -468,7 +468,7 @@ export function UserDashboardContent({ dateRange: dateRangeProp }: UserDashboard
           axisTicks: { show: false },
         },
       ],
-      colors: ['#3b82f6', '#10b981'],
+      colors: ['#38BDF8', '#10b981'],
       legend: {
         show: true,
         position: 'top' as const,
@@ -617,242 +617,171 @@ export function UserDashboardContent({ dateRange: dateRangeProp }: UserDashboard
         </div>
       )}
 
-      {/* Stats Grid */}
       {dashboardLoading ? (
-        <div className="flex items-center justify-center py-20 mt-5 lg:mt-7.5">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <div className="mt-5 flex items-center justify-center py-20 lg:mt-7.5">
+          <Loader2 className="h-8 w-8 animate-spin text-sky-500" />
         </div>
       ) : (
         <>
-      <div className="grid gap-5 lg:gap-7.5 lg:grid-cols-4 mt-5 lg:mt-7.5">
-        {/* Successful Transactions */}
-        <Card className="relative overflow-hidden border-green-200/30 dark:border-green-900/30 bg-linear-to-br from-green-500/5 to-green-500/10 shadow-md shadow-green-500/10 hover:shadow-lg hover:shadow-green-500/20 transition-all duration-300">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-green-500/10 rounded-full -mr-10 -mt-10 blur-2xl" />
-          <div className="absolute bottom-0 right-0 opacity-10">
-            <CheckCircle2 className="h-32 w-32 text-green-600 dark:text-green-500" />
+          <div className="relative mt-5 overflow-hidden rounded-2xl border border-sky-200/70 bg-[linear-gradient(135deg,#f0f9ff_0%,#ffffff_45%,#e0f2fe_100%)] p-5 sm:p-6 dark:border-sky-900/50 dark:bg-[linear-gradient(135deg,#0c1a24_0%,#0f172a_50%,#082f49_100%)] lg:mt-7.5">
+            <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-sky-400/20 blur-3xl" />
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700/80 dark:text-sky-300/80">
+              Merchant pulse
+            </p>
+            <h2 className="mt-1 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+              Home Hub snapshot
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+              Live payment outcomes and workspace health for the selected period.
+            </p>
           </div>
-          <CardHeader className="relative z-10">
-            <CardTitle className="text-sm font-medium text-foreground flex items-center justify-between w-full">
-              <span className="flex-1">Success</span>
-              <div className="p-2 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
-                <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="relative z-10">
-            <div className="text-3xl font-bold mb-2">{stats.successfulTransactions.toLocaleString()}</div>
-            <div className="flex items-center gap-1">
-              <Badge variant="success" appearance="light" size="sm" className="text-xs">
-                {stats.successPercentage.toFixed(1)}% success rate
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Declined Transactions */}
-        <Card className="relative overflow-hidden border-red-200/30 dark:border-red-900/30 bg-linear-to-br from-red-500/5 to-red-500/10 shadow-md shadow-red-500/10 hover:shadow-lg hover:shadow-red-500/20 transition-all duration-300">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-red-500/10 rounded-full -mr-10 -mt-10 blur-2xl" />
-          <div className="absolute bottom-0 right-0 opacity-10">
-            <TrendingDown className="h-32 w-32 text-red-600 dark:text-red-500" />
+          <div className="mt-5 lg:mt-7.5">
+            <div className="mb-3 flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />
+              <h3 className="text-sm font-semibold text-foreground">Money Flow</h3>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="rounded-2xl border border-sky-100 border-l-4 border-l-emerald-500 bg-card p-4 shadow-sm dark:border-sky-900/40">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Approved</p>
+                  <CheckCircle2 className="size-4 text-emerald-500" />
+                </div>
+                <p className="mt-3 text-3xl font-bold tracking-tight">{stats.successfulTransactions.toLocaleString()}</p>
+                <Badge variant="success" appearance="light" size="sm" className="mt-2 text-xs">
+                  {stats.successPercentage.toFixed(1)}% success rate
+                </Badge>
+              </div>
+              <div className="rounded-2xl border border-sky-100 border-l-4 border-l-red-500 bg-card p-4 shadow-sm dark:border-sky-900/40">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Declined</p>
+                  <TrendingDown className="size-4 text-red-500" />
+                </div>
+                <p className="mt-3 text-3xl font-bold tracking-tight">{stats.declineCount.toLocaleString()}</p>
+                <Badge variant="destructive" appearance="light" size="sm" className="mt-2 text-xs">
+                  {stats.declinePercentage?.toFixed(1) || '0.0'}% decline rate
+                </Badge>
+              </div>
+              <div className="rounded-2xl border border-sky-100 border-l-4 border-l-amber-500 bg-card p-4 shadow-sm dark:border-sky-900/40">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Chargebacks</p>
+                  <XCircle className="size-4 text-amber-500" />
+                </div>
+                <p className="mt-3 text-3xl font-bold tracking-tight">{stats.chargebackCount.toLocaleString()}</p>
+                <Badge variant="warning" appearance="light" size="sm" className="mt-2 text-xs">
+                  {stats.chargebackPercentage?.toFixed(1) || '0.0'}% chargeback rate
+                </Badge>
+              </div>
+              <div className="rounded-2xl border border-sky-100 border-l-4 border-l-sky-500 bg-card p-4 shadow-sm dark:border-sky-900/40">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Refunds</p>
+                  <RefreshCw className="size-4 text-sky-500" />
+                </div>
+                <p className="mt-3 text-3xl font-bold tracking-tight">{stats.refundCount.toLocaleString()}</p>
+                <Badge variant="info" appearance="light" size="sm" className="mt-2 text-xs">
+                  {stats.refundPercentage?.toFixed(1) || '0.0'}% refund rate
+                </Badge>
+              </div>
+            </div>
           </div>
-          <CardHeader className="relative z-10">
-            <CardTitle className="text-sm font-medium text-foreground flex items-center justify-between w-full">
-              <span className="flex-1">Declined</span>
-              <div className="p-2 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0">
-                <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="relative z-10">
-            <div className="text-3xl font-bold mb-2">{stats.declineCount.toLocaleString()}</div>
-            <div className="flex items-center gap-1">
-              <Badge variant="destructive" appearance="light" size="sm" className="text-xs">
-                {stats.declinePercentage?.toFixed(1) || '0.0'}% decline rate
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Chargebacks */}
-        <Card className="relative overflow-hidden border-amber-200/30 dark:border-amber-900/30 bg-linear-to-br from-amber-500/5 to-amber-500/10 shadow-md shadow-amber-500/10 hover:shadow-lg hover:shadow-amber-500/20 transition-all duration-300">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/10 rounded-full -mr-10 -mt-10 blur-2xl" />
-          <div className="absolute bottom-0 right-0 opacity-10">
-            <XCircle className="h-32 w-32 text-amber-600 dark:text-amber-500" />
+          <div className="mt-5 grid gap-4 md:grid-cols-2 lg:mt-7.5">
+            {transactionChartData && (
+              <Card className="overflow-hidden rounded-2xl border-sky-100 shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40">
+                <CardHeader className="border-b border-sky-100/80 bg-sky-50/60 dark:border-sky-900/40 dark:bg-sky-950/20">
+                  <CardTitle className="text-base font-semibold">Status Mix</CardTitle>
+                  <CardDescription className="text-sm text-muted-foreground">
+                    How your payments split across outcomes
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <DynamicApexChart
+                    type="bar"
+                    series={[{ name: 'Transactions', data: transactionChartData.distribution.series }]}
+                    options={transactionDistributionChartOptions}
+                    height={280}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {transactionVolumeTrendData && transactionVolumeTrendData.dates.length > 0 ? (
+              <Card className="overflow-hidden rounded-2xl border-sky-100 shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40">
+                <CardHeader className="border-b border-sky-100/80 bg-sky-50/60 dark:border-sky-900/40 dark:bg-sky-950/20">
+                  <CardTitle className="text-base font-semibold">Volume Trail</CardTitle>
+                  <CardDescription className="text-sm text-muted-foreground">
+                    Daily volume (USD) and payment count
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <DynamicApexChart
+                    type="line"
+                    series={[
+                      { name: 'Volume (USD)', type: 'area', data: transactionVolumeTrendData.volumes },
+                      { name: 'Transaction Count', type: 'line', data: transactionVolumeTrendData.counts },
+                    ]}
+                    options={transactionTrendChartOptions}
+                    height={300}
+                  />
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="overflow-hidden rounded-2xl border-sky-100 shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40">
+                <CardHeader className="border-b border-sky-100/80 bg-sky-50/60 dark:border-sky-900/40 dark:bg-sky-950/20">
+                  <CardTitle className="text-base font-semibold">Volume Trail</CardTitle>
+                  <CardDescription className="text-sm text-muted-foreground">
+                    Daily volume (USD) and payment count
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <div className="py-16 text-center text-sm text-muted-foreground">
+                    No trend data available for the selected date range
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
-          <CardHeader className="relative z-10">
-            <CardTitle className="text-sm font-medium text-foreground flex items-center justify-between w-full">
-              <span className="flex-1">Chargebacks</span>
-              <div className="p-2 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
-                <XCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="relative z-10">
-            <div className="text-3xl font-bold mb-2">{stats.chargebackCount.toLocaleString()}</div>
-            <div className="flex items-center gap-1">
-              <Badge variant="warning" appearance="light" size="sm" className="text-xs">
-                {stats.chargebackPercentage?.toFixed(1) || '0.0'}% chargeback rate
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Refunds */}
-        <Card className="relative overflow-hidden border-blue-200/30 dark:border-blue-900/30 bg-linear-to-br from-blue-500/5 to-blue-500/10 shadow-md shadow-blue-500/10 hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full -mr-10 -mt-10 blur-2xl" />
-          <div className="absolute bottom-0 right-0 opacity-10">
-            <RefreshCw className="h-32 w-32 text-blue-600 dark:text-blue-500" />
-          </div>
-          <CardHeader className="relative z-10">
-            <CardTitle className="text-sm font-medium text-foreground flex items-center justify-between w-full">
-              <span className="flex-1">Refunds</span>
-              <div className="p-2 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-                <RefreshCw className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="relative z-10">
-            <div className="text-3xl font-bold mb-2">{stats.refundCount.toLocaleString()}</div>
-            <div className="flex items-center gap-1">
-              <Badge variant="info" appearance="light" size="sm" className="text-xs">
-                {stats.refundPercentage?.toFixed(1) || '0.0'}% refund rate
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Transaction Statistics Charts */}
-      <div className="grid gap-5 lg:gap-7.5 md:grid-cols-2 mt-5 lg:mt-7.5">
-        {/* Transaction Distribution by Status */}
-        {transactionChartData && (
-          <Card className="relative overflow-hidden border-border shadow-md hover:shadow-lg transition-all duration-300">
-            <CardHeader className="border-b border-border/50 bg-muted/30">
-              <CardTitle className="text-base font-semibold">Transaction Status Breakdown</CardTitle>
-              <CardDescription className="text-sm text-muted-foreground">
-                Current distribution of transactions by status type
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <DynamicApexChart
-                type="bar"
-                series={[{ name: 'Transactions', data: transactionChartData.distribution.series }]}
-                options={transactionDistributionChartOptions}
-                height={280}
-              />
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Transaction Volume & Count Trend (combined) */}
-        {transactionVolumeTrendData && transactionVolumeTrendData.dates.length > 0 ? (
-          <Card className="relative overflow-hidden border-border shadow-md hover:shadow-lg transition-all duration-300">
-            <CardHeader className="border-b border-border/50 bg-muted/30">
-              <CardTitle className="text-base font-semibold">Transaction Volume & Count Trend</CardTitle>
-              <CardDescription className="text-sm text-muted-foreground">
-                Daily transaction volume (USD) and count over selected period
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <DynamicApexChart
-                type="line"
-                series={[
-                  { name: 'Volume (USD)', type: 'area', data: transactionVolumeTrendData.volumes },
-                  { name: 'Transaction Count', type: 'line', data: transactionVolumeTrendData.counts },
-                ]}
-                options={transactionTrendChartOptions}
-                height={300}
-              />
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="relative overflow-hidden border-border shadow-md hover:shadow-lg transition-all duration-300">
-            <CardHeader className="border-b border-border/50 bg-muted/30">
-              <CardTitle className="text-base font-semibold">Transaction Volume & Count Trend</CardTitle>
-              <CardDescription className="text-sm text-muted-foreground">
-                Daily transaction volume (USD) and count over selected period
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="text-center py-16 text-muted-foreground text-sm">
-                No trend data available for the selected date range
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-      </>
+        </>
       )}
 
-      {/* Secondary Stats Grid */}
-      <div className="grid gap-5 lg:gap-7.5 lg:grid-cols-3 mt-5 lg:mt-7.5">
-        {/* Trusted Cards */}
-        <Card className="relative overflow-hidden border-primary/20 bg-linear-to-br from-primary/5 to-primary/10 shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full -mr-12 -mt-12 blur-2xl" />
-          <div className="absolute bottom-0 right-0 opacity-10">
-            <CreditCard className="h-32 w-32 text-primary" />
+      <div className="mt-5 lg:mt-7.5">
+        <div className="mb-3 flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />
+          <h3 className="text-sm font-semibold text-foreground">Workspace Signals</h3>
+        </div>
+        <div className="grid gap-4 lg:grid-cols-3">
+          <div className="rounded-2xl border border-sky-100 bg-card p-4 shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Safe Cards</p>
+              <span className="inline-flex size-8 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600">
+                <CreditCard className="size-4" />
+              </span>
+            </div>
+            <p className="mt-3 text-3xl font-bold tracking-tight">{stats.totalCards}</p>
+            <p className="mt-1 text-xs text-muted-foreground">Cards in whitelist</p>
           </div>
-          <CardHeader className="relative z-10">
-            <CardTitle className="text-sm font-medium flex items-center gap-2.5">
-              <div className="p-1.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                <CreditCard className="h-4 w-4 text-primary" />
-              </div>
-              Trusted Cards
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="relative z-10">
-            <div className="text-3xl font-bold mb-1">{stats.totalCards}</div>
-            <p className="text-xs text-muted-foreground">
-              Cards in whitelist
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Active Risks */}
-        <Card className="relative overflow-hidden border-(--color-warning-alpha,var(--color-yellow-200))/30 bg-linear-to-br from-(--color-warning-soft,var(--color-yellow-50)) to-(--color-warning-soft,var(--color-yellow-100)) dark:from-(--color-warning-soft,var(--color-yellow-950)) dark:to-(--color-warning-soft,var(--color-yellow-900)) shadow-md shadow-(--color-warning-accent,var(--color-yellow-500))/10 hover:shadow-lg hover:shadow-(--color-warning-accent,var(--color-yellow-500))/20 transition-all duration-300 group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-(--color-warning-accent,var(--color-yellow-500))/10 rounded-full -mr-12 -mt-12 blur-2xl" />
-          <div className="absolute bottom-0 right-0 opacity-10">
-            <Shield className="h-32 w-32 text-(--color-warning-accent,var(--color-yellow-600))" />
+          <div className="rounded-2xl border border-sky-100 bg-card p-4 shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Risk Rules</p>
+              <span className="inline-flex size-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
+                <Shield className="size-4" />
+              </span>
+            </div>
+            <p className="mt-3 text-3xl font-bold tracking-tight">{stats.activeRisks}</p>
+            <p className="mt-1 text-xs text-muted-foreground">Risk rules configured</p>
           </div>
-          <CardHeader className="relative z-10">
-            <CardTitle className="text-sm font-medium flex items-center gap-2.5">
-              <div className="p-1.5 rounded-lg bg-(--color-warning-accent,var(--color-yellow-500))/10 group-hover:bg-(--color-warning-accent,var(--color-yellow-500))/20 transition-colors">
-                <Shield className="h-4 w-4 text-(--color-warning-accent,var(--color-yellow-600))" />
-              </div>
-              Active Risks
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="relative z-10">
-            <div className="text-3xl font-bold mb-1">{stats.activeRisks}</div>
-            <p className="text-xs text-muted-foreground">
-              Risk rules configured
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Support Tickets */}
-        <Card className="relative overflow-hidden border-(--color-info-alpha,var(--color-violet-200))/30 bg-linear-to-br from-(--color-info-soft,var(--color-violet-50)) to-(--color-info-soft,var(--color-violet-100)) dark:from-(--color-info-soft,var(--color-violet-950)) dark:to-(--color-info-soft,var(--color-violet-900)) shadow-md shadow-(--color-info-accent,var(--color-violet-500))/10 hover:shadow-lg hover:shadow-(--color-info-accent,var(--color-violet-500))/20 transition-all duration-300 group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-(--color-info-accent,var(--color-violet-500))/10 rounded-full -mr-12 -mt-12 blur-2xl" />
-          <div className="absolute bottom-0 right-0 opacity-10">
-            <Ticket className="h-32 w-32 text-(--color-info-accent,var(--color-violet-600))" />
+          <div className="rounded-2xl border border-sky-100 bg-card p-4 shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Open Cases</p>
+              <span className="inline-flex size-8 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600">
+                <Ticket className="size-4" />
+              </span>
+            </div>
+            <p className="mt-3 text-3xl font-bold tracking-tight">{stats.openTickets}</p>
+            <p className="mt-1 text-xs text-muted-foreground">Support tickets</p>
           </div>
-          <CardHeader className="relative z-10">
-            <CardTitle className="text-sm font-medium flex items-center gap-2.5">
-              <div className="p-1.5 rounded-lg bg-(--color-info-accent,var(--color-violet-500))/10 group-hover:bg-(--color-info-accent,var(--color-violet-500))/20 transition-colors">
-                <Ticket className="h-4 w-4 text-(--color-info-accent,var(--color-violet-600))" />
-              </div>
-              Open Tickets
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="relative z-10">
-            <div className="text-3xl font-bold mb-1">{stats.openTickets}</div>
-            <p className="text-xs text-muted-foreground">
-              Support tickets
-            </p>
-          </CardContent>
-        </Card>
+        </div>
       </div>
-
     </Fragment>
   );
 }

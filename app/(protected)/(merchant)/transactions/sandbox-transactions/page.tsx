@@ -277,25 +277,27 @@ export default function SandboxTransactionsPage() {
         <Container>
           <Toolbar>
             <ToolbarHeading
-              title="Sandbox Transactions"
-              description="View and test all your sandbox transactions for development, integration testing, and payment flow validation"
+              title="Test Activity"
+              description="Sandbox payments for integration checks and flow validation"
               icon={CreditCard}
             />
             <ToolbarActions>
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-2"
+                className="gap-2 rounded-xl border-sky-200 hover:bg-sky-50 hover:border-sky-300 dark:border-sky-800 dark:hover:bg-sky-950/40"
                 onClick={() => setFilterOpen(true)}
               >
                 <Filter className="h-4 w-4" />
-                Advanced Filter
+                Smart Filter
               </Button>
             </ToolbarActions>
           </Toolbar>
         </Container>
         <Container>
-          <div className="text-center py-8">Loading...</div>
+          <div className="rounded-2xl border border-sky-100 bg-sky-50/40 py-10 text-center text-muted-foreground dark:border-sky-900/40 dark:bg-sky-950/20">
+            Loading test activity...
+          </div>
         </Container>
       </Fragment>
     );
@@ -306,39 +308,62 @@ export default function SandboxTransactionsPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Sandbox Transactions"
-            description="View and test all your sandbox transactions for development, integration testing, and payment flow validation"
+            title="Test Activity"
+            description="Sandbox payments for integration checks and flow validation"
             icon={CreditCard}
           />
           <ToolbarActions>
             <Button
               variant="outline"
               size="sm"
-              className="gap-2"
+              className="gap-2 rounded-xl border-sky-200 hover:bg-sky-50 hover:border-sky-300 dark:border-sky-800 dark:hover:bg-sky-950/40"
               onClick={() => setFilterOpen(true)}
             >
               <Filter className="h-4 w-4" />
-              Advanced Filter
+              Smart Filter
             </Button>
           </ToolbarActions>
         </Toolbar>
       </Container>
 
       <Container>
+        <div className="relative mb-4 overflow-hidden rounded-2xl border border-amber-200/70 bg-[linear-gradient(135deg,#fffbeb_0%,#ffffff_50%,#fef3c7_100%)] p-4 sm:p-5 dark:border-amber-900/40 dark:bg-[linear-gradient(135deg,#1c1917_0%,#0f172a_55%,#451a03_100%)]">
+          <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-amber-400/20 blur-3xl" />
+          <div className="relative flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700/80 dark:text-amber-300/80">
+                Sandbox money flow
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Safe test payments — no live settlement impact.
+              </p>
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-white/80 px-3 py-2 text-sm font-medium text-amber-700 shadow-sm dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+              <span className="h-2 w-2 rounded-full bg-amber-500" />
+              Test mode
+            </div>
+          </div>
+        </div>
+
         <DataGrid
           table={table}
           recordCount={filteredData.length}
           isLoading={loading}
           tableLayout={modernTableLayout}
-          tableClassNames={modernTableClassNames}
+          tableClassNames={{
+            ...modernTableClassNames,
+            header: 'bg-gradient-to-b from-amber-50/80 to-amber-50/30 border-b border-amber-100 dark:from-amber-950/30 dark:to-amber-950/10 dark:border-amber-900/40',
+            headerSticky: 'sticky top-0 z-10 bg-background/98 backdrop-blur-md shadow-sm border-b border-amber-100 dark:border-amber-900/40',
+            bodyRow: 'h-14 hover:bg-amber-500/5 hover:border-l-2 hover:border-l-amber-500 transition-all duration-200 cursor-pointer border-b border-border/30',
+          }}
         >
-          <Card className={modernTableCardClasses.card}>
-            <CardHeader className={modernTableCardClasses.header}>
+          <Card className="rounded-2xl border-amber-100 bg-card shadow-sm ring-1 ring-amber-500/5 dark:border-amber-900/40">
+            <CardHeader className="border-b border-amber-100/80 bg-amber-50/40 dark:border-amber-900/40 dark:bg-amber-950/20">
               <CardHeading>
                 <SearchInput
                   value={searchQuery}
                   onChange={setSearchQuery}
-                  placeholder="Search transactions..."
+                  placeholder="Search test activity..."
                 />
               </CardHeading>
             </CardHeader>
@@ -348,7 +373,7 @@ export default function SandboxTransactionsPage() {
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </CardTable>
-            <CardFooter className={modernTableCardClasses.footer}>
+            <CardFooter className="border-t border-amber-100/80 bg-amber-50/30 dark:border-amber-900/40 dark:bg-amber-950/10">
               <CursorDataGridPagination
                 meta={meta}
                 onNext={handleCursorNext}

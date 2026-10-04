@@ -288,7 +288,7 @@ export function CardForm() {
   };
 
   const brand = getCardBrand(watched.cardNumber || '');
-  const primaryColor = paymentLinkData?.paymentTemplate?.primaryColor || '#17B8A6';
+  const primaryColor = paymentLinkData?.paymentTemplate?.primaryColor || '#38BDF8';
   const logoUrl =
     searchParams.get('logoUrl') ||
     paymentLinkData?.paymentTemplate?.logoUrl ||

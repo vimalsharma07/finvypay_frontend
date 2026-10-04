@@ -62,15 +62,25 @@ export function ReportContent({ config }: ReportContentProps) {
   }, [dateRange?.from, dateRange?.to, config.apiType]);
 
   return (
-    <div className="space-y-6 min-w-0">
-      <div className="flex items-center justify-end">
-        <DateRangeFilter
-          value={dateRange}
-          onChange={setDateRange}
-          defaultRange={defaultDateRange()}
-          placeholder="Select from and to date"
-          numberOfMonths={2}
-        />
+    <div className="min-w-0 space-y-4">
+      <div className="relative overflow-hidden rounded-2xl border border-sky-200/70 bg-[linear-gradient(135deg,#f0f9ff_0%,#ffffff_55%,#e0f2fe_100%)] p-4 dark:border-sky-900/50 dark:bg-[linear-gradient(135deg,#0c1a24_0%,#0f172a_55%,#082f49_100%)]">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700/80 dark:text-sky-300/80">
+              Insights
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Pick a date range to refresh this report view.
+            </p>
+          </div>
+          <DateRangeFilter
+            value={dateRange}
+            onChange={setDateRange}
+            defaultRange={defaultDateRange()}
+            placeholder="Select from and to date"
+            numberOfMonths={2}
+          />
+        </div>
       </div>
       <ReportDataTable
         data={data}

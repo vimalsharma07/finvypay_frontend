@@ -230,7 +230,7 @@ export function UserManageRiskPageContent({ addDialogOpen, onAddDialogOpenChange
         id: 'userName',
         accessorFn: (row) => row.user?.name || '',
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Name" />
+          <DataGridColumnHeader column={column} title="Owner" />
         ),
         cell: ({ row }) => {
           return <div className="font-medium">{row.original.user?.name || '-'}</div>;
@@ -240,26 +240,30 @@ export function UserManageRiskPageContent({ addDialogOpen, onAddDialogOpenChange
         id: 'riskValue',
         accessorKey: 'riskValue',
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Risk Value" />
+          <DataGridColumnHeader column={column} title="Rule Value" />
         ),
         cell: ({ row }) => {
-          return <div>{row.original.riskValue ?? '-'}</div>;
+          return <div className="font-medium text-slate-700 dark:text-slate-300">{row.original.riskValue ?? '-'}</div>;
         },
       },
       {
         id: 'riskType',
         accessorKey: 'riskType',
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Risk Type" />
+          <DataGridColumnHeader column={column} title="Rule Type" />
         ),
         cell: ({ row }) => {
-          return <div className="capitalize">{row.original.riskType || '-'}</div>;
+          return (
+            <span className="inline-flex rounded-lg border border-sky-200 bg-sky-50 px-2 py-0.5 text-xs font-medium capitalize text-sky-700 dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-300">
+              {row.original.riskType || '-'}
+            </span>
+          );
         },
       },
       {
         id: 'actions',
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Action" />
+          <DataGridColumnHeader column={column} title="Actions" />
         ),
         cell: ({ row }) => (
           <TableActionButtons
@@ -310,20 +314,34 @@ export function UserManageRiskPageContent({ addDialogOpen, onAddDialogOpenChange
   return (
     <Fragment>
       <Container>
+        <div className="relative mb-4 overflow-hidden rounded-2xl border border-sky-200/70 bg-[linear-gradient(135deg,#f0f9ff_0%,#ffffff_55%,#e0f2fe_100%)] p-4 dark:border-sky-900/50 dark:bg-[linear-gradient(135deg,#0c1a24_0%,#0f172a_55%,#082f49_100%)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700/80 dark:text-sky-300/80">
+            Fraud shield
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Add and maintain rules that protect your live payment flow.
+          </p>
+        </div>
+
         <DataGrid
           table={table}
           recordCount={filteredData.length}
           isLoading={loading}
           tableLayout={modernTableLayout}
-          tableClassNames={modernTableClassNames}
+          tableClassNames={{
+            ...modernTableClassNames,
+            header: 'bg-sky-50/60 border-b border-sky-100 dark:bg-sky-950/20 dark:border-sky-900/40',
+            headerSticky: 'sticky top-0 z-10 bg-background/98 backdrop-blur-md shadow-sm border-b border-sky-100 dark:border-sky-900/40',
+            bodyRow: 'h-14 hover:bg-sky-500/5 transition-colors duration-200 cursor-pointer border-b border-border/30',
+          }}
         >
-          <Card className={modernTableCardClasses.card}>
-            <CardHeader className={modernTableCardClasses.header}>
+          <Card className="rounded-2xl border-sky-100 bg-card shadow-sm dark:border-sky-900/40">
+            <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
               <CardHeading>
                 <SearchInput
                   value={searchQuery}
                   onChange={setSearchQuery}
-                  placeholder="Search risks..."
+                  placeholder="Search risk rules..."
                 />
               </CardHeading>
             </CardHeader>
@@ -333,7 +351,7 @@ export function UserManageRiskPageContent({ addDialogOpen, onAddDialogOpenChange
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </CardTable>
-            <CardFooter className={modernTableCardClasses.footer}>
+            <CardFooter className="border-t border-sky-100/80 bg-sky-50/30 dark:border-sky-900/40 dark:bg-sky-950/10">
               <CursorDataGridPagination
                 meta={meta}
                 onNext={handleCursorNext}
@@ -364,9 +382,9 @@ export function UserManageRiskPageContent({ addDialogOpen, onAddDialogOpenChange
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Risk Management Entry</AlertDialogTitle>
+            <AlertDialogTitle>Delete Risk Rule</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete risk &quot;{riskToDelete?.riskValue || 'N/A'}&quot; (Type: {riskToDelete?.riskType || 'N/A'}) for user &quot;{riskToDelete?.user?.name || 'N/A'}&quot;? This action cannot be undone.
+              Remove rule &quot;{riskToDelete?.riskValue || 'N/A'}&quot; ({riskToDelete?.riskType || 'N/A'}) for &quot;{riskToDelete?.user?.name || 'N/A'}&quot;? This cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

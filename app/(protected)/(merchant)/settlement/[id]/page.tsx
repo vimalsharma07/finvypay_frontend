@@ -109,14 +109,16 @@ export default function UserSettlementDetailPage() {
         <Container>
           <Toolbar>
             <ToolbarHeading
-              title="Settlement Details"
+              title="Settlement Record"
               description="Loading settlement information..."
               icon={FileText}
             />
           </Toolbar>
         </Container>
         <Container>
-          <div className="text-center py-10 text-muted-foreground">Loading...</div>
+          <div className="rounded-2xl border border-sky-100 bg-sky-50/40 py-10 text-center text-muted-foreground dark:border-sky-900/40 dark:bg-sky-950/20">
+            Loading...
+          </div>
         </Container>
       </Fragment>
     );
@@ -128,14 +130,16 @@ export default function UserSettlementDetailPage() {
         <Container>
           <Toolbar>
             <ToolbarHeading
-              title="Settlement Details"
+              title="Settlement Record"
               description="Settlement not found"
               icon={FileText}
             />
           </Toolbar>
         </Container>
         <Container>
-          <div className="text-center py-10 text-muted-foreground">No settlement data found</div>
+          <div className="rounded-2xl border border-sky-100 bg-sky-50/40 py-10 text-center text-muted-foreground dark:border-sky-900/40 dark:bg-sky-950/20">
+            No settlement data found
+          </div>
         </Container>
       </Fragment>
     );
@@ -146,8 +150,8 @@ export default function UserSettlementDetailPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Settlement Details"
-            description={`View complete settlement information for Invoice: ${settlementData.invoiceNumber || settlementId || ''}`}
+            title="Settlement Record"
+            description={`Invoice ${settlementData.invoiceNumber || settlementId || ''} — full payout breakdown`}
             icon={FileText}
           />
         </Toolbar>
@@ -155,20 +159,28 @@ export default function UserSettlementDetailPage() {
 
       <Container>
         <div className="space-y-6">
-          {/* Header Actions */}
+          <div className="relative overflow-hidden rounded-2xl border border-sky-200/70 bg-[linear-gradient(135deg,#f0f9ff_0%,#ffffff_55%,#e0f2fe_100%)] p-4 dark:border-sky-900/50 dark:bg-[linear-gradient(135deg,#0c1a24_0%,#0f172a_55%,#082f49_100%)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700/80 dark:text-sky-300/80">
+              Fund desk
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Review amounts, period, and per-account settlement lines for this invoice.
+            </p>
+          </div>
+
           <div className="flex flex-wrap justify-start items-center gap-2">
             <Button
               variant="outline"
               onClick={() => router.push('/settlement/all')}
-              className="gap-2"
+              className="gap-2 rounded-xl"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Settlements
+              Back to History
             </Button>
             {settlementData.pdfUrl && (
               <Button
                 variant="outline"
-                className="gap-2"
+                className="gap-2 rounded-xl shadow-sm shadow-sky-500/10"
                 onClick={() => window.open(settlementData.pdfUrl!, '_blank', 'noopener,noreferrer')}
               >
                 <ExternalLink className="h-4 w-4" />
@@ -178,9 +190,8 @@ export default function UserSettlementDetailPage() {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            {/* Settlement Information */}
-            <Card>
-              <CardHeader>
+            <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+              <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
                 <CardTitle>Settlement Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
@@ -221,9 +232,8 @@ export default function UserSettlementDetailPage() {
               </CardContent>
             </Card>
 
-            {/* Settlement Period */}
-            <Card>
-              <CardHeader>
+            <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+              <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
                 <CardTitle>Settlement Period</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
@@ -246,9 +256,8 @@ export default function UserSettlementDetailPage() {
               </CardContent>
             </Card>
 
-            {/* Amounts Summary */}
-            <Card>
-              <CardHeader>
+            <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+              <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
                 <CardTitle>Amounts Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
@@ -277,9 +286,8 @@ export default function UserSettlementDetailPage() {
               </CardContent>
             </Card>
 
-            {/* Transaction Counts */}
-            <Card>
-              <CardHeader>
+            <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+              <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
                 <CardTitle>Transaction Counts</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
@@ -303,14 +311,13 @@ export default function UserSettlementDetailPage() {
             </Card>
           </div>
 
-          {/* Settlement Details Table */}
           {detailsData && detailsData.length > 0 && (
-            <Card className="lg:col-span-2">
-              <CardHeader>
+            <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40 lg:col-span-2">
+              <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
                 <CardTitle>Settlement Details by Acquirer Account</CardTitle>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[400px] w-full rounded-md border">
+                <ScrollArea className="h-[400px] w-full rounded-xl border border-sky-100 dark:border-sky-900/40">
                   <Table>
                     <TableHeader>
                       <TableRow>

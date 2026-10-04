@@ -240,7 +240,7 @@ export function UserTrustedCardsPageContent({ addDialogOpen, onAddDialogOpenChan
         ),
         cell: ({ row }) => {
           return (
-            <div className="font-mono">
+            <div className="font-mono text-sm font-medium text-slate-700 dark:text-slate-300">
               {formatCardNumber(row.original.card)}
             </div>
           );
@@ -249,7 +249,7 @@ export function UserTrustedCardsPageContent({ addDialogOpen, onAddDialogOpenChan
       {
         id: 'actions',
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Action" />
+          <DataGridColumnHeader column={column} title="Actions" />
         ),
         cell: ({ row }) => (
           <TableActionButtons
@@ -300,20 +300,34 @@ export function UserTrustedCardsPageContent({ addDialogOpen, onAddDialogOpenChan
   return (
     <Fragment>
       <Container>
+        <div className="relative mb-4 overflow-hidden rounded-2xl border border-sky-200/70 bg-[linear-gradient(135deg,#f0f9ff_0%,#ffffff_55%,#e0f2fe_100%)] p-4 dark:border-sky-900/50 dark:bg-[linear-gradient(135deg,#0c1a24_0%,#0f172a_55%,#082f49_100%)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700/80 dark:text-sky-300/80">
+            Card whitelist
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Keep verified cards ready to pass fraud checks smoothly.
+          </p>
+        </div>
+
         <DataGrid
           table={table}
           recordCount={filteredData.length}
           isLoading={loading}
           tableLayout={modernTableLayout}
-          tableClassNames={modernTableClassNames}
+          tableClassNames={{
+            ...modernTableClassNames,
+            header: 'bg-sky-50/60 border-b border-sky-100 dark:bg-sky-950/20 dark:border-sky-900/40',
+            headerSticky: 'sticky top-0 z-10 bg-background/98 backdrop-blur-md shadow-sm border-b border-sky-100 dark:border-sky-900/40',
+            bodyRow: 'h-14 hover:bg-sky-500/5 transition-colors duration-200 cursor-pointer border-b border-border/30',
+          }}
         >
-          <Card className={modernTableCardClasses.card}>
-            <CardHeader className={modernTableCardClasses.header}>
+          <Card className="rounded-2xl border-sky-100 bg-card shadow-sm dark:border-sky-900/40">
+            <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
               <CardHeading>
                 <SearchInput
                   value={searchQuery}
                   onChange={setSearchQuery}
-                  placeholder="Search cards..."
+                  placeholder="Search safe cards..."
                 />
               </CardHeading>
             </CardHeader>
@@ -323,7 +337,7 @@ export function UserTrustedCardsPageContent({ addDialogOpen, onAddDialogOpenChan
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </CardTable>
-            <CardFooter className={modernTableCardClasses.footer}>
+            <CardFooter className="border-t border-sky-100/80 bg-sky-50/30 dark:border-sky-900/40 dark:bg-sky-950/10">
               <CursorDataGridPagination
                 meta={meta}
                 onNext={handleCursorNext}

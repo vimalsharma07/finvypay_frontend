@@ -92,12 +92,12 @@ export default function UserAcquirerRequestsPage() {
 
   const headers: TableHeader<UserAcquirerRequest>[] = useMemo(
     () => [
-      { key: 'sno', label: 'S.No', sortable: false },
-      { key: 'merchantProfile', label: 'Merchant Profile', sortable: false },
-      { key: 'processingVolume', label: 'Processing Volume', sortable: false },
-      { key: 'acceptedPaymentMethods', label: 'Accepted Payment Methods', sortable: false },
-      { key: 'processingCurrency', label: 'Processing Currency', sortable: false },
-      { key: 'requestStatus', label: 'Status', sortable: false },
+      { key: 'sno', label: '#', sortable: false },
+      { key: 'merchantProfile', label: 'Workspace Profile', sortable: false },
+      { key: 'processingVolume', label: 'Expected Volume', sortable: false },
+      { key: 'acceptedPaymentMethods', label: 'Payment Methods', sortable: false },
+      { key: 'processingCurrency', label: 'Currencies', sortable: false },
+      { key: 'requestStatus', label: 'Request Status', sortable: false },
     ],
     [],
   );
@@ -105,16 +105,27 @@ export default function UserAcquirerRequestsPage() {
   const renderCell = (item: UserAcquirerRequest, key: keyof UserAcquirerRequest | string) => {
     switch (key) {
       case 'sno':
-        return <div className="text-sm">{(item as any).sno ?? '-'}</div>;
+        return <div className="text-sm font-medium text-slate-500">{(item as any).sno ?? '-'}</div>;
       case 'merchantProfile':
-        return <div className="text-sm">{item.merchantProfile?.merchantProfileName || '-'}</div>;
+        return (
+          <div className="text-sm font-semibold text-foreground">
+            {item.merchantProfile?.merchantProfileName || '-'}
+          </div>
+        );
       case 'processingVolume':
-        return <div className="text-sm">{item.processingVolume != null ? String(item.processingVolume) : '-'}</div>;
+        return (
+          <div className="text-sm font-medium">
+            {item.processingVolume != null ? String(item.processingVolume) : '-'}
+          </div>
+        );
       case 'acceptedPaymentMethods':
         return (
           <div className="flex flex-wrap gap-1">
             {(item.acceptedPaymentMethods || []).map((m) => (
-              <Badge key={m} variant="secondary" className="capitalize">
+              <Badge
+                key={m}
+                className="rounded-lg border-sky-200 bg-sky-50 capitalize text-sky-700 dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-300"
+              >
                 {m}
               </Badge>
             ))}
@@ -127,7 +138,11 @@ export default function UserAcquirerRequestsPage() {
         return (
           <div className="flex flex-wrap gap-1">
             {(item.processingCurrency || []).map((c) => (
-              <Badge key={c} variant="outline">
+              <Badge
+                key={c}
+                variant="outline"
+                className="rounded-lg border-sky-200 text-sky-700 dark:border-sky-800 dark:text-sky-300"
+              >
                 {c}
               </Badge>
             ))}
@@ -136,15 +151,21 @@ export default function UserAcquirerRequestsPage() {
             )}
           </div>
         );
-      case 'requestStatus':
+      case 'requestStatus': {
+        const status = String((item as any).requestStatus || 'pending').toLowerCase();
+        const isPending = status === 'pending';
         return (
-          <Badge variant={(item as any).requestStatus === 'pending' ? 'secondary' : 'success'}>
-            {(item as any).requestStatus}
+          <Badge
+            variant={isPending ? 'secondary' : 'success'}
+            className="rounded-lg capitalize"
+          >
+            {isPending ? 'In review' : status}
           </Badge>
         );
+      }
       default: {
         const value = item[key as keyof UserAcquirerRequest];
-        return <div className="text-foreground font-normal">{value != null ? String(value) : '-'}</div>;
+        return <div className="font-normal text-foreground">{value != null ? String(value) : '-'}</div>;
       }
     }
   };
@@ -155,43 +176,63 @@ export default function UserAcquirerRequestsPage() {
     <Fragment>
       <Container>
         <Toolbar>
-            <ToolbarHeading
-              title="Acquirer Requests"
-              description="View and manage your acquirer account requests with status tracking and approval workflow"
-              icon={FileText}
-            />
+          <ToolbarHeading
+            title="Bank Requests"
+            description="Track bank-partner applications and approval progress"
+            icon={FileText}
+          />
           <ToolbarActions>
-            <Button asChild variant="primary">
+            <Button asChild variant="primary" className="rounded-xl shadow-sm shadow-sky-500/20">
               <Link href="/acquirer-requests/create">
-                <Plus className="h-4 w-4 me-1" />
-                Apply New Acquirer
+                <Plus className="me-1 h-4 w-4" />
+                Request New Bank
               </Link>
             </Button>
           </ToolbarActions>
         </Toolbar>
       </Container>
       <Container>
-        <TableComp
-          data={requests}
-          headers={headers}
-          renderCell={renderCell}
-          enableCheckbox={false}
-          searchPlaceholder="Search acquirer requests..."
-          searchKeys={['merchantProfile', 'processingVolume', 'requestStatus']}
-          getRowId={(row: UserAcquirerRequest) => String(row.id)}
-          pagination={{
-            pageSize: limit,
-            onPageSizeChange: handlePageSizeChange,
-          }}
-          cursorPagination={{
-            meta,
-            onNext: handleCursorNext,
-            onPrev: handleCursorPrev,
-            canGoPrev,
-          }}
-          sorting={undefined}
-          loading={isTableLoading}
-        />
+        <div className="relative mb-4 overflow-hidden rounded-2xl border border-sky-200/70 bg-[linear-gradient(135deg,#f0f9ff_0%,#ffffff_50%,#e0f2fe_100%)] p-4 sm:p-5 dark:border-sky-900/50 dark:bg-[linear-gradient(135deg,#0c1a24_0%,#0f172a_55%,#082f49_100%)]">
+          <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-sky-400/20 blur-3xl" />
+          <div className="relative flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700/80 dark:text-sky-300/80">
+                Application pipeline
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Submit new bank requests and follow status until they become live connections.
+              </p>
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-xl border border-sky-200 bg-white/80 px-3 py-2 text-sm font-medium text-sky-700 shadow-sm dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-300">
+              <FileText className="size-4" />
+              {requests.length} shown
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-hidden rounded-2xl border border-sky-100 bg-card shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40">
+          <TableComp
+            data={requests}
+            headers={headers}
+            renderCell={renderCell}
+            enableCheckbox={false}
+            searchPlaceholder="Search bank requests..."
+            searchKeys={['merchantProfile', 'processingVolume', 'requestStatus']}
+            getRowId={(row: UserAcquirerRequest) => String(row.id)}
+            pagination={{
+              pageSize: limit,
+              onPageSizeChange: handlePageSizeChange,
+            }}
+            cursorPagination={{
+              meta,
+              onNext: handleCursorNext,
+              onPrev: handleCursorPrev,
+              canGoPrev,
+            }}
+            sorting={undefined}
+            loading={isTableLoading}
+          />
+        </div>
       </Container>
     </Fragment>
   );

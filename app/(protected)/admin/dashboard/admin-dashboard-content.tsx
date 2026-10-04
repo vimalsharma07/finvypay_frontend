@@ -328,7 +328,7 @@ export function AdminDashboardContent({ dateRange: dateRangeProp, merchantId: me
           axisTicks: { show: false },
         },
       ],
-      colors: ['#3b82f6', '#10b981'],
+      colors: ['#38BDF8', '#10b981'],
       legend: {
         show: true,
         position: 'top' as const,
@@ -369,191 +369,122 @@ export function AdminDashboardContent({ dateRange: dateRangeProp, merchantId: me
     <div className="space-y-6">
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="h-8 w-8 animate-spin text-sky-500" />
         </div>
       ) : !data ? (
-        <div className="text-center py-20 text-muted-foreground">
+        <div className="rounded-2xl border border-sky-100 bg-sky-50/50 py-16 text-center text-muted-foreground dark:border-sky-900/40 dark:bg-sky-950/20">
           No data available for the selected date range
         </div>
       ) : (
         <>
-          {/* User Counters */}
-          <div className="grid gap-5 lg:gap-7.5 lg:grid-cols-3">
-            {/* Admins Card */}
-            <Card className="relative overflow-hidden border-amber-200/30 dark:border-amber-900/30 bg-linear-to-br from-amber-500/5 to-amber-500/10 shadow-md shadow-amber-500/10 hover:shadow-lg hover:shadow-amber-500/20 transition-all duration-300">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/10 rounded-full -mr-10 -mt-10 blur-2xl" />
-              <div className="absolute bottom-0 right-0 opacity-10">
-                <UserCog className="h-32 w-32 text-amber-600 dark:text-amber-500" />
-              </div>
-              <CardHeader className="relative z-10">
-                <CardTitle className="text-sm font-medium text-foreground flex items-center justify-between w-full">
-                  <span className="flex-1">Admins</span>
-                  <div className="p-2 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
-                    <UserCog className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-3xl font-bold mb-2">{data.userCounters.totalAdmin.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">
-                  Administrative users
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Merchants Card */}
-            <Card className="relative overflow-hidden border-emerald-200/30 dark:border-emerald-900/30 bg-linear-to-br from-emerald-500/5 to-emerald-500/10 shadow-md shadow-emerald-500/10 hover:shadow-lg hover:shadow-emerald-500/20 transition-all duration-300">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/10 rounded-full -mr-10 -mt-10 blur-2xl" />
-              <div className="absolute bottom-0 right-0 opacity-10">
-                <UserCheck className="h-32 w-32 text-emerald-600 dark:text-emerald-500" />
-              </div>
-              <CardHeader className="relative z-10">
-                <CardTitle className="text-sm font-medium text-foreground flex items-center justify-between w-full">
-                  <span className="flex-1">Merchants</span>
-                  <div className="p-2 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
-                    <UserCheck className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-3xl font-bold mb-2">{data.userCounters.totalMerchant.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">
-                  Merchant accounts
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Affiliates Card */}
-            <Card className="relative overflow-hidden border-violet-200/30 dark:border-violet-900/30 bg-linear-to-br from-violet-500/5 to-violet-500/10 shadow-md shadow-violet-500/10 hover:shadow-lg hover:shadow-violet-500/20 transition-all duration-300">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-violet-500/10 rounded-full -mr-10 -mt-10 blur-2xl" />
-              <div className="absolute bottom-0 right-0 opacity-10">
-                <Users className="h-32 w-32 text-violet-600 dark:text-violet-500" />
-              </div>
-              <CardHeader className="relative z-10">
-                <CardTitle className="text-sm font-medium text-foreground flex items-center justify-between w-full">
-                  <span className="flex-1">Affiliates</span>
-                  <div className="p-2 rounded-lg bg-violet-500/10 flex items-center justify-center shrink-0">
-                    <Users className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-3xl font-bold mb-2">{data.userCounters.totalAffiliate.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">
-                  Affiliate partners
-                </p>
-              </CardContent>
-            </Card>
+          <div className="relative overflow-hidden rounded-2xl border border-sky-200/70 bg-[linear-gradient(135deg,#f0f9ff_0%,#ffffff_45%,#e0f2fe_100%)] p-5 sm:p-6 dark:border-sky-900/50 dark:bg-[linear-gradient(135deg,#0c1a24_0%,#0f172a_50%,#082f49_100%)]">
+            <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-sky-400/20 blur-3xl" />
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700/80 dark:text-sky-300/80">
+              Platform pulse
+            </p>
+            <h2 className="mt-1 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+              Control Hub snapshot
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+              Partner counts and money-flow health for the selected period.
+            </p>
           </div>
 
-          {/* Transaction Statistics */}
-          <div className="grid gap-5 lg:gap-7.5 lg:grid-cols-4">
-            {/* Success Card */}
-            <Card className="relative overflow-hidden border-green-200/30 dark:border-green-900/30 bg-linear-to-br from-green-500/5 to-green-500/10 shadow-md shadow-green-500/10 hover:shadow-lg hover:shadow-green-500/20 transition-all duration-300">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-green-500/10 rounded-full -mr-10 -mt-10 blur-2xl" />
-              <div className="absolute bottom-0 right-0 opacity-10">
-                <CheckCircle2 className="h-32 w-32 text-green-600 dark:text-green-500" />
-              </div>
-              <CardHeader className="relative z-10">
-                <CardTitle className="text-sm font-medium text-foreground flex items-center justify-between w-full">
-                  <span className="flex-1">Success</span>
-                  <div className="p-2 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-3xl font-bold mb-2">{data.transactionStatistics.successCount.toLocaleString()}</div>
-                <div className="flex items-center gap-1">
-                  <Badge variant="success" appearance="light" size="sm" className="text-xs">
-                    {data.transactionStatistics.successPercentage.toFixed(1)}% success rate
-                  </Badge>
+          <div>
+            <div className="mb-3 flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />
+              <h3 className="text-sm font-semibold text-foreground">People Directory</h3>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="rounded-2xl border border-sky-100 bg-card p-4 shadow-sm ring-1 ring-sky-500/5 transition hover:shadow-md dark:border-sky-900/40">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Platform Admins</p>
+                  <span className="inline-flex size-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
+                    <UserCog className="size-4" />
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Declined Card */}
-            <Card className="relative overflow-hidden border-red-200/30 dark:border-red-900/30 bg-linear-to-br from-red-500/5 to-red-500/10 shadow-md shadow-red-500/10 hover:shadow-lg hover:shadow-red-500/20 transition-all duration-300">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-red-500/10 rounded-full -mr-10 -mt-10 blur-2xl" />
-              <div className="absolute bottom-0 right-0 opacity-10">
-                <TrendingDown className="h-32 w-32 text-red-600 dark:text-red-500" />
+                <p className="mt-3 text-3xl font-bold tracking-tight">{data.userCounters.totalAdmin.toLocaleString()}</p>
+                <p className="mt-1 text-xs text-muted-foreground">Administrative users</p>
               </div>
-              <CardHeader className="relative z-10">
-                <CardTitle className="text-sm font-medium text-foreground flex items-center justify-between w-full">
-                  <span className="flex-1">Declined</span>
-                  <div className="p-2 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0">
-                    <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-3xl font-bold mb-2">{data.transactionStatistics.declineCount.toLocaleString()}</div>
-                <div className="flex items-center gap-1">
-                  <Badge variant="destructive" appearance="light" size="sm" className="text-xs">
-                    {data.transactionStatistics.declinePercentage.toFixed(1)}% decline rate
-                  </Badge>
+              <div className="rounded-2xl border border-sky-100 bg-card p-4 shadow-sm ring-1 ring-sky-500/5 transition hover:shadow-md dark:border-sky-900/40">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Merchant Partners</p>
+                  <span className="inline-flex size-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
+                    <UserCheck className="size-4" />
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Chargebacks Card */}
-            <Card className="relative overflow-hidden border-amber-200/30 dark:border-amber-900/30 bg-linear-to-br from-amber-500/5 to-amber-500/10 shadow-md shadow-amber-500/10 hover:shadow-lg hover:shadow-amber-500/20 transition-all duration-300">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/10 rounded-full -mr-10 -mt-10 blur-2xl" />
-              <div className="absolute bottom-0 right-0 opacity-10">
-                <XCircle className="h-32 w-32 text-amber-600 dark:text-amber-500" />
+                <p className="mt-3 text-3xl font-bold tracking-tight">{data.userCounters.totalMerchant.toLocaleString()}</p>
+                <p className="mt-1 text-xs text-muted-foreground">Merchant accounts</p>
               </div>
-              <CardHeader className="relative z-10">
-                <CardTitle className="text-sm font-medium text-foreground flex items-center justify-between w-full">
-                  <span className="flex-1">Chargebacks</span>
-                  <div className="p-2 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
-                    <XCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-3xl font-bold mb-2">{data.transactionStatistics.chargebackCount.toLocaleString()}</div>
-                <div className="flex items-center gap-1">
-                  <Badge variant="warning" appearance="light" size="sm" className="text-xs">
-                    {data.transactionStatistics.chargebackPercentage.toFixed(1)}% chargeback rate
-                  </Badge>
+              <div className="rounded-2xl border border-sky-100 bg-card p-4 shadow-sm ring-1 ring-sky-500/5 transition hover:shadow-md dark:border-sky-900/40">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Affiliate Partners</p>
+                  <span className="inline-flex size-8 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600">
+                    <Users className="size-4" />
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Refunds Card */}
-            <Card className="relative overflow-hidden border-blue-200/30 dark:border-blue-900/30 bg-linear-to-br from-blue-500/5 to-blue-500/10 shadow-md shadow-blue-500/10 hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full -mr-10 -mt-10 blur-2xl" />
-              <div className="absolute bottom-0 right-0 opacity-10">
-                <RefreshCw className="h-32 w-32 text-blue-600 dark:text-blue-500" />
+                <p className="mt-3 text-3xl font-bold tracking-tight">{data.userCounters.totalAffiliate.toLocaleString()}</p>
+                <p className="mt-1 text-xs text-muted-foreground">Affiliate partners</p>
               </div>
-              <CardHeader className="relative z-10">
-                <CardTitle className="text-sm font-medium text-foreground flex items-center justify-between w-full">
-                  <span className="flex-1">Refunds</span>
-                  <div className="p-2 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-                    <RefreshCw className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-3xl font-bold mb-2">{data.transactionStatistics.refundCount.toLocaleString()}</div>
-                <div className="flex items-center gap-1">
-                  <Badge variant="info" appearance="light" size="sm" className="text-xs">
-                    {data.transactionStatistics.refundPercentage.toFixed(1)}% refund rate
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
+            </div>
           </div>
 
-          {/* Transaction Statistics Charts */}
-          <div className="grid gap-5 lg:gap-7.5 md:grid-cols-2">
-            {/* Transaction Distribution by Status */}
+          <div>
+            <div className="mb-3 flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />
+              <h3 className="text-sm font-semibold text-foreground">Money Flow</h3>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="rounded-2xl border-l-4 border-l-emerald-500 border border-sky-100 bg-card p-4 shadow-sm dark:border-sky-900/40">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Approved</p>
+                  <CheckCircle2 className="size-4 text-emerald-500" />
+                </div>
+                <p className="mt-3 text-3xl font-bold tracking-tight">{data.transactionStatistics.successCount.toLocaleString()}</p>
+                <Badge variant="success" appearance="light" size="sm" className="mt-2 text-xs">
+                  {data.transactionStatistics.successPercentage.toFixed(1)}% success rate
+                </Badge>
+              </div>
+              <div className="rounded-2xl border-l-4 border-l-red-500 border border-sky-100 bg-card p-4 shadow-sm dark:border-sky-900/40">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Declined</p>
+                  <TrendingDown className="size-4 text-red-500" />
+                </div>
+                <p className="mt-3 text-3xl font-bold tracking-tight">{data.transactionStatistics.declineCount.toLocaleString()}</p>
+                <Badge variant="destructive" appearance="light" size="sm" className="mt-2 text-xs">
+                  {data.transactionStatistics.declinePercentage.toFixed(1)}% decline rate
+                </Badge>
+              </div>
+              <div className="rounded-2xl border-l-4 border-l-amber-500 border border-sky-100 bg-card p-4 shadow-sm dark:border-sky-900/40">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Chargebacks</p>
+                  <XCircle className="size-4 text-amber-500" />
+                </div>
+                <p className="mt-3 text-3xl font-bold tracking-tight">{data.transactionStatistics.chargebackCount.toLocaleString()}</p>
+                <Badge variant="warning" appearance="light" size="sm" className="mt-2 text-xs">
+                  {data.transactionStatistics.chargebackPercentage.toFixed(1)}% chargeback rate
+                </Badge>
+              </div>
+              <div className="rounded-2xl border-l-4 border-l-sky-500 border border-sky-100 bg-card p-4 shadow-sm dark:border-sky-900/40">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Refunds</p>
+                  <RefreshCw className="size-4 text-sky-500" />
+                </div>
+                <p className="mt-3 text-3xl font-bold tracking-tight">{data.transactionStatistics.refundCount.toLocaleString()}</p>
+                <Badge variant="info" appearance="light" size="sm" className="mt-2 text-xs">
+                  {data.transactionStatistics.refundPercentage.toFixed(1)}% refund rate
+                </Badge>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
             {transactionChartData && (
-              <Card className="relative overflow-hidden border-border shadow-md hover:shadow-lg transition-all duration-300">
-                <CardHeader className="border-b border-border/50 bg-muted/30">
-                  <CardTitle className="text-base font-semibold">Transaction Status Breakdown</CardTitle>
+              <Card className="overflow-hidden rounded-2xl border-sky-100 shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40">
+                <CardHeader className="border-b border-sky-100/80 bg-sky-50/60 dark:border-sky-900/40 dark:bg-sky-950/20">
+                  <CardTitle className="text-base font-semibold">Status Mix</CardTitle>
                   <CardDescription className="text-sm text-muted-foreground">
-                    Current distribution of transactions by status type
+                    How payments split across outcomes
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6">
@@ -567,13 +498,12 @@ export function AdminDashboardContent({ dateRange: dateRangeProp, merchantId: me
               </Card>
             )}
 
-            {/* Transaction Volume & Count Trend (combined) */}
             {transactionVolumeTrendData && transactionVolumeTrendData.dates.length > 0 ? (
-              <Card className="relative overflow-hidden border-border shadow-md hover:shadow-lg transition-all duration-300">
-                <CardHeader className="border-b border-border/50 bg-muted/30">
-                  <CardTitle className="text-base font-semibold">Transaction Volume & Count Trend</CardTitle>
+              <Card className="overflow-hidden rounded-2xl border-sky-100 shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40">
+                <CardHeader className="border-b border-sky-100/80 bg-sky-50/60 dark:border-sky-900/40 dark:bg-sky-950/20">
+                  <CardTitle className="text-base font-semibold">Volume Trail</CardTitle>
                   <CardDescription className="text-sm text-muted-foreground">
-                    Daily transaction volume (USD) and count over selected period
+                    Daily volume (USD) and payment count
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6">
@@ -589,15 +519,15 @@ export function AdminDashboardContent({ dateRange: dateRangeProp, merchantId: me
                 </CardContent>
               </Card>
             ) : (
-              <Card className="relative overflow-hidden border-border shadow-md hover:shadow-lg transition-all duration-300">
-                <CardHeader className="border-b border-border/50 bg-muted/30">
-                  <CardTitle className="text-base font-semibold">Transaction Volume & Count Trend</CardTitle>
+              <Card className="overflow-hidden rounded-2xl border-sky-100 shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40">
+                <CardHeader className="border-b border-sky-100/80 bg-sky-50/60 dark:border-sky-900/40 dark:bg-sky-950/20">
+                  <CardTitle className="text-base font-semibold">Volume Trail</CardTitle>
                   <CardDescription className="text-sm text-muted-foreground">
-                    Daily transaction volume (USD) and count over selected period
+                    Daily volume (USD) and payment count
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6">
-                  <div className="text-center py-16 text-muted-foreground text-sm">
+                  <div className="py-16 text-center text-sm text-muted-foreground">
                     No trend data available for the selected date range
                   </div>
                 </CardContent>
@@ -605,15 +535,14 @@ export function AdminDashboardContent({ dateRange: dateRangeProp, merchantId: me
             )}
           </div>
 
-          {/* Connector Performance - Success vs decline rates (acquirer names) */}
           {data.connectorPerformance && data.connectorPerformance.length > 0 && (
             <div className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground">Connector Performance</h2>
-                  <p className="text-sm text-muted-foreground">Success vs decline rates</p>
+                  <h2 className="text-lg font-semibold text-foreground">Bank Partner Health</h2>
+                  <p className="text-sm text-muted-foreground">Approved vs declined rates by connector</p>
                 </div>
-                <Badge variant="secondary" className="rounded-full px-3 py-1 text-xs font-medium bg-muted text-muted-foreground">
+                <Badge className="rounded-full border-sky-200 bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700 dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-300">
                   {data.connectorPerformance.length} connector{data.connectorPerformance.length !== 1 ? 's' : ''}
                 </Badge>
               </div>
@@ -624,7 +553,7 @@ export function AdminDashboardContent({ dateRange: dateRangeProp, merchantId: me
                   return (
                     <Card
                       key={connector.connector_name}
-                      className="overflow-hidden border border-border bg-card shadow-sm"
+                      className="overflow-hidden rounded-2xl border border-sky-100 bg-card shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40"
                     >
                       <CardHeader className="pb-2">
                         <CardTitle className="text-base font-semibold text-foreground">
@@ -651,7 +580,7 @@ export function AdminDashboardContent({ dateRange: dateRangeProp, merchantId: me
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <div className="flex h-2 w-full overflow-hidden rounded-full">
+                          <div className="flex h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                             <div
                               className="h-full rounded-l-full bg-emerald-500 transition-all"
                               style={{ width: `${successWidth}%` }}
@@ -679,7 +608,6 @@ export function AdminDashboardContent({ dateRange: dateRangeProp, merchantId: me
               </div>
             </div>
           )}
-
         </>
       )}
     </div>

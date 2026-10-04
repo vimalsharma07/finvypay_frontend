@@ -7,7 +7,7 @@ import '@/css/auth-layout.css';
 export function BrandedLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen grid lg:grid-cols-2 grow relative overflow-hidden">
-        {/* Full-screen teal background design */}
+        {/* Full-screen sky background design */}
         <div className="absolute inset-0 bg-gradient-to-br from-background via-primary/5 to-muted/20">
           {/* Background gradient stripes - full width */}
           <div className="absolute inset-0 gradient-stripes"></div>
@@ -93,7 +93,7 @@ export function BrandedLayout({ children }: { children: ReactNode }) {
                     src={toAbsoluteUrl('/media/svg/welcome.svg')}
                     alt="Welcome"
                     className="w-full h-auto mx-auto"
-                    style={{ filter: 'drop-shadow(0 20px 40px rgba(20, 184, 166, 0.1))' }}
+                    style={{ filter: 'drop-shadow(0 20px 40px rgba(56, 189, 248, 0.15))' }}
                   />
                 </div>
               </div>
@@ -116,15 +116,15 @@ export function BrandedLayout({ children }: { children: ReactNode }) {
               {/* Feature highlights */}
               <div className="flex flex-wrap justify-center gap-4 pt-2">
                 <div className="flex items-center gap-1 text-sm text-foreground/70">
-                  <div className="h-2 w-2 rounded-full bg-teal-500"></div>
+                  <div className="h-2 w-2 rounded-full bg-sky-500"></div>
                   <span>Secure</span>
                 </div>
                 <div className="flex items-center gap-1 text-sm text-foreground/70">
-                  <div className="h-2 w-2 rounded-full bg-teal-500"></div>
+                  <div className="h-2 w-2 rounded-full bg-sky-500"></div>
                   <span>Fast</span>
                 </div>
                 <div className="flex items-center gap-1 text-sm text-foreground/70">
-                  <div className="h-2 w-2 rounded-full bg-teal-500"></div>
+                  <div className="h-2 w-2 rounded-full bg-sky-500"></div>
                   <span>Reliable</span>
                 </div>
               </div>

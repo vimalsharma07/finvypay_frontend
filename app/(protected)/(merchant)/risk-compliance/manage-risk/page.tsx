@@ -28,14 +28,18 @@ export default function ManageRiskPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Manage Risk"
-            description="Configure and manage risk management rules, fraud detection settings, and transaction security thresholds"
+            title="Risk Rules"
+            description="Set fraud checks and security thresholds for your payments"
             icon={ShieldCheck}
           />
           <ToolbarActions>
-            <Button variant="primary" onClick={() => setAddDialogOpen(true)}>
+            <Button
+              variant="primary"
+              className="rounded-xl shadow-sm shadow-sky-500/20"
+              onClick={() => setAddDialogOpen(true)}
+            >
               <Plus className="h-4 w-4" />
-              Create Risk
+              Add Rule
             </Button>
           </ToolbarActions>
         </Toolbar>

@@ -31,8 +31,8 @@ export default function UserDashboardPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Dashboard"
-            description="Overview of your payment transactions, account activity, revenue analytics, and key performance metrics"
+            title="Home Hub"
+            description="Your payment pulse, settlement health, and account activity in one place"
             icon={LayoutGrid}
           />
           <ToolbarActions>

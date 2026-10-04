@@ -267,8 +267,8 @@ export default function UserSettlementsPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Settlements"
-            description="View all your settlement records with payment status, amounts, and transaction details"
+            title="Settlement History"
+            description="Track payout status, net amounts, and invoice records from your fund desk"
             icon={Receipt}
           />
           <ToolbarActions>
@@ -278,31 +278,42 @@ export default function UserSettlementsPage() {
       </Container>
 
       <Container>
-        <DataGrid
-          table={table}
-          recordCount={data.length}
-          isLoading={loading}
-          tableLayout={modernTableLayout}
-          tableClassNames={modernTableClassNames}
-        >
-          <Card className={modernTableCardClasses.card}>
-            <CardTable className={modernTableCardClasses.table}>
-              <ScrollArea className="w-full">
-                <DataGridTable />
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
-            </CardTable>
-            <CardFooter className={modernTableCardClasses.footer}>
-              <CursorDataGridPagination
-                meta={meta}
-                onNext={handleCursorNext}
-                onPrev={handleCursorPrev}
-                canGoPrev={canGoPrev}
-                rowCount={data.length}
-              />
-            </CardFooter>
-          </Card>
-        </DataGrid>
+        <div className="relative mb-4 overflow-hidden rounded-2xl border border-sky-200/70 bg-[linear-gradient(135deg,#f0f9ff_0%,#ffffff_55%,#e0f2fe_100%)] p-4 dark:border-sky-900/50 dark:bg-[linear-gradient(135deg,#0c1a24_0%,#0f172a_55%,#082f49_100%)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700/80 dark:text-sky-300/80">
+            Fund desk
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Review settled batches, paid amounts, and download invoice PDFs when ready.
+          </p>
+        </div>
+
+        <div className="overflow-hidden rounded-2xl border border-sky-100 bg-card shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40">
+          <DataGrid
+            table={table}
+            recordCount={data.length}
+            isLoading={loading}
+            tableLayout={modernTableLayout}
+            tableClassNames={modernTableClassNames}
+          >
+            <Card className={`${modernTableCardClasses.card} border-0 shadow-none`}>
+              <CardTable className={modernTableCardClasses.table}>
+                <ScrollArea className="w-full">
+                  <DataGridTable />
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
+              </CardTable>
+              <CardFooter className={modernTableCardClasses.footer}>
+                <CursorDataGridPagination
+                  meta={meta}
+                  onNext={handleCursorNext}
+                  onPrev={handleCursorPrev}
+                  canGoPrev={canGoPrev}
+                  rowCount={data.length}
+                />
+              </CardFooter>
+            </Card>
+          </DataGrid>
+        </div>
       </Container>
     </div>
   );

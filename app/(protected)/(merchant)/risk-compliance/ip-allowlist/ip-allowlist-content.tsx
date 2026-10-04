@@ -272,13 +272,13 @@ export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChang
           <DataGridColumnHeader column={column} title="IP Address" />
         ),
         cell: ({ row }) => {
-          return <div className="font-mono font-medium">{row.original.ip}</div>;
+          return <div className="font-mono text-sm font-medium text-slate-700 dark:text-slate-300">{row.original.ip}</div>;
         },
       },
       {
         accessorKey: 'status',
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Status" />
+          <DataGridColumnHeader column={column} title="Link Status" />
         ),
         cell: ({ row }) => {
           const status = row.original.status?.toLowerCase();
@@ -297,7 +297,7 @@ export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChang
           }
           
           return (
-            <Badge variant={variant} appearance={appearance} className="capitalize">
+            <Badge variant={variant} appearance={appearance} className="rounded-lg capitalize">
               {row.original.status}
             </Badge>
           );
@@ -306,7 +306,7 @@ export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChang
       {
         id: 'actions',
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Action" />
+          <DataGridColumnHeader column={column} title="Actions" />
         ),
         cell: ({ row }) => {
           const actions: TableActionMenuItem<IpWhitelist>[] = [
@@ -371,6 +371,15 @@ export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChang
   return (
     <Fragment>
       <Container>
+        <div className="relative mb-4 overflow-hidden rounded-2xl border border-sky-200/70 bg-[linear-gradient(135deg,#f0f9ff_0%,#ffffff_55%,#e0f2fe_100%)] p-4 dark:border-sky-900/50 dark:bg-[linear-gradient(135deg,#0c1a24_0%,#0f172a_55%,#082f49_100%)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700/80 dark:text-sky-300/80">
+            Access control
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Keep only trusted IPs linked to your workspace.
+          </p>
+        </div>
+
         <DataGrid
           table={table}
           recordCount={filteredData.length}
@@ -387,35 +396,34 @@ export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChang
           }}
           tableClassNames={{
             base: 'text-sm',
-            header: 'bg-gradient-to-b from-muted/40 to-muted/20 border-b border-border',
+            header: 'bg-sky-50/60 border-b border-sky-100 dark:bg-sky-950/20 dark:border-sky-900/40',
             headerRow: 'h-14',
-            headerSticky: 'sticky top-0 z-10 bg-background/98 backdrop-blur-md shadow-sm border-b border-border',
+            headerSticky: 'sticky top-0 z-10 bg-background/98 backdrop-blur-md shadow-sm border-b border-sky-100 dark:border-sky-900/40',
             body: '',
-            bodyRow: 'h-14 hover:bg-primary/5 hover:border-l-2 hover:border-l-primary transition-all duration-200 cursor-pointer border-b border-border/30',
+            bodyRow: 'h-14 hover:bg-sky-500/5 transition-colors duration-200 cursor-pointer border-b border-border/30',
             edgeCell: '',
           }}
         >
-          <Card className="rounded-md border-border/50 bg-card shadow-sm">
-            <CardHeader className="border-b border-border/50 bg-muted/20">
+          <Card className="rounded-2xl border-sky-100 bg-card shadow-sm dark:border-sky-900/40">
+            <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
               <CardHeading>
                 <div className="relative w-full max-w-lg my-2 group">
                   <Search className={cn(
                     "absolute left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none size-4.5 transition-all duration-200",
                     searchQuery 
-                      ? "text-primary" 
-                      : "text-muted-foreground group-focus-within:text-primary"
+                      ? "text-sky-600" 
+                      : "text-muted-foreground group-focus-within:text-sky-600"
                   )} />
                   <Input
-                    placeholder="Search IP addresses..."
+                    placeholder="Search trusted IPs..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className={cn(
-                      "pl-11 pr-10 h-9 text-sm w-full",
-                      "bg-background border-border/60",
-                      "focus-visible:border-primary/50 focus-visible:ring-primary/20",
+                      "pl-11 pr-10 h-9 text-sm w-full rounded-xl",
+                      "bg-background border-sky-200/70",
+                      "focus-visible:border-sky-400/50 focus-visible:ring-sky-400/20",
                       "transition-all duration-200",
-                      "shadow-sm hover:shadow-md focus-visible:shadow-lg",
-                      searchQuery && "border-primary/30 bg-primary/5"
+                      searchQuery && "border-sky-300 bg-sky-50/50"
                     )}
                   />
                   {searchQuery.length > 0 && (
@@ -437,7 +445,7 @@ export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChang
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </CardTable>
-            <CardFooter className="border-t border-border/50 bg-muted/10">
+            <CardFooter className="border-t border-sky-100/80 bg-sky-50/30 dark:border-sky-900/40 dark:bg-sky-950/10">
               <CursorDataGridPagination
                 meta={meta}
                 onNext={handleCursorNext}

@@ -40,17 +40,17 @@ export function SidebarMenu() {
 
   // Global classNames for consistent styling
   const classNames: AccordionMenuClassNames = {
-    root: 'lg:ps-0.5 space-y-1',
+    root: 'lg:ps-0.5 space-y-1.5',
     group: 'gap-0.5',
     label:
-      'uppercase tracking-wide text-[11px] font-semibold text-muted-foreground/80 pt-3 pb-1 px-2 first:pt-0',
+      'uppercase tracking-[0.14em] text-[10px] font-semibold text-sky-700/70 dark:text-sky-300/70 pt-3.5 pb-1.5 px-2.5 first:pt-0',
     separator: '',
-    item: 'h-9 rounded-lg px-2.5 text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground data-[selected=true]:bg-primary/10 data-[selected=true]:text-primary data-[selected=true]:font-semibold data-[selected=true]:shadow-none',
+    item: 'h-9 rounded-xl px-2.5 text-slate-600 dark:text-slate-300 transition-all duration-200 hover:bg-sky-500/10 hover:text-foreground data-[selected=true]:bg-sky-500/15 data-[selected=true]:text-sky-700 dark:data-[selected=true]:text-sky-300 data-[selected=true]:font-semibold data-[selected=true]:ring-1 data-[selected=true]:ring-sky-500/20',
     sub: '',
     subTrigger:
-      'h-9 rounded-lg px-2.5 text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground data-[selected=true]:bg-primary/10 data-[selected=true]:text-primary data-[selected=true]:font-semibold',
-    subContent: 'py-1 ms-3 ps-2.5 border-s border-border/70',
-    indicator: 'text-muted-foreground/70',
+      'h-9 rounded-xl px-2.5 text-slate-600 dark:text-slate-300 transition-all duration-200 hover:bg-sky-500/10 hover:text-foreground data-[selected=true]:bg-sky-500/15 data-[selected=true]:text-sky-700 dark:data-[selected=true]:text-sky-300 data-[selected=true]:font-semibold',
+    subContent: 'py-1.5 ms-3.5 ps-2.5 border-s border-sky-200/70 dark:border-sky-800/70',
+    indicator: 'text-sky-500/70',
   };
 
   const buildMenu = (items: MenuConfig): JSX.Element[] => {
@@ -71,10 +71,12 @@ export function SidebarMenu() {
         <AccordionMenuSub key={index} value={item.path || `root-${index}`}>
           <AccordionMenuSubTrigger className="text-[13px] font-medium flex items-center gap-2.5">
             {item.icon && (
-              <item.icon
-                data-slot="accordion-menu-icon"
-                className="size-4 shrink-0 opacity-80"
-              />
+              <span className="inline-flex size-7 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
+                <item.icon
+                  data-slot="accordion-menu-icon"
+                  className="size-3.5 shrink-0"
+                />
+              </span>
             )}
             <span data-slot="accordion-menu-title" className="flex-1 text-left leading-tight">
               {item.title}
@@ -120,10 +122,12 @@ export function SidebarMenu() {
               }}
             >
               {item.icon && (
-                <item.icon
-                  data-slot="accordion-menu-icon"
-                  className="size-4 shrink-0 opacity-80"
-                />
+                <span className="inline-flex size-7 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
+                  <item.icon
+                    data-slot="accordion-menu-icon"
+                    className="size-3.5 shrink-0"
+                  />
+                </span>
               )}
               <span data-slot="accordion-menu-title" className="flex-1 text-left leading-tight">
                 {item.title}
@@ -136,10 +140,12 @@ export function SidebarMenu() {
               className="flex items-center gap-2.5"
             >
               {item.icon && (
-                <item.icon
-                  data-slot="accordion-menu-icon"
-                  className="size-4 shrink-0 opacity-80"
-                />
+                <span className="inline-flex size-7 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
+                  <item.icon
+                    data-slot="accordion-menu-icon"
+                    className="size-3.5 shrink-0"
+                  />
+                </span>
               )}
               <span data-slot="accordion-menu-title" className="flex-1 text-left leading-tight">
                 {item.title}
@@ -162,7 +168,9 @@ export function SidebarMenu() {
         className="text-[13px] font-medium opacity-60"
       >
         {item.icon && (
-          <item.icon data-slot="accordion-menu-icon" className="size-4 shrink-0 opacity-80" />
+          <span className="inline-flex size-7 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+            <item.icon data-slot="accordion-menu-icon" className="size-3.5 shrink-0" />
+          </span>
         )}
         <span data-slot="accordion-menu-title" className="leading-tight">{item.title}</span>
         {item.disabled && (
@@ -263,7 +271,7 @@ export function SidebarMenu() {
               {isAdminPath && path === '/admin/support/tickets' && typeof openTicketCount === 'number' && openTicketCount > 0 && (
                 <Badge
                   variant="outline"
-                  className="ml-2 h-5 min-w-[1.25rem] px-1.5 text-[11px] flex items-center justify-center"
+                  className="ml-2 h-5 min-w-[1.25rem] px-1.5 text-[11px] flex items-center justify-center border-sky-300 text-sky-700 bg-sky-50 dark:border-sky-700 dark:text-sky-300 dark:bg-sky-950/40"
                 >
                   {openTicketCount}
                 </Badge>
@@ -301,7 +309,7 @@ export function SidebarMenu() {
   };
 
   return (
-    <div className="kt-scrollable-y-hover flex grow shrink-0 py-4 px-3.5 lg:max-h-[calc(100vh-5.5rem)]">
+    <div className="kt-scrollable-y-hover flex grow shrink-0 py-3.5 px-3 lg:max-h-[calc(100vh-5.5rem)]">
       <AccordionMenu
         selectedValue={pathname}
         matchPath={matchPath}

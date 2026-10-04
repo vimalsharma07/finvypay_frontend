@@ -61,22 +61,35 @@ export default function UserRatesPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="My Rates"
-            description="View your assigned merchant processing rates, fee structures, and pricing details for payment transactions"
+            title="Rate Card"
+            description="Your processing MDR, reserves, and per-transaction fee schedule"
             icon={Percent}
           />
         </Toolbar>
       </Container>
 
       <Container>
+        <div className="relative mb-4 overflow-hidden rounded-2xl border border-sky-200/70 bg-[linear-gradient(135deg,#f0f9ff_0%,#ffffff_55%,#e0f2fe_100%)] p-4 dark:border-sky-900/50 dark:bg-[linear-gradient(135deg,#0c1a24_0%,#0f172a_55%,#082f49_100%)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700/80 dark:text-sky-300/80">
+            Workspace
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Pricing assigned to your merchant account — view only.
+          </p>
+        </div>
+
         {loading ? (
-          <div className="py-10 text-center text-muted-foreground">Loading rates...</div>
+          <div className="rounded-2xl border border-sky-100 bg-sky-50/40 py-10 text-center text-muted-foreground dark:border-sky-900/40 dark:bg-sky-950/20">
+            Loading rates...
+          </div>
         ) : !rates ? (
-          <div className="py-10 text-center text-muted-foreground">No rates available.</div>
+          <div className="rounded-2xl border border-sky-100 bg-sky-50/40 py-10 text-center text-muted-foreground dark:border-sky-900/40 dark:bg-sky-950/20">
+            No rates available.
+          </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
+            <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+              <CardHeader className="flex flex-row items-center justify-between border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
                 <CardTitle>Overview</CardTitle>
                 <Badge variant={statusVariant(rates.status)} className="uppercase">
                   {rates.status}
@@ -106,8 +119,8 @@ export default function UserRatesPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
+            <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+              <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
                 <CardTitle>Transaction Fees</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
@@ -139,5 +152,3 @@ export default function UserRatesPage() {
     </Fragment>
   );
 }
-
-

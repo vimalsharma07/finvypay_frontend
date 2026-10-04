@@ -129,11 +129,11 @@ export function ReportDataTable({
 
   if (loading) {
     return (
-      <Card className={modernTableCardClasses.card}>
-        <CardHeader className={modernTableCardClasses.header}>
+      <Card className="overflow-hidden rounded-2xl border-sky-100 shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40">
+        <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
           <CardTitle>{title}</CardTitle>
         </CardHeader>
-        <div className="flex items-center justify-center py-12 p-5">
+        <div className="flex items-center justify-center p-5 py-12">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
       </Card>
@@ -142,11 +142,11 @@ export function ReportDataTable({
 
   if (rows.length === 0) {
     return (
-      <Card className={modernTableCardClasses.card}>
-        <CardHeader className={modernTableCardClasses.header}>
+      <Card className="overflow-hidden rounded-2xl border-sky-100 shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40">
+        <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
           <CardTitle>{title}</CardTitle>
         </CardHeader>
-        <div className="flex flex-col items-center justify-center py-12 text-center p-5">
+        <div className="flex flex-col items-center justify-center p-5 py-12 text-center">
           <p className="text-sm text-muted-foreground">{emptyMessage}</p>
         </div>
       </Card>
@@ -154,15 +154,15 @@ export function ReportDataTable({
   }
 
   return (
-    <Card className={modernTableCardClasses.card}>
-      <CardHeader className={modernTableCardClasses.header}>
+    <Card className="overflow-hidden rounded-2xl border-sky-100 shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40">
+      <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardTable className={modernTableCardClasses.table}>
         <ScrollArea className="w-full">
           <table className="w-full caption-bottom text-foreground text-sm border-collapse">
             <TableHeader>
-              <TableRow className="hover:bg-transparent border-b bg-muted/40">
+              <TableRow className="hover:bg-transparent border-b bg-sky-50/50 dark:bg-sky-950/20">
                 {columns.map((col) => (
                   <TableHead
                     key={col}
@@ -181,7 +181,7 @@ export function ReportDataTable({
               {rows.map((row, index) => (
                 <TableRow
                   key={index}
-                  className={index % 2 === 1 ? 'bg-muted/20' : undefined}
+                  className={index % 2 === 1 ? 'bg-sky-50/30 dark:bg-sky-950/10' : undefined}
                 >
                   {columns.map((col) => (
                     <TableCell

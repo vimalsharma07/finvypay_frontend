@@ -28,14 +28,18 @@ export default function UserIpAllowlistPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="IP Allowlist"
-            description="Add and manage IP address allowlist entries for secure access control and enhanced security"
+            title="Trusted IPs"
+            description="Allow only approved IPs to access your payment workspace"
             icon={Network}
           />
           <ToolbarActions>
-            <Button variant="primary" onClick={() => setAddDialogOpen(true)}>
+            <Button
+              variant="primary"
+              className="rounded-xl shadow-sm shadow-sky-500/20"
+              onClick={() => setAddDialogOpen(true)}
+            >
               <Plus className="h-4 w-4" />
-              Add IP Address
+              Add IP
             </Button>
           </ToolbarActions>
         </Toolbar>

@@ -148,12 +148,12 @@ export function UserCascadingPageContent() {
 
   const headers: TableHeader<UserCascadingRule>[] = useMemo(
     () => [
-      { key: 'name', label: 'Name', sortable: false },
+      { key: 'name', label: 'Path Name', sortable: false },
       { key: 'priority', label: 'Priority', sortable: true },
       { key: 'type', label: 'Type', sortable: false },
-      { key: 'connectorName', label: 'Main MID', sortable: false },
-      { key: 'cascadingFor', label: 'Cascading For', sortable: false },
-      { key: 'status', label: 'Status', sortable: false },
+      { key: 'connectorName', label: 'Primary MID', sortable: false },
+      { key: 'cascadingFor', label: 'Backup For', sortable: false },
+      { key: 'status', label: 'Active', sortable: false },
     ],
     [],
   );
@@ -161,10 +161,10 @@ export function UserCascadingPageContent() {
   const renderCell = (item: UserCascadingRule, key: keyof UserCascadingRule | string) => {
     switch (key) {
       case 'name':
-        return <div className="font-medium">{item.name}</div>;
+        return <div className="font-semibold text-foreground">{item.name}</div>;
       case 'priority':
         return (
-          <Badge variant="secondary" className="font-mono">
+          <Badge variant="secondary" className="rounded-lg font-mono">
             {item.priority}
           </Badge>
         );
@@ -213,7 +213,7 @@ export function UserCascadingPageContent() {
         );
       case 'type':
         return (
-          <Badge variant="outline" className="capitalize">
+          <Badge variant="outline" className="rounded-lg border-sky-200 capitalize text-sky-700 dark:border-sky-800 dark:text-sky-300">
             {item.type ?? '-'}
           </Badge>
         );
@@ -282,41 +282,52 @@ export function UserCascadingPageContent() {
   return (
     <Fragment>
       <Container>
-        <TableComp
-          data={cascades}
-          headers={headers}
-          renderCell={renderCell}
-          actions={actions}
-          enableCheckbox={false}
-          searchPlaceholder="Search cascading rules..."
-          searchKeys={['name']}
-          getRowId={(row: UserCascadingRule) => String(row.id)}
-          pagination={{
-            pageSize: limit,
-            onPageSizeChange: handlePageSizeChange,
-          }}
-          cursorPagination={{
-            meta,
-            onNext: handleCursorNext,
-            onPrev: handleCursorPrev,
-            canGoPrev,
-          }}
-          sorting={{
-            sortBy: sortBy,
-            sortOrder: sortOrder,
-            onSortChange: handleSortChange,
-          }}
-          loading={isTableLoading}
-        />
+        <div className="relative mb-4 overflow-hidden rounded-2xl border border-sky-200/70 bg-[linear-gradient(135deg,#f0f9ff_0%,#ffffff_55%,#e0f2fe_100%)] p-4 dark:border-sky-900/50 dark:bg-[linear-gradient(135deg,#0c1a24_0%,#0f172a_55%,#082f49_100%)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700/80 dark:text-sky-300/80">
+            Failover paths
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Keep backup bank partners ready when the primary path cannot process.
+          </p>
+        </div>
+
+        <div className="overflow-hidden rounded-2xl border border-sky-100 bg-card shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40">
+          <TableComp
+            data={cascades}
+            headers={headers}
+            renderCell={renderCell}
+            actions={actions}
+            enableCheckbox={false}
+            searchPlaceholder="Search failover paths..."
+            searchKeys={['name']}
+            getRowId={(row: UserCascadingRule) => String(row.id)}
+            pagination={{
+              pageSize: limit,
+              onPageSizeChange: handlePageSizeChange,
+            }}
+            cursorPagination={{
+              meta,
+              onNext: handleCursorNext,
+              onPrev: handleCursorPrev,
+              canGoPrev,
+            }}
+            sorting={{
+              sortBy: sortBy,
+              sortOrder: sortOrder,
+              onSortChange: handleSortChange,
+            }}
+            loading={isTableLoading}
+          />
+        </div>
       </Container>
       <ConfirmComp
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Cascading Rule"
+        title="Delete Failover Path"
         message={
           cascadeToDelete
-            ? `Are you sure you want to delete cascading rule "${cascadeToDelete.name}"? This action cannot be undone.`
-            : 'Are you sure you want to delete this cascading rule?'
+            ? `Delete failover path "${cascadeToDelete.name}"? This cannot be undone.`
+            : 'Delete this failover path? This cannot be undone.'
         }
         confirmLabel="Yes, Delete"
         cancelLabel="Cancel"

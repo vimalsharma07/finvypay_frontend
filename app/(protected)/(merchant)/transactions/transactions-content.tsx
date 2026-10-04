@@ -277,20 +277,43 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
   return (
     <Fragment>
       <Container>
+        <div className="relative mb-4 overflow-hidden rounded-2xl border border-sky-200/70 bg-[linear-gradient(135deg,#f0f9ff_0%,#ffffff_50%,#e0f2fe_100%)] p-4 sm:p-5 dark:border-sky-900/50 dark:bg-[linear-gradient(135deg,#0c1a24_0%,#0f172a_55%,#082f49_100%)]">
+          <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-sky-400/20 blur-3xl" />
+          <div className="relative flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700/80 dark:text-sky-300/80">
+                Production money flow
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Live payments with status, amount, and connector detail at a glance.
+              </p>
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-white/80 px-3 py-2 text-sm font-medium text-emerald-700 shadow-sm dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              Live
+            </div>
+          </div>
+        </div>
+
         <DataGrid
           table={table}
           recordCount={filteredData.length}
           isLoading={loading}
           tableLayout={modernTableLayout}
-          tableClassNames={modernTableClassNames}
+          tableClassNames={{
+            ...modernTableClassNames,
+            header: 'bg-gradient-to-b from-sky-50/80 to-sky-50/30 border-b border-sky-100 dark:from-sky-950/40 dark:to-sky-950/10 dark:border-sky-900/40',
+            headerSticky: 'sticky top-0 z-10 bg-background/98 backdrop-blur-md shadow-sm border-b border-sky-100 dark:border-sky-900/40',
+            bodyRow: 'h-14 hover:bg-sky-500/5 hover:border-l-2 hover:border-l-sky-500 transition-all duration-200 cursor-pointer border-b border-border/30',
+          }}
         >
-          <Card className={modernTableCardClasses.card}>
-            <CardHeader className={modernTableCardClasses.header}>
+          <Card className="rounded-2xl border-sky-100 bg-card shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40">
+            <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
               <CardHeading>
                 <SearchInput
                   value={searchQuery}
                   onChange={setSearchQuery}
-                  placeholder="Search transactions..."
+                  placeholder="Search live activity..."
                 />
               </CardHeading>
             </CardHeader>
@@ -300,7 +323,7 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </CardTable>
-            <CardFooter className={modernTableCardClasses.footer}>
+            <CardFooter className="border-t border-sky-100/80 bg-sky-50/30 dark:border-sky-900/40 dark:bg-sky-950/10">
               <CursorDataGridPagination
                 meta={meta}
                 onNext={handleCursorNext}

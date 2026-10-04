@@ -28,14 +28,18 @@ export default function TrustedCardsPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Trusted Cards"
-            description="Manage trusted card whitelist entries to bypass fraud checks for verified payment cards"
+            title="Safe Cards"
+            description="Whitelist verified cards that can skip extra fraud checks"
             icon={CreditCard}
           />
           <ToolbarActions>
-            <Button variant="primary" onClick={() => setAddDialogOpen(true)}>
+            <Button
+              variant="primary"
+              className="rounded-xl shadow-sm shadow-sky-500/20"
+              onClick={() => setAddDialogOpen(true)}
+            >
               <Plus className="h-4 w-4" />
-              Create Trusted Card
+              Add Safe Card
             </Button>
           </ToolbarActions>
         </Toolbar>

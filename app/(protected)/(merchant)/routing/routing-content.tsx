@@ -191,29 +191,29 @@ export function UserRoutingPageContent() {
   }, [profileList, selectedProfileId, resetCursor]);
 
   const headers: TableHeader<UserRouteRule>[] = useMemo(() => [
-    { key: 'name', label: 'Name', sortable: true },
+    { key: 'name', label: 'Route Name', sortable: true },
     { key: 'priority', label: 'Priority', sortable: true },
-    { key: 'viewRoute', label: 'View Route', sortable: false },
-    { key: 'merchantConnector', label: 'Gateway Connector', sortable: false },
-    { key: 'routingFor', label: 'Route Handler', sortable: true },
-    { key: 'status', label: 'Status', sortable: false },
-    { key: 'isCascade', label: 'Cascade', sortable: false },
-    { key: 'splitEnable', label: 'Split Enabled', sortable: false },
+    { key: 'viewRoute', label: 'Path', sortable: false },
+    { key: 'merchantConnector', label: 'Bank Partner', sortable: false },
+    { key: 'routingFor', label: 'Handled By', sortable: true },
+    { key: 'status', label: 'Active', sortable: false },
+    { key: 'isCascade', label: 'Failover', sortable: false },
+    { key: 'splitEnable', label: 'Split', sortable: false },
   ], []);
 
   const renderCell = (item: UserRouteRule, key: keyof UserRouteRule | string) => {
     switch (key) {
       case 'name':
-        return <div className="font-medium">{item.name}</div>;
+        return <div className="font-semibold text-foreground">{item.name}</div>;
       case 'priority':
         return (
-          <Badge variant="secondary" className="font-mono">
+          <Badge variant="secondary" className="rounded-lg font-mono">
             {item.priority}
           </Badge>
         );
       case 'viewRoute':
         return (
-          <div className="text-sm text-muted-foreground max-w-xs truncate">
+          <div className="max-w-xs truncate text-sm text-muted-foreground">
             {item.viewRoute || '-'}
           </div>
         );
@@ -225,7 +225,7 @@ export function UserRoutingPageContent() {
         );
       case 'routingFor':
         return (
-          <Badge variant="outline" className="capitalize">
+          <Badge variant="outline" className="rounded-lg border-sky-200 capitalize text-sky-700 dark:border-sky-800 dark:text-sky-300">
             {item.routingFor}
           </Badge>
         );
@@ -256,13 +256,13 @@ export function UserRoutingPageContent() {
         );
       case 'isCascade':
         return (
-          <Badge variant={item.isCascade ? 'success' : 'secondary'}>
+          <Badge variant={item.isCascade ? 'success' : 'secondary'} className="rounded-lg">
             {item.isCascade ? 'Yes' : 'No'}
           </Badge>
         );
       case 'splitEnable':
         return (
-          <Badge variant={item.splitEnable ? 'success' : 'secondary'}>
+          <Badge variant={item.splitEnable ? 'success' : 'secondary'} className="rounded-lg">
             {item.splitEnable ? 'Yes' : 'No'}
           </Badge>
         );
@@ -302,12 +302,21 @@ export function UserRoutingPageContent() {
   return (
     <Fragment>
       <Container>
-        <div className="flex flex-col gap-3 mb-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div className="relative mb-4 overflow-hidden rounded-2xl border border-sky-200/70 bg-[linear-gradient(135deg,#f0f9ff_0%,#ffffff_55%,#e0f2fe_100%)] p-4 dark:border-sky-900/50 dark:bg-[linear-gradient(135deg,#0c1a24_0%,#0f172a_55%,#082f49_100%)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700/80 dark:text-sky-300/80">
+            Smart routing
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Pick a workspace profile, then manage the paths that send payments to bank partners.
+          </p>
+        </div>
+
+        <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-sky-100 bg-card p-4 shadow-sm dark:border-sky-900/40">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-col gap-1">
-              <p className="text-sm font-semibold text-foreground">Merchant Profile (Industry)</p>
+              <p className="text-sm font-semibold text-foreground">Workspace Profile</p>
               <p className="text-xs text-muted-foreground">
-                Select an industry to load routing rules scoped to that profile.
+                Load routes for the selected industry profile.
               </p>
             </div>
             <div className="w-full md:w-80">
@@ -330,49 +339,52 @@ export function UserRoutingPageContent() {
             </div>
           </div>
         </div>
-        <TableComp
-          data={routes}
-          headers={headers}
-          renderCell={renderCell}
-          actions={actions}
-          enableCheckbox={false}
-          searchPlaceholder="Search routing rules..."
-          searchKeys={['name', 'view_route']}
-          getRowId={(row: UserRouteRule) => String(row.id)}
-          pagination={{
-            pageSize: limit,
-            pageIndex: 0,
-            onPageSizeChange: (newSize) => {
-              setLimit(newSize);
-              resetCursor();
-            },
-          }}
-          cursorPagination={{
-            meta,
-            onNext: handleCursorNext,
-            onPrev: handleCursorPrev,
-            canGoPrev,
-          }}
-          sorting={{
-            sortBy: sortBy,
-            sortOrder: sortOrder,
-            onSortChange: (newSortBy, newSortOrder) => {
-              setSortBy(newSortBy);
-              setSortOrder(newSortOrder);
-              resetCursor();
-            },
-          }}
-          loading={isTableLoading}
-        />
+
+        <div className="overflow-hidden rounded-2xl border border-sky-100 bg-card shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40">
+          <TableComp
+            data={routes}
+            headers={headers}
+            renderCell={renderCell}
+            actions={actions}
+            enableCheckbox={false}
+            searchPlaceholder="Search routes..."
+            searchKeys={['name', 'view_route']}
+            getRowId={(row: UserRouteRule) => String(row.id)}
+            pagination={{
+              pageSize: limit,
+              pageIndex: 0,
+              onPageSizeChange: (newSize) => {
+                setLimit(newSize);
+                resetCursor();
+              },
+            }}
+            cursorPagination={{
+              meta,
+              onNext: handleCursorNext,
+              onPrev: handleCursorPrev,
+              canGoPrev,
+            }}
+            sorting={{
+              sortBy: sortBy,
+              sortOrder: sortOrder,
+              onSortChange: (newSortBy, newSortOrder) => {
+                setSortBy(newSortBy);
+                setSortOrder(newSortOrder);
+                resetCursor();
+              },
+            }}
+            loading={isTableLoading}
+          />
+        </div>
       </Container>
       <ConfirmComp
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Routing Rule"
+        title="Delete Route"
         message={
           routeToDelete
-            ? `Are you sure you want to delete routing rule "${routeToDelete.name}"? This action cannot be undone.`
-            : 'Are you sure you want to delete this routing rule?'
+            ? `Delete route "${routeToDelete.name}"? This cannot be undone.`
+            : 'Delete this route? This cannot be undone.'
         }
         confirmLabel="Yes, Delete"
         cancelLabel="Cancel"

@@ -1,4 +1,4 @@
- 'use client';
+'use client';
 
 import { Fragment, useEffect, useState } from 'react';
 import { KeyRound, ShieldCheck, LockKeyhole, Webhook } from 'lucide-react';
@@ -49,22 +49,35 @@ export default function UserConfigPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="API Configuration"
-            description="View your API keys, encryption key, and webhook hash for integrating your applications."
+            title="Preferences"
+            description="API keys, encryption, and webhook hash for your integrations"
             icon={KeyRound}
           />
         </Toolbar>
       </Container>
 
       <Container>
+        <div className="relative mb-4 overflow-hidden rounded-2xl border border-sky-200/70 bg-[linear-gradient(135deg,#f0f9ff_0%,#ffffff_55%,#e0f2fe_100%)] p-4 dark:border-sky-900/50 dark:bg-[linear-gradient(135deg,#0c1a24_0%,#0f172a_55%,#082f49_100%)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700/80 dark:text-sky-300/80">
+            Workspace
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Keep keys private — use test credentials in sandbox and live keys only in production.
+          </p>
+        </div>
+
         {loading ? (
-          <div className="py-10 text-center text-muted-foreground">Loading configuration...</div>
+          <div className="rounded-2xl border border-sky-100 bg-sky-50/40 py-10 text-center text-muted-foreground dark:border-sky-900/40 dark:bg-sky-950/20">
+            Loading configuration...
+          </div>
         ) : !credentials ? (
-          <div className="py-10 text-center text-muted-foreground">No configuration data available.</div>
+          <div className="rounded-2xl border border-sky-100 bg-sky-50/40 py-10 text-center text-muted-foreground dark:border-sky-900/40 dark:bg-sky-950/20">
+            No configuration data available.
+          </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
+            <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+              <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
                 <CardTitle className="flex items-center gap-2">
                   <KeyRound className="h-5 w-5 text-primary" />
                   Test Secret Key
@@ -80,8 +93,8 @@ export default function UserConfigPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
+            <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+              <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
                 <CardTitle className="flex items-center gap-2">
                   <ShieldCheck className="h-5 w-5 text-primary" />
                   Live Secret Key
@@ -97,8 +110,8 @@ export default function UserConfigPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
+            <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+              <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
                 <CardTitle className="flex items-center gap-2">
                   <LockKeyhole className="h-5 w-5 text-primary" />
                   Encryption Key
@@ -114,8 +127,8 @@ export default function UserConfigPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
+            <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+              <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
                 <CardTitle className="flex items-center gap-2">
                   <Webhook className="h-5 w-5 text-primary" />
                   Webhook Hash
@@ -136,4 +149,3 @@ export default function UserConfigPage() {
     </Fragment>
   );
 }
-
