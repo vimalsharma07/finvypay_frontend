@@ -300,15 +300,10 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
           recordCount={filteredData.length}
           isLoading={loading}
           tableLayout={modernTableLayout}
-          tableClassNames={{
-            ...modernTableClassNames,
-            header: 'bg-gradient-to-b from-sky-50/80 to-sky-50/30 border-b border-sky-100 dark:from-sky-950/40 dark:to-sky-950/10 dark:border-sky-900/40',
-            headerSticky: 'sticky top-0 z-10 bg-background/98 backdrop-blur-md shadow-sm border-b border-sky-100 dark:border-sky-900/40',
-            bodyRow: 'h-14 hover:bg-sky-500/5 hover:border-l-2 hover:border-l-sky-500 transition-all duration-200 cursor-pointer border-b border-border/30',
-          }}
+          tableClassNames={modernTableClassNames}
         >
-          <Card className="rounded-2xl border-sky-100 bg-card shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40">
-            <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
+          <Card className={modernTableCardClasses.card}>
+            <CardHeader className={modernTableCardClasses.header}>
               <CardHeading>
                 <SearchInput
                   value={searchQuery}
@@ -323,7 +318,7 @@ export function TransactionsPageContent({ filterOpen: externalFilterOpen, setFil
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </CardTable>
-            <CardFooter className="border-t border-sky-100/80 bg-sky-50/30 dark:border-sky-900/40 dark:bg-sky-950/10">
+            <CardFooter className={modernTableCardClasses.footer}>
               <CursorDataGridPagination
                 meta={meta}
                 onNext={handleCursorNext}

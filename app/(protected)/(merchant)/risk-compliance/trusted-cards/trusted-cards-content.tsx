@@ -314,15 +314,10 @@ export function UserTrustedCardsPageContent({ addDialogOpen, onAddDialogOpenChan
           recordCount={filteredData.length}
           isLoading={loading}
           tableLayout={modernTableLayout}
-          tableClassNames={{
-            ...modernTableClassNames,
-            header: 'bg-sky-50/60 border-b border-sky-100 dark:bg-sky-950/20 dark:border-sky-900/40',
-            headerSticky: 'sticky top-0 z-10 bg-background/98 backdrop-blur-md shadow-sm border-b border-sky-100 dark:border-sky-900/40',
-            bodyRow: 'h-14 hover:bg-sky-500/5 transition-colors duration-200 cursor-pointer border-b border-border/30',
-          }}
+          tableClassNames={modernTableClassNames}
         >
-          <Card className="rounded-2xl border-sky-100 bg-card shadow-sm dark:border-sky-900/40">
-            <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
+          <Card className={modernTableCardClasses.card}>
+            <CardHeader className={modernTableCardClasses.header}>
               <CardHeading>
                 <SearchInput
                   value={searchQuery}
@@ -337,7 +332,7 @@ export function UserTrustedCardsPageContent({ addDialogOpen, onAddDialogOpenChan
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </CardTable>
-            <CardFooter className="border-t border-sky-100/80 bg-sky-50/30 dark:border-sky-900/40 dark:bg-sky-950/10">
+            <CardFooter className={modernTableCardClasses.footer}>
               <CursorDataGridPagination
                 meta={meta}
                 onNext={handleCursorNext}

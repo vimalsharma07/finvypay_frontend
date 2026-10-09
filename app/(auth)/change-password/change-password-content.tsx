@@ -117,17 +117,15 @@ export function ChangePasswordContent() {
         onSubmit={form.handleSubmit(onSubmit)}
         className="block w-full space-y-6"
       >
-        <div className="space-y-2 pb-2">
-          <div className="mb-4 flex justify-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 ring-1 ring-sky-500/20">
-              <KeyRound className="h-6 w-6 text-sky-600 dark:text-sky-400" />
-            </div>
+        <div className="space-y-3 border-b border-zinc-200 pb-5 dark:border-slate-600">
+          <div className="auth-icon-mark">
+            <KeyRound className="h-4 w-4" />
           </div>
-          <h1 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
-            Choose a new password
+          <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-slate-50">
+            New password
           </h1>
-          <p className="text-center text-sm text-muted-foreground">
-            Pick something strong you haven&apos;t used before
+          <p className="text-sm text-zinc-500 dark:text-slate-400">
+            Set a strong password you haven&apos;t used before
           </p>
         </div>
 
@@ -139,7 +137,7 @@ export function ChangePasswordContent() {
               </AlertIcon>
               <AlertTitle className="text-sm">{error}</AlertTitle>
             </Alert>
-            <Button asChild className="h-11 w-full rounded-xl shadow-sm shadow-sky-500/20">
+            <Button asChild className="auth-btn-primary h-11 w-full text-sm font-semibold">
               <Link href="/signin">
                 Back to sign in
               </Link>
@@ -251,16 +249,16 @@ export function ChangePasswordContent() {
               <Button 
                 type="submit" 
                 disabled={isProcessing} 
-                className="h-11 w-full rounded-xl text-base font-semibold shadow-sm shadow-sky-500/20"
+                className="auth-btn-primary h-11 w-full text-sm font-semibold"
               >
                 {isProcessing ? (
                   <>
-                    <LoaderCircleIcon className="size-4 animate-spin mr-1" />
+                    <LoaderCircleIcon className="mr-1 size-4 animate-spin" />
                     Updating...
                   </>
                 ) : (
                   <>
-                    <KeyRound className="h-4 w-4 mr-1" />
+                    <KeyRound className="mr-1 h-4 w-4" />
                     Update password
                   </>
                 )}

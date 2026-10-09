@@ -83,7 +83,7 @@ function DataGridColumnHeader<TData, TValue>({
     return (
       <div
         className={cn(
-          'text-foreground/70 font-semibold inline-flex h-full items-center gap-2 text-sm leading-tight tracking-tight [&_svg]:size-4 [&_svg]:opacity-70',
+          'inline-flex h-full items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.06em] text-slate-500 leading-tight dark:text-slate-400 [&_svg]:size-3.5 [&_svg]:opacity-70',
           className,
         )}
       >
@@ -98,7 +98,7 @@ function DataGridColumnHeader<TData, TValue>({
       <Button
         variant="ghost"
         className={cn(
-          'text-foreground/70 rounded-md font-semibold -ms-2 px-3 h-8 hover:bg-muted/60 data-[state=open]:bg-muted/60 hover:text-foreground data-[state=open]:text-foreground text-sm leading-tight tracking-tight transition-all duration-200 hover:shadow-sm',
+          '-ms-2 h-8 rounded-lg px-2.5 text-xs font-semibold uppercase tracking-[0.06em] text-slate-500 leading-tight hover:bg-sky-100/70 hover:text-slate-700 data-[state=open]:bg-sky-100/70 data-[state=open]:text-slate-700 dark:text-slate-400 dark:hover:bg-sky-950/50 dark:hover:text-slate-200 dark:data-[state=open]:bg-sky-950/50 transition-colors',
           className,
         )}
         disabled={isLoading || recordCount === 0}

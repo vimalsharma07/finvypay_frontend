@@ -242,20 +242,18 @@ export function SignupContent() {
             onSubmit={otpForm.handleSubmit(handleVerifyOtp)}
             className="block w-full space-y-6"
           >
-            <div className="space-y-2 pb-2">
-              <div className="mb-4 flex justify-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 ring-1 ring-sky-500/20">
-                  <Mail className="h-6 w-6 text-sky-600 dark:text-sky-400" />
-                </div>
+            <div className="space-y-3 border-b border-zinc-200 pb-5 dark:border-slate-600">
+              <div className="auth-icon-mark">
+                <Mail className="h-4 w-4" />
               </div>
-              <h1 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
-                Confirm your email
+              <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-slate-50">
+                Verify email
               </h1>
-              <p className="text-center text-sm text-muted-foreground">
-                Enter the 6-digit verification code sent to
-              </p>
-              <p className="text-center text-sm font-semibold text-foreground">
-                {registeredEmail}
+              <p className="text-sm text-zinc-500 dark:text-slate-400">
+                Code sent to{' '}
+                <span className="font-medium text-zinc-800 dark:text-slate-200">
+                  {registeredEmail}
+                </span>
               </p>
             </div>
 
@@ -322,11 +320,11 @@ export function SignupContent() {
                         type="button"
                         onClick={resendOtp}
                         disabled={!canResend}
-                        className={`font-semibold transition-colors ${
+                        className={
                           canResend
-                            ? 'text-primary hover:text-primary/80 cursor-pointer'
-                            : 'text-muted-foreground cursor-not-allowed opacity-50'
-                        }`}
+                            ? 'auth-link cursor-pointer'
+                            : 'cursor-not-allowed text-zinc-400 opacity-50'
+                        }
                       >
                         {isResending ? (
                           <>
@@ -354,17 +352,17 @@ export function SignupContent() {
                     otpForm.setValue('otp', otpValue, { shouldValidate: true });
                   }
                 }}
-                className="h-11 w-full rounded-xl text-base font-semibold shadow-sm shadow-sky-500/20"
+                className="auth-btn-primary h-11 w-full text-sm font-semibold"
               >
                 {isProcessing ? (
                   <>
-                    <LoaderCircleIcon className="size-4 animate-spin mr-1" />
+                    <LoaderCircleIcon className="mr-1 size-4 animate-spin" />
                     Verifying...
                   </>
                 ) : (
                   <>
-                    <CheckCircle className="h-4 w-4 mr-1" />
-                    Verify & continue
+                    <CheckCircle className="mr-1 h-4 w-4" />
+                    Verify
                   </>
                 )}
               </Button>
@@ -376,7 +374,7 @@ export function SignupContent() {
                   setError(null);
                   setSuccess(null);
                 }}
-                className="h-11 w-full rounded-xl"
+                className="auth-btn-outline h-11 w-full"
               >
                 <ArrowLeft className="h-4 w-4 mr-1" />
                 Back to Registration
@@ -396,17 +394,15 @@ export function SignupContent() {
           onSubmit={form.handleSubmit(handleRegister)}
           className="block w-full space-y-6"
         >
-          <div className="space-y-2 pb-2">
-            <div className="mb-4 flex justify-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 ring-1 ring-sky-500/20">
-                <UserPlus className="h-6 w-6 text-sky-600 dark:text-sky-400" />
-              </div>
+          <div className="space-y-3 border-b border-zinc-200 pb-5 dark:border-slate-600">
+            <div className="auth-icon-mark">
+              <UserPlus className="h-4 w-4" />
             </div>
-            <h1 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
-              Start accepting payments
+            <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-slate-50">
+              Create account
             </h1>
-            <p className="text-center text-sm text-muted-foreground">
-              Create your FinvyPay account in a few steps
+            <p className="text-sm text-zinc-500 dark:text-slate-400">
+              Register to start processing payments
             </p>
           </div>
 
@@ -547,7 +543,7 @@ export function SignupContent() {
                         id="accept"
                         checked={field.value}
                         onCheckedChange={(checked) => field.onChange(!!checked)}
-                        className="mt-0.5 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                        className="mt-0.5 data-[state=checked]:border-zinc-900 data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:border-slate-100 dark:data-[state=checked]:bg-slate-100"
                       />
                       <label
                         htmlFor="accept"
@@ -557,7 +553,7 @@ export function SignupContent() {
                         <Link
                           href="/privacy-policy"
                           target="_blank"
-                          className="font-semibold text-primary hover:text-primary/80 transition-colors"
+                          className="auth-link"
                         >
                           Privacy Policy
                         </Link>
@@ -583,29 +579,26 @@ export function SignupContent() {
             <Button 
               type="submit" 
               disabled={isProcessing}
-              className="h-11 w-full rounded-xl text-base font-semibold shadow-sm shadow-sky-500/20"
+              className="auth-btn-primary h-11 w-full text-sm font-semibold"
             >
               {isProcessing ? (
                 <>
-                  <LoaderCircleIcon className="size-4 animate-spin mr-1" />
+                  <LoaderCircleIcon className="mr-1 size-4 animate-spin" />
                   Creating account...
                 </>
               ) : (
                 <>
-                  <UserPlus className="h-4 w-4 mr-1" />
-                  Create account
+                  <UserPlus className="mr-1 h-4 w-4" />
+                  Register
                 </>
               )}
             </Button>
           </div>
 
-          <div className="pt-2">
-            <p className="text-center text-sm text-muted-foreground">
-              Already have an account?{' '}
-              <Link
-                href="/signin"
-                className="font-semibold text-primary transition-colors hover:text-primary/80"
-              >
+          <div className="pt-1">
+            <p className="text-center text-sm text-zinc-500 dark:text-slate-400">
+              Already registered?{' '}
+              <Link href="/signin" className="auth-link">
                 Sign in
               </Link>
             </p>

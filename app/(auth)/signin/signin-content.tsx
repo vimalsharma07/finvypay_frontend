@@ -294,17 +294,15 @@ export function SigninContent() {
             onSubmit={form.handleSubmit(onSubmit)}
             className="block w-full space-y-6"
           >
-        <div className="space-y-2 pb-2">
-          <div className="mb-4 flex justify-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 ring-1 ring-sky-500/20">
-              <LogIn className="h-6 w-6 text-sky-600 dark:text-sky-400" />
-            </div>
+        <div className="space-y-3 border-b border-zinc-200 pb-5 dark:border-slate-600">
+          <div className="auth-icon-mark">
+            <LogIn className="h-4 w-4" />
           </div>
-          <h1 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
-            Welcome back
+          <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-slate-50">
+            Sign in
           </h1>
-          <p className="text-center text-sm text-muted-foreground">
-            Sign in to your FinvyPay dashboard
+          <p className="text-sm text-zinc-500 dark:text-slate-400">
+            Enter your credentials to continue
           </p>
         </div>
 
@@ -346,7 +344,7 @@ export function SigninContent() {
                   <button
                     type="button"
                     onClick={() => setForgotPasswordOpen(true)}
-                    className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+                    className="auth-link text-xs"
                   >
                     Forgot password?
                   </button>
@@ -392,7 +390,7 @@ export function SigninContent() {
                   id="remember-me"
                   checked={field.value}
                   onCheckedChange={(checked) => field.onChange(!!checked)}
-                  className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  className="data-[state=checked]:border-zinc-900 data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:border-slate-100 dark:data-[state=checked]:bg-slate-100"
                 />
                 <label
                   htmlFor="remember-me"
@@ -409,30 +407,27 @@ export function SigninContent() {
           <Button 
             type="submit" 
             disabled={isProcessing}
-            className="h-11 w-full rounded-xl text-base font-semibold shadow-sm shadow-sky-500/20"
+            className="auth-btn-primary h-11 w-full text-sm font-semibold"
           >
             {isProcessing ? (
               <>
-                <LoaderCircleIcon className="size-4 animate-spin mr-1" />
+                <LoaderCircleIcon className="mr-1 size-4 animate-spin" />
                 Signing in...
               </>
             ) : (
               <>
-                <LogIn className="h-4 w-4 mr-1" />
+                <LogIn className="mr-1 h-4 w-4" />
                 Sign in
               </>
             )}
           </Button>
         </div>
 
-        <div className="pt-2">
-          <p className="text-center text-sm text-muted-foreground">
-            New to FinvyPay?{' '}
-            <Link
-              href="/signup"
-              className="font-semibold text-primary transition-colors hover:text-primary/80"
-            >
-              Create an account
+        <div className="pt-1">
+          <p className="text-center text-sm text-zinc-500 dark:text-slate-400">
+            No account?{' '}
+            <Link href="/signup" className="auth-link">
+              Register
             </Link>
           </p>
         </div>
@@ -447,17 +442,15 @@ export function SigninContent() {
           onSubmit={otpEmailForm.handleSubmit(onOtpEmailSubmit)}
           className="block w-full space-y-6"
         >
-          <div className="space-y-2 pb-2">
-            <div className="mb-4 flex justify-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 ring-1 ring-sky-500/20">
-                <Mail className="h-6 w-6 text-sky-600 dark:text-sky-400" />
-              </div>
+          <div className="space-y-3 border-b border-zinc-200 pb-5 dark:border-slate-600">
+            <div className="auth-icon-mark">
+              <Mail className="h-4 w-4" />
             </div>
-            <h1 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
-              Passwordless sign-in
+            <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-slate-50">
+              One-time code
             </h1>
-            <p className="text-center text-sm text-muted-foreground">
-              We&apos;ll email you a one-time code to continue
+            <p className="text-sm text-zinc-500 dark:text-slate-400">
+              We&apos;ll email a 6-digit code to sign you in
             </p>
           </div>
 
@@ -504,30 +497,27 @@ export function SigninContent() {
             <Button 
               type="submit" 
               disabled={isSendingOtp}
-              className="h-11 w-full rounded-xl text-base font-semibold shadow-sm shadow-sky-500/20"
+              className="auth-btn-primary h-11 w-full text-sm font-semibold"
             >
               {isSendingOtp ? (
                 <>
-                  <LoaderCircleIcon className="size-4 animate-spin mr-1" />
-                  Sending OTP...
+                  <LoaderCircleIcon className="mr-1 size-4 animate-spin" />
+                  Sending code...
                 </>
               ) : (
                 <>
-                  <Mail className="h-4 w-4 mr-1" />
-                  Send OTP
+                  <Mail className="mr-1 h-4 w-4" />
+                  Send code
                 </>
               )}
             </Button>
           </div>
 
-          <div className="pt-2">
-            <p className="text-center text-sm text-muted-foreground">
-              New to FinvyPay?{' '}
-              <Link
-                href="/signup"
-                className="font-semibold text-primary transition-colors hover:text-primary/80"
-              >
-                Create an account
+          <div className="pt-1">
+            <p className="text-center text-sm text-zinc-500 dark:text-slate-400">
+              No account?{' '}
+              <Link href="/signup" className="auth-link">
+                Register
               </Link>
             </p>
           </div>
@@ -542,20 +532,15 @@ export function SigninContent() {
           onSubmit={otpForm.handleSubmit(onOtpVerifySubmit)}
           className="block w-full space-y-6"
         >
-          <div className="space-y-2 pb-2">
-            <div className="mb-4 flex justify-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 ring-1 ring-sky-500/20">
-                <Mail className="h-6 w-6 text-sky-600 dark:text-sky-400" />
-              </div>
+          <div className="space-y-3 border-b border-zinc-200 pb-5 dark:border-slate-600">
+            <div className="auth-icon-mark">
+              <Mail className="h-4 w-4" />
             </div>
-            <h1 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
-              Check your inbox
+            <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-slate-50">
+              Enter code
             </h1>
-            <p className="text-center text-sm text-muted-foreground">
-              Enter the 6-digit code we sent to
-            </p>
-            <p className="text-center text-sm font-semibold text-foreground">
-              {otpEmail}
+            <p className="text-sm text-zinc-500 dark:text-slate-400">
+              Sent to <span className="font-medium text-zinc-800 dark:text-slate-200">{otpEmail}</span>
             </p>
           </div>
 
@@ -613,7 +598,7 @@ export function SigninContent() {
                       type="button"
                       onClick={handleResendOtp}
                       disabled={resendCooldown > 0 || isSendingOtp || !otpEmail}
-                      className="font-semibold text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="auth-link disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {isSendingOtp
                         ? 'Sending...'
@@ -634,17 +619,17 @@ export function SigninContent() {
               onClick={() => {
                 otpForm.setValue('otp', otpValue, { shouldValidate: true });
               }}
-              className="h-11 w-full rounded-xl text-base font-semibold shadow-sm shadow-sky-500/20"
+              className="auth-btn-primary h-11 w-full text-sm font-semibold"
             >
               {isVerifyingOtp ? (
                 <>
-                  <LoaderCircleIcon className="size-4 animate-spin mr-1" />
+                  <LoaderCircleIcon className="mr-1 size-4 animate-spin" />
                   Verifying...
                 </>
               ) : (
                 <>
-                  <CheckCircle className="h-4 w-4 mr-1" />
-                  Verify & continue
+                  <CheckCircle className="mr-1 h-4 w-4" />
+                  Verify
                 </>
               )}
             </Button>
@@ -660,7 +645,7 @@ export function SigninContent() {
                 otpForm.reset({ otp: '' });
                 setError(null);
               }}
-              className="h-11 w-full rounded-xl"
+              className="auth-btn-outline h-11 w-full"
             >
               <ArrowLeft className="h-4 w-4 mr-1" />
               Back to Email
@@ -671,7 +656,7 @@ export function SigninContent() {
     )}
 
     {/* Login Method Toggle */}
-    <div className="flex items-center justify-center gap-2 mt-6 pt-4 border-t border-border/50">
+    <div className="mt-6 flex items-center justify-center border-t border-zinc-200 pt-4 dark:border-slate-600">
       <button
         type="button"
         onClick={() => {
@@ -684,11 +669,11 @@ export function SigninContent() {
           setOtpEmail('');
           resetOtpState();
         }}
-        className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium"
+        className="auth-link text-sm"
       >
         {loginMethod === 'password'
-          ? 'Use a one-time code instead'
-          : 'Use email & password instead'}
+          ? 'Sign in with a code'
+          : 'Sign in with password'}
       </button>
     </div>
 

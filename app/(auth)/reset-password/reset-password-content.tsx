@@ -158,16 +158,14 @@ export function ResetPasswordContent() {
       {step === 'email' ? (
         <Form {...emailForm}>
           <form onSubmit={handleEmailSubmit} className="block w-full space-y-6">
-            <div className="space-y-2 pb-2">
-              <div className="mb-4 flex justify-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 ring-1 ring-sky-500/20">
-                  <Mail className="h-6 w-6 text-sky-600 dark:text-sky-400" />
-                </div>
+            <div className="space-y-3 border-b border-zinc-200 pb-5 dark:border-slate-600">
+              <div className="auth-icon-mark">
+                <Mail className="h-4 w-4" />
               </div>
-              <h1 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
-                Reset your password
+              <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-slate-50">
+                Reset password
               </h1>
-              <p className="text-center text-sm text-muted-foreground">
+              <p className="text-sm text-zinc-500 dark:text-slate-400">
                 Enter your email to receive a verification code
               </p>
             </div>
@@ -220,24 +218,24 @@ export function ResetPasswordContent() {
                   <Button
                     type="submit"
                     disabled={isProcessing || !canSend}
-                    className="h-11 w-full rounded-xl text-base font-semibold shadow-sm shadow-sky-500/20"
+                    className="auth-btn-primary h-11 w-full text-sm font-semibold"
                   >
                     {isProcessing ? (
                       <>
-                        <LoaderCircleIcon className="size-4 animate-spin mr-1" />
+                        <LoaderCircleIcon className="mr-1 size-4 animate-spin" />
                         Sending...
                       </>
                     ) : (
                       <>
-                        <Mail className="h-4 w-4 mr-1" />
-                        Send verification code
+                        <Mail className="mr-1 h-4 w-4" />
+                        Send code
                       </>
                     )}
                   </Button>
                 }
               />
 
-              <Button type="button" variant="outline" className="h-11 w-full rounded-xl" asChild>
+              <Button type="button" variant="outline" className="auth-btn-outline h-11 w-full" asChild>
                 <Link href="/signin">
                   <ArrowLeft className="mr-1 size-4" />
                   Back to sign in
@@ -252,19 +250,17 @@ export function ResetPasswordContent() {
             onSubmit={resetForm.handleSubmit(handleResetSubmit)}
             className="block w-full space-y-6"
           >
-            <div className="space-y-2 pb-2">
-              <div className="mb-4 flex justify-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 ring-1 ring-sky-500/20">
-                  <KeyRound className="h-6 w-6 text-sky-600 dark:text-sky-400" />
-                </div>
+            <div className="space-y-3 border-b border-zinc-200 pb-5 dark:border-slate-600">
+              <div className="auth-icon-mark">
+                <KeyRound className="h-4 w-4" />
               </div>
-              <h1 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
-                Choose a new password
+              <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-slate-50">
+                New password
               </h1>
-              <p className="text-center text-sm text-muted-foreground">
-                Enter the 6-digit code sent to
+              <p className="text-sm text-zinc-500 dark:text-slate-400">
+                Code sent to{' '}
+                <span className="font-medium text-zinc-800 dark:text-slate-200">{email}</span>
               </p>
-              <p className="text-center text-sm font-semibold text-foreground">{email}</p>
             </div>
 
             {resetError && (
@@ -331,7 +327,7 @@ export function ResetPasswordContent() {
                 type="button"
                 onClick={handleResendOtp}
                 disabled={cooldownRemaining > 0 || isProcessing || !!resetSuccess}
-                className="text-sm text-primary hover:text-primary/80 disabled:text-muted-foreground disabled:cursor-not-allowed"
+                className="auth-link text-sm disabled:cursor-not-allowed disabled:text-zinc-400"
               >
                 {cooldownRemaining > 0
                   ? `Resend code in ${cooldownRemaining}s`
@@ -417,16 +413,16 @@ export function ResetPasswordContent() {
                   <Button
                     type="submit"
                     disabled={isResetting || otpValue.length !== 6}
-                    className="h-11 w-full rounded-xl text-base font-semibold shadow-sm shadow-sky-500/20"
+                    className="auth-btn-primary h-11 w-full text-sm font-semibold"
                   >
                     {isResetting ? (
                       <>
-                        <LoaderCircleIcon className="size-4 animate-spin mr-1" />
+                        <LoaderCircleIcon className="mr-1 size-4 animate-spin" />
                         Updating...
                       </>
                     ) : (
                       <>
-                        <Check className="h-4 w-4 mr-1" />
+                        <Check className="mr-1 h-4 w-4" />
                         Update password
                       </>
                     )}
@@ -436,7 +432,7 @@ export function ResetPasswordContent() {
                     variant="outline"
                     onClick={() => setStep('email')}
                     disabled={isResetting}
-                    className="h-11 w-full rounded-xl"
+                    className="auth-btn-outline h-11 w-full"
                   >
                     Back
                   </Button>

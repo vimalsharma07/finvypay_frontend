@@ -29,6 +29,11 @@ import { useCursorPagination } from '@/lib/hooks/use-cursor-pagination';
 import type { CursorPaginationMeta } from '@/lib/types/pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
+  modernTableLayout,
+  modernTableClassNames,
+  modernTableCardClasses,
+} from '@/app/(protected)/components/table-comp';
+import {
   Card,
   CardFooter,
   CardHeader,
@@ -384,28 +389,11 @@ export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChang
           table={table}
           recordCount={filteredData.length}
           isLoading={loading}
-          tableLayout={{
-            cellBorder: false,
-            rowBorder: true,
-            rowRounded: false,
-            stripped: false,
-            headerBackground: true,
-            headerBorder: true,
-            headerSticky: true,
-            width: 'fixed',
-          }}
-          tableClassNames={{
-            base: 'text-sm',
-            header: 'bg-sky-50/60 border-b border-sky-100 dark:bg-sky-950/20 dark:border-sky-900/40',
-            headerRow: 'h-14',
-            headerSticky: 'sticky top-0 z-10 bg-background/98 backdrop-blur-md shadow-sm border-b border-sky-100 dark:border-sky-900/40',
-            body: '',
-            bodyRow: 'h-14 hover:bg-sky-500/5 transition-colors duration-200 cursor-pointer border-b border-border/30',
-            edgeCell: '',
-          }}
+          tableLayout={modernTableLayout}
+          tableClassNames={modernTableClassNames}
         >
-          <Card className="rounded-2xl border-sky-100 bg-card shadow-sm dark:border-sky-900/40">
-            <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
+          <Card className={modernTableCardClasses.card}>
+            <CardHeader className={modernTableCardClasses.header}>
               <CardHeading>
                 <div className="relative w-full max-w-lg my-2 group">
                   <Search className={cn(
@@ -439,13 +427,13 @@ export function UserIpAllowlistPageContent({ addDialogOpen, onAddDialogOpenChang
                 </div>
               </CardHeading>
             </CardHeader>
-            <CardTable className="overflow-hidden">
+            <CardTable className={modernTableCardClasses.table}>
               <ScrollArea className="w-full">
                 <DataGridTable />
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </CardTable>
-            <CardFooter className="border-t border-sky-100/80 bg-sky-50/30 dark:border-sky-900/40 dark:bg-sky-950/10">
+            <CardFooter className={modernTableCardClasses.footer}>
               <CursorDataGridPagination
                 meta={meta}
                 onNext={handleCursorNext}

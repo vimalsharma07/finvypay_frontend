@@ -352,12 +352,15 @@ export default function SandboxTransactionsPage() {
           tableLayout={modernTableLayout}
           tableClassNames={{
             ...modernTableClassNames,
-            header: 'bg-gradient-to-b from-amber-50/80 to-amber-50/30 border-b border-amber-100 dark:from-amber-950/30 dark:to-amber-950/10 dark:border-amber-900/40',
-            headerSticky: 'sticky top-0 z-10 bg-background/98 backdrop-blur-md shadow-sm border-b border-amber-100 dark:border-amber-900/40',
-            bodyRow: 'h-14 hover:bg-amber-500/5 hover:border-l-2 hover:border-l-amber-500 transition-all duration-200 cursor-pointer border-b border-border/30',
+            header:
+              'bg-amber-50/70 border-b border-amber-100/90 dark:bg-amber-950/35 dark:border-amber-900/50',
+            headerSticky:
+              'sticky top-0 z-10 bg-amber-50/95 backdrop-blur-md border-b border-amber-100 shadow-[0_1px_0_0_rgba(245,158,11,0.1)] dark:bg-amber-950/90 dark:border-amber-900/50',
+            bodyRow:
+              'h-12 border-b border-amber-100/70 transition-colors duration-150 odd:bg-amber-50/35 hover:bg-amber-100/55 dark:border-amber-900/40 dark:odd:bg-amber-950/20 dark:hover:bg-amber-950/40',
           }}
         >
-          <Card className="rounded-2xl border-amber-100 bg-card shadow-sm ring-1 ring-amber-500/5 dark:border-amber-900/40">
+          <Card className="overflow-hidden rounded-2xl border border-amber-100 bg-card shadow-sm ring-1 ring-amber-500/5 dark:border-amber-900/40">
             <CardHeader className="border-b border-amber-100/80 bg-amber-50/40 dark:border-amber-900/40 dark:bg-amber-950/20">
               <CardHeading>
                 <SearchInput

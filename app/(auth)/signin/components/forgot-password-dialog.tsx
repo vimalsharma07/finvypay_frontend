@@ -160,22 +160,22 @@ export function ForgotPasswordDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="space-y-4 pb-2">
-          <div className="flex justify-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/10 ring-1 ring-sky-500/20">
+          <div className="flex justify-start">
+            <div className="auth-icon-mark">
               {step === 'email' ? (
-                <Mail className="h-6 w-6 text-sky-600 dark:text-sky-400" />
+                <Mail className="h-4 w-4" />
               ) : (
-                <KeyRound className="h-6 w-6 text-sky-600 dark:text-sky-400" />
+                <KeyRound className="h-4 w-4" />
               )}
             </div>
           </div>
-          <div className="space-y-2 text-center">
-            <DialogTitle className="text-2xl font-bold tracking-tight">
-              {step === 'email' ? 'Reset your password' : 'Choose a new password'}
+          <div className="space-y-2 text-left">
+            <DialogTitle className="text-xl font-semibold tracking-tight">
+              {step === 'email' ? 'Reset password' : 'New password'}
             </DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground">
+            <DialogDescription className="text-sm text-zinc-500 dark:text-slate-400">
               {step === 'email'
-                ? "We'll email you a secure code to create a new password."
+                ? "We'll email a secure code to create a new password."
                 : `Enter the 6-digit code sent to ${email}`}
             </DialogDescription>
           </div>
@@ -225,7 +225,7 @@ export function ForgotPasswordDialog({
               <Button
                 type="submit"
                 disabled={isProcessing || !canSend}
-                className="h-11 w-full rounded-xl text-base font-semibold shadow-sm shadow-sky-500/20"
+                className="auth-btn-primary h-11 w-full text-sm font-semibold"
               >
                 {isProcessing ? (
                   <>
@@ -235,7 +235,7 @@ export function ForgotPasswordDialog({
                 ) : (
                   <>
                     <Mail className="mr-1 h-4 w-4" />
-                    Send verification code
+                    Send code
                   </>
                 )}
               </Button>
@@ -308,7 +308,7 @@ export function ForgotPasswordDialog({
                   type="button"
                   onClick={handleResendOtp}
                   disabled={cooldownRemaining > 0 || isProcessing || !!resetSuccess}
-                  className="text-sm text-primary hover:text-primary/80 disabled:text-muted-foreground disabled:cursor-not-allowed"
+                  className="auth-link text-sm disabled:cursor-not-allowed disabled:text-zinc-400"
                 >
                   {cooldownRemaining > 0
                     ? `Resend code in ${cooldownRemaining}s`
@@ -394,7 +394,7 @@ export function ForgotPasswordDialog({
                     <Button
                       type="submit"
                       disabled={isResetting || otpValue.length !== 6}
-                      className="h-11 w-full rounded-xl text-base font-semibold shadow-sm shadow-sky-500/20"
+                      className="auth-btn-primary h-11 w-full text-sm font-semibold"
                     >
                       {isResetting ? (
                         <>
@@ -413,7 +413,7 @@ export function ForgotPasswordDialog({
                       variant="outline"
                       onClick={() => setStep('email')}
                       disabled={isResetting}
-                      className="h-11 w-full rounded-xl"
+                      className="auth-btn-outline h-11 w-full"
                     >
                       Back
                     </Button>
@@ -423,7 +423,7 @@ export function ForgotPasswordDialog({
                     type="button"
                     variant="primary"
                     onClick={() => handleClose(false)}
-                    className="h-11 w-full rounded-xl shadow-sm shadow-sky-500/20"
+                    className="auth-btn-primary h-11 w-full text-sm font-semibold"
                   >
                     Close
                   </Button>
