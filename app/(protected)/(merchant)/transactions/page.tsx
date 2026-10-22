@@ -53,8 +53,8 @@ export default function TransactionsPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Transactions"
-            description="View and monitor all your production payment transactions with detailed information, filtering, and transaction history"
+            title="Live Activity"
+            description="Monitor production payments, filter outcomes, and export your money-flow history"
             icon={CreditCard}
           />
           <ToolbarActions>
@@ -62,11 +62,11 @@ export default function TransactionsPage() {
             <Button
               variant="outline"
               size="sm"
-              className="gap-2"
+              className="gap-2 rounded-xl border-sky-200 hover:bg-sky-50 hover:border-sky-300 dark:border-sky-800 dark:hover:bg-sky-950/40"
               onClick={() => setFilterOpen(true)}
             >
               <Filter className="h-4 w-4" />
-              Advanced Filter
+              Smart Filter
             </Button>
           </ToolbarActions>
         </Toolbar>

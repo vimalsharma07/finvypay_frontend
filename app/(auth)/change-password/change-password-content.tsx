@@ -117,17 +117,15 @@ export function ChangePasswordContent() {
         onSubmit={form.handleSubmit(onSubmit)}
         className="block w-full space-y-6"
       >
-        <div className="space-y-2 pb-2">
-          <div className="flex justify-center mb-4">
-            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <KeyRound className="h-6 w-6 text-primary" />
-            </div>
+        <div className="space-y-3 border-b border-zinc-200 pb-5 dark:border-slate-600">
+          <div className="auth-icon-mark">
+            <KeyRound className="h-4 w-4" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-center">
-            Reset Password
+          <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-slate-50">
+            New password
           </h1>
-          <p className="text-sm text-muted-foreground text-center">
-            Enter your new password below
+          <p className="text-sm text-zinc-500 dark:text-slate-400">
+            Set a strong password you haven&apos;t used before
           </p>
         </div>
 
@@ -139,9 +137,9 @@ export function ChangePasswordContent() {
               </AlertIcon>
               <AlertTitle className="text-sm">{error}</AlertTitle>
             </Alert>
-            <Button asChild className="w-full h-11">
+            <Button asChild className="auth-btn-primary h-11 w-full text-sm font-semibold">
               <Link href="/signin">
-                Go back to Sign In
+                Back to sign in
               </Link>
             </Button>
           </div>
@@ -251,17 +249,17 @@ export function ChangePasswordContent() {
               <Button 
                 type="submit" 
                 disabled={isProcessing} 
-                className="w-full h-11 text-base font-semibold"
+                className="auth-btn-primary h-11 w-full text-sm font-semibold"
               >
                 {isProcessing ? (
                   <>
-                    <LoaderCircleIcon className="size-4 animate-spin mr-1" />
-                    Resetting...
+                    <LoaderCircleIcon className="mr-1 size-4 animate-spin" />
+                    Updating...
                   </>
                 ) : (
                   <>
-                    <KeyRound className="h-4 w-4 mr-1" />
-                    Reset Password
+                    <KeyRound className="mr-1 h-4 w-4" />
+                    Update password
                   </>
                 )}
               </Button>

@@ -22,148 +22,148 @@ import { filterMenuByPermissions } from '@/lib/utils/permission-menu-matcher';
 // Base admin menu configuration (before permission filtering)
 const BASE_ADMIN_MENU: MenuConfig = [
   {
-    title: 'Overview',
+    title: 'Control Hub',
     icon: LayoutDashboard,
     path: '/admin/dashboard',
     requirePermission: false, // Dashboard always visible
   },
   {
-    title: 'Identity & Access',
+    title: 'People Directory',
     icon: UsersRound,
     permissionModule: 'User Management',
     requirePermission: true,
     children: [
-      { title: 'Admin', path: '/admin/user-management/admin', submodule: 'Admin User' },
-      { title: 'Merchant', path: '/admin/user-management/merchant', submodule: 'Merchant User' },
-      { title: 'Affiliate', path: '/admin/user-management/affiliate', submodule: 'Affiliate User' },
+      { title: 'Platform Admins', path: '/admin/user-management/admin', submodule: 'Admin User' },
+      { title: 'Merchant Partners', path: '/admin/user-management/merchant', submodule: 'Merchant User' },
+      { title: 'Affiliate Partners', path: '/admin/user-management/affiliate', submodule: 'Affiliate User' },
     ],
   },
   {
-    title: 'Payments',
+    title: 'Money Flow',
     icon: WalletCards,
     permissionModule: 'Transactions',
     requirePermission: false,
     children: [
-      { title: 'Transactions', path: '/admin/transactions/transactions', submodule: 'Transactions' },
-      { title: 'Sanbox Transactions', path: '/admin/transactions/sandbox-transactions', submodule: 'Sanbox Transactions' },
+      { title: 'Live Activity', path: '/admin/transactions/transactions', submodule: 'Transactions' },
+      { title: 'Test Activity', path: '/admin/transactions/sandbox-transactions', submodule: 'Sanbox Transactions' },
     ],
   },
   {
-    title: 'Access Control',
+    title: 'Security Gates',
     icon: KeyRound,
     permissionModule: 'Roles & Permissions', // Explicit permission module mapping
     requirePermission: true,
     children: [
-      { title: 'Roles', path: '/admin/roles-permissions/roles', submodule: 'Role' },
-      { title: 'Permissions', path: '/admin/roles-permissions/permissions', submodule: 'Permission' },
+      { title: 'Role Profiles', path: '/admin/roles-permissions/roles', submodule: 'Role' },
+      { title: 'Access Rights', path: '/admin/roles-permissions/permissions', submodule: 'Permission' },
     ],
   },
   {
-    title: 'Risk Center',
+    title: 'Fraud Shield',
     icon: ShieldAlert,
     permissionModule: 'Risk Management', // Explicit permission module mapping
     requirePermission: true,
     children: [
-      { title: 'Manage Risk', path: '/admin/risk-compliance/manage-risk' }, // No specific submodule - shows if has any Risk Management permission
-      { title: 'IP Allowlist', path: '/admin/risk-compliance/ip-allowlist', submodule: 'IP Whitelist' },
-      { title: 'Trusted Cards', path: '/admin/risk-compliance/trusted-cards' }, // No specific submodule - shows if has any Risk Management permission
+      { title: 'Risk Rules', path: '/admin/risk-compliance/manage-risk' }, // No specific submodule - shows if has any Risk Management permission
+      { title: 'Trusted IPs', path: '/admin/risk-compliance/ip-allowlist', submodule: 'IP Whitelist' },
+      { title: 'Safe Cards', path: '/admin/risk-compliance/trusted-cards' }, // No specific submodule - shows if has any Risk Management permission
     ],
   },
   {
-    title: 'Acquirers',
+    title: 'Bank Partners',
     icon: Building2,
     path: '/admin/acquirers',
     permissionModule: 'Acquirer Management', // Explicit permission module mapping
     requirePermission: true,
   },
   {
-    title: 'Routing & Cascading',
+    title: 'Smart Routing',
     icon: Route,
     permissionModule: 'Routing',
     requirePermission: true,
     hidden: true, // Temporarily hidden from nav; pages under /admin/global-routing etc. remain available by URL
     children: [
-      { title: 'Global Routing', path: '/admin/global-routing', submodule: 'Global Routing' },
-      { title: 'Global Cascading', path: '/admin/global-cascading', submodule: 'Global Cascading' },
+      { title: 'Route Map', path: '/admin/global-routing', submodule: 'Global Routing' },
+      { title: 'Failover Map', path: '/admin/global-cascading', submodule: 'Global Cascading' },
     ],
   },
   {
-    title: 'Merchant Onboarding',
+    title: 'Partner Intake',
     icon: ClipboardCheck,
     path: '/admin/applications',
     permissionModule: 'Application Management', // Explicit permission module mapping
     requirePermission: false,
   },
   {
-    title: 'Settlements',
+    title: 'Fund Desk',
     icon: CircleDollarSign,
     permissionModule: 'Settlement Reports', // Explicit permission module mapping
     requirePermission: false,
     children: [
-      { title: 'Settlement Summary', path: '/admin/settlement/summary', submodule: 'Settlement Summary' },
-      { title: 'All Settlements', path: '/admin/settlement/all', submodule: 'All Settlements' },
-      { title: 'Settlement Calculations', path: '/admin/settlement/calculations', submodule: 'Settlement Calculations' },
+      { title: 'Daily Pulse', path: '/admin/settlement/summary', submodule: 'Settlement Summary' },
+      { title: 'Settlement History', path: '/admin/settlement/all', submodule: 'All Settlements' },
+      { title: 'Calc Engine', path: '/admin/settlement/calculations', submodule: 'Settlement Calculations' },
     ],
   },
   {
-    title: 'Analytics',
+    title: 'Insights',
     icon: ChartColumn,
     permissionModule: 'Reports', // Explicit permission module mapping
     requirePermission: false,
     children: [
-      { title: 'Merchant Turnover', path: '/admin/reports/merchant-turnover', submodule: 'overall reports' },
-      { title: 'Merchant Transaction', path: '/admin/reports/merchant-transaction', submodule: 'Reports' },
-      { title: 'MID Transaction', path: '/admin/reports/mid-transaction', submodule: 'Reports' },
-      { title: 'Transaction Summary', path: '/admin/reports/transaction-summary', submodule: 'Reports' },
-      { title: 'Country-wise Transaction', path: '/admin/reports/country-wise-transaction', submodule: 'Reports' },
+      { title: 'Turnover Pulse', path: '/admin/reports/merchant-turnover', submodule: 'overall reports' },
+      { title: 'Partner Activity', path: '/admin/reports/merchant-transaction', submodule: 'Reports' },
+      { title: 'MID Activity', path: '/admin/reports/mid-transaction', submodule: 'Reports' },
+      { title: 'Payment Snapshot', path: '/admin/reports/transaction-summary', submodule: 'Reports' },
+      { title: 'Country Pulse', path: '/admin/reports/country-wise-transaction', submodule: 'Reports' },
     ],
   },
   {
-    title: 'Configuration',
+    title: 'System Setup',
     icon: Settings2,
     permissionModule: 'Master Module', // Explicit permission module mapping
     requirePermission: true,
     children: [
-      { title: 'Countries', path: '/admin/master/countries', submodule: 'Countries' },
-      { title: 'Currency', path: '/admin/master/currency', submodule: 'Currency' },
-      { title: 'Industries', path: '/admin/master/industries', submodule: 'Industries' },
-      { title: 'Agreements', path: '/admin/master/agreements', submodule: 'Agreements' },
-      { title: 'SMTP', path: '/admin/smtp' },
+      { title: 'Regions', path: '/admin/master/countries', submodule: 'Countries' },
+      { title: 'Currencies', path: '/admin/master/currency', submodule: 'Currency' },
+      { title: 'Verticals', path: '/admin/master/industries', submodule: 'Industries' },
+      { title: 'Contracts', path: '/admin/master/agreements', submodule: 'Agreements' },
+      { title: 'Email Gateway', path: '/admin/smtp' },
     ],
   },
   {
-    title: 'Help Center',
+    title: 'Care Desk',
     icon: LifeBuoy,
     permissionModule: 'Support', // Explicit permission module mapping
     requirePermission: true,
     children: [
-      { title: 'Tickets', path: '/admin/support/tickets', submodule: 'Tickets' },
-      { title: 'Help Center', path: '/admin/support/help-center', submodule: 'Help Center' },
+      { title: 'Open Cases', path: '/admin/support/tickets', submodule: 'Tickets' },
+      { title: 'Knowledge Base', path: '/admin/support/help-center', submodule: 'Help Center' },
     ],
   },
   {
-    title: 'Audit Logs',
+    title: 'Activity Trail',
     icon: FileSearch,
     permissionModule: 'Logs', // Explicit permission module mapping
     requirePermission: false,
     children: [
-      { title: 'Transaction Logs', path: '/admin/log/txn_logs', submodule: 'Transaction Logs' },
-      { title: 'Webhook Logs', path: '/admin/log/webhook_logs', submodule: 'Webhook Logs' },
-      { title: 'Provider Logs', path: '/admin/log/provider_logs', submodule: 'Provider Logs' },
-      { title: 'App Error Logs', path: '/admin/log/app_error_logs', submodule: 'App Error Logs' },
-      { title: 'Job Error Logs', path: '/admin/log/job_error_logs', submodule: 'Job Error Logs' },
-      { title: 'Cron Error Logs', path: '/admin/log/cron_error_logs', submodule: 'Cron Error Logs' },
-      { title: 'Admin Audit Logs', path: '/admin/log/admin_audit_logs', submodule: 'Admin Audit Logs' },
+      { title: 'Payment Trails', path: '/admin/log/txn_logs', submodule: 'Transaction Logs' },
+      { title: 'Webhook Trails', path: '/admin/log/webhook_logs', submodule: 'Webhook Logs' },
+      { title: 'Provider Trails', path: '/admin/log/provider_logs', submodule: 'Provider Logs' },
+      { title: 'App Faults', path: '/admin/log/app_error_logs', submodule: 'App Error Logs' },
+      { title: 'Job Faults', path: '/admin/log/job_error_logs', submodule: 'Job Error Logs' },
+      { title: 'Cron Faults', path: '/admin/log/cron_error_logs', submodule: 'Cron Error Logs' },
+      { title: 'Admin Trail', path: '/admin/log/admin_audit_logs', submodule: 'Admin Audit Logs' },
     ],
   },
   {
-    title: 'Store - Admin',
+    title: 'Store Console',
     icon: Bolt,
     disabled: true,
     children: [
-      { title: 'Dashboard', path: '/store-admin/dashboard' },
+      { title: 'Store Hub', path: '/store-admin/dashboard' },
       {
-        title: 'Inventory',
+        title: 'Stock Room',
         children: [
           {
             title: 'All Products',
@@ -191,9 +191,9 @@ const BASE_ADMIN_MENU: MenuConfig = [
       },
     ],
   },
-  { title: 'Store - Services', icon: Codepen, disabled: true },
-  { title: 'AI Promt', icon: Theater, disabled: true },
-  { title: 'Invoice Generator', icon: FileSearch, disabled: true },
+  { title: 'Store Services', icon: Codepen, disabled: true },
+  { title: 'AI Studio', icon: Theater, disabled: true },
+  { title: 'Invoice Studio', icon: FileSearch, disabled: true },
 ];
 
 /**

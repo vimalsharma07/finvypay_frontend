@@ -29,17 +29,18 @@ export default function UserRoutingPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Routing Rules"
-            description="Create, edit, and manage payment routing rules to optimize transaction processing across multiple acquirers"
+            title="Route Map"
+            description="Direct payments to the right bank partner with simple priority rules"
             icon={Route}
           />
           <ToolbarActions>
             <Button
               variant="primary"
+              className="rounded-xl shadow-sm shadow-sky-500/20"
               onClick={() => router.push('/routing/create')}
             >
               <Plus className="h-4 w-4" />
-              Create Routing
+              Add Route
             </Button>
           </ToolbarActions>
         </Toolbar>

@@ -46,18 +46,18 @@ export default function OnboardingPage() {
     const baseSteps = [
       {
         number: 1,
-        title: 'Account Type',
-        subtitle: 'Setup Your Account Details',
+        title: 'Business Type',
+        subtitle: 'Choose how you operate',
       },
       {
         number: 2,
-        title: 'Account Settings',
-        subtitle: 'Setup Your Account Settings',
+        title: 'Profile Basics',
+        subtitle: 'Company and contact details',
       },
       {
         number: 3,
-        title: 'Business Info',
-        subtitle: 'Your Business Related Info',
+        title: 'Processing Profile',
+        subtitle: 'How you accept payments',
       },
     ];
 
@@ -65,36 +65,36 @@ export default function OnboardingPage() {
     if (shouldShowDirectorsStep) {
       baseSteps.push({
         number: 4,
-        title: 'Directors',
-        subtitle: 'Add Directors Information',
+        title: 'Leadership',
+        subtitle: 'Directors and documents',
       });
       baseSteps.push({
         number: 5,
-        title: 'Video KYC',
-        subtitle: 'Record Your Verification Video',
+        title: 'Face Check',
+        subtitle: 'Short verification recording',
       });
       baseSteps.push({
         number: 6,
-        title: 'Agreement',
-        subtitle: 'Sign the Agreement',
+        title: 'Sign Off',
+        subtitle: 'Review and sign agreement',
       });
     } else {
       baseSteps.push({
         number: 4,
-        title: 'Video KYC',
-        subtitle: 'Record Your Verification Video',
+        title: 'Face Check',
+        subtitle: 'Short verification recording',
       });
       baseSteps.push({
         number: 5,
-        title: 'Agreement',
-        subtitle: 'Sign the Agreement',
+        title: 'Sign Off',
+        subtitle: 'Review and sign agreement',
       });
     }
 
     baseSteps.push({
       number: shouldShowDirectorsStep ? 7 : 6,
-      title: 'Completed',
-      subtitle: 'Woah, we are here',
+      title: "You're In",
+      subtitle: 'Application submitted',
     });
 
     return baseSteps;
@@ -294,14 +294,16 @@ export default function OnboardingPage() {
         <Container>
           <Toolbar>
             <ToolbarHeading
-              title="Onboarding"
-              description="Complete your merchant profile verification with business information, documents, and compliance requirements"
+              title="Merchant Setup"
+              description="Finish verification so you can go live with payments"
               icon={UserCheck}
             />
           </Toolbar>
         </Container>
         <Container>
-          <div className="text-center py-12">Loading...</div>
+          <div className="rounded-2xl border border-sky-100 bg-sky-50/40 py-12 text-center text-muted-foreground dark:border-sky-900/40 dark:bg-sky-950/20">
+            Loading setup...
+          </div>
         </Container>
       </Fragment>
     );
@@ -312,21 +314,28 @@ export default function OnboardingPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Onboarding"
-            description="Complete your merchant profile verification with business information, documents, and compliance requirements to get started"
+            title="Merchant Setup"
+            description="Finish verification so you can go live with payments"
             icon={UserCheck}
           />
         </Toolbar>
       </Container>
 
       <Container>
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Step Indicator - Left Side */}
-          <div className="lg:col-span-1">
+        <div className="relative mb-6 overflow-hidden rounded-2xl border border-sky-200/70 bg-[linear-gradient(135deg,#f0f9ff_0%,#ffffff_55%,#e0f2fe_100%)] p-4 dark:border-sky-900/50 dark:bg-[linear-gradient(135deg,#0c1a24_0%,#0f172a_55%,#082f49_100%)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700/80 dark:text-sky-300/80">
+            Onboarding desk
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Complete each step once — your progress is saved as you move forward.
+          </p>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
+          <div className="lg:col-span-1 lg:sticky lg:top-24 lg:self-start">
             <StepIndicator steps={steps} currentStep={currentStep} />
           </div>
 
-          {/* Step Content - Right Side */}
           <div className="lg:col-span-2">
             {currentStep === 1 && (
               <Step1KycType
@@ -422,7 +431,7 @@ export default function OnboardingPage() {
               />
             )}
             {currentStep > 7 && (
-              <div className="text-center py-12 text-muted-foreground">
+              <div className="rounded-2xl border border-sky-100 bg-sky-50/40 py-12 text-center text-muted-foreground dark:border-sky-900/40 dark:bg-sky-950/20">
                 Step {currentStep} - Coming soon
               </div>
             )}

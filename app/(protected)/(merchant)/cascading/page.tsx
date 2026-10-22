@@ -29,17 +29,18 @@ export default function UserCascadingPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Cascading Rules"
-            description="View and manage cascading payment rules that automatically route transactions through multiple acquirers in sequence"
+            title="Failover Paths"
+            description="Set backup bank partners when the primary path declines"
             icon={Link2}
           />
           <ToolbarActions>
             <Button
               variant="primary"
+              className="rounded-xl shadow-sm shadow-sky-500/20"
               onClick={() => router.push('/cascading/create')}
             >
               <Plus className="h-4 w-4" />
-              Create Cascading
+              Add Failover
             </Button>
           </ToolbarActions>
         </Toolbar>

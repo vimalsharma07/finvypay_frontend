@@ -225,16 +225,16 @@ export default function EditPaymentLinkPage({ params }: EditPaymentLinkPageProps
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Edit Payment Link"
-            description="Update payment link details for secure customer payments"
+            title="Edit Pay Link"
+            description="Update checkout link details for your customers"
             icon={Link2}
           />
         </Toolbar>
       </Container>
       <Container>
-        <Card className="rounded-md">
-          <CardHeader>
-            <CardTitle>Payment Link Information</CardTitle>
+        <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+          <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
+            <CardTitle>Link Details</CardTitle>
           </CardHeader>
           <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

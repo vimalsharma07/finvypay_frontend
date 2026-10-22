@@ -165,11 +165,10 @@ export function VideoRecorder({
   };
 
   return (
-    <Card>
-      <CardContent className="pt-6">
+    <Card className="rounded-xl border-sky-100 shadow-sm dark:border-sky-900/40">
+      <CardContent className="pt-5">
         <div className="space-y-4">
-          {/* Video Preview/Recording Area */}
-          <div className="relative bg-black rounded-lg overflow-hidden aspect-video flex items-center justify-center">
+          <div className="relative aspect-video overflow-hidden rounded-xl bg-black ring-1 ring-sky-500/10 flex items-center justify-center">
             {videoUrl && !isRecording ? (
               // Show recorded video preview
               <video
@@ -224,16 +223,16 @@ export function VideoRecorder({
                 variant={isRecording ? 'destructive' : 'primary'}
                 onClick={isRecording ? stopRecording : startRecording}
                 disabled={disabled || isUploading}
-                className="w-full"
+                className="w-full rounded-xl shadow-sm shadow-sky-500/20"
               >
                 {isRecording ? (
                   <>
-                    <VideoOff className="h-4 w-4 mr-1" />
+                    <VideoOff className="mr-1 h-4 w-4" />
                     Stop Recording
                   </>
                 ) : (
                   <>
-                    <Video className="h-4 w-4 mr-1" />
+                    <Video className="mr-1 h-4 w-4" />
                     Start Recording ({maxDuration}s)
                   </>
                 )}
@@ -246,9 +245,9 @@ export function VideoRecorder({
                   variant="outline"
                   onClick={resetRecording}
                   disabled={isUploading || hasUploaded}
-                  className="flex-1"
+                  className="flex-1 rounded-xl"
                 >
-                  <RotateCcw className="h-4 w-4 mr-1" />
+                  <RotateCcw className="mr-1 h-4 w-4" />
                   Record Again
                 </Button>
                 <Button
@@ -256,7 +255,7 @@ export function VideoRecorder({
                   variant="primary"
                   onClick={handleUpload}
                   disabled={isUploading || hasUploaded || disabled}
-                  className="flex-1"
+                  className="flex-1 rounded-xl shadow-sm shadow-sky-500/20"
                 >
                   {hasUploaded ? (
                     <>

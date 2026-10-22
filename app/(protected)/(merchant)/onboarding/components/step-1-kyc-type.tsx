@@ -96,10 +96,10 @@ export function Step1KycType({ onNext, onBack, onUpdate }: Step1KycTypeProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Account Type</CardTitle>
-        <CardDescription>Select your account type to get started</CardDescription>
+    <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+      <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
+        <CardTitle>Business Type</CardTitle>
+        <CardDescription>Choose the structure that matches your business</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -113,7 +113,7 @@ export function Step1KycType({ onNext, onBack, onUpdate }: Step1KycTypeProps) {
                     <RadioGroup
                       onValueChange={field.onChange}
                       value={field.value}
-                      className="grid gap-4"
+                      className="grid gap-3"
                     >
                       {kycTypeOptions.map((option) => {
                         const Icon = option.icon;
@@ -123,10 +123,10 @@ export function Step1KycType({ onNext, onBack, onUpdate }: Step1KycTypeProps) {
                           <label
                             key={option.value}
                             htmlFor={option.value}
-                            className={`flex items-start gap-4 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                            className={`flex cursor-pointer items-start gap-4 rounded-xl border-2 p-4 transition-all ${
                               isSelected
-                                ? 'border-primary bg-primary/5'
-                                : 'border-border hover:border-primary/50'
+                                ? 'border-sky-400 bg-sky-50/80 shadow-sm shadow-sky-500/10 dark:border-sky-500 dark:bg-sky-950/30'
+                                : 'border-sky-100 hover:border-sky-300 dark:border-sky-900/40 dark:hover:border-sky-700'
                             }`}
                           >
                             <RadioGroupItem
@@ -135,16 +135,18 @@ export function Step1KycType({ onNext, onBack, onUpdate }: Step1KycTypeProps) {
                               className="mt-0.5"
                             />
                             <div
-                              className={`flex-shrink-0 mt-0.5 ${
-                                isSelected ? 'text-primary' : 'text-muted-foreground'
+                              className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
+                                isSelected
+                                  ? 'bg-sky-500/15 text-sky-600 dark:text-sky-300'
+                                  : 'bg-muted text-muted-foreground'
                               }`}
                             >
                               <Icon className="h-5 w-5" />
                             </div>
                             <div className="flex-1">
                               <div
-                                className={`font-semibold mb-1 ${
-                                  isSelected ? 'text-primary' : 'text-foreground'
+                                className={`mb-1 font-semibold ${
+                                  isSelected ? 'text-sky-700 dark:text-sky-300' : 'text-foreground'
                                 }`}
                               >
                                 {option.label}
@@ -154,22 +156,20 @@ export function Step1KycType({ onNext, onBack, onUpdate }: Step1KycTypeProps) {
                               </div>
                             </div>
                             {isSelected && (
-                              <div className="flex-shrink-0">
-                                <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                                  <svg
-                                    className="w-3 h-3 text-white"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M5 13l4 4L19 7"
-                                    />
-                                  </svg>
-                                </div>
+                              <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sky-500">
+                                <svg
+                                  className="h-3 w-3 text-white"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M5 13l4 4L19 7"
+                                  />
+                                </svg>
                               </div>
                             )}
                           </label>
@@ -183,7 +183,7 @@ export function Step1KycType({ onNext, onBack, onUpdate }: Step1KycTypeProps) {
             />
 
             <div className="flex justify-between pt-4">
-              <Button type="button" variant="outline" onClick={onBack} className="gap-2">
+              <Button type="button" variant="outline" onClick={onBack} className="gap-2 rounded-xl">
                 <ChevronLeft className="h-4 w-4" />
                 Back
               </Button>
@@ -191,9 +191,9 @@ export function Step1KycType({ onNext, onBack, onUpdate }: Step1KycTypeProps) {
                 type="submit"
                 variant="primary"
                 disabled={isSubmitting || !form.watch('kycType')}
-                className="gap-2"
+                className="gap-2 rounded-xl shadow-sm shadow-sky-500/20"
               >
-                {isSubmitting ? 'Initializing...' : 'Continue'}
+                {isSubmitting ? 'Starting...' : 'Continue'}
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>

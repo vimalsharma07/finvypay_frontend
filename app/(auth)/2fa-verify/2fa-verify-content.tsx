@@ -121,18 +121,18 @@ export function Verify2FAContent() {
   return (
     <div className="w-full space-y-6">
       {/* Header */}
-      <div className="space-y-2 pb-2">
-        <div className="mx-auto h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-          <Shield className="h-6 w-6 text-primary" />
+      <div className="space-y-3 border-b border-zinc-200 pb-5 dark:border-slate-600">
+        <div className="auth-icon-mark">
+          <Shield className="h-4 w-4" />
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-center">
-          Two-Factor Authentication
+        <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-slate-50">
+          Two-factor check
         </h1>
-        <p className="text-sm text-muted-foreground text-center">
+        <p className="text-sm text-zinc-500 dark:text-slate-400">
           Enter the 6-digit code from your authenticator app
         </p>
-        <p className="text-xs text-muted-foreground text-center">
-          Verifying for: <span className="font-semibold text-foreground">{email}</span>
+        <p className="text-xs text-zinc-500 dark:text-slate-400">
+          Account: <span className="font-medium text-zinc-800 dark:text-slate-200">{email}</span>
         </p>
       </div>
 
@@ -182,7 +182,7 @@ export function Verify2FAContent() {
             <div className="pt-2">
               <Button
                 type="submit"
-                className="w-full h-11 text-base font-semibold"
+                className="auth-btn-primary h-11 w-full text-sm font-semibold"
                 disabled={isProcessing}
               >
                 {isProcessing ? (
@@ -193,7 +193,7 @@ export function Verify2FAContent() {
                 ) : (
                   <>
                     <Shield className="mr-1 h-4 w-4" />
-                    Verify & Continue
+                    Verify
                   </>
                 )}
               </Button>
@@ -205,7 +205,7 @@ export function Verify2FAContent() {
       <div className="text-center pt-2">
         <p className="text-sm text-muted-foreground">
           Having trouble?{' '}
-          <Link href="/signin" className="font-semibold text-primary hover:text-primary/80 transition-colors">
+          <Link href="/signin" className="auth-link">
             Back to sign in
           </Link>
         </p>

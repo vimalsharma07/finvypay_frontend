@@ -136,14 +136,14 @@ export function SignaturePad({
   };
 
   return (
-    <Card>
-      <CardContent className="pt-6">
+    <Card className="rounded-xl border-sky-100 shadow-sm dark:border-sky-900/40">
+      <CardContent className="pt-5">
         <div className="space-y-4">
           <div className="text-sm text-muted-foreground">
             Please sign in the box below using your mouse or touch screen
           </div>
           
-          <div className="border-2 border-dashed border-border rounded-lg bg-muted/30 p-4">
+          <div className="rounded-xl border-2 border-dashed border-sky-200 bg-sky-50/40 p-4 dark:border-sky-800 dark:bg-sky-950/20">
             <canvas
               ref={canvasRef}
               className="w-full cursor-crosshair touch-none"

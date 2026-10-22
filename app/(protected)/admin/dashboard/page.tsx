@@ -43,8 +43,8 @@ export default function AdminDashboardPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Overview"
-            description="Overview of system statistics, transaction analytics, user activity, and key performance metrics for administrative monitoring"
+            title="Control Hub"
+            description="Live pulse of platform activity, partner health, and payment performance"
             icon={LayoutGrid}
           />
           <ToolbarActions>

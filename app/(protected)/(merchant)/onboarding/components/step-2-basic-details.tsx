@@ -302,9 +302,9 @@ export function Step2BasicDetails({ onboardingData, onNext, onBack, onUpdate }: 
 
   if (!kycType) {
     return (
-      <Card>
+      <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
         <CardContent className="pt-6">
-          <div className="text-center py-8 text-muted-foreground">
+          <div className="rounded-xl border border-sky-100 bg-sky-50/40 py-8 text-center text-muted-foreground dark:border-sky-900/40 dark:bg-sky-950/20">
             Please complete step 1 to select your account type first.
           </div>
         </CardContent>
@@ -316,11 +316,11 @@ export function Step2BasicDetails({ onboardingData, onNext, onBack, onUpdate }: 
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Account Settings</CardTitle>
+      <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+        <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
+          <CardTitle>Profile Basics</CardTitle>
           <CardDescription>
-            Fill in your basic details and upload required documents
+            Add your details and upload the documents we need to verify you
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -539,8 +539,8 @@ export function Step2BasicDetails({ onboardingData, onNext, onBack, onUpdate }: 
             Please upload all required documents to continue
           </p>
         )}
-        <div className="flex justify-between w-full gap-4">
-          <Button type="button" variant="outline" onClick={onBack} className="gap-2">
+        <div className="flex w-full justify-between gap-4">
+          <Button type="button" variant="outline" onClick={onBack} className="gap-2 rounded-xl">
             <ChevronLeft className="h-4 w-4" />
             Back
           </Button>
@@ -549,7 +549,7 @@ export function Step2BasicDetails({ onboardingData, onNext, onBack, onUpdate }: 
             form="basic-details-form"
             variant="primary" 
             disabled={isSubmitting || !checkAllDocumentsUploaded}
-            className="gap-2"
+            className="gap-2 rounded-xl shadow-sm shadow-sky-500/20"
           >
             {isSubmitting ? 'Saving...' : 'Continue'}
             <ChevronRight className="h-4 w-4" />

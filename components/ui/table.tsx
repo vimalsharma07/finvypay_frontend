@@ -12,7 +12,16 @@ function Table({ className, ...props }: React.HTMLAttributes<HTMLTableElement>) 
 }
 
 function TableHeader({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) {
-  return <thead data-slot="table-header" className={cn('[&_tr]:border-b', className)} {...props} />;
+  return (
+    <thead
+      data-slot="table-header"
+      className={cn(
+        'bg-sky-50/70 [&_tr]:border-b [&_tr]:border-sky-100 dark:bg-sky-950/35 dark:[&_tr]:border-sky-900/50',
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
 function TableBody({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) {
@@ -34,7 +43,7 @@ function TableRow({ className, ...props }: React.HTMLAttributes<HTMLTableRowElem
     <tr
       data-slot="table-row"
       className={cn(
-        'border-b transition-colors [&:has(td):hover]:bg-muted/50 data-[state=selected]:bg-muted',
+        'border-b border-sky-100/70 transition-colors odd:bg-sky-50/30 [&:has(td):hover]:bg-sky-100/50 data-[state=selected]:bg-sky-100/60 dark:border-sky-900/40 dark:odd:bg-sky-950/20 dark:[&:has(td):hover]:bg-sky-950/40',
         className,
       )}
       {...props}
@@ -47,7 +56,7 @@ function TableHead({ className, ...props }: React.ThHTMLAttributes<HTMLTableCell
     <th
       data-slot="table-head"
       className={cn(
-        'h-12 px-4 text-left rtl:text-right align-middle font-normal text-muted-foreground [&:has([role=checkbox])]:pe-0',
+        'h-11 px-4 text-left rtl:text-right align-middle text-xs font-semibold uppercase tracking-[0.06em] text-slate-500 dark:text-slate-400 [&:has([role=checkbox])]:pe-0',
         className,
       )}
       {...props}
@@ -57,7 +66,7 @@ function TableHead({ className, ...props }: React.ThHTMLAttributes<HTMLTableCell
 
 function TableCell({ className, ...props }: React.TdHTMLAttributes<HTMLTableCellElement>) {
   return (
-    <td data-slot="table-cell" className={cn('p-4 align-middle [&:has([role=checkbox])]:pe-0', className)} {...props} />
+    <td data-slot="table-cell" className={cn('px-4 py-3 align-middle [&:has([role=checkbox])]:pe-0', className)} {...props} />
   );
 }
 

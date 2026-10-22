@@ -24,8 +24,8 @@ export default function CreateCascadingPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Create Cascading Rule"
-            description="Configure cascading rules to automatically route transactions through multiple acquirers in sequence"
+            title="Add Failover"
+            description="Create a backup path when the primary bank partner cannot process"
             icon={Plus}
           />
         </Toolbar>

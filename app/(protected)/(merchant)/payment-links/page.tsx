@@ -88,19 +88,19 @@ export default function PaymentLinksPage() {
   }, [goPrev]);
 
   const headers: TableHeader<PaymentLink>[] = useMemo(() => [
-    { key: 'name', label: 'Name', sortable: false },
-    { key: 'link', label: 'Payment Link', sortable: false },
+    { key: 'name', label: 'Link Name', sortable: false },
+    { key: 'link', label: 'Pay URL', sortable: false },
     { key: 'amount', label: 'Amount', sortable: false },
     { key: 'currency', label: 'Currency', sortable: false },
-    { key: 'expiryValidity', label: 'Expiry', sortable: false },
-    { key: 'status', label: 'Status', sortable: false },
+    { key: 'expiryValidity', label: 'Expires', sortable: false },
+    { key: 'status', label: 'Link Status', sortable: false },
     { key: 'createdAt', label: 'Created', sortable: false },
   ], []);
 
   const renderCell = (item: PaymentLink, key: keyof PaymentLink | string) => {
     switch (key) {
       case 'name':
-        return <div className="font-medium">{item.name}</div>;
+        return <div className="font-semibold text-foreground">{item.name}</div>;
       case 'link':
         return (
           <div className="max-w-xs truncate">
@@ -108,7 +108,7 @@ export default function PaymentLinksPage() {
               href={item.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:underline text-sm"
+              className="text-sm text-sky-700 hover:underline dark:text-sky-300"
             >
               {item.link}
             </a>
@@ -122,7 +122,7 @@ export default function PaymentLinksPage() {
         );
       case 'currency':
         return (
-          <Badge variant="outline" className="font-mono">
+          <Badge variant="outline" className="rounded-lg border-sky-200 font-mono text-sky-700 dark:border-sky-800 dark:text-sky-300">
             {item.currency}
           </Badge>
         );
@@ -134,7 +134,10 @@ export default function PaymentLinksPage() {
         );
       case 'status':
         return (
-          <Badge variant={item.status === 'active' ? 'success' : 'secondary'}>
+          <Badge
+            variant={item.status === 'active' ? 'success' : 'secondary'}
+            className="rounded-lg"
+          >
             {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
           </Badge>
         );
@@ -200,18 +203,19 @@ export default function PaymentLinksPage() {
       <Container>
         <Toolbar>
           <ToolbarHeading
-            title="Payment Links"
-            description="Manage payment templates and payment links from one place"
+            title="Pay Links"
+            description="Build branded templates and share checkout links with customers"
             icon={Link2}
           />
           <ToolbarActions>
             {activeTab === 'payment-link' && (
               <Button
                 variant="primary"
+                className="rounded-xl shadow-sm shadow-sky-500/20"
                 onClick={() => window.location.href = '/payment-links/create'}
               >
-                <Plus className="h-4 w-4 mr-1" />
-                Create Payment Link
+                <Plus className="mr-1 h-4 w-4" />
+                Create Pay Link
               </Button>
             )}
           </ToolbarActions>
@@ -219,14 +223,27 @@ export default function PaymentLinksPage() {
       </Container>
 
       <Container>
+        <div className="relative mb-4 overflow-hidden rounded-2xl border border-sky-200/70 bg-[linear-gradient(135deg,#f0f9ff_0%,#ffffff_55%,#e0f2fe_100%)] p-4 dark:border-sky-900/50 dark:bg-[linear-gradient(135deg,#0c1a24_0%,#0f172a_55%,#082f49_100%)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700/80 dark:text-sky-300/80">
+            Checkout studio
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Style your checkout look, then publish shareable pay links.
+          </p>
+        </div>
+
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}
           className="w-full"
         >
-          <TabsList className="mb-4">
-            <TabsTrigger value="payment-template">Payment Template</TabsTrigger>
-            <TabsTrigger value="payment-link">Payment Link</TabsTrigger>
+          <TabsList className="mb-4 rounded-xl border border-sky-100 bg-sky-50/50 p-1 dark:border-sky-900/40 dark:bg-sky-950/20">
+            <TabsTrigger value="payment-template" className="rounded-lg">
+              Brand Templates
+            </TabsTrigger>
+            <TabsTrigger value="payment-link" className="rounded-lg">
+              Live Pay Links
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="payment-template">
@@ -234,27 +251,29 @@ export default function PaymentLinksPage() {
           </TabsContent>
 
           <TabsContent value="payment-link">
-            <TableComp
-              data={paymentLinks}
-              headers={headers}
-              renderCell={renderCell}
-              actions={actions}
-              enableCheckbox={false}
-              searchPlaceholder="Search payment links..."
-              searchKeys={['name', 'amount', 'currency']}
-              getRowId={(row: PaymentLink) => String(row.id)}
-              pagination={{
-                pageSize: limit,
-                onPageSizeChange: handlePageSizeChange,
-              }}
-              cursorPagination={{
-                meta,
-                onNext: handleCursorNext,
-                onPrev: handleCursorPrev,
-                canGoPrev,
-              }}
-              loading={loading}
-            />
+            <div className="overflow-hidden rounded-2xl border border-sky-100 bg-card shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40">
+              <TableComp
+                data={paymentLinks}
+                headers={headers}
+                renderCell={renderCell}
+                actions={actions}
+                enableCheckbox={false}
+                searchPlaceholder="Search pay links..."
+                searchKeys={['name', 'amount', 'currency']}
+                getRowId={(row: PaymentLink) => String(row.id)}
+                pagination={{
+                  pageSize: limit,
+                  onPageSizeChange: handlePageSizeChange,
+                }}
+                cursorPagination={{
+                  meta,
+                  onNext: handleCursorNext,
+                  onPrev: handleCursorPrev,
+                  canGoPrev,
+                }}
+                loading={loading}
+              />
+            </div>
           </TabsContent>
         </Tabs>
       </Container>
@@ -262,11 +281,11 @@ export default function PaymentLinksPage() {
       <ConfirmComp
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete Payment Link"
+        title="Delete Pay Link"
         message={
           paymentLinkToDelete
-            ? `Are you sure you want to delete payment link "${paymentLinkToDelete.name}"? This action cannot be undone.`
-            : 'Are you sure you want to delete this payment link?'
+            ? `Delete pay link "${paymentLinkToDelete.name}"? This cannot be undone.`
+            : 'Delete this pay link? This cannot be undone.'
         }
         confirmLabel="Yes, Delete"
         cancelLabel="Cancel"

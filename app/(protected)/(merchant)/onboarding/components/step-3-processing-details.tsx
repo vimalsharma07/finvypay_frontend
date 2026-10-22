@@ -233,11 +233,11 @@ export function Step3ProcessingDetails({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Business Info</CardTitle>
+    <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+      <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
+        <CardTitle>Processing Profile</CardTitle>
         <CardDescription>
-          Provide your business processing details and preferences
+          Tell us how you want to accept and settle payments
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -364,7 +364,7 @@ export function Step3ProcessingDetails({
             />
 
             <div className="flex justify-between pt-4">
-              <Button type="button" variant="outline" onClick={onBack} className="gap-2">
+              <Button type="button" variant="outline" onClick={onBack} className="gap-2 rounded-xl">
                 <ChevronLeft className="h-4 w-4" />
                 Back
               </Button>
@@ -372,7 +372,7 @@ export function Step3ProcessingDetails({
                 type="submit"
                 variant="primary"
                 disabled={isSubmitting || loadingData || loadingCurrencies}
-                className="gap-2"
+                className="gap-2 rounded-xl shadow-sm shadow-sky-500/20"
               >
                 {isSubmitting ? 'Saving...' : 'Continue'}
                 <ChevronRight className="h-4 w-4" />

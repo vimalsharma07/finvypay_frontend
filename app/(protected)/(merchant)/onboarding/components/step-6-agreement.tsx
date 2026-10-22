@@ -181,9 +181,11 @@ export function Step6Agreement({ onboardingData, onNext, onBack, onUpdate }: Ste
 
   if (loading) {
     return (
-      <Card>
+      <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
         <CardContent className="pt-6">
-          <div className="text-center py-8 text-muted-foreground">Loading agreement...</div>
+          <div className="rounded-xl border border-sky-100 bg-sky-50/40 py-8 text-center text-muted-foreground dark:border-sky-900/40 dark:bg-sky-950/20">
+            Loading agreement...
+          </div>
         </CardContent>
       </Card>
     );
@@ -191,9 +193,9 @@ export function Step6Agreement({ onboardingData, onNext, onBack, onUpdate }: Ste
 
   if (!agreement) {
     return (
-      <Card>
+      <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
         <CardContent className="pt-6">
-          <div className="text-center py-8 text-muted-foreground">
+          <div className="rounded-xl border border-sky-100 bg-sky-50/40 py-8 text-center text-muted-foreground dark:border-sky-900/40 dark:bg-sky-950/20">
             Agreement not available
           </div>
         </CardContent>
@@ -202,43 +204,42 @@ export function Step6Agreement({ onboardingData, onNext, onBack, onUpdate }: Ste
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Agreement & Signature</CardTitle>
+    <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+      <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
+        <CardTitle>Sign Off</CardTitle>
         <CardDescription>
-          Please read and sign the agreement to continue
+          Review the agreement and add your signature to finish setup
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {/* Agreement Content */}
           <div className="space-y-2">
-            <div className="flex items-center gap-1">
-              <FileText className="h-5 w-5 text-primary" />
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-300">
+                <FileText className="h-4 w-4" />
+              </div>
               <h3 className="text-lg font-semibold">{agreement.name}</h3>
             </div>
-            <ScrollArea className="h-[300px] w-full rounded-md border p-4">
+            <ScrollArea className="h-[300px] w-full rounded-xl border border-sky-100 p-4 dark:border-sky-900/40">
               <div
-                className="text-sm text-muted-foreground whitespace-pre-wrap"
+                className="whitespace-pre-wrap text-sm text-muted-foreground"
                 dangerouslySetInnerHTML={{ __html: personalizedAgreementHtml }}
               />
             </ScrollArea>
           </div>
 
-          {/* Success Message */}
           {isSignatureUploaded && (
-            <div className="flex items-center gap-1 p-4 bg-success/10 border border-success/20 rounded-lg">
+            <div className="flex items-center gap-3 rounded-xl border border-success/20 bg-success/10 p-4">
               <CheckCircle2 className="h-5 w-5 text-success" />
               <div>
-                <p className="font-medium text-success">Agreement Signed</p>
+                <p className="font-medium text-success">Agreement signed</p>
                 <p className="text-sm text-muted-foreground">
-                  Your agreement has been successfully signed and uploaded.
+                  Your signed agreement has been uploaded.
                 </p>
               </div>
             </div>
           )}
 
-          {/* Signature Pad */}
           {canSign && (
             <div className="space-y-4">
               <h4 className="font-medium">Electronic Signature</h4>
@@ -248,7 +249,6 @@ export function Step6Agreement({ onboardingData, onNext, onBack, onUpdate }: Ste
                 disabled={isUploading || isSignatureUploaded}
               />
               
-              {/* Upload Signature Button - Show when signature is captured */}
               {signatureDataUrl && !isSignatureUploaded && (
                 <div className="flex justify-end">
                   <Button
@@ -256,6 +256,7 @@ export function Step6Agreement({ onboardingData, onNext, onBack, onUpdate }: Ste
                     variant="primary"
                     onClick={handleUploadSignature}
                     disabled={isUploading || isSignatureUploaded}
+                    className="rounded-xl shadow-sm shadow-sky-500/20"
                   >
                     {isUploading ? 'Uploading...' : 'Upload Signature'}
                   </Button>
@@ -264,9 +265,8 @@ export function Step6Agreement({ onboardingData, onNext, onBack, onUpdate }: Ste
             </div>
           )}
 
-          {/* Alternative: File Upload */}
           <div className="space-y-4">
-            <h4 className="font-medium">Or Upload Signed Agreement Document</h4>
+            <h4 className="font-medium">Or upload a signed agreement document</h4>
             <FileUploadCard
               type="signed_agreement"
               label="Signed Agreement Document"
@@ -277,9 +277,8 @@ export function Step6Agreement({ onboardingData, onNext, onBack, onUpdate }: Ste
             />
           </div>
 
-          {/* Back and Continue Buttons - At bottom */}
-          <div className="flex justify-between pt-4 border-t">
-            <Button type="button" variant="outline" onClick={onBack} className="gap-2">
+          <div className="flex justify-between border-t border-sky-100 pt-4 dark:border-sky-900/40">
+            <Button type="button" variant="outline" onClick={onBack} className="gap-2 rounded-xl">
               <ChevronLeft className="h-4 w-4" />
               Back
             </Button>
@@ -288,7 +287,7 @@ export function Step6Agreement({ onboardingData, onNext, onBack, onUpdate }: Ste
               variant="primary" 
               onClick={handleNext}
               disabled={!isSignatureUploaded || isUploading}
-              className="gap-2"
+              className="gap-2 rounded-xl shadow-sm shadow-sky-500/20"
             >
               Continue
               <ChevronRight className="h-4 w-4" />

@@ -22,20 +22,20 @@ export const MERCHANT_REPORT_TYPES: MerchantReportTypeConfig[] = [
   {
     slug: 'merchant-turnover',
     apiType: 'merchant-turnover-report',
-    title: 'Overall Turnover',
-    description: 'View merchant turnover reports with transaction statistics, success rates, and performance metrics',
+    title: 'Turnover Pulse',
+    description: 'See volume, success rates, and performance trends across your payments',
   },
   {
     slug: 'transaction-summary',
     apiType: 'transaction-summary-report',
-    title: 'Transaction Summary',
-    description: 'View transaction summary reports with aggregated metrics',
+    title: 'Payment Snapshot',
+    description: 'Aggregated success, decline, refund, and chargeback metrics by currency',
   },
   {
     slug: 'bin-wise-transaction',
     apiType: 'bin-wise-transaction-report',
-    title: 'BIN-wise Transaction',
-    description: 'View BIN (Bank Identification Number) wise transaction reports',
+    title: 'BIN Pulse',
+    description: 'Break down activity by card BIN to spot issuer patterns',
   },
 ];
 

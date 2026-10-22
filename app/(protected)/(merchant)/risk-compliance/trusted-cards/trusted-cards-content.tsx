@@ -240,7 +240,7 @@ export function UserTrustedCardsPageContent({ addDialogOpen, onAddDialogOpenChan
         ),
         cell: ({ row }) => {
           return (
-            <div className="font-mono">
+            <div className="font-mono text-sm font-medium text-slate-700 dark:text-slate-300">
               {formatCardNumber(row.original.card)}
             </div>
           );
@@ -249,7 +249,7 @@ export function UserTrustedCardsPageContent({ addDialogOpen, onAddDialogOpenChan
       {
         id: 'actions',
         header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Action" />
+          <DataGridColumnHeader column={column} title="Actions" />
         ),
         cell: ({ row }) => (
           <TableActionButtons
@@ -300,6 +300,15 @@ export function UserTrustedCardsPageContent({ addDialogOpen, onAddDialogOpenChan
   return (
     <Fragment>
       <Container>
+        <div className="relative mb-4 overflow-hidden rounded-2xl border border-sky-200/70 bg-[linear-gradient(135deg,#f0f9ff_0%,#ffffff_55%,#e0f2fe_100%)] p-4 dark:border-sky-900/50 dark:bg-[linear-gradient(135deg,#0c1a24_0%,#0f172a_55%,#082f49_100%)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700/80 dark:text-sky-300/80">
+            Card whitelist
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Keep verified cards ready to pass fraud checks smoothly.
+          </p>
+        </div>
+
         <DataGrid
           table={table}
           recordCount={filteredData.length}
@@ -313,7 +322,7 @@ export function UserTrustedCardsPageContent({ addDialogOpen, onAddDialogOpenChan
                 <SearchInput
                   value={searchQuery}
                   onChange={setSearchQuery}
-                  placeholder="Search cards..."
+                  placeholder="Search safe cards..."
                 />
               </CardHeading>
             </CardHeader>

@@ -16,8 +16,8 @@ export function SidebarMenuClient() {
 
   if (!mounted) {
     return (
-      <div className="kt-scrollable-y-hover flex grow shrink-0 py-4 px-3.5 lg:max-h-[calc(100vh-5.5rem)]">
-        <div className="w-full space-y-1">
+      <div className="kt-scrollable-y-hover flex grow shrink-0 py-3.5 px-3 lg:max-h-[calc(100vh-5.5rem)]">
+        <div className="w-full space-y-1.5">
           {/* Placeholder to maintain layout during SSR */}
           <div className="h-9" />
         </div>

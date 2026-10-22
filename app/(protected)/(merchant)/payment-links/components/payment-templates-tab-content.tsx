@@ -19,7 +19,7 @@ import {
 import { ImageInput, type ImageInputFiles } from '@/components/image-input';
 import { uploadFile } from '@/lib/services/file-upload';
 
-const DEFAULT_PRIMARY_COLOR = '#17B8A6';
+const DEFAULT_PRIMARY_COLOR = '#38BDF8';
 
 export function PaymentTemplatesTabContent() {
   const [templates, setTemplates] = useState<PaymentTemplate[]>([]);
@@ -171,22 +171,23 @@ export function PaymentTemplatesTabContent() {
 
   return (
     <div className="space-y-6">
-      <Card className="rounded-md">
-        <CardHeader>
-          <CardTitle>Create Template</CardTitle>
+      <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+        <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
+          <CardTitle>Create Brand Template</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-[2fr_1fr_1fr_auto] items-end">
+        <CardContent className="grid gap-4 md:grid-cols-[2fr_1fr_1fr_auto] items-end pt-6">
           <div>
             <Label htmlFor="templateName">Template Name</Label>
             <Input
               id="templateName"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Brand Blue Template"
+              placeholder="e.g. Sky Checkout Theme"
+              className="rounded-xl border-sky-200/70"
             />
           </div>
           <div>
-            <Label htmlFor="primaryColor">Primary Color</Label>
+            <Label htmlFor="primaryColor">Brand Color</Label>
             <Input
               id="primaryColor"
               type="color"
@@ -246,15 +247,19 @@ export function PaymentTemplatesTabContent() {
               )}
             </ImageInput>
           </div>
-          <Button onClick={onCreate} disabled={loading}>
-            <Plus className="h-4 w-4 me-1" />
+          <Button
+            onClick={onCreate}
+            disabled={loading}
+            className="rounded-xl shadow-sm shadow-sky-500/20"
+          >
+            <Plus className="me-1 h-4 w-4" />
             {loading ? 'Creating...' : 'Create'}
           </Button>
         </CardContent>
       </Card>
 
-      <Card className="rounded-md">
-        <CardHeader>
+      <Card className="rounded-2xl border-sky-100 shadow-sm dark:border-sky-900/40">
+        <CardHeader className="border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20">
           <CardTitle>Template Library</CardTitle>
         </CardHeader>
         <CardContent>

@@ -199,7 +199,7 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
     );
   }
 
-  const primaryColor = paymentLinkData?.paymentTemplate?.primaryColor || '#17B8A6';
+  const primaryColor = paymentLinkData?.paymentTemplate?.primaryColor || '#38BDF8';
   const brandLogoUrl = paymentLinkData?.paymentTemplate?.logoUrl || '/media/app/mini-logo.svg';
   const inputClassName =
     'h-11 rounded-xl border-slate-200 bg-slate-50/70 focus-visible:ring-2 focus-visible:ring-offset-0';

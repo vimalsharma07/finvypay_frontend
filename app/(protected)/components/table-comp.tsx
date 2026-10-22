@@ -53,7 +53,7 @@ export const modernTableLayout: DataGridProps<any>['tableLayout'] = {
   cellBorder: false,
   rowBorder: true,
   rowRounded: false,
-  stripped: false,
+  stripped: true,
   headerBackground: true,
   headerBorder: true,
   headerSticky: true,
@@ -65,22 +65,28 @@ export const modernTableLayout: DataGridProps<any>['tableLayout'] = {
  */
 export const modernTableClassNames: DataGridProps<any>['tableClassNames'] = {
   base: 'text-sm',
-  header: 'bg-gradient-to-b from-muted/40 to-muted/20 border-b border-border',
-  headerRow: 'h-14',
-  headerSticky: 'sticky top-0 z-10 bg-background/98 backdrop-blur-md shadow-sm border-b border-border',
+  header:
+    'bg-sky-50/70 border-b border-sky-100/90 dark:bg-sky-950/35 dark:border-sky-900/50',
+  headerRow: 'h-12 bg-transparent [&>th]:text-xs [&>th]:font-semibold [&>th]:uppercase [&>th]:tracking-[0.06em] [&>th]:text-slate-500 dark:[&>th]:text-slate-400',
+  headerSticky:
+    'sticky top-0 z-10 bg-sky-50/95 backdrop-blur-md border-b border-sky-100 shadow-[0_1px_0_0_rgba(14,165,233,0.08)] dark:bg-sky-950/90 dark:border-sky-900/50',
   body: '',
-  bodyRow: 'h-14 hover:bg-primary/5 hover:border-l-2 hover:border-l-primary transition-all duration-200 cursor-pointer border-b border-border/30',
-  edgeCell: '',
+  bodyRow:
+    'h-12 border-b border-sky-100/70 transition-colors duration-150 odd:bg-sky-50/35 hover:bg-sky-100/55 dark:border-sky-900/40 dark:odd:bg-sky-950/20 dark:hover:bg-sky-950/40',
+  edgeCell: 'first:ps-5 last:pe-5',
 };
 
 /**
  * Shared Card class names for modern table containers
  */
 export const modernTableCardClasses = {
-  card: 'rounded-md border-border/50 bg-card shadow-sm',
-  header: 'border-b border-border/50 bg-muted/20',
+  card:
+    'overflow-hidden rounded-2xl border border-sky-100 bg-card shadow-sm ring-1 ring-sky-500/5 dark:border-sky-900/40',
+  header:
+    'border-b border-sky-100/80 bg-sky-50/40 dark:border-sky-900/40 dark:bg-sky-950/20',
   table: 'overflow-hidden',
-  footer: 'border-t border-border/50 bg-muted/10',
+  footer:
+    'border-t border-sky-100/80 bg-sky-50/30 dark:border-sky-900/40 dark:bg-sky-950/20',
 };
 
 // Header definition matching old project pattern
@@ -444,31 +450,29 @@ export function TableComp<T extends Record<string, any>>({
       <Card className={modernTableCardClasses.card}>
         <CardHeader className={modernTableCardClasses.header}>
           <CardHeading>
-            <div className="relative w-full max-w-lg my-2 group">
+            <div className="group relative my-1.5 w-full max-w-md">
               <Search className={cn(
-                "absolute left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none size-4.5 transition-all duration-200",
-                searchQuery 
-                  ? "text-primary" 
-                  : "text-muted-foreground group-focus-within:text-primary"
+                "pointer-events-none absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 transition-colors",
+                searchQuery
+                  ? "text-sky-600 dark:text-sky-400"
+                  : "text-muted-foreground group-focus-within:text-sky-600 dark:group-focus-within:text-sky-400"
               )} />
               <Input
                 placeholder={searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={cn(
-                  "pl-11 pr-10 h-9 text-sm w-full",
-                  "bg-background border-border/60",
-                  "focus-visible:border-primary/50 focus-visible:ring-primary/20",
-                  "transition-all duration-200",
-                  "shadow-sm hover:shadow-md focus-visible:shadow-lg",
-                  searchQuery && "border-primary/30 bg-primary/5"
+                  "h-9 w-full rounded-xl border-sky-100 bg-background/80 ps-10 pe-10 text-sm shadow-none",
+                  "focus-visible:border-sky-300 focus-visible:ring-sky-500/15",
+                  "dark:border-sky-900/50",
+                  searchQuery && "border-sky-300 bg-sky-50/50 dark:bg-sky-950/30"
                 )}
               />
               {searchQuery.length > 0 && (
                 <Button
                   mode="icon"
                   variant="ghost"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 rounded-md hover:bg-muted/80 transition-colors"
+                  className="absolute right-1.5 top-1/2 h-6 w-6 -translate-y-1/2 rounded-lg hover:bg-sky-100/80 dark:hover:bg-sky-900/40"
                   onClick={() => setSearchQuery('')}
                 >
                   <X className="size-3.5 text-muted-foreground hover:text-foreground" />

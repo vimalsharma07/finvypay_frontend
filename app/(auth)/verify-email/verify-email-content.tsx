@@ -84,17 +84,15 @@ export function VerifyEmailContent() {
   return (
     <Suspense>
       <div className="w-full space-y-6">
-        <div className="space-y-2 pb-2">
-          <div className="flex justify-center mb-4">
-            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <Mail className="h-6 w-6 text-primary" />
-            </div>
+        <div className="space-y-3 border-b border-zinc-200 pb-5 dark:border-slate-600">
+          <div className="auth-icon-mark">
+            <Mail className="h-4 w-4" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-center">
-            Email Verification
+          <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-slate-50">
+            Email verification
           </h1>
-          <p className="text-sm text-muted-foreground text-center">
-            Please wait while we verify your email address
+          <p className="text-sm text-zinc-500 dark:text-slate-400">
+            Confirming your account email
           </p>
         </div>
 
@@ -107,9 +105,9 @@ export function VerifyEmailContent() {
               <AlertTitle className="text-sm">{error}</AlertTitle>
             </Alert>
 
-            <Button asChild className="w-full h-11">
+            <Button asChild className="auth-btn-primary h-11 w-full text-sm font-semibold">
               <Link href="/signin">
-                Go back to Sign In
+                Back to sign in
               </Link>
             </Button>
           </div>

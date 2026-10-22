@@ -18,30 +18,33 @@ export function SidebarHeader() {
   };
 
   return (
-    <div className="sidebar-header hidden lg:flex items-center justify-center relative shrink-0 min-h-0 overflow-hidden mt-5 py-5 px-5 lg:px-4">
-      <Link href="/" className="flex items-center justify-center min-w-0 shrink flex-1">
-        <div className="dark:hidden flex items-center justify-center">
+    <div className="sidebar-header hidden lg:flex items-center relative shrink-0 min-h-0 overflow-hidden py-4 px-4 lg:px-3.5 border-b border-sky-100/80 dark:border-sky-900/40">
+      <Link
+        href="/"
+        className="flex items-center gap-2.5 min-w-0 shrink flex-1 px-1"
+      >
+        <div className="dark:hidden flex items-center gap-2.5 min-w-0">
           <img
             src={toAbsoluteUrl('/media/app/finvypay.png')}
-            className="default-logo max-h-[30px] h-auto w-auto object-contain object-center"
-            alt="Default Logo"
+            className="default-logo max-h-[28px] h-auto w-auto object-contain object-left"
+            alt="FinvyPay"
           />
           <img
             src={toAbsoluteUrl('/media/app/mini-logo.svg')}
-            className="small-logo max-h-[30px] h-auto w-auto object-contain object-center"
-            alt="Mini Logo"
+            className="small-logo max-h-[28px] h-auto w-auto object-contain"
+            alt="FinvyPay"
           />
         </div>
-        <div className="hidden dark:flex items-center justify-center">
+        <div className="hidden dark:flex items-center gap-2.5 min-w-0">
           <img
             src={toAbsoluteUrl('/media/app/finvypay.png')}
-            className="default-logo max-h-[30px] h-auto w-auto object-contain object-center"
-            alt="Default Dark Logo"
+            className="default-logo max-h-[28px] h-auto w-auto object-contain object-left"
+            alt="FinvyPay"
           />
           <img
             src={toAbsoluteUrl('/media/app/mini-logo.svg')}
-            className="small-logo max-h-[30px] h-auto w-auto object-contain object-center"
-            alt="Mini Logo"
+            className="small-logo max-h-[28px] h-auto w-auto object-contain"
+            alt="FinvyPay"
           />
         </div>
       </Link>
@@ -52,6 +55,7 @@ export function SidebarHeader() {
         variant="outline"
         className={cn(
           'size-7 absolute start-full top-2/4 rtl:translate-x-2/4 -translate-x-2/4 -translate-y-2/4',
+          'border-sky-200 bg-background shadow-sm hover:bg-sky-50 hover:border-sky-300 dark:border-sky-800 dark:hover:bg-sky-950/40',
           settings.layouts.main.sidebarCollapse
             ? 'ltr:rotate-180'
             : 'rtl:rotate-180',
