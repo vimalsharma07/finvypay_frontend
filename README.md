@@ -1,8 +1,8 @@
-# FinvyPay Frontend
+# LancPay Frontend
 
 ## Getting Started
 
-This is the frontend application for FinvyPay.
+This is the frontend application for LancPay.
 
 ### Prerequisites
 

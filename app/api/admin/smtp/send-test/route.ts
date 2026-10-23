@@ -166,13 +166,13 @@ export async function POST(request: NextRequest) {
     const info = await transporter.sendMail({
       from: fromHeader,
       to,
-      subject: 'FinvyPay SMTP test email',
-      text: 'This is a dummy SMTP test email from FinvyPay admin.',
+      subject: 'LancPay SMTP test email',
+      text: 'This is a dummy SMTP test email from LancPay admin.',
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5;">
           ${logoHtml}
           <h2>SMTP test successful</h2>
-          <p>This is a dummy email sent from the FinvyPay admin SMTP tester.</p>
+          <p>This is a dummy email sent from the LancPay admin SMTP tester.</p>
           <p style="color:#667085;font-size:12px;">If you received this, outbound mail is working.</p>
         </div>
       `,

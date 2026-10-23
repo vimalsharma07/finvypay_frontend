@@ -43,7 +43,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const DEFAULT_ACQUIRER_ICON = '/media/app/finvypay.png';
+const DEFAULT_ACQUIRER_ICON = '/media/app/lancpay.png';
 import { getIconUrl as getS3IconUrl } from '@/lib/s3-url';
 const getIconUrl = getS3IconUrl;
 
@@ -238,7 +238,7 @@ export function AcquirersPageContent() {
                               <img
                                 src={DEFAULT_ACQUIRER_ICON}
                                 alt="Default acquirer icon"
-                                className="h-full w-full object-cover"
+                                className="h-full w-full object-contain p-1"
                               />
                             )}
                           </div>

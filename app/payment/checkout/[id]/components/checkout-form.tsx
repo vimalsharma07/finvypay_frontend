@@ -200,7 +200,7 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
   }
 
   const primaryColor = paymentLinkData?.paymentTemplate?.primaryColor || '#38BDF8';
-  const brandLogoUrl = paymentLinkData?.paymentTemplate?.logoUrl || '/media/app/mini-logo.svg';
+  const brandLogoUrl = paymentLinkData?.paymentTemplate?.logoUrl || '/media/app/lancpay.png';
   const inputClassName =
     'h-11 rounded-xl border-slate-200 bg-slate-50/70 focus-visible:ring-2 focus-visible:ring-offset-0';
 
@@ -221,7 +221,7 @@ export function CheckoutForm({ paymentLinkId }: CheckoutFormProps) {
                   alt="Brand logo"
                   className="h-full max-w-full object-contain"
                   onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = '/media/app/mini-logo.svg';
+                    (e.currentTarget as HTMLImageElement).src = '/media/app/lancpay.png';
                   }}
                 />
               </div>

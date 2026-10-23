@@ -261,7 +261,7 @@ export function CreateAcquirerContent() {
                                       className="h-full w-full object-cover"
                                       onError={(e) => {
                                         const target = e.target as HTMLImageElement;
-                                        target.src = '/media/app/finvypay.png';
+                                        target.src = '/media/app/lancpay.png';
                                       }}
                                     />
                                   ) : fileList[0]?.dataURL ? (
@@ -272,9 +272,9 @@ export function CreateAcquirerContent() {
                                     />
                                   ) : (
                                     <img
-                                      src="/media/app/finvypay.png"
+                                      src="/media/app/lancpay.png"
                                       alt="Default acquirer icon"
-                                      className="h-full w-full object-cover opacity-50"
+                                      className="h-full w-full object-contain p-2 opacity-50"
                                     />
                                   )}
                                 </div>

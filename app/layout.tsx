@@ -23,11 +23,11 @@ import '@/components/keenicons/assets/styles.css';
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | FinvyPay',
-    default: 'FinvyPay', // a default is required when creating a template
+    template: '%s | LancPay',
+    default: 'LancPay', // a default is required when creating a template
   },
   icons: {
-    icon: '/media/app/fevicon.png?v=2',
+    icon: '/media/app/favicon-32x32.png?v=3',
   },
 };
 

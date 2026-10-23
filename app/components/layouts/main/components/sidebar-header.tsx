@@ -25,26 +25,26 @@ export function SidebarHeader() {
       >
         <div className="dark:hidden flex items-center gap-2.5 min-w-0">
           <img
-            src={toAbsoluteUrl('/media/app/finvypay.png')}
-            className="default-logo max-h-[28px] h-auto w-auto object-contain object-left"
-            alt="FinvyPay"
+            src={toAbsoluteUrl('/media/app/lancpay.png')}
+            className="default-logo max-h-[32px] h-auto w-auto object-contain object-left"
+            alt="LancPay"
           />
           <img
-            src={toAbsoluteUrl('/media/app/mini-logo.svg')}
-            className="small-logo max-h-[28px] h-auto w-auto object-contain"
-            alt="FinvyPay"
+            src={toAbsoluteUrl('/media/app/mini-logo.png')}
+            className="small-logo max-h-[32px] h-auto w-auto object-contain"
+            alt="LancPay"
           />
         </div>
         <div className="hidden dark:flex items-center gap-2.5 min-w-0">
           <img
-            src={toAbsoluteUrl('/media/app/finvypay.png')}
-            className="default-logo max-h-[28px] h-auto w-auto object-contain object-left"
-            alt="FinvyPay"
+            src={toAbsoluteUrl('/media/app/lancpay-dark.png')}
+            className="default-logo max-h-[32px] h-auto w-auto object-contain object-left"
+            alt="LancPay"
           />
           <img
-            src={toAbsoluteUrl('/media/app/mini-logo.svg')}
-            className="small-logo max-h-[28px] h-auto w-auto object-contain"
-            alt="FinvyPay"
+            src={toAbsoluteUrl('/media/app/mini-logo.png')}
+            className="small-logo max-h-[32px] h-auto w-auto object-contain"
+            alt="LancPay"
           />
         </div>
       </Link>

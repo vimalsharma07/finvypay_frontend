@@ -433,7 +433,7 @@ export function EditAcquirerContent() {
                                             return;
                                           }
                                         }
-                                        target.src = '/media/app/finvypay.png';
+                                        target.src = '/media/app/lancpay.png';
                                       }}
                                       onLoad={() => {
                                         console.log('Image loaded successfully:', iconUrl);
@@ -447,9 +447,9 @@ export function EditAcquirerContent() {
                                     />
                                   ) : (
                                     <img
-                                      src="/media/app/finvypay.png"
+                                      src="/media/app/lancpay.png"
                                       alt="Default acquirer icon"
-                                      className="h-full w-full object-cover opacity-50"
+                                      className="h-full w-full object-contain p-2 opacity-50"
                                     />
                                   )}
                                 </div>

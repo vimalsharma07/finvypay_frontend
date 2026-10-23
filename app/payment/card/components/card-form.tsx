@@ -292,7 +292,7 @@ export function CardForm() {
   const logoUrl =
     searchParams.get('logoUrl') ||
     paymentLinkData?.paymentTemplate?.logoUrl ||
-    '/media/app/mini-logo.svg';
+    '/media/app/lancpay.png';
   const inputClassName =
     'h-11 rounded-xl border-slate-200 bg-slate-50/70 focus-visible:ring-2 focus-visible:ring-offset-0';
 
@@ -493,11 +493,11 @@ export function CardForm() {
                           alt="Logo"
                           className="h-8 max-w-20 object-contain rounded bg-white/90 px-1.5"
                           onError={(e) => {
-                            (e.currentTarget as HTMLImageElement).src = '/media/app/mini-logo.svg';
+                            (e.currentTarget as HTMLImageElement).src = '/media/app/lancpay.png';
                           }}
                         />
                       ) : (
-                        <div className="h-8 w-12 rounded-md bg-white/15 flex items-center justify-center text-[11px] font-semibold tracking-wide">FP</div>
+                        <div className="h-8 w-12 rounded-md bg-white/15 flex items-center justify-center text-[11px] font-semibold tracking-wide">LP</div>
                       )}
                       <div className="h-9 w-12 rounded-md border border-white/30 bg-gradient-to-br from-slate-200/80 to-slate-400/60" />
                     </div>

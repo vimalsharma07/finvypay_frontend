@@ -1,4 +1,4 @@
-# FinvyPay Frontend - Installation Guide
+# LancPay Frontend - Installation Guide
 
 ## Prerequisites
 

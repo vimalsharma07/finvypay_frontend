@@ -11,16 +11,17 @@ export function BrandedLayout({ children }: { children: ReactNode }) {
       <div className="auth-hatch pointer-events-none absolute inset-0" />
 
       <div className="auth-fade-up relative z-10 w-full max-w-[420px]">
-        <Link
-          href="/"
-          className="mb-8 flex items-center gap-3"
-        >
+        <Link href="/" className="mb-8 flex items-center">
           <img
-            src={toAbsoluteUrl('/media/app/mini-logo.svg')}
-            className="h-7 w-auto"
-            alt=""
+            src={toAbsoluteUrl('/media/app/lancpay.png')}
+            className="h-9 w-auto dark:hidden"
+            alt="LancPay"
           />
-          <span className="auth-wordmark">FinvyPay</span>
+          <img
+            src={toAbsoluteUrl('/media/app/lancpay-dark.png')}
+            className="hidden h-9 w-auto dark:block"
+            alt="LancPay"
+          />
         </Link>
 
         <Card className="auth-form-card border shadow-none">
